@@ -440,7 +440,7 @@ input[type=range]::-moz-range-thumb{width:18px;height:18px;border:0;border-radiu
 button,.tap,.lt,.vc,.vr,.xr{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 .rm,.st,.lt,.xr,.vc{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 @media (hover:none){.tap:hover{transform:none;border-color:var(--line)}.c:hover::before{opacity:0}.nb:hover{background:none;color:var(--tx3)}.nb.on:hover{color:#fff}}
-@supports (height:100dvh){:host{min-height:calc(100dvh - var(--header-height,0px))}nav{height:calc(100dvh - var(--header-height,0px))}.sheet{max-height:88dvh}}
+@supports (height:100dvh){:host{min-height:var(--hmin,calc(100dvh - var(--header-height,0px)))}nav{height:var(--hmin,calc(100dvh - var(--header-height,0px)))}.sheet{max-height:88dvh}}
 @media (max-width:860px){
   .shell{grid-template-columns:minmax(0,1fr)}main{min-width:0}
   nav{position:fixed;z-index:20;left:10px;right:10px;bottom:calc(10px + env(safe-area-inset-bottom,0px));top:auto;height:auto;flex-direction:row;justify-content:space-between;gap:2px;padding:6px;border-radius:26px;background:rgba(14,20,44,.86);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border:1px solid var(--line);box-shadow:0 18px 40px -10px rgba(0,0,0,.7)}
@@ -3140,6 +3140,7 @@ class HomeAurora extends HTMLElement {
     this._rdrMount();
     this._todSet();
     this._fxKind();
+    this._fitHost(); requestAnimationFrame(() => this._fitHost());
     if (this._fitCock) { this._fitCock(); requestAnimationFrame(() => this._fitCock()); }
     if (this._need.size) this._loadHist();
     if (this._v === 'home' || this._v === 'weather') this._loadFc();
@@ -3223,6 +3224,13 @@ class HomeAurora extends HTMLElement {
       };
       requestAnimationFrame(step);
     });
+  }
+  /* Hintergrund/Navigation bis zur echten Fensterunterkante ziehen (HA-Kopfzeile ist im Kiosk-Modus weg, --header-height bleibt aber gesetzt) */
+  _fitHost() {
+    if (!this._fhR) { this._fhR = 1; addEventListener('resize', () => this._fitHost()); }
+    const t = this.getBoundingClientRect().top, ih = window.innerHeight || document.documentElement.clientHeight;
+    if (!(ih > 0) || t < 0 || t > ih / 2) return;
+    this.style.setProperty('--hmin', Math.floor(ih - t) + 'px');
   }
   _toast(msg, ms = 2200, a) {
     this._tst.textContent = msg; this._tst.classList.add('show');
