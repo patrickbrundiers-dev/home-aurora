@@ -154,6 +154,42 @@ const ICONS = {
   bolt: '<path d="M13 2 4 14h7l-1 8 9-12h-7z"/>',
   list: '<path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.500" cy="6" r="1" fill="currentColor"/><circle cx="4.500" cy="12" r="1" fill="currentColor"/><circle cx="4.500" cy="18" r="1" fill="currentColor"/>',
   broom: '<path d="M19 3l-7.2 8.8"/><path d="M8.4 10l5.6 5.6c-1.1 3-3.9 5.4-9.4 5.4 1.2-2.9.9-5.6 3.8-11z"/>',
+  mop: '<path d="M15 3l-3.500 10"/><path d="M6.500 13.500h10l1.500 7H5z"/><path d="M9.500 17v3.500M13 17v3.500"/>',
+  robovac: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/><path d="M12 3.500V6"/>',
+  vacuum: '<path d="M15 3l-3 11"/><path d="M4.500 20l2.500-6h9.500l2.500 6z"/>',
+  washer: '<rect x="4" y="3" width="16" height="18" rx="2.500"/><circle cx="12" cy="13" r="4.500"/><path d="M7.500 6.500h2M13 6.500h3.500"/>',
+  counter: '<path d="M3 12h18v3H3z"/><path d="M5 15v5M19 15v5"/><path d="M9 12V8h5v4"/><path d="M14 9h1.500a1.200 1.200 0 0 1 0 2.400H14"/>',
+  sponge: '<rect x="3.500" y="8" width="17" height="9" rx="2.500"/><path d="M8 12.500h.01M12 11.500h.01M16 12.500h.01M10 14.500h.01M14 14.500h.01"/><path d="M8 5.500h.01M12 4h.01M15 5.500h.01"/>',
+  dishwasher: '<rect x="4" y="3" width="16" height="18" rx="2.500"/><path d="M4 8h16M7.500 5.500h.01"/><path d="M8 12.500h8M8 16h8"/>',
+  filter: '<rect x="4" y="5" width="16" height="14" rx="2"/><path d="M8 5v14M12 5v14M16 5v14"/>',
+  shower: '<path d="M4 21V7a3 3 0 0 1 3-3h7v2"/><path d="M9 11a5 5 0 0 1 10 0z"/><path d="M11 14.500V16M14 14.500V16M17 14.500V16M12.500 18v1.500M15.500 18v1.500"/>',
+  fridge: '<rect x="6" y="2.500" width="12" height="19" rx="2.500"/><path d="M6 10h12M9.500 6v2M9.500 13v3"/>',
+  spray: '<path d="M8.500 11.500h7V21h-7z"/><path d="M10 11.500V8h5.500l2-1.500"/><path d="M19 9h2M18.500 11.500l2 .8"/>',
+  toilet: '<rect x="7" y="3" width="10" height="5" rx="1.500"/><path d="M5 11h14c0 4-2 6.500-5 7.200V21h-4v-2.800C7 17.500 5 15 5 11z"/>',
+  faucet: '<path d="M4 9h8a4 4 0 0 1 4 4v1"/><path d="M8 9V5M5.500 5h5"/><path d="M16 17c-1 1.300-1.500 2-1.500 2.800a1.500 1.500 0 0 0 3 0C17.500 19 17 18.300 16 17z"/>',
+  coffee: '<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M5 8h14"/><path d="M9 14h6v4a1 1 0 0 1-1 1h-4a1 1 0 0 1-1-1z"/>',
+  stove: '<rect x="4" y="3" width="16" height="18" rx="2.500"/><path d="M4 8h16"/><path d="M8 5.500h.01M12 5.500h.01M16 5.500h.01"/><rect x="7" y="11" width="10" height="7" rx="1.500"/>',
+  hood: '<path d="M9.500 3h5l1 5h-7z"/><path d="M4 8h16l-2.500 7h-11z"/><path d="M9 19v2M12 19v2M15 19v2"/>',
+  rug: '<rect x="4" y="7" width="16" height="10" rx="1.500"/><rect x="7" y="10" width="10" height="4" rx="1"/><path d="M4 9.500H2M4 14.500H2M20 9.500h2M20 14.500h2"/>',
+  kettle: '<path d="M5 21h11l1-10a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4z"/><path d="M5.500 10L3 7"/><path d="M17 10h1.500a2 2 0 0 1 0 5H16.500"/><path d="M11 4v3"/>',
+  cupboard: '<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M12 3v18M9.500 11v2M14.500 11v2"/>',
+  mirror: '<ellipse cx="12" cy="10.500" rx="6" ry="7.500"/><path d="M9 8l2-1.500"/><path d="M12 18v3.500M9 21.500h6"/>',
+  drain: '<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><path d="M12 7v10M7 12h10"/>',
+  curtains: '<path d="M2.500 4h19"/><path d="M4 4c0 5 .5 11-.5 16h6C8 15 9 8 9 4"/><path d="M20 4c0 5-.5 11 .5 16h-6C16 15 15 8 15 4"/>',
+  wall: '<rect x="3" y="5" width="18" height="14" rx="1"/><path d="M3 9.700h18M3 14.300h18M9 5v4.700M15 9.700v4.600M9 14.300V19"/>',
+  radiator: '<rect x="3.500" y="6" width="3.500" height="12" rx="1.500"/><rect x="8" y="6" width="3.500" height="12" rx="1.500"/><rect x="12.500" y="6" width="3.500" height="12" rx="1.500"/><rect x="17" y="6" width="3.500" height="12" rx="1.500"/><path d="M6 18v2.500M18 18v2.500"/>',
+  wardrobe: '<rect x="4" y="3" width="16" height="16" rx="2"/><path d="M12 3v16M9.500 10v2M14.500 10v2M7 19v2M17 19v2"/>',
+  lswitch: '<rect x="6" y="3" width="12" height="18" rx="2.500"/><rect x="9.500" y="7" width="5" height="10" rx="1.200"/><path d="M12 9.500V12"/>',
+  shoe: '<path d="M9 4c2 0 3 2 3 4.500S10.500 11 9 11 6 9 6 7.500 7 4 9 4z"/><path d="M8 14h4c.5 2.500-.5 6-2 6s-2.500-3.500-2-6z"/><path d="M16 9c1.500 0 2.200 1.500 2.200 3.200S17.300 15 16 15s-2-1.500-2-2.800S14.500 9 16 9z"/>',
+  teddy: '<circle cx="12" cy="13" r="6"/><circle cx="7" cy="6.500" r="2.200"/><circle cx="17" cy="6.500" r="2.200"/><circle cx="12" cy="14.500" r="2"/><path d="M10 11h.01M14 11h.01"/>',
+  brick: '<rect x="3" y="9" width="18" height="10" rx="1.500"/><path d="M6.500 9V6.500h3V9M14.500 9V6.500h3V9"/>',
+  backpack: '<path d="M6.500 9a5.500 5.500 0 0 1 11 0v10a2 2 0 0 1-2 2h-7a2 2 0 0 1-2-2z"/><rect x="9" y="13" width="6" height="5" rx="1"/><path d="M10 4V3h4v1"/>',
+  table: '<rect x="3" y="7" width="18" height="3" rx="1"/><path d="M5.500 10v10M18.500 10v10M5.500 14h13"/>',
+  microwave: '<rect x="3" y="5" width="18" height="14" rx="2.500"/><rect x="6" y="8" width="8" height="8" rx="1.200"/><path d="M17.500 9h.01M17.500 12h.01M17.500 15h.01"/>',
+  toaster: '<rect x="3.500" y="10" width="17" height="9" rx="3"/><path d="M7 10V6.500h4V10M13 10V6.500h4V10"/><path d="M17 14.500h1.500"/>',
+  waterfilter: '<path d="M12 3c-3.500 4.500-6 7.500-6 10.500a6 6 0 0 0 12 0C18 10.500 15.500 7.500 12 3z"/><path d="M9.500 13.500l2 2 3.500-4"/>',
+  handwash: '<path d="M12 3c-2 2.500-3.500 4.300-3.500 6.200a3.500 3.500 0 0 0 7 0C15.500 7.300 14 5.500 12 3z"/><path d="M3.500 16h4l3 1.500h4a1.500 1.500 0 0 1 0 3H9.500L7.500 20h-4z"/>',
+  cloth: '<path d="M5 5l14-1 1 9-14 2z"/><path d="M5 5l-1 5M7 17.500l-.5 3M12 16.500v3M17 15.700v3"/>',
   phone: '<rect x="7" y="2.5" width="10" height="19" rx="2.6"/><path d="M10.8 18.4h2.4"/>',
   bell: '<path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.6 2H4.4z"/><path d="M10 21a2.2 2.2 0 0 0 4 0"/>',
   unlock: '<rect x="4.5" y="10.5" width="15" height="10" rx="2.5"/><path d="M8 10.5V8a4 4 0 0 1 7.6-1.7"/>',
@@ -2919,7 +2955,7 @@ class HomeAurora extends HTMLElement {
       const s = st[e], a = s.attributes || {};
       if (!a.putzplan_task || !e.startsWith('sensor.')) continue;
       const n = x => (x == null || x === '' || isNaN(Number(x))) ? null : Number(x);
-      out.push({ e, name: a.task_name || a.friendly_name || e, room: a.room || 'Allgemein', st: s.state, iv: n(a.interval_days), since: n(a.days_since_done), until: n(a.days_until_due), over: n(a.days_overdue) || 0, today: !!a.done_today });
+      out.push({ e, name: a.task_name || a.friendly_name || e, room: a.room || 'Allgemein', st: s.state, iv: n(a.interval_days), since: n(a.days_since_done), until: n(a.days_until_due), over: n(a.days_overdue) || 0, today: !!a.done_today, mdi: String(a.icon || '').replace(/^mdi:/, '') });
     }
     return out;
   }
@@ -2930,8 +2966,20 @@ class HomeAurora extends HTMLElement {
   }
   _pzIv(iv) { return !iv ? '' : iv === 1 ? 'täglich' : iv === 7 ? 'wöchentlich' : iv % 7 === 0 && iv <= 28 ? `alle ${iv / 7} Wochen` : iv === 30 ? 'monatlich' : `alle ${iv} Tage`; }
   _pzIcon(t) {
-    const n = t.name.toLowerCase();
-    return /fenster/.test(n) ? 'window' : /bett|matratze/.test(n) ? 'bed' : /bad|dusche|wanne|toilette|handtuch|matte|schwamm/.test(n) ? 'bath' : /gefrier|kühl|eis/.test(n) ? 'snow' : /herd|kochfeld|backofen|ofen|spül|arbeitsplatte|kaffee|dunst|fett|schrank/.test(n) ? 'cook' : /wasch/.test(n) ? 'drop' : /staubsaug|filter/.test(n) ? 'wind' : 'broom';
+    const M = { 'mop': 'mop', 'window-closed-variant': 'window', 'window-frame': 'window', 'window-open-variant': 'window', 'robot-vacuum': 'robovac', 'vacuum': 'vacuum', 'washing-machine': 'washer', 'countertop': 'counter', 'sponge': 'sponge', 'bed-empty': 'bed', 'bed': 'bed', 'bed-double-outline': 'bed', 'bed-double': 'bed', 'dishwasher': 'dishwasher', 'air-filter': 'filter', 'shower': 'shower', 'shower-head': 'shower', 'fridge-outline': 'fridge', 'fridge': 'fridge', 'door': 'door', 'door-sliding': 'door', 'spray-bottle': 'spray', 'spray': 'spray', 'toilet': 'toilet', 'faucet': 'faucet', 'sink': 'faucet', 'coffee-maker': 'coffee', 'stove': 'stove', 'hand-wash-outline': 'handwash', 'hand-wash': 'handwash', 'range-hood': 'hood', 'rug': 'rug', 'trash-can-outline': 'trash', 'trash-can': 'trash', 'kettle': 'kettle', 'cupboard-outline': 'cupboard', 'cupboard': 'cupboard', 'snowflake': 'snow', 'mirror': 'mirror', 'pipe': 'drain', 'curtains': 'curtains', 'wall': 'wall', 'sofa': 'sofa', 'radiator': 'radiator', 'wardrobe-outline': 'wardrobe', 'light-switch': 'lswitch', 'shoe-print': 'shoe', 'teddy-bear': 'teddy', 'toy-brick-outline': 'brick', 'bag-personal-outline': 'backpack', 'table-furniture': 'table', 'microwave': 'microwave', 'toaster': 'toaster', 'water-check': 'waterfilter', 'broom': 'broom' };
+    if (M[t.mdi] && ICONS[M[t.mdi]]) return M[t.mdi];
+    const n = t.name.toLowerCase(), R = [
+      [/fenster|glas|rahmen/, 'window'], [/schwamm/, 'sponge'], [/lappen|tücher|handtuch|bademat/, 'cloth'], [/toilette/, 'toilet'],
+      [/dusch/, 'shower'], [/wanne|bad(?!ezimmer)/, 'bath'], [/abfluss|siphon/, 'drain'], [/spiegel/, 'mirror'], [/perlator|armatur|spüle|waschbecken|wasserhahn/, 'faucet'],
+      [/gefrier|kühl|eis/, 'fridge'], [/herd|kochfeld|backofen|ofen/, 'stove'], [/dunst|fett/, 'hood'], [/mikrowelle/, 'microwave'], [/toaster/, 'toaster'],
+      [/kaffee/, 'coffee'], [/wasserkocher/, 'kettle'], [/spülmaschine/, 'dishwasher'], [/waschmaschine|wäsche|hygienewasch/, 'washer'], [/wasserfilter|kartusche/, 'waterfilter'],
+      [/filter|flusen/, 'filter'], [/staubsauger|saugen|absaugen/, 'vacuum'], [/wischen|boden|flur|eingang/, 'mop'], [/bett|matratze|kissen|decke/, 'bed'],
+      [/teppich/, 'rug'], [/gardine|vorhang/, 'curtains'], [/heizkörper/, 'radiator'], [/kleiderschrank/, 'wardrobe'], [/schrank/, 'cupboard'],
+      [/klinke|lichtschalter/, 'lswitch'], [/tür|balkontür/, 'door'], [/kuscheltier/, 'teddy'], [/spielzeug/, 'brick'], [/schulranzen|ranzen/, 'backpack'],
+      [/möbel|tisch/, 'table'], [/polster|sofa/, 'sofa'], [/müll|eimer/, 'trash'], [/fugen|silikon|wand/, 'wall'], [/spray|desinfekt/, 'spray']
+    ];
+    for (const [re, ic2] of R) if (re.test(n) && ICONS[ic2]) return ic2;
+    return 'broom';
   }
   _pzSub(t) {
     const iv = this._pzIv(t.iv), tail = iv ? ' · ' + iv : '', d = (n, one, many) => `${n} ${n === 1 ? one : many}`;
