@@ -3140,6 +3140,7 @@ class HomeAurora extends HTMLElement {
     this._rdrMount();
     this._todSet();
     this._fxKind();
+    if (this._fitCock) { this._fitCock(); requestAnimationFrame(() => this._fitCock()); }
     if (this._need.size) this._loadHist();
     if (this._v === 'home' || this._v === 'weather') this._loadFc();
     if (this._v === 'home') { this._loadCal(); this._loadSys(); this._loadPower(); }
@@ -3456,8 +3457,8 @@ const CSSW = `
 
 /* Startseite = Cockpit */
 .cock{display:flex;flex-direction:column;gap:12px}
-@media (min-width:1200px){.cock{height:calc(100vh - var(--header-height,0px) - 32px);min-height:620px}}
-@supports (height:100dvh){@media (min-width:1200px){.cock{height:calc(100dvh - var(--header-height,0px) - 32px)}}}
+@media (min-width:1200px){.cock{height:var(--cockh,calc(100vh - var(--header-height,0px) - 32px));min-height:620px}}
+@supports (height:100dvh){@media (min-width:1200px){.cock{height:var(--cockh,calc(100dvh - var(--header-height,0px) - 32px))}}}
 .ctop{display:flex;align-items:center;gap:10px;min-height:40px;flex:none}
 .ctop .alerts{margin:0;flex-wrap:nowrap;flex:none}.ctop .qa{margin:0;padding:2px 0;flex:1 1 0;min-width:0;flex-wrap:nowrap;overflow-x:auto}
 .ctop .al,.ctop .qp{flex:none;white-space:nowrap}
@@ -3505,8 +3506,8 @@ const CSSW = `
 .col .c.cal{overflow:hidden}
 .col .c.cal .vr,.col .c.cal .ev{margin-bottom:6px}
 @media (min-width:1700px){
-  .app.wide main{padding:22px 28px 22px 6px}.cock{height:calc(100vh - var(--header-height,0px) - 44px);gap:16px}
-  @supports (height:100dvh){.cock{height:calc(100dvh - var(--header-height,0px) - 44px)}}
+  .app.wide main{padding:22px 28px 22px 6px}.cock{height:var(--cockh,calc(100vh - var(--header-height,0px) - 44px));gap:16px}
+  @supports (height:100dvh){.cock{height:var(--cockh,calc(100dvh - var(--header-height,0px) - 44px))}}
   .cols{gap:18px}.col{gap:18px}.stg{gap:16px}
   .rooms .rg{gap:14px}.rooms .rm{padding:16px 16px 14px}.rooms .rm .rw,.rooms .rm .rw .ring{width:52px;height:52px}.rooms .rm .rv{font-size:32px}.rooms .rm .rt{font-size:15px}.rooms .rm .rb{font-size:13px}
   .app.wide .sum{font-size:16px}.alt .xr .t{font-size:13.5px}
@@ -3547,6 +3548,14 @@ class HomeAuroraWide extends HomeAurora {
     const st = document.createElement('style'); st.textContent = CSSW; this.shadowRoot.appendChild(st);
   }
   getCardSize() { return 10; }
+  /* Cockpit exakt auf die sichtbare Höhe ziehen (HA-Kopfzeile/Kiosk-Modus berücksichtigt): Abstand zur Fensterkante messen statt --header-height zu raten */
+  _fitCock() {
+    const el = this._main && this._main.querySelector('.cock'); if (!el) return;
+    if (!this._fcR) { this._fcR = 1; addEventListener('resize', () => this._fitCock()); }
+    const t = el.getBoundingClientRect().top, pb = parseFloat(getComputedStyle(this._main).paddingBottom) || 16, ih = window.innerHeight || document.documentElement.clientHeight;
+    if (!(ih > 0) || t > ih) return;
+    this.style.setProperty('--cockh', Math.max(620, Math.floor(ih - t - pb)) + 'px');
+  }
   setConfig(cfg) { super.setConfig({ ambient_night: { from: '23:00', to: '06:00', after: 1 }, ...(cfg || {}) }); }
 
   _vHome() {

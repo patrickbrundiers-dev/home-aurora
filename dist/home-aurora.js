@@ -3140,6 +3140,7 @@ class HomeAurora extends HTMLElement {
     this._rdrMount();
     this._todSet();
     this._fxKind();
+    if (this._fitCock) { this._fitCock(); requestAnimationFrame(() => this._fitCock()); }
     if (this._need.size) this._loadHist();
     if (this._v === 'home' || this._v === 'weather') this._loadFc();
     if (this._v === 'home') { this._loadCal(); this._loadSys(); this._loadPower(); }
