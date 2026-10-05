@@ -153,6 +153,7 @@ const ICONS = {
   battery: '<rect x="2.500" y="7" width="17" height="10" rx="2.500"/><path d="M22 10.500v3"/><path d="M6 10.500v3M9.500 10.500v3" />',
   bolt: '<path d="M13 2 4 14h7l-1 8 9-12h-7z"/>',
   list: '<path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.500" cy="6" r="1" fill="currentColor"/><circle cx="4.500" cy="12" r="1" fill="currentColor"/><circle cx="4.500" cy="18" r="1" fill="currentColor"/>',
+  broom: '<path d="M19 3l-7.2 8.8"/><path d="M8.4 10l5.6 5.6c-1.1 3-3.9 5.4-9.4 5.4 1.2-2.9.9-5.6 3.8-11z"/>',
   phone: '<rect x="7" y="2.5" width="10" height="19" rx="2.6"/><path d="M10.8 18.4h2.4"/>',
   bell: '<path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.6 2H4.4z"/><path d="M10 21a2.2 2.2 0 0 0 4 0"/>',
   unlock: '<rect x="4.5" y="10.5" width="15" height="10" rx="2.5"/><path d="M8 10.5V8a4 4 0 0 1 7.6-1.7"/>',
@@ -1038,6 +1039,9 @@ const CSS4 = `
 .al.crit{box-shadow:0 0 0 1px rgba(251,191,36,.25),0 0 14px rgba(251,191,36,.18)}.al.bad.crit{box-shadow:0 0 0 1px rgba(251,113,133,.3),0 0 14px rgba(251,113,133,.25)}
 .qp.on{background:rgba(94,234,212,.2);border-color:rgba(94,234,212,.5)}.qp.qe{padding:10px 12px;opacity:.75;border-style:dashed}.qp.qe:first-child{background:rgba(var(--wh),.07)}
 .qfl{display:flex;gap:6px;flex-wrap:wrap;margin:2px 0 10px}.qfc{padding:7px 13px;border-radius:999px;font-size:12.5px;font-weight:500;background:rgba(var(--wh),.07);border:1px solid var(--line);color:var(--tx)}.qfc.on{background:rgba(94,234,212,.2);border-color:rgba(94,234,212,.5)}
+.vr.pz .ico{background:rgba(var(--wh),.07)}.vr.pz.o .ico{color:#fda4af;background:rgba(251,113,133,.16)}.vr.pz.d .ico{color:#fcd34d;background:rgba(251,191,36,.16)}.vr.pz.k .ico{color:#6ee7b7;background:rgba(52,211,153,.14)}
+.vr.pz.o{border-color:rgba(251,113,133,.3)}.vr.pz .vbt{flex:none;white-space:nowrap}.vr.pz .pzb{background:rgba(52,211,153,.16);border-color:rgba(52,211,153,.4);color:#6ee7b7}
+.app.light .vr.pz.o .ico{color:#be123c}.app.light .vr.pz.d .ico{color:#b45309}.app.light .vr.pz.k .ico{color:#047857}.app.light .vr.pz .pzb{color:#047857}
 `;
 const CSS2 = `
 
@@ -1494,6 +1498,7 @@ class HomeAurora extends HTMLElement {
     if (this._s(ex.waste)) { const WL = this._waste(); xr.push(`<button class="xr" data-act="waste"><div class="ico">${ic('trash', 19)}</div><div><div class="t">Müllabfuhr</div><div class="s">${WL && WL.length ? WL.slice(0, 2).map(x => this._dayTxt(x) + ' ' + esc(x.name)).join(' · ') : esc(this._val(ex.waste))}</div></div></button>`); }
     if (this._s(ex.fuel)) xr.push(`<button class="xr" data-act="fuel"><div class="ico">${ic('fuel', 19)}</div><div><div class="t">Tanken · günstigster Preis</div><div class="s">${esc(this._val(ex.fuel))} ${esc(this._unit(ex.fuel))}${this._s(ex.fuelName) && okv(this._val(ex.fuelName)) ? ' · ' + esc(this._val(ex.fuelName)) : ''}</div></div></button>`);
     if (this._s(ex.kids)) xr.push(`<button class="xr" data-act="toggle" data-e="${ex.kids}"><div class="ico">${ic('shield', 19)}</div><div><div class="t">Kindersicherung TV</div><div class="s">${this._val(ex.kids) === 'on' ? 'Aktiv' : 'Aus'}</div></div><span class="sw ${this._val(ex.kids) === 'on' ? 'on' : ''}"></span></button>`);
+    xr.splice(Math.min(xr.length, 1), 0, ...this._cleanRows());
     xr.push(...this._kidRows());
     if (this._s(ex.winter)) xr.push(`<button class="xr" data-act="more" data-e="${ex.winter}"><div class="ico">${ic(this._val(ex.winter) === 'on' ? 'thermo' : 'sun', 19)}</div><div><div class="t">Heizmodus</div><div class="s">${this._val(ex.winter) === 'on' ? 'Wintermodus aktiv' : 'Sommerbetrieb'}</div></div></button>`);
     const sa = this._s(c.sun)?.attributes, sUp = this._val(c.sun) === 'above_horizon';
@@ -2890,6 +2895,7 @@ class HomeAurora extends HTMLElement {
       const w = this._wxNow(), h = new Date().getHours(), night = h >= 22 || h < 6, wet = /rain|pour|hail|snow/.test(w.cond || '') || (w.rain || 0) > 0, cold = w.temp != null && w.temp <= 3;
       if (night || wet || cold) A.unshift({ id: 'open', crit: true, cls: 'warn', icon: 'window', text: 'Fenster/Türen offen', sub: open.join(', ') + ' · ' + (wet ? 'es regnet' : cold ? 'Frost' : 'nachts'), act: 'nav', attrs: 'data-v="rooms"' });
     }
+    A.push(...this._cleanAlerts());
     return A;
   }
   _banPick(AL) { const now = Date.now(), dis = this._banDis || {}; return (AL || this._alerts()).filter(a => a.crit && !(dis[a.id] && now - dis[a.id] < 36e5)); }
@@ -2902,6 +2908,69 @@ class HomeAurora extends HTMLElement {
     const d = dom(e);
     return e.startsWith('builtin:') ? 'moon' : d === 'scene' ? 'sparkle' : d === 'light' ? 'bulb' : d === 'switch' ? 'plug' : d === 'cover' ? 'window' : d === 'input_boolean' ? 'cog' : 'play';
   }
+
+  /* ───────────── v10: Putzplan (Integration „putzplan“) ───────────── */
+  _pzTasks() {
+    const st = this._h.states, out = [];
+    for (const e in st) {
+      const s = st[e], a = s.attributes || {};
+      if (!a.putzplan_task || !e.startsWith('sensor.')) continue;
+      const n = x => (x == null || x === '' || isNaN(Number(x))) ? null : Number(x);
+      out.push({ e, name: a.task_name || a.friendly_name || e, room: a.room || 'Allgemein', st: s.state, iv: n(a.interval_days), since: n(a.days_since_done), until: n(a.days_until_due), over: n(a.days_overdue) || 0, today: !!a.done_today });
+    }
+    return out;
+  }
+  _pzRank(t) { return t.st === 'overdue' ? 0 : t.st === 'due_soon' ? 1 : t.st === 'unknown' ? 2 : t.st === 'ok' ? 3 : 4; }
+  _pzSum() {
+    const T = this._pzTasks(), over = T.filter(t => t.st === 'overdue'), soon = T.filter(t => t.st === 'due_soon');
+    return { T, over, soon, never: T.filter(t => t.st === 'unknown').length };
+  }
+  _pzIv(iv) { return !iv ? '' : iv === 1 ? 'täglich' : iv === 7 ? 'wöchentlich' : iv % 7 === 0 && iv <= 28 ? `alle ${iv / 7} Wochen` : iv === 30 ? 'monatlich' : `alle ${iv} Tage`; }
+  _pzIcon(t) {
+    const n = t.name.toLowerCase();
+    return /fenster/.test(n) ? 'window' : /bett|matratze/.test(n) ? 'bed' : /bad|dusche|wanne|toilette|handtuch|matte|schwamm/.test(n) ? 'bath' : /herd|kühl|spül|arbeitsplatte|kaffee|dunst/.test(n) ? 'cook' : /wasch/.test(n) ? 'drop' : /staubsaug|filter/.test(n) ? 'wind' : 'broom';
+  }
+  _pzSub(t) {
+    const iv = this._pzIv(t.iv), tail = iv ? ' · ' + iv : '', d = (n, one, many) => `${n} ${n === 1 ? one : many}`;
+    if (t.today) return 'Heute erledigt' + tail;
+    if (t.st === 'overdue') return `Überfällig seit ${d(t.over, 'Tag', 'Tagen')}` + tail;
+    if (t.st === 'due_soon') return (t.until === 0 ? 'Heute fällig' : t.until === 1 ? 'Morgen fällig' : `In ${t.until} Tagen fällig`) + tail;
+    if (t.st === 'ok') return (t.until != null ? `In ${d(t.until, 'Tag', 'Tagen')} fällig` : 'Erledigt') + tail;
+    if (t.st === 'as_needed') return 'Bei Bedarf' + (t.since != null ? ` · zuletzt vor ${d(t.since, 'Tag', 'Tagen')}` : '');
+    return 'Noch nie erledigt' + tail;
+  }
+  _cleanRows() {
+    const S = this._pzSum(); if (!S.T.length) return [];
+    const o = S.over.length, s = S.soon.length;
+    const sub = o ? `${o} überfällig${s ? ' · ' + s + ' bald fällig' : ''}` : s ? `${s} bald fällig` : S.never === S.T.length ? `${S.T.length} Aufgaben · noch nichts erledigt` : 'Alles sauber';
+    return [`<button class="xr kid" data-act="pz"><div class="ico">${ic('broom', 19)}</div><div><div class="t">Putzplan</div><div class="s">${esc(sub)}</div></div><span class="kdot ${o ? 'lk' : s ? 'off' : 'ok'}"></span></button>`];
+  }
+  _cleanAlerts() {
+    const S = this._pzSum(), A = [];
+    if (S.over.length) A.push({ id: 'clean', cls: 'warn', icon: 'broom', text: S.over.length === 1 ? '1 Putzaufgabe überfällig' : `${S.over.length} Putzaufgaben überfällig`, sub: S.over[0].name, act: 'pz', attrs: '' });
+    else { const today = S.soon.filter(t => t.until === 0); if (today.length) A.push({ id: 'clean', cls: 'info', icon: 'broom', text: 'Heute putzen', sub: today.length === 1 ? today[0].name : today.length + ' Aufgaben', act: 'pz', attrs: '' }); }
+    return A;
+  }
+  _sClean() {
+    const S = this._pzSum(), T = S.T, f = this._sheet.f || (S.over.length || S.soon.length ? 'due' : 'all');
+    const head = `<div class="grab"></div><div class="sh"><div class="ico">${ic('broom', 24)}</div><div><h2>Putzplan</h2><p>${T.length} Aufgaben${S.over.length ? ' · ' + S.over.length + ' überfällig' : ''}</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>`;
+    if (!T.length) return head + '<div class="empty">Keine Putzplan-Aufgaben gefunden. Ist die Integration „Putzplan“ geladen?</div>';
+    const tone = S.over.length ? 'hot' : S.soon.length ? 'warn' : 'live';
+    const status = `<div class="vst ${tone}"><div class="vsi">${ic(S.over.length ? 'alert' : 'check', 26)}</div><div class="vsx"><div class="vkick">STATUS</div><div class="vh1">${S.over.length ? S.over.length + ' überfällig' : S.soon.length ? S.soon.length + ' bald fällig' : 'Alles sauber'}</div><div class="vh2">${S.soon.length && S.over.length ? S.soon.length + ' weitere bald fällig · ' : ''}${S.never ? S.never + ' noch nie erledigt · ' : ''}${T.length} Aufgaben</div></div></div>`;
+    const chips = `<div class="qfl" style="margin-top:12px">${[['due', 'Fällig'], ['all', 'Alle']].map(x => `<button class="qfc ${x[0] === f ? 'on' : ''}" data-act="pzf" data-e="${x[0]}">${x[1]}</button>`).join('')}</div>`;
+    const list = f === 'due' ? T.filter(t => t.st === 'overdue' || t.st === 'due_soon' || t.today) : T;
+    const rooms = {}; for (const t of list) (rooms[t.room] = rooms[t.room] || []).push(t);
+    const key = r => Math.min(...rooms[r].map(t => this._pzRank(t)));
+    const order = Object.keys(rooms).sort((a, b) => key(a) - key(b) || a.localeCompare(b, 'de'));
+    const row = t => {
+      const cls = t.today ? 'k' : t.st === 'overdue' ? 'o' : t.st === 'due_soon' ? 'd' : t.st === 'ok' ? 'k' : '';
+      return `<div class="vr pz ${cls}"><div class="ico">${ic(this._pzIcon(t), 19)}</div><div><div class="t">${esc(t.name)}</div><div class="s">${esc(this._pzSub(t))}</div></div>${t.today ? `<button class="vbt" data-act="pzundo" data-e="${esc(t.e)}">Rückgängig</button>` : `<button class="vbt big pzb" data-act="pzdone" data-e="${esc(t.e)}">${ic('check', 15)}Erledigt</button>`}</div>`;
+    };
+    const body = order.length ? order.map(r => `<div class="lab2">${esc(r.toUpperCase())} · ${rooms[r].length}</div>${rooms[r].sort((a, b) => this._pzRank(a) - this._pzRank(b) || b.over - a.over || (a.until ?? 1e9) - (b.until ?? 1e9) || a.name.localeCompare(b.name, 'de')).map(row).join('')}`).join('') : `<div class="empty">Nichts fällig. Unter „Alle" siehst du alle ${T.length} Aufgaben.</div>`;
+    return head + status + chips + body + `<div class="card-note">„Erledigt" setzt das Datum auf heute. Intervalle und Aufgaben änderst du in der Putzplan-Integration.</div>`;
+  }
+  _pzDone(e) { this._h.callService('putzplan', 'mark_done', { entity_id: e }); this._toast((this._name(e).replace(/^Putzplan\s+/, '')) + ' erledigt ✓'); }
+  _pzUndo(e) { this._h.callService('putzplan', 'undo_done', { entity_id: e }); this._toast('Rückgängig gemacht'); }
 
   /* ───────────── Rendern ───────────── */
   _navHtml() {
@@ -2956,7 +3025,7 @@ class HomeAurora extends HTMLElement {
     const st = this._sh.scrollTop;
     if (this._sheet.t === 'sched' && this._schedEl && this._sh.contains(this._schedEl)) { this._schedEl.hass = this._h; this._ov.classList.add('show'); return; }
     const r = this._sheet.t === 'room' ? this._c.rooms.find(x => x.id === this._sheet.id) : null;
-    const T = { vroom: () => this._sVRoom(this._sheet.e), persons: () => this._sPersons(), quick: () => this._sQuick(), vent: () => this._sVent(), cal: () => this._sCal(), bat: () => this._sBat(), doors: () => this._sDoors(), sys: () => this._sSys(), waste: () => this._sWaste(), power: () => this._sPower(), sched: () => this._sSched(), set: () => this._sSet(), warn: () => this._sWarn(), radar: () => this._sRadar(), pin: () => this._sPin(), fuel: () => this._sFuel(), plants: () => this._sPlants(), heat: () => this._sHeat(), kid: () => this._sKid() };
+    const T = { vroom: () => this._sVRoom(this._sheet.e), persons: () => this._sPersons(), quick: () => this._sQuick(), vent: () => this._sVent(), cal: () => this._sCal(), bat: () => this._sBat(), doors: () => this._sDoors(), sys: () => this._sSys(), waste: () => this._sWaste(), power: () => this._sPower(), sched: () => this._sSched(), set: () => this._sSet(), warn: () => this._sWarn(), radar: () => this._sRadar(), pin: () => this._sPin(), fuel: () => this._sFuel(), plants: () => this._sPlants(), heat: () => this._sHeat(), kid: () => this._sKid(), clean: () => this._sClean() };
     const qn = this.shadowRoot.getElementById('qname'), qv = qn ? qn.value : null, qf = qn && this.shadowRoot.activeElement === qn;
     const html = r ? this._sRoom(r) : (T[this._sheet.t] || (() => this._sLights()))(), key = this._sheet.t + ':' + (this._sheet.id || this._sheet.e || '');
     if (this._shKey === key && this._sh.firstChild) this._morph(this._sh, html); else this._sh.innerHTML = html;
@@ -3096,6 +3165,10 @@ class HomeAurora extends HTMLElement {
       case 'radar': this._sheet = { t: 'radar' }; this._renderSheet(); break;
       case 'lock': this._lockToggle(); break;
       case 'kid': this._sheet = { t: 'kid', i: parseInt(el.dataset.i, 10) || 0 }; this._renderSheet(); break;
+      case 'pz': this._sheet = { t: 'clean' }; this._renderSheet(); break;
+      case 'pzf': if (this._sheet) { this._sheet.f = e; this._renderSheet(); } break;
+      case 'pzdone': this._pzDone(e); break;
+      case 'pzundo': this._pzUndo(e); break;
       case 'kact': this._kidAct(parseInt(el.dataset.i, 10) || 0, el.dataset.a); break;
       case 'pk': this._pinKey(el.dataset.k); break;
       case 'pdel': this._pin = (this._pin || '').slice(0, -1); this._renderSheet(); break;
