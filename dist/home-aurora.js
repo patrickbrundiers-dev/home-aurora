@@ -1042,6 +1042,9 @@ const CSS4 = `
 .vr.pz .ico{background:rgba(var(--wh),.07)}.vr.pz.o .ico{color:#fda4af;background:rgba(251,113,133,.16)}.vr.pz.d .ico{color:#fcd34d;background:rgba(251,191,36,.16)}.vr.pz.k .ico{color:#6ee7b7;background:rgba(52,211,153,.14)}
 .vr.pz.o{border-color:rgba(251,113,133,.3)}.vr.pz .vbt{flex:none;white-space:nowrap}.vr.pz .pzb{background:rgba(52,211,153,.16);border-color:rgba(52,211,153,.4);color:#6ee7b7}
 .app.light .vr.pz.o .ico{color:#be123c}.app.light .vr.pz.d .ico{color:#b45309}.app.light .vr.pz.k .ico{color:#047857}.app.light .vr.pz .pzb{color:#047857}
+.vr.pz{padding:11px 12px;gap:11px;margin-bottom:7px}.vr.pz .t{white-space:normal;overflow:visible;text-overflow:clip;line-height:1.25}.vr.pz .s{line-height:1.3}
+.vr.pz .vbt{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:42px}.vr.pz .pzb{padding:0 14px}.vr.pz .pzu{padding:0 12px;color:var(--tx2)}
+@media (max-width:860px){.vr.pz .vbt{width:44px;height:44px;min-height:0;padding:0;border-radius:50%}.vr.pz .vbt span{display:none}.vr.pz .pzb svg{width:20px;height:20px}}
 `;
 const CSS2 = `
 
@@ -2928,7 +2931,7 @@ class HomeAurora extends HTMLElement {
   _pzIv(iv) { return !iv ? '' : iv === 1 ? 'täglich' : iv === 7 ? 'wöchentlich' : iv % 7 === 0 && iv <= 28 ? `alle ${iv / 7} Wochen` : iv === 30 ? 'monatlich' : `alle ${iv} Tage`; }
   _pzIcon(t) {
     const n = t.name.toLowerCase();
-    return /fenster/.test(n) ? 'window' : /bett|matratze/.test(n) ? 'bed' : /bad|dusche|wanne|toilette|handtuch|matte|schwamm/.test(n) ? 'bath' : /herd|kühl|spül|arbeitsplatte|kaffee|dunst/.test(n) ? 'cook' : /wasch/.test(n) ? 'drop' : /staubsaug|filter/.test(n) ? 'wind' : 'broom';
+    return /fenster/.test(n) ? 'window' : /bett|matratze/.test(n) ? 'bed' : /bad|dusche|wanne|toilette|handtuch|matte|schwamm/.test(n) ? 'bath' : /gefrier|kühl|eis/.test(n) ? 'snow' : /herd|kochfeld|backofen|ofen|spül|arbeitsplatte|kaffee|dunst|fett|schrank/.test(n) ? 'cook' : /wasch/.test(n) ? 'drop' : /staubsaug|filter/.test(n) ? 'wind' : 'broom';
   }
   _pzSub(t) {
     const iv = this._pzIv(t.iv), tail = iv ? ' · ' + iv : '', d = (n, one, many) => `${n} ${n === 1 ? one : many}`;
@@ -2937,7 +2940,7 @@ class HomeAurora extends HTMLElement {
     if (t.st === 'due_soon') return (t.until === 0 ? 'Heute fällig' : t.until === 1 ? 'Morgen fällig' : `In ${t.until} Tagen fällig`) + tail;
     if (t.st === 'ok') return (t.until != null ? `In ${d(t.until, 'Tag', 'Tagen')} fällig` : 'Erledigt') + tail;
     if (t.st === 'as_needed') return 'Bei Bedarf' + (t.since != null ? ` · zuletzt vor ${d(t.since, 'Tag', 'Tagen')}` : '');
-    return 'Noch nie erledigt' + tail;
+    return 'Nie erledigt' + tail;
   }
   _cleanRows() {
     const S = this._pzSum(); if (!S.T.length) return [];
@@ -2964,7 +2967,7 @@ class HomeAurora extends HTMLElement {
     const order = Object.keys(rooms).sort((a, b) => key(a) - key(b) || a.localeCompare(b, 'de'));
     const row = t => {
       const cls = t.today ? 'k' : t.st === 'overdue' ? 'o' : t.st === 'due_soon' ? 'd' : t.st === 'ok' ? 'k' : '';
-      return `<div class="vr pz ${cls}"><div class="ico">${ic(this._pzIcon(t), 19)}</div><div><div class="t">${esc(t.name)}</div><div class="s">${esc(this._pzSub(t))}</div></div>${t.today ? `<button class="vbt" data-act="pzundo" data-e="${esc(t.e)}">Rückgängig</button>` : `<button class="vbt big pzb" data-act="pzdone" data-e="${esc(t.e)}">${ic('check', 15)}Erledigt</button>`}</div>`;
+      return `<div class="vr pz ${cls}"><div class="ico">${ic(this._pzIcon(t), 19)}</div><div><div class="t">${esc(t.name)}</div><div class="s">${esc(this._pzSub(t))}</div></div>${t.today ? `<button class="vbt pzu" data-act="pzundo" data-e="${esc(t.e)}" aria-label="Rückgängig">${ic('refresh', 15)}<span>Rückgängig</span></button>` : `<button class="vbt pzb" data-act="pzdone" data-e="${esc(t.e)}" aria-label="Erledigt">${ic('check', 18)}<span>Erledigt</span></button>`}</div>`;
     };
     const body = order.length ? order.map(r => `<div class="lab2">${esc(r.toUpperCase())} · ${rooms[r].length}</div>${rooms[r].sort((a, b) => this._pzRank(a) - this._pzRank(b) || b.over - a.over || (a.until ?? 1e9) - (b.until ?? 1e9) || a.name.localeCompare(b.name, 'de')).map(row).join('')}`).join('') : `<div class="empty">Nichts fällig. Unter „Alle" siehst du alle ${T.length} Aufgaben.</div>`;
     return head + status + chips + body + `<div class="card-note">„Erledigt" setzt das Datum auf heute. Intervalle und Aufgaben änderst du in der Putzplan-Integration.</div>`;
