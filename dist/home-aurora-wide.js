@@ -1075,6 +1075,18 @@ const CSS4 = `
 .al.crit{box-shadow:0 0 0 1px rgba(251,191,36,.25),0 0 14px rgba(251,191,36,.18)}.al.bad.crit{box-shadow:0 0 0 1px rgba(251,113,133,.3),0 0 14px rgba(251,113,133,.25)}
 .qp.on{background:rgba(94,234,212,.2);border-color:rgba(94,234,212,.5)}.qp.qe{padding:10px 12px;opacity:.75;border-style:dashed}.qp.qe:first-child{background:rgba(var(--wh),.07)}
 .qfl{display:flex;gap:6px;flex-wrap:wrap;margin:2px 0 10px}.qfc{padding:7px 13px;border-radius:999px;font-size:12.5px;font-weight:500;background:rgba(var(--wh),.07);border:1px solid var(--line);color:var(--tx)}.qfc.on{background:rgba(94,234,212,.2);border-color:rgba(94,234,212,.5)}
+.pzc .pzbar,.pzbar{height:4px;border-radius:4px;background:rgba(var(--wh),.1);overflow:hidden;margin:0 0 6px}.pzbar i{display:block;height:100%;border-radius:4px;background:#34d399}
+.pzr{display:flex;align-items:center;gap:11px;padding:8px 0;border-top:1px solid var(--line);position:relative;touch-action:pan-y}.pzr:first-of-type{border-top:0}
+.pzr>div:nth-child(2){flex:1;min-width:0}.pzr .t{font-size:14px;font-weight:600;line-height:1.25}.pzr .s{font-size:12px;color:var(--tx3);line-height:1.3;margin-top:1px}
+.pzr .ico,.pzfresh .ico{width:36px;height:36px;border-radius:12px;display:grid;place-items:center;flex:none;background:rgba(var(--wh),.07)}
+.pzr.o .ico{color:#fda4af;background:rgba(251,113,133,.16)}.pzr.d .ico{color:#fcd34d;background:rgba(251,191,36,.16)}.pzfresh .ico.ok{color:#6ee7b7;background:rgba(52,211,153,.18)}
+.pzb2{flex:none;width:40px;height:40px;border-radius:50%;border:1px solid rgba(52,211,153,.4);background:rgba(52,211,153,.14);color:#34d399;display:grid;place-items:center;cursor:pointer}
+.pzr.swp{background-image:linear-gradient(90deg,rgba(52,211,153,calc(var(--sw,0)*.4)),transparent 70%);transition:none}.pzr:not(.swp){transition:transform .2s}
+.pzmore{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;margin-top:6px;padding:9px 0 3px;border:0;border-top:1px solid var(--line);background:none;color:var(--tx2);font:inherit;font-size:12.5px;font-weight:500;cursor:pointer}
+.pzfresh{display:flex;align-items:center;gap:12px;text-align:left;width:100%;color:inherit;font:inherit;padding:14px 16px}.pzfresh>div:nth-child(2){flex:1;min-width:0}.pzfresh .t{font-size:14.5px;font-weight:600}.pzfresh .s{font-size:12.5px;color:var(--tx3);margin-top:2px}.pzfresh .pzv,.pzmore .pzv{display:grid;place-items:center;color:var(--tx3)}
+.app.light .pzr.o .ico{color:#be123c}.app.light .pzr.d .ico{color:#b45309}.app.light .pzb2{color:#047857}
+.pzpage{max-width:1100px}.pzg{display:block}.app.wide .pzpage .pzl{column-width:430px;column-gap:20px}.app.wide .pzpage .pzg{break-inside:avoid}
+.app.wide .cock .pzc{padding-top:10px;padding-bottom:6px}.app.wide .cock .pzc .pzbar{display:none}.app.wide .cock .pzc .h{margin-bottom:2px}.app.wide .cock .pzc .pzr{padding:5px 0}.app.wide .cock .pzc .pzr .ico{width:32px;height:32px}.app.wide .cock .pzc .pzb2{width:36px;height:36px}.app.wide .cock .pzc .pzmore{margin-top:3px;padding:7px 0 2px}.app.wide .pzpage .pzh{break-after:avoid}
 .toast.tap.show{pointer-events:auto;cursor:pointer;border-color:rgba(52,211,153,.5)}
 .pzq{display:block;width:100%;box-sizing:border-box;margin:0 0 4px;padding:11px 14px;border-radius:14px;border:1px solid var(--line);background:rgba(var(--wh),.05);color:var(--tx);font:inherit;font-size:14px;outline:none}.pzq:focus{border-color:rgba(56,189,248,.55)}.pzq::placeholder{color:var(--tx3)}
 .pzh{display:flex;align-items:center;gap:10px;width:100%;box-sizing:border-box;background:none;border:0;color:inherit;font:inherit;text-align:left;padding:6px 4px;margin:16px 0 6px;cursor:pointer;min-height:36px}
@@ -1572,7 +1584,7 @@ class HomeAurora extends HTMLElement {
       ${this._stat(3, 'window', 'Fenster offen', open.length, open.length ? 'bad' : 'cool', this._winSub(open), 'doors')}
       ${(() => { const nv = VD.rooms.length ? VD.prio.length : V; return this._stat(4, 'wind', 'Räume zu lüften', nv, nv ? 'hot' : 'cool', nv ? (VD.prio.slice(0, 2).map(r => esc(r.name)).join(', ') + (VD.prio.length > 2 ? ' …' : '')) : (VD.paused.length ? VD.paused.length + ' später empfohlen' : 'Luft ist gut'), 'vent'); })()}
       ${this._stat(5, 'bath', 'Badezimmer', bathState, bathBusy ? 'bad' : 'cool', 'Status', 'nav', 'data-v="bath"')}
-      <div class="s8 col"><div><div class="h">${ic('grid', 14)}Räume<span class="r">${this._c.rooms.length} Räume</span></div><div class="rg">${c.rooms.map((r, i) => this._roomTile(r, false, 6 + i)).join('')}</div></div>
+      <div class="s8 col">${this._pzCard(5, 5)}<div><div class="h">${ic('grid', 14)}Räume<span class="r">${this._c.rooms.length} Räume</span></div><div class="rg">${c.rooms.map((r, i) => this._roomTile(r, false, 6 + i)).join('')}</div></div>
         <div class="c" style="--i:10"><div class="h">${ic('thermo', 14)}Temperaturen<span class="r">letzte 24 Stunden</span></div>${this._chart(this._tempSeries(false), { h: 190, dec: 1 })}</div>
         <div class="c" style="--i:11"><div class="h">${ic('star', 14)}Alltag</div><div class="ex two">${xr.join('')}${this._plantRow()}${this._sysRow()}${this._ambRow()}${this._setRow()}</div></div></div>
       <div class="s4 col">${this._calCard(8)}${this._powerCard(9) || `<div class="c" style="--i:9"><div class="h">${ic('sun', 14)}Sonne</div>${this._sunArc()}</div>`}</div>
@@ -3029,29 +3041,50 @@ class HomeAurora extends HTMLElement {
   async _pzStart() {
     const P = this._pzPlan(), g = {};
     for (const p of P) (g[p.last] = g[p.last] || []).push(p.e);
-    this._sheet.cf = false; this._sheet.f = 'due';
+    const st = this._pzSt(); if (st) { st.cf = false; st.f = 'due'; }
     try { await Promise.all(Object.keys(g).map(d => this._h.callService('putzplan', 'update_task', { entity_id: g[d], last_done: d }))); } catch (err) { this._toast('Start fehlgeschlagen'); return; }
     const t0 = P.filter(p => p.o === 0).length;
-    this._toast(`Plan gestartet · heute ${t0} ${t0 === 1 ? 'Aufgabe' : 'Aufgaben'}`, 3500); this._renderSheet();
+    this._toast(`Plan gestartet · heute ${t0} ${t0 === 1 ? 'Aufgabe' : 'Aufgaben'}`, 3500); this._pzRefresh();
   }
   _cleanRows() {
-    const S = this._pzSum(); if (!S.T.length) return [];
-    const o = S.over.length, s = S.soon.length, fresh = S.never > 0 && S.never === S.T.filter(t => t.st !== 'as_needed').length;
-    if (WALL_UI && !o && !s) return [];
-    const sub = o ? `${o} überfällig${s ? ' · ' + s + ' bald fällig' : ''}` : s ? `${s} bald fällig` : fresh ? `Noch nicht gestartet · ${S.never} Aufgaben` : 'Alles sauber';
-    return [`<button class="xr kid" data-act="pz"><div class="ico">${ic('broom', 19)}</div><div><div class="t">Putzplan</div><div class="s">${esc(sub)}</div></div><span class="kdot ${o ? 'lk' : s || fresh ? 'off' : 'ok'}"></span></button>`];
+    const S = this._pzSum(); if (!S.T.length || WALL_UI || this._pzCard(0, 5)) return [];
+    return [`<button class="xr kid" data-act="pz"><div class="ico">${ic('broom', 19)}</div><div><div class="t">Putzplan</div><div class="s">Alles sauber</div></div><span class="kdot ok"></span></button>`];
   }
-  _cleanAlerts() {
-    const S = this._pzSum(), A = [];
-    if (S.over.length) A.push({ id: 'clean', cls: 'warn', icon: 'broom', text: S.over.length === 1 ? '1 Putzaufgabe überfällig' : `${S.over.length} Putzaufgaben überfällig`, sub: S.over[0].name, act: 'pz', attrs: '' });
-    else { const today = S.soon.filter(t => t.until === 0); if (today.length) A.push({ id: 'clean', cls: 'info', icon: 'broom', text: 'Heute putzen', sub: today.length === 1 ? today[0].name : today.length + ' Aufgaben', act: 'pz', attrs: '' }); }
-    return A;
+  /* Karte „Heute putzen“ für die Startseite (n = max. Zeilen) */
+  _pzCard(i, n) {
+    const S = this._pzSum(); if (!S.T.length) return '';
+    const sched = S.T.filter(t => t.st !== 'as_needed'), U = S.T.filter(t => t.st === 'unknown');
+    if (U.length && U.length === sched.length) return `<button class="c pzc pzfresh tap" style="--i:${i}" data-act="pz"><div class="ico">${ic('broom', 20)}</div><div><div class="t">Putzplan · noch nicht gestartet</div><div class="s">${U.length} Aufgaben – jetzt auf die Wochen verteilen</div></div><span class="pzv">${ic('chevron', 16)}</span></button>`;
+    const due = S.T.filter(t => !t.today && (t.st === 'overdue' || (t.st === 'due_soon' && t.until === 0))).sort((a, b) => b.over - a.over || a.room.localeCompare(b.room, 'de') || a.name.localeCompare(b.name, 'de'));
+    const done = S.T.filter(t => t.today).length, tot = due.length + done;
+    if (!tot) return '';
+    if (!due.length) return `<button class="c pzc pzfresh tap" style="--i:${i}" data-act="pz"><div class="ico ok">${ic('check', 20)}</div><div><div class="t">Heute alles geputzt</div><div class="s">${done} ${done === 1 ? 'Aufgabe' : 'Aufgaben'} erledigt</div></div><span class="pzv">${ic('chevron', 16)}</span></button>`;
+    const rows = due.slice(0, n).map(t => `<div class="pzr ${t.st === 'overdue' ? 'o' : 'd'}" data-sw="${esc(t.e)}"><div class="ico">${ic(this._pzIcon(t), 18)}</div><div><div class="t">${esc(t.name)}</div><div class="s">${esc(t.st === 'overdue' ? 'Überfällig seit ' + t.over + (t.over === 1 ? ' Tag' : ' Tagen') + ' · ' + t.room : t.room + (t.iv ? ' · ' + this._pzIv(t.iv) : ''))}</div></div><button class="pzb2" data-act="pzdone" data-e="${esc(t.e)}" aria-label="Erledigt">${ic('check', 18)}</button></div>`).join('');
+    const more = due.length - rows.split('class="pzr ').length + 1;
+    return `<div class="c pzc fix" style="--i:${i}"><div class="h">${ic('broom', 14)}Heute putzen<span class="r">${done} von ${tot} erledigt</span></div><div class="pzbar"><i style="width:${Math.round(100 * done / tot)}%"></i></div>${rows}<button class="pzmore" data-act="pz">${more > 0 ? '+ ' + more + ' weitere · ' : ''}Putzplan öffnen<span class="pzv">${ic('chevron', 14)}</span></button></div>`;
+  }
+  _cleanAlerts() { return []; }
+  _pzSt() { return this._sheet && this._sheet.t === 'clean' ? this._sheet : this._v === 'clean' ? (this._pzp = this._pzp || {}) : null; }
+  _pzRefresh() {
+    const pq = this.shadowRoot.getElementById('pzq'), foc = pq && this.shadowRoot.activeElement === pq, pos = pq ? pq.selectionStart : 0;
+    if (this._sheet && this._sheet.t === 'clean') this._renderSheet(); else { this._sig = ''; this._render(); }
+    if (foc) { const p2 = this.shadowRoot.getElementById('pzq'); if (p2) { p2.focus(); try { p2.setSelectionRange(pos, pos); } catch (x) { } } }
   }
   _sClean() {
-    const S = this._pzSum(), T = S.T, f = this._sheet.f || (S.over.length || S.soon.length ? 'due' : 'all'), q = (this._sheet.q || '').trim().toLowerCase();
-    const sched = T.filter(t => t.st !== 'as_needed'), U = T.filter(t => t.st === 'unknown'), fresh = U.length > 0 && U.length === sched.length;
+    const S = this._pzSum(), T = S.T;
     const head = `<div class="grab"></div><div class="sh"><div class="ico">${ic('broom', 24)}</div><div><h2>Putzplan</h2><p>${T.length} Aufgaben${S.over.length ? ' · ' + S.over.length + ' überfällig' : ''}</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>`;
     if (!T.length) return head + '<div class="empty">Keine Putzplan-Aufgaben gefunden. Ist die Integration „Putzplan“ geladen?</div>';
+    return head + this._cleanBody(this._sheet);
+  }
+  _vClean() {
+    const S = this._pzSum(), T = S.T;
+    const h = `<div class="vh"><div><h1>Putzplan</h1><p>${T.length} Aufgaben${S.over.length ? ' · ' + S.over.length + ' überfällig' : ''}</p></div></div>`;
+    if (!T.length) return h + '<div class="empty">Keine Putzplan-Aufgaben gefunden. Ist die Integration „Putzplan“ geladen?</div>';
+    return h + `<div class="pzpage">${this._cleanBody(this._pzSt())}</div>`;
+  }
+  _cleanBody(st) {
+    const S = this._pzSum(), T = S.T, f = st.f || (S.over.length || S.soon.length ? 'due' : 'all'), q = (st.q || '').trim().toLowerCase();
+    const sched = T.filter(t => t.st !== 'as_needed'), U = T.filter(t => t.st === 'unknown'), fresh = U.length > 0 && U.length === sched.length;
     const plan = U.length ? this._pzPlan() : [], p0 = plan.filter(p => p.o === 0).length, p7 = plan.filter(p => p.o < 7).length;
     const tone = fresh ? 'hot' : S.over.length ? 'hot' : S.soon.length ? 'warn' : 'live';
     const h1 = fresh ? 'Noch nicht gestartet' : S.over.length ? S.over.length + ' überfällig' : S.soon.length ? S.soon.length + ' bald fällig' : U.length ? 'Nichts fällig' : 'Alles sauber';
@@ -3059,11 +3092,11 @@ class HomeAurora extends HTMLElement {
     const status = `<div class="vst ${tone}"><div class="vsi">${ic(fresh ? 'play' : S.over.length ? 'alert' : 'check', 26)}</div><div class="vsx"><div class="vkick">STATUS</div><div class="vh1">${h1}</div><div class="vh2">${h2}</div></div></div>`;
     let go = '';
     if (U.length) {
-      go = this._sheet.cf
+      go = st.cf
         ? `<div class="pzcf"><div class="pzct">Aufgaben verteilen?</div><div class="pzcs">${U.length} Aufgaben ohne Startdatum werden auf die nächsten Wochen verteilt: heute ${p0}, in den nächsten 7 Tagen ${p7}. Pro Aufgabe lässt sich das später mit „Rückgängig“ zurücknehmen.</div><div class="pzcb"><button class="vbt pzgo" data-act="pzgo">Jetzt starten</button><button class="vbt" data-act="pzcancel">Abbrechen</button></div></div>`
         : `<button class="vbt pzgo pzgo1" data-act="pzstart">${ic('play', 16)}<span>${fresh ? 'Plan starten' : U.length + ' Aufgaben ohne Startdatum verteilen'}</span></button>`;
     }
-    const chips = `<div class="qfl" style="margin-top:12px">${[['due', 'Fällig'], ['all', 'Alle']].map(x => `<button class="qfc ${x[0] === f && !q ? 'on' : ''}" data-act="pzf" data-e="${x[0]}">${x[1]}</button>`).join('')}</div><input id="pzq" class="pzq" type="search" placeholder="Aufgabe oder Raum suchen …" value="${esc(this._sheet.q || '')}" autocomplete="off" enterkeyhint="search">`;
+    const chips = `<div class="qfl" style="margin-top:12px">${[['due', 'Fällig'], ['all', 'Alle']].map(x => `<button class="qfc ${x[0] === f && !q ? 'on' : ''}" data-act="pzf" data-e="${x[0]}">${x[1]}</button>`).join('')}</div><input id="pzq" class="pzq" type="search" placeholder="Aufgabe oder Raum suchen …" value="${esc(st.q || '')}" autocomplete="off" enterkeyhint="search">`;
     const view = q ? 'all' : f;
     const doneT = view === 'due' ? T.filter(t => t.today) : [];
     const list = q ? T.filter(t => (t.name + ' ' + t.room).toLowerCase().includes(q)) : view === 'due' ? T.filter(t => !t.today && (t.st === 'overdue' || t.st === 'due_soon')) : T;
@@ -3081,25 +3114,25 @@ class HomeAurora extends HTMLElement {
       const worst = key(r), def = q ? false : view === 'all' ? worst > 1 : false, col = k in this._pzCol ? this._pzCol[k] : def;
       const kid = /^kinderzimmer/i.test(r), star = kid ? all.filter(t => t.since != null && t.since <= 6).length : 0;
       const info = view === 'all' || q ? `<span class="pzp"><i style="width:${Math.round(100 * cur / all.length)}%"></i></span><span class="pzc">${cur}/${all.length}</span>` : `<span class="pzc">${rooms[r].length}</span>`;
-      return `<button class="pzh${col ? ' c' : ''}" data-act="pzroom" data-id="${esc(k)}" data-c="${col ? 1 : 0}"><span class="pzn">${esc(r.toUpperCase())}</span>${kid ? `<span class="pzs" title="in den letzten 7 Tagen erledigt">★ ${star} diese Woche</span>` : ''}${info}<span class="pzv">${ic('chevron', 14)}</span></button>${col ? '' : sortR(rooms[r]).map(row).join('')}`;
+      return `<div class="pzg"><button class="pzh${col ? ' c' : ''}" data-act="pzroom" data-id="${esc(k)}" data-c="${col ? 1 : 0}"><span class="pzn">${esc(r.toUpperCase())}</span>${kid ? `<span class="pzs" title="in den letzten 7 Tagen erledigt">★ ${star} diese Woche</span>` : ''}${info}<span class="pzv">${ic('chevron', 14)}</span></button>${col ? '' : sortR(rooms[r]).map(row).join('')}</div>`;
     };
-    const body = order.length ? order.map(group).join('') : q ? `<div class="empty">Keine Aufgabe zu „${esc(this._sheet.q)}“ gefunden.</div>` : `<div class="empty">Nichts fällig. Unter „Alle" siehst du alle ${T.length} Aufgaben.</div>`;
+    const body = order.length ? order.map(group).join('') : q ? `<div class="empty">Keine Aufgabe zu „${esc(st.q)}“ gefunden.</div>` : `<div class="empty">Nichts fällig. Unter „Alle" siehst du alle ${T.length} Aufgaben.</div>`;
     const doneS = doneT.length ? `<div class="lab2">HEUTE ERLEDIGT · ${doneT.length}</div>${doneT.map(row).join('')}` : '';
-    return head + status + go + chips + body + doneS + `<div class="card-note">„Erledigt" setzt das Datum auf heute, nach rechts wischen geht auch. Intervalle und Aufgaben änderst du in der Putzplan-Integration.</div>`;
+    return status + go + chips + `<div class="pzl">${body}</div>` + doneS + `<div class="card-note">„Erledigt" setzt das Datum auf heute, nach rechts wischen geht auch. Intervalle und Aufgaben änderst du in der Putzplan-Integration.</div>`;
   }
   _pzDone(e) { this._h.callService('putzplan', 'mark_done', { entity_id: e }); this._toast((this._name(e).replace(/^Putzplan\s+/, '')) + ' erledigt ✓ · Rückgängig', 4500, { act: 'pzundo', e }); }
   _pzUndo(e) { this._h.callService('putzplan', 'undo_done', { entity_id: e }); this._toast('Rückgängig gemacht'); }
 
   /* ───────────── Rendern ───────────── */
   _navHtml() {
-    return `<div class="logo"></div>${TABS.map(t => `<button class="nb ${this._v === t[0] ? 'on' : ''}" data-act="nav" data-v="${t[0]}">${ic(t[2], 24)}<span class="lab">${t[1]}</span></button>`).join('')}
+    return `<div class="logo"></div>${(WALL_UI ? [...TABS, ['clean', 'Putzplan', 'broom']] : TABS).map(t => `<button class="nb ${this._v === t[0] ? 'on' : ''}" data-act="nav" data-v="${t[0]}">${ic(t[2], 24)}<span class="lab">${t[1]}</span></button>`).join('')}
       <div class="sp"></div>${this._lockBtn()}<button class="nb gear" data-act="settings">${ic('cog', 24)}<span class="lab">Einstellungen</span></button>`;
   }
   _render() {
     if (!this._h || !this._built) return;
     this._lastRender = Date.now(); this._applyTheme();
     this._need = new Set();
-    const views = { home: () => this._vHome(), rooms: () => this._vRooms(), climate: () => this._vClimate(), bath: () => this._vBath(), weather: () => this._vWeather(), printer: () => this._vPrinter() };
+    const views = { clean: () => this._vClean(), home: () => this._vHome(), rooms: () => this._vRooms(), climate: () => this._vClimate(), bath: () => this._vBath(), weather: () => this._vWeather(), printer: () => this._vPrinter() };
     this._main.className = this._enter ? 'enter' : '';
     this._morph(this._main, (views[this._v] || views.home)());
     this._morph(this._nav, this._navHtml());
@@ -3221,7 +3254,7 @@ class HomeAurora extends HTMLElement {
       if (this._ht && Math.abs(ev.movementX) + Math.abs(ev.movementY) > 6) cancel();
     });
     root.addEventListener('input', ev => {
-      if (ev.target.id === 'pzq' && this._sheet && this._sheet.t === 'clean') { this._sheet.q = ev.target.value; this._renderSheet(); return; }
+      if (ev.target.id === 'pzq') { const st = this._pzSt(); if (st) { st.q = ev.target.value; this._pzRefresh(); } return; }
       const el = ev.target.closest('input[data-act="bright"]');
       if (el) el.style.setProperty('--v', el.value + '%');
     });
@@ -3237,7 +3270,7 @@ class HomeAurora extends HTMLElement {
     });
     let sw = null;
     root.addEventListener('touchstart', ev => {
-      const r = ev.target.closest && ev.target.closest('.vr.pz[data-sw]');
+      const r = ev.target.closest && ev.target.closest('[data-sw]');
       if (!r || ev.touches.length !== 1 || ev.target.closest('button')) { sw = null; return; }
       sw = { r, x: ev.touches[0].clientX, y: ev.touches[0].clientY, dx: 0, on: false };
     }, { passive: true });
@@ -3305,13 +3338,13 @@ class HomeAurora extends HTMLElement {
       case 'radar': this._sheet = { t: 'radar' }; this._renderSheet(); break;
       case 'lock': this._lockToggle(); break;
       case 'kid': this._sheet = { t: 'kid', i: parseInt(el.dataset.i, 10) || 0 }; this._renderSheet(); break;
-      case 'pz': this._sheet = { t: 'clean' }; this._renderSheet(); break;
-      case 'pzf': if (this._sheet) { this._sheet.f = e; this._renderSheet(); } break;
+      case 'pz': if (WALL_UI) { this._v = 'clean'; this._enter = true; this._counted = false; this._closeSheet(); this._render(); } else { this._sheet = { t: 'clean' }; this._renderSheet(); } break;
+      case 'pzf': { const st = this._pzSt(); if (st) { st.f = e; st.q = ''; this._pzRefresh(); } break; }
       case 'pzdone': this._pzDone(e); break;
       case 'pzundo': this._pzUndo(e); this._tst.classList.remove('show'); break;
-      case 'pzroom': if (this._sheet) { this._pzCol = this._pzCol || {}; this._pzCol[el.dataset.id] = el.dataset.c !== '1'; this._renderSheet(); } break;
-      case 'pzstart': if (this._sheet) { this._sheet.cf = true; this._renderSheet(); } break;
-      case 'pzcancel': if (this._sheet) { this._sheet.cf = false; this._renderSheet(); } break;
+      case 'pzroom': if (this._pzSt()) { this._pzCol = this._pzCol || {}; this._pzCol[el.dataset.id] = el.dataset.c !== '1'; this._pzRefresh(); } break;
+      case 'pzstart': { const st = this._pzSt(); if (st) { st.cf = true; this._pzRefresh(); } break; }
+      case 'pzcancel': { const st = this._pzSt(); if (st) { st.cf = false; this._pzRefresh(); } break; }
       case 'pzgo': this._pzStart(); break;
       case 'kact': this._kidAct(parseInt(el.dataset.i, 10) || 0, el.dataset.a); break;
       case 'pk': this._pinKey(el.dataset.k); break;
@@ -3523,7 +3556,7 @@ class HomeAuroraWide extends HomeAurora {
     const wxCard = `<div class="c wxh tap fix" style="--i:2;--wglow:${this._wxGlow(w.cond)}" data-act="nav" data-v="weather">
         <div class="wtop"><div><div class="wtemp big" data-count="${w.temp ?? 0}" data-d="1">${de(w.temp)}<small class="u">°C</small></div><div class="wcond">${COND[w.cond] || w.cond}</div></div>${wx(w.cond, 72)}</div>
         <div><div class="chips"><span class="chip">${ic('drop', 14)}<b>${de(w.hum, 0)}</b>%</span><span class="chip">${ic('wind', 14)}<b>${de(w.wind, 0)}</b> ${esc(w.windU)}</span>${w.rain ? `<span class="chip">${ic('rain', 14)}<b>${de(w.rain)}</b> ${esc(w.rainU)}</span>` : ''}${sunChip}</div>${mini ? `<div class="mini">${mini}</div>` : ''}</div></div>`;
-    const alltag = [...xr.filter(x => !/Heizmodus/.test(x)), this._plantRow(), this._sysRow()].filter(Boolean).slice(0, 5);
+    const pz0 = this._pzCard(6, 2), alltag = [...xr.filter(x => !/Heizmodus/.test(x) && !(this._pzCard(6, 2) && /Tanken/.test(x))), this._plantRow(), this._sysRow()].filter(Boolean).slice(0, pz0 ? 3 : 5);
     const cal = this._calCard(7), pow = this._powerCard(8);
     const vh = typeof innerHeight === 'number' ? innerHeight : 800;
     return `<div class="cock">
@@ -3540,6 +3573,7 @@ class HomeAuroraWide extends HomeAurora {
           <div class="c hero grow" style="--i:5"><div class="hl"><div><div class="hello">${this._greet()}</div><div class="clock big" id="clk">${this._clockStr()}</div>
             <div class="date">${new Date().toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long' })}</div><div class="sum">${sentence}</div></div>
             ${this._rings()}<div class="pp">${this._persons()}</div></div></div>
+          ${pz0}
           ${alltag.length ? `<div class="c fix" style="--i:6"><div class="alt">${alltag.join('')}</div></div>` : ''}
         </div>
         <div class="col c2">
