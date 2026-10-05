@@ -1044,7 +1044,7 @@ const CSS4 = `
 .app.light .vr.pz.o .ico{color:#be123c}.app.light .vr.pz.d .ico{color:#b45309}.app.light .vr.pz.k .ico{color:#047857}.app.light .vr.pz .pzb{color:#047857}
 .vr.pz{padding:11px 12px;gap:11px;margin-bottom:7px}.vr.pz .t{white-space:normal;overflow:visible;text-overflow:clip;line-height:1.25}.vr.pz .s{line-height:1.3}
 .vr.pz .vbt{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:42px}.vr.pz .pzb{padding:0 14px}.vr.pz .pzu{padding:0 12px;color:var(--tx2)}
-@media (max-width:860px){.vr.pz .vbt{width:44px;height:44px;min-height:0;padding:0;border-radius:50%}.vr.pz .vbt span{display:none}.vr.pz .pzb svg{width:20px;height:20px}}
+@media (max-width:860px){.vr.pz .pzb{width:44px;height:44px;min-height:0;padding:0;border-radius:50%}.vr.pz .pzb span{display:none}.vr.pz .pzb svg{width:20px;height:20px}.vr.pz .pzu{padding:0 12px;font-size:12px}}
 `;
 const CSS2 = `
 
@@ -2959,9 +2959,9 @@ class HomeAurora extends HTMLElement {
     const head = `<div class="grab"></div><div class="sh"><div class="ico">${ic('broom', 24)}</div><div><h2>Putzplan</h2><p>${T.length} Aufgaben${S.over.length ? ' · ' + S.over.length + ' überfällig' : ''}</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>`;
     if (!T.length) return head + '<div class="empty">Keine Putzplan-Aufgaben gefunden. Ist die Integration „Putzplan“ geladen?</div>';
     const tone = S.over.length ? 'hot' : S.soon.length ? 'warn' : 'live';
-    const status = `<div class="vst ${tone}"><div class="vsi">${ic(S.over.length ? 'alert' : 'check', 26)}</div><div class="vsx"><div class="vkick">STATUS</div><div class="vh1">${S.over.length ? S.over.length + ' überfällig' : S.soon.length ? S.soon.length + ' bald fällig' : 'Alles sauber'}</div><div class="vh2">${S.soon.length && S.over.length ? S.soon.length + ' weitere bald fällig · ' : ''}${S.never ? S.never + ' noch nie erledigt · ' : ''}${T.length} Aufgaben</div></div></div>`;
+    const status = `<div class="vst ${tone}"><div class="vsi">${ic(S.over.length ? 'alert' : 'check', 26)}</div><div class="vsx"><div class="vkick">STATUS</div><div class="vh1">${S.over.length ? S.over.length + ' überfällig' : S.soon.length ? S.soon.length + ' bald fällig' : S.never ? 'Nichts fällig' : 'Alles sauber'}</div><div class="vh2">${S.soon.length && S.over.length ? S.soon.length + ' weitere bald fällig · ' : ''}${S.never ? S.never + ' noch nie erledigt · ' : ''}${T.length} Aufgaben</div></div></div>`;
     const chips = `<div class="qfl" style="margin-top:12px">${[['due', 'Fällig'], ['all', 'Alle']].map(x => `<button class="qfc ${x[0] === f ? 'on' : ''}" data-act="pzf" data-e="${x[0]}">${x[1]}</button>`).join('')}</div>`;
-    const list = f === 'due' ? T.filter(t => t.st === 'overdue' || t.st === 'due_soon' || t.today) : T;
+    const doneT = f === 'due' ? T.filter(t => t.today) : [], list = f === 'due' ? T.filter(t => !t.today && (t.st === 'overdue' || t.st === 'due_soon')) : T;
     const rooms = {}; for (const t of list) (rooms[t.room] = rooms[t.room] || []).push(t);
     const key = r => Math.min(...rooms[r].map(t => this._pzRank(t)));
     const order = Object.keys(rooms).sort((a, b) => key(a) - key(b) || a.localeCompare(b, 'de'));
@@ -2970,7 +2970,8 @@ class HomeAurora extends HTMLElement {
       return `<div class="vr pz ${cls}"><div class="ico">${ic(this._pzIcon(t), 19)}</div><div><div class="t">${esc(t.name)}</div><div class="s">${esc(this._pzSub(t))}</div></div>${t.today ? `<button class="vbt pzu" data-act="pzundo" data-e="${esc(t.e)}" aria-label="Rückgängig">${ic('refresh', 15)}<span>Rückgängig</span></button>` : `<button class="vbt pzb" data-act="pzdone" data-e="${esc(t.e)}" aria-label="Erledigt">${ic('check', 18)}<span>Erledigt</span></button>`}</div>`;
     };
     const body = order.length ? order.map(r => `<div class="lab2">${esc(r.toUpperCase())} · ${rooms[r].length}</div>${rooms[r].sort((a, b) => this._pzRank(a) - this._pzRank(b) || b.over - a.over || (a.until ?? 1e9) - (b.until ?? 1e9) || a.name.localeCompare(b.name, 'de')).map(row).join('')}`).join('') : `<div class="empty">Nichts fällig. Unter „Alle" siehst du alle ${T.length} Aufgaben.</div>`;
-    return head + status + chips + body + `<div class="card-note">„Erledigt" setzt das Datum auf heute. Intervalle und Aufgaben änderst du in der Putzplan-Integration.</div>`;
+    const doneS = doneT.length ? `<div class="lab2">HEUTE ERLEDIGT · ${doneT.length}</div>${doneT.map(row).join('')}` : '';
+    return head + status + chips + body + doneS + `<div class="card-note">„Erledigt" setzt das Datum auf heute. Intervalle und Aufgaben änderst du in der Putzplan-Integration.</div>`;
   }
   _pzDone(e) { this._h.callService('putzplan', 'mark_done', { entity_id: e }); this._toast((this._name(e).replace(/^Putzplan\s+/, '')) + ' erledigt ✓'); }
   _pzUndo(e) { this._h.callService('putzplan', 'undo_done', { entity_id: e }); this._toast('Rückgängig gemacht'); }
