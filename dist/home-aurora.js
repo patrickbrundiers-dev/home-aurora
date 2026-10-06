@@ -27,7 +27,8 @@ const DEFAULTS = {
     rainRate: 'sensor.hp2550a_pro_v1_9_3_rain_rate', rainEvent: 'sensor.hp2550a_pro_v1_9_3_event_rain', rainHour: 'sensor.hp2550a_pro_v1_9_3_hourly_rain', dayRain: 'sensor.hp2550a_pro_v1_9_3_daily_rain', rainWeek: 'sensor.hp2550a_pro_v1_9_3_weekly_rain', rainMonth: 'sensor.hp2550a_pro_v1_9_3_monthly_rain', rainYear: 'sensor.hp2550a_pro_v1_9_3_yearly_rain',
     uv: 'sensor.hp2550a_pro_v1_9_3_uv_index', solar: 'sensor.hp2550a_pro_v1_9_3_solar_radiation', lux: 'sensor.hp2550a_pro_v1_9_3_solar_lux',
     strikes: 'sensor.hp2550a_pro_v1_9_3_lightning_strikes', lastStrike: 'sensor.hp2550a_pro_v1_9_3_last_lightning_strike', strikeDist: 'sensor.hp2550a_pro_v1_9_3_lightning_strike_distance',
-    indoor: [['sensor.hp2550a_pro_v1_9_3_indoor_temperature', 'sensor.hp2550a_pro_v1_9_3_indoor_humidity', 'sensor.hp2550a_pro_v1_9_3_indoor_dewpoint', 'Wohnzimmer'], ['sensor.hp2550a_pro_v1_9_3_temperature_2', 'sensor.hp2550a_pro_v1_9_3_humidity_2', 'sensor.hp2550a_pro_v1_9_3_dewpoint_2', 'Badezimmer']],
+    innen: { exclude: ['bad'], extra: [['Flur', 'sensor.flur_vorne_temperature', 'sensor.flur_vorne_humidity']] },
+    indoor: [['sensor.hp2550a_pro_v1_9_3_indoor_temperature', 'sensor.hp2550a_pro_v1_9_3_indoor_humidity', 'sensor.hp2550a_pro_v1_9_3_indoor_dewpoint'], ['sensor.hp2550a_pro_v1_9_3_temperature_2', 'sensor.hp2550a_pro_v1_9_3_humidity_2', 'sensor.hp2550a_pro_v1_9_3_dewpoint_2']],
     batteryPct: ['sensor.hp2550a_pro_v1_9_3_wh57_battery'], batteryBin: ['binary_sensor.hp2550a_pro_v1_9_3_wh65_battery', 'binary_sensor.hp2550a_pro_v1_9_3_wh25_battery', 'binary_sensor.hp2550a_pro_v1_9_3_battery_2'],
   },
   kidScript: 'script.kinderhandy_aktion',
@@ -1144,10 +1145,10 @@ const CSS4 = `
 .hlr{display:flex;gap:18px;margin-top:10px;font-size:14px}.hlr span{display:inline-flex;align-items:center;gap:6px}.hlr b{font-weight:600;color:#fff}.hlr i{font-style:normal;font-size:12px;opacity:.7}
 .bchs{display:flex;flex-wrap:wrap;gap:8px}.bch{display:inline-flex;align-items:center;gap:7px;padding:7px 12px;border-radius:12px;background:rgba(var(--wh),.06);font-size:13px}.bch i{width:8px;height:8px;border-radius:50%}.bch b{font-weight:600}
 @media (max-width:860px){.grs{grid-template-columns:repeat(2,minmax(0,1fr));row-gap:16px}.gr .gv b{font-size:26px}}
-.ins{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}.inc{flex:1 1 150px;display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:14px;background:rgba(var(--wh),.05);min-width:0}.inc .n{display:flex;align-items:center;gap:6px;flex:1;min-width:0;font-size:13px;color:var(--tx2);overflow:hidden;white-space:nowrap;text-overflow:ellipsis}.inc b{font-size:17px;font-weight:600;font-variant-numeric:tabular-nums}.inc .hm{font-size:12px;color:var(--tx2);min-width:34px;text-align:right}
+.ins{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;margin-top:14px}.inc{display:grid;grid-template-columns:1fr auto;align-items:baseline;column-gap:8px;padding:8px 12px;border-radius:14px;background:rgba(var(--wh),.05);min-width:0}.inc .n{grid-column:1/-1;font-size:12px;color:var(--tx2);overflow:hidden;white-space:nowrap;text-overflow:ellipsis;margin-bottom:2px}.inc .n svg{display:none}.inc b{font-size:17px;font-weight:600;font-variant-numeric:tabular-nums}.inc .hm{font-size:12px;color:var(--tx2);text-align:right}
 .r7h{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--tx2);margin:14px 0 6px}.r7{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;align-items:end}.r7>div{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:3px;height:70px}.r7 b{font-size:10.5px;font-weight:600;color:#bae6fd;min-height:12px;font-variant-numeric:tabular-nums}.r7 i{width:100%;max-width:26px;border-radius:5px;background:linear-gradient(180deg,#38bdf8,#818cf8);display:block}.r7 span{font-size:10.5px;color:var(--tx2)}
 .hb{margin-top:4px}.hbt{position:relative;height:10px;border-radius:6px;background:linear-gradient(90deg,#60a5fa 0%,#34d399 25%,#fde047 50%,#fb923c 75%,#fb7185 90%,#c084fc 100%);opacity:.9}.hbt i{position:absolute;top:-4px;width:6px;height:18px;margin-left:-3px;border-radius:3px;background:#fff;box-shadow:0 0 8px rgba(0,0,0,.5)}.hbl{display:flex;justify-content:space-between;font-size:10.5px;color:var(--tx2);margin-top:5px}
-@media (max-width:860px){.inc{flex:1 1 100%}.heatg{grid-template-columns:repeat(3,minmax(0,1fr))!important}}
+@media (max-width:860px){.heatg{grid-template-columns:repeat(3,minmax(0,1fr))!important}}
 `;
 const CSS2 = `
 
@@ -2145,7 +2146,8 @@ class HomeAurora extends HTMLElement {
     const uvC = uv == null ? '#94a3b8' : uv < 3 ? '#34d399' : uv < 6 ? '#fbbf24' : uv < 8 ? '#fb923c' : uv < 11 ? '#fb7185' : '#c084fc';
     const T = (v, d, u) => v == null ? '–' : de(v, d) + (u ? '<small class="u">' + u + '</small>' : '');
     const dirs = ['N', 'NO', 'O', 'SO', 'S', 'SW', 'W', 'NW'], bear = this._sv('dir'), dTxt0 = bear != null ? dirs[Math.round(bear / 45) % 8] + ' · ' + de(bear, 0) + '°' : '';
-    const inR = st.indoor.filter(r => this._s(r[0]) && okv(this._val(r[0]))), avg = a => a.length ? a.reduce((x, y) => x + y, 0) / a.length : null;
+    const avg = a => a.length ? a.reduce((x, y) => x + y, 0) / a.length : null;
+    const inR = c.rooms.filter(r => r.temp && !st.innen.exclude.includes(r.id)).map(r => [r.temp, r.hum, null, r.name]).concat(st.innen.extra.map(x => [x[1], x[2], null, x[0]])).filter(r => this._s(r[0]) && okv(this._val(r[0])));
     const inT = avg(inR.map(r => this._num(r[0])).filter(v => v != null)), inH = avg(inR.map(r => this._num(r[1])).filter(v => v != null));
     this._loadRain7();
     const r7 = this._rn7 && this._rn7.length ? this._rn7 : null;
@@ -2160,7 +2162,7 @@ class HomeAurora extends HTMLElement {
         ${this._gring(t == null ? 0 : clamp((t + 10) / 50, 0, 1), t == null ? '#94a3b8' : tempCol(t), de(t, 1), '°C', 'Außen', feels != null ? 'Gefühlt ' + de(feels, 1) + '°' : '')}
         ${this._gring(hum == null ? 0 : hum / 100, '#38bdf8', de(hum, 0), '%', 'Luftfeuchte', dew != null ? 'Taupunkt ' + de(dew, 1) + '°' : '')}
         ${this._gring(spd == null ? 0 : clamp(spd / 60, 0, 1), '#5eead4', de(spd, 1), 'km/h', 'Wind', dTxt0)}
-        ${this._gring(inT == null ? 0 : clamp((inT - 5) / 30, 0, 1), inT == null ? '#94a3b8' : tempCol(inT), de(inT, 1), '°C', inR.length > 1 ? 'Innen Ø' : 'Innen', inH != null ? 'Feuchte ' + de(inH, 0) + ' %' : '')}</div>
+        ${this._gring(inT == null ? 0 : clamp((inT - 5) / 30, 0, 1), inT == null ? '#94a3b8' : tempCol(inT), de(inT, 1), '°C', inR.length > 1 ? 'Innen Ø' : 'Innen', inH != null ? 'ohne Bad · ' + de(inH, 0) + ' %' : 'ohne Bad')}</div>
         ${inR.length ? `<div class="ins">${inR.map(r => `<div class="inc"><span class="n">${ic('home', 14)}${esc(r[3] || this._name(r[0]).replace(/^HP2550A_Pro_V[\d.]+\s*/i, '') || 'Innen')}</span><b>${de(this._num(r[0]), 1)}°</b><span class="hm">${this._num(r[1]) != null ? de(this._num(r[1]), 0) + ' %' : ''}</span></div>`).join('')}</div>` : ''}</div>`;
     const sunc = `<div class="c s4" style="--i:2"><div class="h">${ic('sun', 14)}Sonne &amp; Licht<span class="r" style="color:${uvC}">UV ${uv != null ? de(uv, 0) : '–'} · ${uvL || '–'}</span></div>${this._sunArc()}
         <div class="dg" style="grid-template-columns:1fr 1fr;margin-top:10px">${this._tile(T(sol, 0, 'W/m²'), 'Strahlung', 'sun')}${this._tile(lux == null ? '–' : lux >= 1000 ? de(lux / 1000, 1) + '<small class="u">klx</small>' : de(lux, 0) + '<small class="u">lx</small>', 'Helligkeit', 'bulb')}</div></div>`;
@@ -2462,7 +2464,7 @@ class HomeAurora extends HTMLElement {
   _sSet() {
     const th = this._themePref || this._c.theme || 'dark', am = String(this._ambMin());
     const seg = (act, cur, items) => `<div class="seg wide">${items.map(x => `<button class="${cur === x[0] ? 'on' : ''}" data-act="${act}" data-m="${x[0]}">${x[1]}</button>`).join('')}</div>`;
-    return `<div class="grab"></div><div class="sh"><div class="ico">${ic('cog', 24)}</div><div><h2>Darstellung &amp; Modi</h2><p>Home Aurora v5.2 · Build pz11</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
+    return `<div class="grab"></div><div class="sh"><div class="ico">${ic('cog', 24)}</div><div><h2>Darstellung &amp; Modi</h2><p>Home Aurora v5.2 · Build pz12</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
       <div class="lab2">DESIGN</div>${seg('theme', th, [['dark', 'Dunkel'], ['light', 'Hell'], ['auto', 'Automatisch']])}
       <div class="card-note">„Automatisch“ folgt dem Dunkel-/Hellmodus deines Home-Assistant-Profils. Die Auswahl gilt nur für dieses Gerät.</div>
       ${WALL_UI ? `      <div class="lab2">WANDTABLET-MODUS</div>
