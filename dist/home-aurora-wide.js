@@ -1335,7 +1335,7 @@ class HomeAurora extends HTMLElement {
   _tick() {
     const h = this._h; let sig = this._isLight() + '|';
     for (const e of this._watch) sig += (h.states[e]?.last_updated || '-') + '|';
-    for (const k in h.states) if (k.startsWith('light.') || this._isBat(k) || this._isContact(k) || k.includes(this._pid)) sig += h.states[k].last_updated;
+    for (const k in h.states) if (k.startsWith('light.') || this._isBat(k) || this._isContact(k) || k.includes(this._pid) || h.states[k].attributes?.putzplan_task) sig += h.states[k].last_updated;
     const va = h.states[this._c.stats.vent]?.attributes?.raeume; if (va) for (const r of va) if (r.entity_id) sig += (h.states[r.entity_id]?.last_updated || '-');
     if (sig === this._sig) return;
     if (this._rweb && this._v === 'weather' && Date.now() - this._lastRender < 3e5) return;
@@ -2395,7 +2395,7 @@ class HomeAurora extends HTMLElement {
   _sSet() {
     const th = this._themePref || this._c.theme || 'dark', am = String(this._ambMin());
     const seg = (act, cur, items) => `<div class="seg wide">${items.map(x => `<button class="${cur === x[0] ? 'on' : ''}" data-act="${act}" data-m="${x[0]}">${x[1]}</button>`).join('')}</div>`;
-    return `<div class="grab"></div><div class="sh"><div class="ico">${ic('cog', 24)}</div><div><h2>Darstellung &amp; Modi</h2><p>Home Aurora v5.2 · Build tv1</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
+    return `<div class="grab"></div><div class="sh"><div class="ico">${ic('cog', 24)}</div><div><h2>Darstellung &amp; Modi</h2><p>Home Aurora v5.2 · Build pz1</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
       <div class="lab2">DESIGN</div>${seg('theme', th, [['dark', 'Dunkel'], ['light', 'Hell'], ['auto', 'Automatisch']])}
       <div class="card-note">„Automatisch“ folgt dem Dunkel-/Hellmodus deines Home-Assistant-Profils. Die Auswahl gilt nur für dieses Gerät.</div>
       ${WALL_UI ? `      <div class="lab2">WANDTABLET-MODUS</div>
@@ -3046,7 +3046,15 @@ class HomeAurora extends HTMLElement {
       const s = st[e], a = s.attributes || {};
       if (!a.putzplan_task || !e.startsWith('sensor.')) continue;
       const n = x => (x == null || x === '' || isNaN(Number(x))) ? null : Number(x);
-      out.push({ e, name: a.task_name || a.friendly_name || e, room: a.room || 'Allgemein', st: s.state, iv: n(a.interval_days), since: n(a.days_since_done), until: n(a.days_until_due), over: n(a.days_overdue) || 0, today: !!a.done_today, mdi: String(a.icon || '').replace(/^mdi:/, '') });
+      let t = { e, name: a.task_name || a.friendly_name || e, room: a.room || 'Allgemein', st: s.state, iv: n(a.interval_days), since: n(a.days_since_done), until: n(a.days_until_due), over: n(a.days_overdue) || 0, today: !!a.done_today, mdi: String(a.icon || '').replace(/^mdi:/, ''), lu: s.last_updated };
+      /* sofort anzeigen, bevor Home Assistant antwortet; verschwindet, sobald der echte Zustand da ist (oder nach 8 s) */
+      const o = this._pzO && this._pzO[e];
+      if (o) {
+        if (o.lu !== s.last_updated || Date.now() - o.t > 8000) delete this._pzO[e];
+        else if (o.k === 'done') t = Object.assign(t, { today: true, st: 'ok', over: 0, since: 0, until: t.iv });
+        else if (o.k === 'undo' && o.prev) t = Object.assign(t, o.prev, { today: false });
+      }
+      out.push(t);
     }
     return out;
   }
@@ -3188,8 +3196,28 @@ class HomeAurora extends HTMLElement {
     const doneS = doneT.length ? `<div class="lab2">HEUTE ERLEDIGT · ${doneT.length}</div>${doneT.map(row).join('')}` : '';
     return status + go + chips + `<div class="pzl">${body}</div>` + doneS + `<div class="card-note">„Erledigt" setzt das Datum auf heute, nach rechts wischen geht auch. Intervalle und Aufgaben änderst du in der Putzplan-Integration.</div>`;
   }
-  _pzDone(e) { this._h.callService('putzplan', 'mark_done', { entity_id: e }); this._toast((this._name(e).replace(/^Putzplan\s+/, '')) + ' erledigt ✓ · Rückgängig', 4500, { act: 'pzundo', e }); }
-  _pzUndo(e) { this._h.callService('putzplan', 'undo_done', { entity_id: e }); this._toast('Rückgängig gemacht'); }
+  _pzOpt(e, k, prev) {
+    this._pzO = this._pzO || {};
+    this._pzO[e] = { k, t: Date.now(), lu: this._h.states[e]?.last_updated, prev };
+    this._pzRefresh();
+  }
+  _pzCall(e, svc, ok) {
+    let p; try { p = this._h.callService('putzplan', svc, { entity_id: e }); } catch (x) { p = Promise.reject(x); }
+    Promise.resolve(p).catch(() => { if (this._pzO) delete this._pzO[e]; this._pzRefresh(); this._toast('Speichern fehlgeschlagen – bitte nochmal'); });
+  }
+  _pzDone(e) {
+    const t0 = this._pzTasks().find(t => t.e === e), prev = t0 ? { st: t0.st, over: t0.over, since: t0.since, until: t0.until } : null;
+    (this._pzPrev = this._pzPrev || {})[e] = prev;
+    this._pzOpt(e, 'done', prev);
+    this._pzCall(e, 'mark_done');
+    this._toast((this._name(e).replace(/^Putzplan\s+/, '')) + ' erledigt ✓ · Rückgängig', 4500, { act: 'pzundo', e });
+  }
+  _pzUndo(e) {
+    const prev = this._pzPrev && this._pzPrev[e];
+    this._pzOpt(e, 'undo', prev);
+    this._pzCall(e, 'undo_done');
+    this._toast('Rückgängig gemacht');
+  }
 
   /* ───────────── v11: Kindersicherung TV (Integration „kindersicherung“) ───────────── */
   _tvs() {
