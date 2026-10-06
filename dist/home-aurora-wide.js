@@ -2399,7 +2399,7 @@ class HomeAurora extends HTMLElement {
   _sSet() {
     const th = this._themePref || this._c.theme || 'dark', am = String(this._ambMin());
     const seg = (act, cur, items) => `<div class="seg wide">${items.map(x => `<button class="${cur === x[0] ? 'on' : ''}" data-act="${act}" data-m="${x[0]}">${x[1]}</button>`).join('')}</div>`;
-    return `<div class="grab"></div><div class="sh"><div class="ico">${ic('cog', 24)}</div><div><h2>Darstellung &amp; Modi</h2><p>Home Aurora v5.2 · Build pz3</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
+    return `<div class="grab"></div><div class="sh"><div class="ico">${ic('cog', 24)}</div><div><h2>Darstellung &amp; Modi</h2><p>Home Aurora v5.2 · Build pz4</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
       <div class="lab2">DESIGN</div>${seg('theme', th, [['dark', 'Dunkel'], ['light', 'Hell'], ['auto', 'Automatisch']])}
       <div class="card-note">„Automatisch“ folgt dem Dunkel-/Hellmodus deines Home-Assistant-Profils. Die Auswahl gilt nur für dieses Gerät.</div>
       ${WALL_UI ? `      <div class="lab2">WANDTABLET-MODUS</div>
@@ -3749,7 +3749,7 @@ const CSSW = `
   .rooms .rg{gap:14px}.rooms .rm{padding:16px 16px 14px}.rooms .rm .rw,.rooms .rm .rw .ring{width:52px;height:52px}.rooms .rm .rv{font-size:32px}.rooms .rm .rt{font-size:15px}.rooms .rm .rb{font-size:13px}
   .app.wide .sum{font-size:16px}.alt .xr .t{font-size:13.5px}
 }
-@media (max-height:899px),(max-width:1699px){.app.wide .hero .rings{display:none}}
+@media (max-height:899px),(max-width:1699px){.app.wide .hero .rings{display:none}.app.wide .hero .pp{flex-wrap:nowrap;gap:4px}.app.wide .hero .pp .pc{flex:0 1 auto;min-width:0;padding:3px 7px 3px 3px;gap:4px;font-size:12px}.app.wide .hero .pp .pc .av{width:22px;height:22px;font-size:10.5px;flex:none}.app.wide .hero .pp .pc small{display:none}.app.wide .hero .pp .pc>div:last-child{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}}
 @media (min-height:940px){.rooms .rm .spark{display:block}}
 @media (max-height:959px){.col [data-act=power] .bt,.col [data-act=power] .card-note,.col [data-act=power] .okc{display:none}.col [data-act=power] .pwr{margin:0}}
 /* Niedrige Tablets (ca. 700–800 px Höhe, z. B. Vollbild-Browser): kompakter, damit nichts abgeschnitten wird */
