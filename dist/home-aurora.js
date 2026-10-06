@@ -9,6 +9,7 @@ let WH = '255,255,255', FG = '#fff';
 const DEFAULTS = {
   persons: ['person.home_sweet_home', 'person.jenny', 'person.leonie'],
   weather: 'weather.forecast_home',
+  weatherCompact: 'weather.lippstadt_boekenfoer',
   outdoor: { temp: 'sensor.hp2550a_pro_v1_9_3_outdoor_temperature', hum: 'sensor.hp2550a_pro_v1_9_3_humidity', wind: 'sensor.hp2550a_pro_v1_9_3_wind_speed', rain: 'sensor.hp2550a_pro_v1_9_3_rain_rate' },
   sun: 'sun.sun',
   radar: 'camera.precipitation',
@@ -1117,6 +1118,18 @@ const CSS4 = `
 .pzsb{display:flex;align-items:flex-end;gap:8px;height:128px;margin:10px 0 2px;padding:0 2px}.pzsb .c1{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:4px}.pzsb .c1 i{display:block;width:100%;max-width:40px;border-radius:9px 9px 4px 4px;background:rgba(var(--wh),.16)}.pzsb .c1.t i{background:#34d399}.pzsb .c1 b{font-size:12px;font-weight:650;font-variant-numeric:tabular-nums;min-height:15px}.pzsb .c1 span{font-size:11px;color:var(--tx3)}.pzsb .c1.t span{color:var(--tx);font-weight:600}
 .qfc.pzsc{cursor:default}.qfc.pzsc b{margin-left:4px;color:#34d399;font-variant-numeric:tabular-nums}
 .pzsr{display:flex;align-items:center;gap:10px;padding:8px 4px;border-bottom:1px solid var(--line)}.pzsr:last-of-type{border-bottom:0}.pzsr .pzt{font-size:12.5px;color:var(--tx3);font-variant-numeric:tabular-nums;min-width:44px}.pzsr .ico{width:30px;height:30px;border-radius:10px;display:grid;place-items:center;background:rgba(var(--wh),.07);flex:none}.pzsr .t{font-size:14px;font-weight:550;line-height:1.25}.pzsr .s{font-size:12px;color:var(--tx3)}.pzsr>div:last-child{min-width:0}.pzsn{font-size:12.5px;color:var(--tx3);padding:6px 4px}
+.wxwrap{overflow-x:auto;margin:6px -2px 0;padding:0 2px 2px;scrollbar-width:none}.wxwrap::-webkit-scrollbar{display:none}
+.wxc{position:relative;touch-action:pan-y;-webkit-user-select:none;user-select:none}.wxc svg.wxs{position:absolute;left:0;overflow:visible;display:block}
+.wxs text{fill:var(--tx3);font-size:10.5px;font-variant-numeric:tabular-nums}.wxs text.mm{fill:#7dd3fc;opacity:.85}.wxs .gl{stroke:rgba(var(--wh),.09);stroke-width:1}.wxs .dl{stroke:rgba(var(--wh),.22);stroke-width:1}.wxs .wxn{fill:rgba(3,5,22,.42)}.wxs .wxr{fill:#38bdf8;opacity:.72}
+.wxs .tp{fill:none;stroke-width:2.8;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 2px 6px rgba(251,146,60,.35))}.wxs .wxp{fill:none;stroke:rgba(var(--wh),.55);stroke-width:1.5;stroke-dasharray:2 4;stroke-linecap:round}.wxs .wxcl{stroke:rgba(var(--wh),.7);stroke-width:1.2}.wxs .wxcd{fill:#fff;stroke:#fb7185;stroke-width:3}
+.wxd{position:absolute;top:0;height:22px;display:flex;align-items:center;justify-content:center;gap:5px;font-size:12.5px;font-weight:650;white-space:nowrap;overflow:hidden;color:var(--tx)}.wxd small{font-size:10.5px;font-weight:500;color:var(--tx3)}
+.wxi{position:absolute;top:22px;width:34px;margin-left:-17px;height:30px;display:grid;place-items:center;pointer-events:none}.wxi .wx *{animation:none!important}
+.wxw{position:absolute;width:34px;margin-left:-17px;text-align:center;font-size:10px;line-height:1;color:var(--tx3);font-variant-numeric:tabular-nums;pointer-events:none}.wxw svg{display:block;margin:0 auto 3px}
+.wxt{position:absolute;z-index:4;box-sizing:border-box;padding:10px 12px;border-radius:14px;background:rgba(10,15,40,.92);border:1px solid rgba(255,255,255,.16);color:#e9efff;box-shadow:0 10px 30px rgba(0,0,0,.4);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);display:flex;gap:8px;pointer-events:none;font-size:12px}
+.wxtl{flex:1;min-width:0}.wxtl>b{display:block;font-size:11.5px;margin-bottom:5px;color:#fff}.wxtr{display:flex;align-items:center;gap:6px;line-height:1.55}.wxtr b{margin-left:auto;font-weight:650;font-variant-numeric:tabular-nums}
+.wxdt{width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,.75);flex:none}.wxdt.t{background:#fb7185}.wxdt.r{background:#38bdf8}
+.wxti{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:10.5px;color:#b8c4e6;text-align:center;max-width:66px}
+.wxt.nar{padding:8px 10px;font-size:11px}.wxt.nar .wxti{display:none}.wxt.nar .wxtr{line-height:1.45}
 `;
 const CSS2 = `
 
@@ -1745,7 +1758,7 @@ class HomeAurora extends HTMLElement {
         <div class="c s4" style="--i:1"><div class="h">${ic('sun', 14)}Sonne &amp; Mond</div>${this._sunArc()}
           <div class="srow" style="margin-top:8px"><span>${up ? 'Noch <b>' + lh + ' h ' + lm + ' min</b> Tageslicht' : 'Sonne in <b>' + lh + ' h ' + lm + ' min</b>'}</span></div>
           <div class="moon">${this._moonSvg(mo.p)}<div><b>${mo.name}</b>${Math.round(mo.ill * 100)} % beleuchtet</div></div></div>
-        <div class="c s12" style="--i:2"><div class="h">${ic('thermo', 14)}Die nächsten 24 Stunden<span class="r">Temperatur &amp; Regenwahrscheinlichkeit</span></div>${this._meteo()}</div>
+        <div class="c s12 wxcard" style="--i:2">${this._wxCard() || `<div class="h">${ic('thermo', 14)}Die nächsten 24 Stunden<span class="r">Temperatur &amp; Regenwahrscheinlichkeit</span></div>${this._meteo()}`}</div>
         <div class="c s7" style="--i:3"><div class="h">${ic('cloudsun', 14)}Die nächsten Tage</div>${days || '<div class="sk" style="height:200px"></div>'}</div>
         <div class="s5 col"><div class="c" style="--i:4"><div class="h">${ic('wind', 14)}Wind</div>${this._compass(w)}</div>
           <div class="c" style="--i:5"><div class="h">${ic('drop', 14)}Details</div><div class="dg">${tile(de(w.hum, 0) + '<small class="u">%</small>', 'Luftfeuchte', 'drop')}${tile(de(dew, 1) + '<small class="u">°</small>', 'Taupunkt', 'thermo')}${tile(w.press ? de(w.press, 0) + '<small class="u">hPa</small>' : '–', 'Luftdruck', 'radar')}${tile(uv != null ? de(uv, 0) : '–', 'UV-Index', 'sun')}${tile(wa.cloud_coverage != null ? de(wa.cloud_coverage, 0) + '<small class="u">%</small>' : (sol != null ? de(sol, 0) + '<small class="u">W/m²</small>' : '–'), wa.cloud_coverage != null ? 'Bewölkung' : 'Sonnenstrahlung', 'cloudsun')}${tile(de(dayRain ?? w.rain ?? 0, 1) + '<small class="u">mm</small>', 'Regen heute', 'rain')}${tile(gm != null ? de(gm, 0) + '<small class="u">' + esc(w.windU) + '</small>' : '–', 'Stärkste Böe heute', 'wind')}${tile(sol != null ? de(sol, 0) + '<small class="u">W/m²</small>' : '–', 'Sonnenstrahlung', 'sun')}${tile(strikes != null ? de(strikes, 0) : '–', okv(lastStrike) ? 'Blitze · zuletzt ' + this._rel(lastStrike) + (sDist != null ? ' (' + de(sDist, 0) + ' km)' : '') : 'Blitze', 'bolt')}</div></div></div>
@@ -2399,7 +2412,7 @@ class HomeAurora extends HTMLElement {
   _sSet() {
     const th = this._themePref || this._c.theme || 'dark', am = String(this._ambMin());
     const seg = (act, cur, items) => `<div class="seg wide">${items.map(x => `<button class="${cur === x[0] ? 'on' : ''}" data-act="${act}" data-m="${x[0]}">${x[1]}</button>`).join('')}</div>`;
-    return `<div class="grab"></div><div class="sh"><div class="ico">${ic('cog', 24)}</div><div><h2>Darstellung &amp; Modi</h2><p>Home Aurora v5.2 · Build pz5</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
+    return `<div class="grab"></div><div class="sh"><div class="ico">${ic('cog', 24)}</div><div><h2>Darstellung &amp; Modi</h2><p>Home Aurora v5.2 · Build pz6</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
       <div class="lab2">DESIGN</div>${seg('theme', th, [['dark', 'Dunkel'], ['light', 'Hell'], ['auto', 'Automatisch']])}
       <div class="card-note">„Automatisch“ folgt dem Dunkel-/Hellmodus deines Home-Assistant-Profils. Die Auswahl gilt nur für dieses Gerät.</div>
       ${WALL_UI ? `      <div class="lab2">WANDTABLET-MODUS</div>
@@ -3344,6 +3357,143 @@ class HomeAurora extends HTMLElement {
     return head(tot ? `${tot} ${tot === 1 ? 'Aufgabe' : 'Aufgaben'} erledigt · Ø ${avg} pro Tag` : 'Noch nichts erledigt') + `<div class="pzsb">${bars}</div>` + chips + list + `<div class="card-note">Die Zeiten kommen aus dem Verlauf von Home Assistant. Erledigungen vor dem Start des Putzplans sind nicht enthalten.</div>` + back;
   }
 
+  /* ───────────── v13: Kompakt-Vorhersage (stündlich) im Stil der Kachelmann-Kompaktvorhersage ───────────── */
+  _wxEnt() { const e = this._c.weatherCompact; return e && this._s(e) ? e : this._c.weather; }
+  async _loadFcX(force) {
+    const w = this._wxEnt();
+    if (this._wxb || (!force && this._wxF && this._wxF.e === w && Date.now() - this._wxF.t < 9e5)) return;
+    this._wxb = true;
+    let hourly = [];
+    try { const r = await this._h.callWS({ type: 'call_service', domain: 'weather', service: 'get_forecasts', service_data: { type: 'hourly' }, target: { entity_id: w }, return_response: true }); hourly = r?.response?.[w]?.forecast || []; } catch (e) { hourly = []; }
+    this._wxF = { t: Date.now(), e: w, hourly };
+    this._wxb = false;
+    if (this._v === 'weather') this._renderSoon();
+  }
+  _wxBear(b) {
+    if (b == null || b === '') return null;
+    const n = parseFloat(b); if (!isNaN(n)) return n;
+    const M = { N: 0, NNO: 22.5, NO: 45, ONO: 67.5, O: 90, OSO: 112.5, SO: 135, SSO: 157.5, S: 180, SSW: 202.5, SW: 225, WSW: 247.5, W: 270, WNW: 292.5, NW: 315, NNW: 337.5, NNE: 22.5, NE: 45, ENE: 67.5, E: 90, ESE: 112.5, SE: 135, SSE: 157.5 };
+    return M[String(b).trim().toUpperCase()] ?? null;
+  }
+  /* Sonnenauf-/untergang (Näherung nach „Sunrise equation“), day = lokales Datum 00:00 */
+  _wxSun(day) {
+    const cf = this._h.config || {}, lat = cf.latitude ?? 51.7, lon = cf.longitude ?? 8.4, R = Math.PI / 180;
+    const J = Date.UTC(day.getFullYear(), day.getMonth(), day.getDate(), 12) / 864e5 + 2440587.5;
+    const n = Math.round(J - 2451545.0 + 0.0008), Js = n - lon / 360;
+    const M = (357.5291 + 0.98560028 * Js) % 360, Mr = M * R;
+    const C = 1.9148 * Math.sin(Mr) + 0.02 * Math.sin(2 * Mr) + 0.0003 * Math.sin(3 * Mr);
+    const lam = (M + C + 180 + 102.9372) % 360, lr = lam * R;
+    const Jt = 2451545.0 + Js + 0.0053 * Math.sin(Mr) - 0.0069 * Math.sin(2 * lr);
+    const dec = Math.asin(Math.sin(lr) * Math.sin(23.44 * R));
+    const cw = (Math.sin(-0.833 * R) - Math.sin(lat * R) * Math.sin(dec)) / (Math.cos(lat * R) * Math.cos(dec));
+    const w0 = Math.acos(Math.max(-1, Math.min(1, cw))) / R;
+    return { rise: (Jt - w0 / 360 - 2440587.5) * 864e5, set: (Jt + w0 / 360 - 2440587.5) * 864e5 };
+  }
+  _wxGeo() {
+    const F = this._wxF; if (!F || F.hourly.length < 6) return null;
+    const now = Date.now(), all = F.hourly.filter(d => new Date(d.datetime).getTime() >= now - 36e5 && d.temperature != null);
+    const bw = (this._main && this._main.getBoundingClientRect().width) || 0;
+    const W = Math.max(290, Math.min(1180, Math.floor((bw || 390) - 62)));
+    const span = this._wxSpan || (W < 600 ? 48 : 72);
+    const hr = all.slice(0, span).map(d => ({ ...d, ts: new Date(d.datetime).getTime() }));
+    if (hr.length < 6) return null;
+    return { W, span, hr, N: hr.length };
+  }
+  _wxChart(G) {
+    const { W, hr, N } = G, wide = W > 640, HT = wide ? 220 : 180, L = 32, Rr = 30, pw = W - L - Rr, px = pw / N, T0 = hr[0].ts, T1 = hr[N - 1].ts;
+    const X = t => L + (t - T0) / 36e5 * px + px / 2, pt = 8, ph = HT - pt - 3;
+    const wu = this._attr(this._wxEnt(), 'wind_speed_unit') || 'km/h', kw = /m\/s/.test(wu) ? 3.6 : /mph/.test(wu) ? 1.609 : 1;
+    const T = hr.map(d => d.temperature), D = hr.map(d => d.dew_point != null ? d.dew_point : d.temperature), P = hr.map(d => d.precipitation || 0);
+    const lo = Math.min(...T, ...D), hi = Math.max(...T, ...D), steps = [2, 4, 5, 8, 10, 20];
+    const step = steps.find(s => Math.ceil(hi / s) - Math.floor(lo / s) <= 5) || 20;
+    let y0 = Math.floor(lo / step) * step, y1 = Math.ceil(hi / step) * step; if (y1 - y0 < step * 2) y1 = y0 + step * 2;
+    const nl = Math.round((y1 - y0) / step) + 1, Y = v => pt + (1 - (v - y0) / (y1 - y0)) * ph;
+    const pm = Math.max(...P), q = [0.25, 0.5, 1, 2, 5, 10, 20].find(v => v * (nl - 1) >= Math.max(pm, 0.01)) || 20, rm = q * (nl - 1);
+    const fmt = v => (Math.round(v * 100) / 100).toString().replace('.', ',');
+    let g = '';
+    /* Nacht */
+    const d0 = new Date(T0); d0.setHours(0, 0, 0, 0); const sun = [];
+    for (let k = -1; k <= Math.ceil(N / 24) + 1; k++) sun.push(this._wxSun(new Date(d0.getFullYear(), d0.getMonth(), d0.getDate() + k)));
+    for (let k = 0; k < sun.length - 1; k++) { const a = Math.max(sun[k].set, T0 - 18e5), b = Math.min(sun[k + 1].rise, T1 + 18e5); if (b > a) { const xa = Math.max(L, X(a)), xb = Math.min(L + pw, X(b)); if (xb > xa) g += `<rect class="wxn" x="${xa.toFixed(1)}" y="0" width="${(xb - xa).toFixed(1)}" height="${HT}"/>`; } }
+    /* Gitter + Achsen */
+    for (let k = 0; k < nl; k++) {
+      const v = y0 + k * step, yy = Y(v).toFixed(1);
+      g += `<line class="gl" x1="${L}" x2="${L + pw}" y1="${yy}" y2="${yy}"/><text x="${L - 6}" y="${yy}" text-anchor="end" dy=".35em">${v}°</text><text x="${L + pw + 6}" y="${yy}" dy=".35em" class="mm">${fmt(k * q)}</text>`;
+    }
+    /* Tageswechsel + Tageslabels */
+    const days = []; const mids = [];
+    for (let k = 0; k <= Math.ceil(N / 24) + 1; k++) { const m = new Date(d0.getFullYear(), d0.getMonth(), d0.getDate() + k).getTime(); mids.push(m); if (m > T0 && m < T1) g += `<line class="dl" x1="${X(m).toFixed(1)}" x2="${X(m).toFixed(1)}" y1="0" y2="${HT}"/>`; }
+    const todayK = new Date(); todayK.setHours(0, 0, 0, 0);
+    for (let k = 0; k < mids.length - 1; k++) {
+      const a = Math.max(mids[k], T0), b = Math.min(mids[k + 1], T1 + 36e5); if (b <= a) continue;
+      const xa = Math.max(L, X(a) - (a === T0 ? px / 2 : 0)), xb = Math.min(L + pw, X(b) - px / 2); if (xb - xa < 22) continue;
+      const dd = new Date(mids[k]);
+      days.push(`<div class="wxd" style="left:${xa.toFixed(1)}px;width:${(xb - xa).toFixed(1)}px${a === T0 && xb - xa < 110 ? ';justify-content:flex-start;padding-left:6px;box-sizing:border-box' : ''}">${mids[k] === todayK.getTime() ? 'Heute' : dd.toLocaleDateString('de-DE', { weekday: 'short' }).replace('.', '')}${xb - xa > 80 ? `<small>${dd.getDate()}.${dd.getMonth() + 1}.</small>` : ''}</div>`);
+    }
+    /* Regen */
+    const bwid = Math.max(1.6, px * 0.78);
+    P.forEach((v, i) => { if (v > 0.001) { const h = Math.max(1.5, Math.min(1, v / rm) * ph); g += `<rect class="wxr" x="${(X(hr[i].ts) - bwid / 2).toFixed(1)}" y="${(pt + ph - h).toFixed(1)}" width="${bwid.toFixed(1)}" height="${h.toFixed(1)}" rx="1.4"/>`; } });
+    /* Kurven */
+    const pts = hr.map((d, i) => [X(d.ts), Y(T[i])]), dpts = hr.map((d, i) => [X(d.ts), Y(D[i])]);
+    g += `<defs><linearGradient id="wxg" gradientUnits="userSpaceOnUse" x1="0" x2="0" y1="${Y(y1).toFixed(1)}" y2="${Y(y0).toFixed(1)}"><stop offset="0" stop-color="#fb923c"/><stop offset=".5" stop-color="#fbbf24"/><stop offset="1" stop-color="#60a5fa"/></linearGradient></defs>`;
+    g += `<path class="wxp" d="${smooth(dpts)}"/><path class="tp" stroke="url(#wxg)" d="${smooth(pts)}"/>`;
+    g += `<line class="wxcl" x1="0" x2="0" y1="0" y2="${HT}" style="display:none"/><circle class="wxcd" r="5" cx="0" cy="0" style="display:none"/>`;
+    /* Symbole + Wind */
+    const pick = min => [1, 2, 3, 6, 12, 24].find(s => s * px >= min) || 24;
+    const top = 54, wt = top + HT + 6, tot = wt + 38;
+    const si = pick(wide ? 34 : 28), sw = pick(wide ? 30 : 26), isz = wide ? 28 : 24;
+    const onGrid = (d, s) => s === 24 ? new Date(d.ts).getHours() === 12 : new Date(d.ts).getHours() % s === 0;
+    let ic1 = '', wnd = '';
+    hr.forEach(d => {
+      if (onGrid(d, si)) ic1 += `<div class="wxi" style="left:${X(d.ts).toFixed(1)}px">${wx(d.condition, isz)}</div>`;
+      if (onGrid(d, sw)) {
+        const b = this._wxBear(d.wind_bearing), v = d.wind_speed != null ? d.wind_speed * kw : null; if (b == null || v == null) return;
+        const col = v >= 50 ? '#fb7185' : v >= 30 ? '#fbbf24' : 'currentColor';
+        wnd += `<div class="wxw" style="top:${wt}px;left:${X(d.ts).toFixed(1)}px;color:${col}"><svg width="16" height="16" viewBox="0 0 16 16" style="transform:rotate(${Math.round(b + 180)}deg)"><path d="M8 1.5 12.6 9H9.3v5.5H6.7V9H3.4z" fill="currentColor"/></svg>${Math.round(v)}</div>`;
+      }
+    });
+    this._wxG = { G, L, px, N, hr, T0, X, Y, HT, top, W, pw, kw, wu, T, D, P };
+    return `<div class="wxc" data-w="${W}" style="width:${W}px;height:${tot}px">${days.join('')}${ic1}<svg class="wxs" width="${W}" height="${HT}" viewBox="0 0 ${W} ${HT}" style="top:${top}px">${g}</svg>${wnd}<div class="wxt" style="display:none"></div></div>`;
+  }
+  _wxTip(i) {
+    const Q = this._wxG, d = Q.hr[i], x = Q.X(d.ts), v = Q.kw, f = (a, u, n = 0) => a == null ? '–' : de(a * (u || 1), n);
+    const dt = new Date(d.ts);
+    return { x, y: Q.Y(Q.T[i]), html: `<div class="wxtl"><b>${dt.toLocaleDateString('de-DE', Q.W < 600 ? { weekday: 'short', day: 'numeric', month: 'numeric' } : { weekday: 'long', day: 'numeric', month: 'long' })}, ${hhmm(d.ts)} Uhr</b>
+      <div class="wxtr"><i class="wxdt t"></i>Temperatur<b>${de(d.temperature, 1)} °C</b></div>
+      ${d.dew_point != null ? `<div class="wxtr"><i class="wxdt"></i>Taupunkt<b>${de(d.dew_point, 1)} °C</b></div>` : ''}
+      ${d.wind_gust_speed != null ? `<div class="wxtr"><i class="wxdt"></i>Windböen<b>${Math.round(d.wind_gust_speed * v)} ${esc(Q.wu === 'm/s' ? 'km/h' : Q.wu)}</b></div>` : ''}
+      ${d.wind_speed != null ? `<div class="wxtr"><i class="wxdt"></i>Mittelwind<b>${Math.round(d.wind_speed * v)} ${esc(Q.wu === 'm/s' ? 'km/h' : Q.wu)}</b></div>` : ''}
+      <div class="wxtr"><i class="wxdt r"></i>Niederschlag<b>${de(d.precipitation || 0, 1)} mm</b></div></div><div class="wxti">${wx(d.condition, 38)}<span>${COND[d.condition] || ''}</span></div>` };
+  }
+  _wxCur(c, i) {
+    const Q = this._wxG; if (!Q || !c) return;
+    const t = this._wxTip(i), s = c.querySelector('svg.wxs'), ln = s.querySelector('.wxcl'), dot = s.querySelector('.wxcd'), tip = c.querySelector('.wxt');
+    ln.setAttribute('x1', t.x); ln.setAttribute('x2', t.x); ln.style.display = ''; dot.setAttribute('cx', t.x); dot.setAttribute('cy', t.y); dot.style.display = '';
+    tip.innerHTML = t.html; tip.style.display = '';
+    const nar = Q.W < 600, tw = nar ? 168 : 232, left = t.x > Q.W * 0.52 ? Math.max(0, t.x - 12 - tw) : Math.min(Q.W - tw, t.x + 12);
+    tip.classList.toggle('nar', nar);
+    tip.style.left = left + 'px'; tip.style.top = (Q.top + (nar ? 2 : 6)) + 'px'; tip.style.width = tw + 'px';
+  }
+  _wxPtr(ev, ty) {
+    if (ty === 'u') { this._wxDrag = false; return; }
+    const c = ev.target && ev.target.closest ? ev.target.closest('.wxc') : null, Q = this._wxG;
+    if (!c || !Q) return;
+    if (ty === 'd') { this._wxDrag = true; this._busy = true; } else if (!this._wxDrag && ev.pointerType !== 'mouse') return;
+    const x = ev.clientX - c.getBoundingClientRect().left, i = Math.max(0, Math.min(Q.N - 1, Math.round((x - Q.L - Q.px / 2) / Q.px)));
+    this._wxSelT = Q.hr[i].ts; this._wxCur(c, i);
+  }
+  _wxCard() {
+    const G = this._wxGeo(); if (!G) return this._wxF && !this._wxF.hourly.length && this._wxF.t ? '' : null;
+    const src = this._attr(this._wxEnt(), 'friendly_name') || '', n = G.hr.length;
+    const chips = [[48, '48 h'], [72, '3 Tage'], [120, '5 Tage'], [216, '9 Tage']].map(x => `<button class="qfc ${x[0] === G.span ? 'on' : ''}" data-act="wxspan" data-n="${x[0]}">${x[1]}</button>`).join('');
+    const ch = this._wxChart(G);
+    return `<div class="h">${ic('cloudsun', 14)}Vorhersage kompakt<span class="r">${esc(src)}</span></div><div class="qfl wxsp">${chips}</div><div class="wxwrap">${ch}</div><div class="card-note" style="margin-top:6px">Tippen oder wischen für Details · Temperatur (Linie), Taupunkt (gestrichelt), Regen (Balken, mm), Wind (Pfeile in km/h) · Nacht dunkel hinterlegt</div>`;
+  }
+  _wxRestore() {
+    const Q = this._wxG, c = this.shadowRoot && this.shadowRoot.querySelector('.wxc'); if (!Q || !c || !this._wxSelT) return;
+    const i = Q.hr.findIndex(d => d.ts === this._wxSelT); if (i >= 0) this._wxCur(c, i);
+  }
+
   /* ───────────── Rendern ───────────── */
   _navHtml() {
     return `<div class="logo"></div>${(WALL_UI ? [...TABS, ['clean', 'Putzplan', 'broom']] : TABS).map(t => `<button class="nb ${this._v === t[0] ? 'on' : ''}" data-act="nav" data-v="${t[0]}">${ic(t[2], 24)}<span class="lab">${t[1]}</span></button>`).join('')}
@@ -3365,6 +3515,7 @@ class HomeAurora extends HTMLElement {
     if (this._fitCock) { this._fitCock(); requestAnimationFrame(() => this._fitCock()); }
     if (this._need.size) this._loadHist();
     if (this._v === 'home' || this._v === 'weather') this._loadFc();
+    if (this._v === 'weather') { this._loadFcX(); this._wxRestore(); }
     if (this._v === 'home') { this._loadCal(); this._loadSys(); this._loadPower(); }
     this._ambRender();
     if (this._enter && !this._counted) {
@@ -3495,6 +3646,9 @@ class HomeAurora extends HTMLElement {
       this._busy = false;
       if (this._dirty) { this._dirty = false; this._sig = ''; this._tick(); }
     });
+    root.addEventListener('pointerdown', ev => this._wxPtr(ev, 'd')); root.addEventListener('pointermove', ev => this._wxPtr(ev, 'm'));
+    root.addEventListener('pointerup', ev => { this._wxPtr(ev, 'u'); });
+    root.addEventListener('pointercancel', ev => this._wxPtr(ev, 'u'));
     root.addEventListener('pointerup', () => {
       if (this._busy) setTimeout(() => { this._busy = false; if (this._dirty) { this._dirty = false; this._sig = ''; this._tick(); } }, 250);
     });
@@ -3591,6 +3745,7 @@ class HomeAurora extends HTMLElement {
       case 'calmode': this._calMode = el.dataset.m === 'list' ? 'list' : 'month'; this._renderSheet(); break;
       case 'calday': { const k = +el.dataset.d, d = new Date(k), t0 = new Date(); t0.setHours(0, 0, 0, 0); this._calSel = k; this._calMo = Math.max(0, Math.min(2, (d.getFullYear() - t0.getFullYear()) * 12 + d.getMonth() - t0.getMonth())); this._renderSheet(); break; }
       case 'calmo': { const n = +el.dataset.n, t0 = new Date(); t0.setHours(0, 0, 0, 0); this._calMo = n === 0 ? 0 : Math.max(0, Math.min(2, (this._calMo || 0) + n)); this._calSel = n === 0 ? +t0 : null; if (n !== 0) { const f = new Date(t0.getFullYear(), t0.getMonth() + this._calMo, 1); this._calSel = this._calMo === 0 ? +t0 : +f; } this._renderSheet(); break; }
+      case 'wxspan': this._wxSpan = +el.dataset.n; this._wxSelT = null; this._render(); break;
       case 'wxmode': this._wxMode = el.dataset.m; this._enter = true; this._counted = false; this._render(); break;
       case 'pcmd': h.callService(el.dataset.d, el.dataset.s, { entity_id: e }); this._toast(el.dataset.msg || 'Gesendet'); break;
       case 'plant': {
