@@ -2398,8 +2398,9 @@ class HomeAurora extends HTMLElement {
     const w = this._wxNow(), lights = this._lightsOn().length, open = this._openRooms();
     const temps = this._c.rooms.map(r => this._room(r).temp).filter(t => t != null), avg = temps.length ? temps.reduce((a, b) => a + b, 0) / temps.length : null;
     let nxt = '';
-    if (this._cal) { const { list } = this._calList(), n = list.find(x => x.e > new Date()); if (n) nxt = `<div class="ambn">${ic('cal', 18)}<span>${n.allDay ? this._dayName(n.s) : n.s.toLocaleString('de-DE', { weekday: 'short', hour: '2-digit', minute: '2-digit' })} · ${esc(n.title)}</span></div>`; }
-    const WL = this._waste(), wn = WL && WL[0] && WL[0].days <= 1 ? `<div class="ambn">${ic('trash', 18)}<span>${this._dayTxt(WL[0])} · ${esc(WL[0].name)}</span></div>` : '';
+    const WL = this._waste(), wasteTx = /tonne|müll|abfall|gelber sack|gelbe sack|restmüll|biomüll|sperrmüll|papier|altpapier/i;
+    if (this._cal) { const { list } = this._calList(), skipW = !!(WL && WL[0] && WL[0].days <= 1), n = list.find(x => x.e > new Date() && !(skipW && wasteTx.test(x.title || ''))); if (n) nxt = `<div class="ambn">${ic('cal', 18)}<span>${n.allDay ? this._dayName(n.s) : n.s.toLocaleString('de-DE', { weekday: 'short', hour: '2-digit', minute: '2-digit' })} · ${esc(n.title)}</span></div>`; }
+    const wn = WL && WL[0] && WL[0].days <= 1 ? `<div class="ambn">${ic('trash', 18)}<span>${this._dayTxt(WL[0])} · ${esc(WL[0].name)}</span></div>` : '';
     const pe = this._persons();
     if (first || !this._ambDrift || Date.now() - this._ambDrift > 6e4) { this._ambDrift = Date.now(); this._ambDx = Math.round((Math.random() - .5) * 60); this._ambDy = Math.round((Math.random() - .5) * 50); }
     this._morph(this._amb_el, `<div class="ambin" style="transform:translate(${this._ambDx}px,${this._ambDy}px)"><div class="ambc big">${this._clockStr()}</div>
