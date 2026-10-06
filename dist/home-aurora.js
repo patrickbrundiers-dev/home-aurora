@@ -1063,6 +1063,13 @@ const CSS4 = `
 .kb b{font-size:15px;font-weight:650}.kb small{font-size:11.5px;color:var(--tx3);font-weight:500}.kb:active{transform:scale(.97)}.kb[disabled]{opacity:.45;pointer-events:none}
 .kgrid.k1 .kb{flex-direction:row;gap:12px;min-height:64px;justify-content:center}.kgrid.k1 .kb small{display:none}
 .ksc{display:flex;align-items:center;gap:12px;margin:8px 0 2px;padding:12px 14px;border-radius:18px;border:1px solid var(--line);background:rgba(var(--wh),.06)}.ksc b{display:block;font-size:15px;font-weight:650}.ksc span{display:block;font-size:12.5px;color:var(--tx3);margin-top:1px}.ksi{width:40px;height:40px;border-radius:14px;display:grid;place-items:center;flex:none;background:rgba(var(--wh),.08)}.ksc.live .ksi{background:rgba(52,211,153,.18);color:#6ee7b7}.ksc.hot .ksi{background:rgba(251,113,133,.18);color:#fda4af}.ksc.warn .ksi{background:rgba(251,191,36,.18);color:#fbbf24}.app.light .ksc.live .ksi{color:#047857}.app.light .ksc.hot .ksi{color:#be123c}.app.light .ksc.warn .ksi{color:#b45309}
+.calc .h .r{display:inline-flex;align-items:center;gap:2px}.ccd{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--tx3);margin:10px 0 2px;display:flex;gap:8px;align-items:baseline}.ccd:first-of-type{margin-top:2px}.ccd b{color:var(--tx);letter-spacing:0;text-transform:none;font-size:13.5px;font-weight:650}
+.cc2{display:flex;align-items:center;gap:10px;padding:7px 2px;min-width:0}.cc2 i{width:8px;height:8px;border-radius:50%;background:var(--ec,#818cf8);flex:none;box-shadow:0 0 8px var(--ec,#818cf8)}.cc2 .t{flex:1;min-width:0;font-size:14px;font-weight:550;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.cc2 .w{font-size:12.5px;color:var(--tx3);white-space:nowrap;font-variant-numeric:tabular-nums}.ccm{margin-top:4px;font-size:12px;color:var(--tx3)}
+.cal2tabs{display:flex;gap:4px;padding:3px;border-radius:15px;background:rgba(var(--wh),.06);margin-bottom:12px}.cal2tabs button{flex:1;min-height:38px;display:flex;align-items:center;justify-content:center;gap:6px;border-radius:12px;border:0;background:none;color:var(--tx3);font:inherit;font-size:13.5px;font-weight:600}.cal2tabs button.on{background:rgba(var(--wh),.13);color:var(--tx)}
+.cmh{display:flex;align-items:center;gap:8px;margin-bottom:8px}.cmh b{flex:1;font-size:17px;font-weight:650;text-transform:capitalize}.cmh button{min-width:42px;min-height:42px;border-radius:13px;border:1px solid var(--line);background:rgba(var(--wh),.05);color:var(--tx);font:inherit;display:grid;place-items:center}.cmh button[disabled]{opacity:.3;pointer-events:none}.cmh .cmt{font-size:12.5px;padding:0 14px;font-weight:600}
+.cmg{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}.cmw{font-size:10.5px;letter-spacing:.1em;color:var(--tx3);text-align:center;padding:4px 0;text-transform:uppercase}
+.cmd{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:4px;min-height:54px;padding:7px 2px 5px;border-radius:14px;border:1px solid transparent;background:rgba(var(--wh),.04);color:var(--tx);font:inherit;font-size:14.5px;font-weight:550;font-variant-numeric:tabular-nums}.cmd .dots{display:flex;gap:3px;min-height:6px}.cmd .dots i{width:6px;height:6px;border-radius:50%;background:var(--ec)}.cmd.out{opacity:.35}.cmd.today{border-color:rgba(var(--wh),.4)}.cmd.today .n{color:var(--acc)}.cmd.sel{background:rgba(var(--wh),.17);border-color:rgba(var(--wh),.32)}
+.cmsel{margin:16px 2px 8px;font-size:13px;color:var(--tx3)}.cmsel b{color:var(--tx);font-size:15px;font-weight:650}
 .kb.danger{background:rgba(251,113,133,.16);border-color:rgba(251,113,133,.4);color:#fda4af}.kb.good{background:rgba(52,211,153,.16);border-color:rgba(52,211,153,.4);color:#6ee7b7}
 .app.light .kb.danger{color:#be123c}.app.light .kb.good{color:#047857}
 .dg.kdg{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px}.dg.kdg .dt{min-width:0;grid-column:auto!important;padding:12px 12px}.dg.kdg .dt .v{font-size:19px;overflow-wrap:anywhere}.dg.kdg .dt.kfull{grid-column:1/-1!important}
@@ -1087,7 +1094,7 @@ const CSS4 = `
 .pzfresh{display:flex;align-items:center;gap:12px;text-align:left;width:100%;color:inherit;font:inherit;padding:14px 16px}.pzfresh>div:nth-child(2){flex:1;min-width:0}.pzfresh .t{font-size:14.5px;font-weight:600}.pzfresh .s{font-size:12.5px;color:var(--tx3);margin-top:2px}.pzfresh .pzv,.pzmore .pzv{display:grid;place-items:center;color:var(--tx3)}
 .app.light .pzr.o .ico{color:#be123c}.app.light .pzr.d .ico{color:#b45309}.app.light .pzb2{color:#047857}
 .pzpage{max-width:1100px}.pzg{display:block}.app.wide .pzpage .pzl{column-width:430px;column-gap:20px}.app.wide .pzpage .pzg{break-inside:avoid}
-.app.wide .cock .pzc{padding-top:10px;padding-bottom:6px}.app.wide .cock .pzc .pzbar{display:none}.app.wide .cock .pzc .h{margin-bottom:2px}.app.wide .cock .pzc .pzr{padding:5px 0}.app.wide .cock .pzc .pzr .ico{width:32px;height:32px}.app.wide .cock .pzc .pzb2{width:36px;height:36px}.app.wide .cock .pzc .pzmore{margin-top:3px;padding:7px 0 2px}.app.wide .pzpage .pzh{break-after:avoid}
+.app.wide .cock .pzc{padding-top:10px;padding-bottom:6px}.app.wide .cock .pzc .pzbar{margin:0 0 2px}.app.wide .cock .pzc .h{margin-bottom:4px}.app.wide .cock .pzc .pzr{padding:4px 0}.app.wide .cock .pzc .pzr .ico{width:32px;height:32px}.app.wide .cock .pzc .pzb2{width:36px;height:36px}.app.wide .cock .pzc .pzmore{margin-top:3px;padding:7px 0 2px}.app.wide .pzpage .pzh{break-after:avoid}
 .toast.tap.show{pointer-events:auto;cursor:pointer;border-color:rgba(52,211,153,.5)}
 .pzq{display:block;width:100%;box-sizing:border-box;margin:0 0 4px;padding:11px 14px;border-radius:14px;border:1px solid var(--line);background:rgba(var(--wh),.05);color:var(--tx);font:inherit;font-size:14px;outline:none}.pzq:focus{border-color:rgba(56,189,248,.55)}.pzq::placeholder{color:var(--tx3)}
 .pzh{display:flex;align-items:center;gap:10px;width:100%;box-sizing:border-box;background:none;border:0;color:inherit;font:inherit;text-align:left;padding:6px 4px;margin:16px 0 6px;cursor:pointer;min-height:36px}
@@ -1861,12 +1868,13 @@ class HomeAurora extends HTMLElement {
     if (this._calB || (this._cal && Date.now() - this._cal.t < 6e5)) return;
     this._calB = true;
     const t0 = new Date(); t0.setHours(0, 0, 0, 0);
-    const t1 = new Date(+t0 + this._c.calendarDays * 864e5), evs = [];
+    const y0 = t0.getFullYear(), mo0 = t0.getMonth(), m0 = new Date(y0, mo0, 1 - ((new Date(y0, mo0, 1).getDay() + 6) % 7)), m2 = new Date(y0, mo0 + 3, 8);
+    const t1 = new Date(Math.max(+t0 + this._c.calendarDays * 864e5, +m2)), evs = [];
     const old = this._cal?.evs || []; let fails = 0;
     await Promise.all(this._c.calendars.map(async c => {
       if (!this._s(c[0]) || this._s(c[0]).state === 'unavailable') { fails++; evs.push(...old.filter(x => x.cal === c[0])); return; }
       try {
-        const r = await this._h.callApi('GET', `calendars/${c[0]}?start=${encodeURIComponent(t0.toISOString())}&end=${encodeURIComponent(t1.toISOString())}`);
+        const r = await this._h.callApi('GET', `calendars/${c[0]}?start=${encodeURIComponent(m0.toISOString())}&end=${encodeURIComponent(t1.toISOString())}`);
         for (const ev of r || []) {
           const allDay = !!(ev.start && ev.start.date), s = new Date(allDay ? ev.start.date + 'T00:00:00' : ev.start.dateTime);
           if (isNaN(s)) continue;
@@ -1888,7 +1896,7 @@ class HomeAurora extends HTMLElement {
       cnt[ev.cal] = (cnt[ev.cal] || 0) + 1;
       if (this._calOff.has(ev.cal)) continue;
       if (ev.allDay) { for (const d = new Date(Math.max(+ev.s, +t0)); d < ev.e && +d < horizon; d.setDate(d.getDate() + 1)) list.push({ ...ev, dk: +d, day: new Date(d) }); }
-      else if (ev.e >= now) { const d = new Date(ev.s); d.setHours(0, 0, 0, 0); list.push({ ...ev, dk: Math.max(+d, +t0), day: new Date(Math.max(+d, +t0)) }); }
+      else if (ev.e >= now && +ev.s < horizon) { const d = new Date(ev.s); d.setHours(0, 0, 0, 0); list.push({ ...ev, dk: Math.max(+d, +t0), day: new Date(Math.max(+d, +t0)) }); }
     }
     list.sort((a, b) => a.dk - b.dk || (b.allDay - a.allDay) || a.s - b.s);
     return { list, cnt, t0 };
@@ -1906,22 +1914,55 @@ class HomeAurora extends HTMLElement {
     }
     return html;
   }
-  _calCard(i) {
+  _calMap() {
+    const M = new Map(); if (!this._cal) return M;
+    for (const ev of this._cal.evs) {
+      if (this._calOff.has(ev.cal)) continue;
+      const d = new Date(ev.s); d.setHours(0, 0, 0, 0);
+      const end = ev.allDay ? +ev.e : (ev.e > ev.s ? +ev.e - 1 : +ev.s);
+      for (let n = 0; n < 70 && (ev.allDay ? +d < end : +d <= end); n++, d.setDate(d.getDate() + 1)) { const k = +d; if (!M.has(k)) M.set(k, []); M.get(k).push(ev); }
+    }
+    for (const a of M.values()) a.sort((x, y) => (y.allDay - x.allDay) || x.s - y.s);
+    return M;
+  }
+  _calCard(i, n) {
     if (!this._c.calendars.some(c => this._s(c[0]))) return '';
+    const open = `data-act="cal"`;
     if (!this._cal) return `<div class="c" style="--i:${i}"><div class="h">${ic('cal', 14)}Termine</div><div class="sk" style="height:140px"></div></div>`;
-    const { list, t0 } = this._calList(), shown = list.slice(0, 5);
-    return `<div class="c" style="--i:${i}"><div class="h">${ic('cal', 14)}Termine<span class="r">nächste ${this._c.calendarDays} Tage</span></div>
-      ${shown.length ? this._calGroups(shown, t0) : `<div class="empty">🗓️ Keine Termine in den nächsten ${this._c.calendarDays} Tagen</div>`}
-      <button class="qb" style="margin-top:8px" data-act="cal">${ic('cal', 14)}Alle Termine${list.length > 5 ? ' (' + list.length + ')' : ''}</button></div>`;
+    const { list, t0 } = this._calList(), W = this._waste(), skipW = !!(W && W.length);
+    const L = list.filter(ev => !(skipW && /müll|muell|abfall/i.test(ev.cal + ' ' + ev.calName))), lim = n || 4, shown = L.slice(0, lim), more = L.length - shown.length;
+    let body = '', last = null;
+    for (const ev of shown) {
+      if (ev.dk !== last) {
+        last = ev.dk; const diff = Math.round((ev.dk - +t0) / 864e5);
+        body += `<div class="ccd"><b>${diff === 0 ? 'Heute' : diff === 1 ? 'Morgen' : ev.day.toLocaleDateString('de-DE', { weekday: 'long' })}</b>${ev.day.toLocaleDateString('de-DE', { weekday: 'short', day: 'numeric', month: 'short' })}</div>`;
+      }
+      body += `<div class="cc2" style="--ec:${ev.col}"><i></i><div class="t">${esc(ev.title)}</div><div class="w">${ev.allDay ? esc(ev.calName) : hhmm(ev.s)}</div></div>`;
+    }
+    if (!shown.length) body = `<div class="empty">🗓️ Keine Termine in den nächsten ${this._c.calendarDays} Tagen</div>`;
+    return `<div class="c calc tap" style="--i:${i}" ${open}><div class="h">${ic('cal', 14)}Termine<span class="r">Kalender${ic('chevron', 13)}</span></div>${body}${more > 0 ? `<div class="ccm">+ ${more} weitere</div>` : ''}</div>`;
   }
   _sCal() {
-    let body = '<div class="sk" style="height:200px"></div>';
-    if (this._cal) {
-      const { list, cnt, t0 } = this._calList();
-      const chips = this._c.calendars.filter(c => cnt[c[0]]).map(c => `<button class="${this._calOff.has(c[0]) ? '' : 'on'}" style="--ec:${c[2]}" data-act="calf" data-e="${c[0]}"><i></i>${esc(c[1])}</button>`).join('');
-      body = (chips ? `<div class="calf">${chips}</div>` : '') + (list.length ? this._calGroups(list, t0) : `<div class="empty">🗓️ Keine Termine</div>`);
+    const head = `<div class="grab"></div><div class="sh"><div class="ico">${ic('cal', 24)}</div><div><h2>Kalender</h2><p>${this._calMode === 'list' ? `nächste ${this._c.calendarDays} Tage` : 'Monatsansicht'}</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>`;
+    if (!this._cal) return head + '<div class="sk" style="height:220px"></div>';
+    const mode = this._calMode === 'list' ? 'list' : 'month';
+    const tabs = `<div class="cal2tabs"><button class="${mode === 'month' ? 'on' : ''}" data-act="calmode" data-m="month">${ic('cal', 14)}Monat</button><button class="${mode === 'list' ? 'on' : ''}" data-act="calmode" data-m="list">${ic('list', 14)}Liste</button></div>`;
+    const { list, cnt, t0 } = this._calList();
+    const chips = this._c.calendars.filter(c => cnt[c[0]]).map(c => `<button class="${this._calOff.has(c[0]) ? '' : 'on'}" style="--ec:${c[2]}" data-act="calf" data-e="${c[0]}"><i></i>${esc(c[1])}</button>`).join('');
+    const chipsH = chips ? `<div class="calf">${chips}</div>` : '';
+    if (mode === 'list') return head + tabs + chipsH + (list.length ? this._calGroups(list, t0) : `<div class="empty">🗓️ Keine Termine</div>`);
+    const mo = Math.max(0, Math.min(2, this._calMo || 0)), first = new Date(t0.getFullYear(), t0.getMonth() + mo, 1);
+    const lead = (first.getDay() + 6) % 7, nd = new Date(first.getFullYear(), first.getMonth() + 1, 0).getDate(), weeks = Math.ceil((lead + nd) / 7);
+    const M = this._calMap(), sel = this._calSel != null ? this._calSel : +t0;
+    let cells = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'].map(d => `<div class="cmw">${d}</div>`).join('');
+    for (let k = 0; k < weeks * 7; k++) {
+      const d = new Date(first.getFullYear(), first.getMonth(), 1 - lead + k), key = +d, evs = M.get(key) || [], cols = [...new Set(evs.map(e => e.col))].slice(0, 3);
+      cells += `<button class="cmd${d.getMonth() !== first.getMonth() ? ' out' : ''}${key === +t0 ? ' today' : ''}${key === sel ? ' sel' : ''}" data-act="calday" data-d="${key}" aria-label="${d.toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long' })}"><span class="n">${d.getDate()}</span><span class="dots">${cols.map(c => `<i style="--ec:${c}"></i>`).join('')}</span></button>`;
     }
-    return `<div class="grab"></div><div class="sh"><div class="ico">${ic('cal', 24)}</div><div><h2>Termine</h2><p>nächste ${this._c.calendarDays} Tage</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>${body}`;
+    const sd = new Date(sel), sev = M.get(sel) || [], diff = Math.round((sel - +t0) / 864e5);
+    const rows = sev.map(ev => `<div class="ev" style="--ec:${ev.col}"><i></i><div style="min-width:0"><div class="t">${esc(ev.title)}</div><div class="s">${esc(ev.calName)}${ev.loc ? ' · ' + esc(ev.loc) : ''}</div></div><div class="tm">${ev.allDay ? 'Ganztägig' : `${hhmm(ev.s)}<br><span style="color:var(--tx3)">${hhmm(ev.e)}</span>`}</div></div>`).join('');
+    const nav = `<div class="cmh"><button data-act="calmo" data-n="-1" ${mo === 0 ? 'disabled' : ''} aria-label="Vorheriger Monat">${ic('chevron', 18).replace('<svg', '<svg style="transform:rotate(180deg)"')}</button><b>${first.toLocaleDateString('de-DE', { month: 'long', year: 'numeric' })}</b><button class="cmt" data-act="calmo" data-n="0">Heute</button><button data-act="calmo" data-n="1" ${mo === 2 ? 'disabled' : ''} aria-label="Nächster Monat">${ic('chevron', 18)}</button></div>`;
+    return head + tabs + nav + `<div class="cmg">${cells}</div><div class="cmsel"><b>${diff === 0 ? 'Heute' : diff === 1 ? 'Morgen' : sd.toLocaleDateString('de-DE', { weekday: 'long' })}</b> · ${sd.toLocaleDateString('de-DE', { day: 'numeric', month: 'long' })}</div>${rows || `<div class="empty">Keine Termine</div>`}${chipsH ? `<div style="margin-top:14px">${chipsH}</div>` : ''}`;
   }
 
   /* ───────────── Pflanze, Batterien, Fenster ───────────── */
@@ -3381,8 +3422,11 @@ class HomeAurora extends HTMLElement {
       case 'pdel': this._pin = (this._pin || '').slice(0, -1); this._renderSheet(); break;
       case 'warn': this._sheet = { t: 'warn', k: el.dataset.k, i: +el.dataset.i, from: el.dataset.from ?? (this._sheet?.t === 'radar' ? 'radar' : '') }; this._renderSheet(); break;
       case 'mp': h.callService('media_player', el.dataset.s, { entity_id: e }); break;
-      case 'calf': this._calOff.has(e) ? this._calOff.delete(e) : this._calOff.add(e); this._render(); break;
-      case 'cal': this._sheet = { t: 'cal' }; this._renderSheet(); if (!this._cal) this._loadCal(); break;
+      case 'calf': this._calOff.has(e) ? this._calOff.delete(e) : this._calOff.add(e); if (this._sheet && this._sheet.t === 'cal') this._renderSheet(); else this._render(); break;
+      case 'cal': this._calMode = 'month'; this._calMo = 0; this._calSel = null; this._sheet = { t: 'cal' }; this._renderSheet(); if (!this._cal) this._loadCal(); break;
+      case 'calmode': this._calMode = el.dataset.m === 'list' ? 'list' : 'month'; this._renderSheet(); break;
+      case 'calday': { const k = +el.dataset.d, d = new Date(k), t0 = new Date(); t0.setHours(0, 0, 0, 0); this._calSel = k; this._calMo = Math.max(0, Math.min(2, (d.getFullYear() - t0.getFullYear()) * 12 + d.getMonth() - t0.getMonth())); this._renderSheet(); break; }
+      case 'calmo': { const n = +el.dataset.n, t0 = new Date(); t0.setHours(0, 0, 0, 0); this._calMo = n === 0 ? 0 : Math.max(0, Math.min(2, (this._calMo || 0) + n)); this._calSel = n === 0 ? +t0 : null; if (n !== 0) { const f = new Date(t0.getFullYear(), t0.getMonth() + this._calMo, 1); this._calSel = this._calMo === 0 ? +t0 : +f; } this._renderSheet(); break; }
       case 'wxmode': this._wxMode = el.dataset.m; this._enter = true; this._counted = false; this._render(); break;
       case 'pcmd': h.callService(el.dataset.d, el.dataset.s, { entity_id: e }); this._toast(el.dataset.msg || 'Gesendet'); break;
       case 'plant': {
