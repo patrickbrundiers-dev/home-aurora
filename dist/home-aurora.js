@@ -29,7 +29,7 @@ const DEFAULTS = {
     batteryPct: ['sensor.hp2550a_pro_v1_9_3_wh57_battery'], batteryBin: ['binary_sensor.hp2550a_pro_v1_9_3_wh65_battery', 'binary_sensor.hp2550a_pro_v1_9_3_wh25_battery', 'binary_sensor.hp2550a_pro_v1_9_3_battery_2'],
   },
   kidScript: 'script.kinderhandy_aktion',
-  kidphones: [{ name: 'Leonie', title: 'Leonies Handy', lock: 'switch.redmi', b15: 'button.redmi_15min', b30: 'button.redmi_30min', b60: 'button.redmi_60min', reset: 'button.redmi_reset_bonus', ring: 'button.redmi_ring', used: 'sensor.redmi_daily_screen_time', bonus: 'sensor.redmi_active_bonus', next: 'sensor.redmi_next_restriction', limit: 'sensor.redmi_daily_limit', bed: 'binary_sensor.redmi_bedtime_active', school: 'binary_sensor.redmi_school_time_active', reached: 'binary_sensor.redmi_daily_limit_reached' }],
+  kidphones: [{ name: 'Leonie', title: 'Leonies Handy', lock: 'switch.redmi', b15: 'button.redmi_15min', b30: 'button.redmi_30min', b60: 'button.redmi_60min', reset: 'button.redmi_reset_bonus', ring: 'button.redmi_ring', used: 'sensor.redmi_daily_screen_time', bonus: 'sensor.redmi_active_bonus', next: 'sensor.redmi_next_restriction', limit: 'sensor.redmi_daily_limit', bed: 'binary_sensor.redmi_bedtime_active', school: 'binary_sensor.redmi_school_time_active', reached: 'binary_sensor.redmi_daily_limit_reached', schoolFree: 'input_boolean.leonie_schule_heute_frei', schoolWin: 'input_text.leonie_schulzeit_original_heute' }],
   unlock: { entity: 'input_boolean.tablet_entsperrt', pin: 'input_text.tablet_pin', code: '' },
   alerts: { now: 'sensor.stadt_delbruck_aktuelle_warnstufe', pre: 'sensor.stadt_delbruck_vorwarnstufe', washer: { name: 'Waschmaschine', state: 'sensor.waschmaschine_zustand', pct: 'sensor.waschmaschine_fortschritt', left: 'sensor.waschmaschine_verbleibende_zeit', unload: 'button.badezimmer_waschmaschine_als_entladen_markieren' } },
   calendars: [
@@ -1062,6 +1062,7 @@ const CSS4 = `
 .kb{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-height:74px;padding:12px 10px;border-radius:20px;border:1px solid var(--line);background:rgba(var(--wh),.07);color:var(--tx);font:inherit;text-align:center;cursor:pointer;transition:.2s}
 .kb b{font-size:15px;font-weight:650}.kb small{font-size:11.5px;color:var(--tx3);font-weight:500}.kb:active{transform:scale(.97)}.kb[disabled]{opacity:.45;pointer-events:none}
 .kgrid.k1 .kb{flex-direction:row;gap:12px;min-height:64px;justify-content:center}.kgrid.k1 .kb small{display:none}
+.ksc{display:flex;align-items:center;gap:12px;margin:8px 0 2px;padding:12px 14px;border-radius:18px;border:1px solid var(--line);background:rgba(var(--wh),.06)}.ksc b{display:block;font-size:15px;font-weight:650}.ksc span{display:block;font-size:12.5px;color:var(--tx3);margin-top:1px}.ksi{width:40px;height:40px;border-radius:14px;display:grid;place-items:center;flex:none;background:rgba(var(--wh),.08)}.ksc.live .ksi{background:rgba(52,211,153,.18);color:#6ee7b7}.ksc.hot .ksi{background:rgba(251,113,133,.18);color:#fda4af}.ksc.warn .ksi{background:rgba(251,191,36,.18);color:#fbbf24}.app.light .ksc.live .ksi{color:#047857}.app.light .ksc.hot .ksi{color:#be123c}.app.light .ksc.warn .ksi{color:#b45309}
 .kb.danger{background:rgba(251,113,133,.16);border-color:rgba(251,113,133,.4);color:#fda4af}.kb.good{background:rgba(52,211,153,.16);border-color:rgba(52,211,153,.4);color:#6ee7b7}
 .app.light .kb.danger{color:#be123c}.app.light .kb.good{color:#047857}
 .dg.kdg{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px}.dg.kdg .dt{min-width:0;grid-column:auto!important;padding:12px 12px}.dg.kdg .dt .v{font-size:19px;overflow-wrap:anywhere}.dg.kdg .dt.kfull{grid-column:1/-1!important}
@@ -2888,16 +2889,34 @@ class HomeAurora extends HTMLElement {
     if (a.next_scheduled_start) { const t = a.next_scheduled_type === 'bedtime' ? 'Schlafenszeit' : a.next_scheduled_type === 'school_time' ? 'Schulzeit' : 'Sperre'; return `${t} ${day(a.next_scheduled_start)} ${hm(a.next_scheduled_start)}`; }
     return '';
   }
+  _kidSchool(k) {
+    const a = this._s(k.school)?.attributes || {}, now = new Date(), pad = n => String(n).padStart(2, '0');
+    const today = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`, hm = n => `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+    const cur = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+    const win = String(k.schoolWin && this._val(k.schoolWin) || ''), o = win.startsWith(today) ? win.split('|') : null;
+    const flag = !!k.schoolFree && this._val(k.schoolFree) === 'on';
+    const has = !!(k.schoolFree && k.schoolWin && this._s(k.schoolFree) && this._s(k.schoolWin));
+    let s0 = a.schooltime_start && String(a.schooltime_start).startsWith(today) ? String(a.schooltime_start).slice(11, 16) : '', e0 = s0 && a.schooltime_end ? String(a.schooltime_end).slice(11, 16) : '';
+    const os = o && o.length === 3 ? o[1] : '', oe = o && o.length === 3 ? o[2] : '';
+    const ws = os || s0, we = oe || e0, mod = !!o;
+    let st = 'none', title = 'Heute keine Schulzeit', sub = 'Wochenende, Ferien oder kein Plan für heute', ico = 'sun', tone = 'dim';
+    if (mod && flag) { st = 'free'; title = 'Heute schulfrei'; sub = ws ? `Geplant war ${ws}–${we} Uhr · aufgehoben` : 'Schulzeit aufgehoben'; ico = 'sun'; tone = 'live'; }
+    else if (mod) { st = 'ended'; title = 'Schule vorzeitig beendet'; sub = ws ? `Geplant war ${ws}–${we} Uhr` : ''; ico = 'check'; tone = 'live'; }
+    else if (ws && cur < ws) { st = 'soon'; title = `Schule ab ${ws} Uhr`; sub = `bis ${we} Uhr`; ico = 'backpack'; tone = 'warn'; }
+    else if (ws && cur < we) { st = 'run'; title = 'Schulzeit läuft'; sub = `${ws}–${we} Uhr`; ico = 'backpack'; tone = 'hot'; }
+    else if (ws) { st = 'done'; title = 'Schule vorbei'; sub = `${ws}–${we} Uhr`; ico = 'check'; tone = 'dim'; }
+    return { has, st, title, sub, ico, tone, mod, ws, we };
+  }
   _kidRows() {
     return this._kids().map((k, i) => {
-      const I = this._kidInfo(k), u = I.used != null ? ` · ${Math.round(I.used)} Min. heute` : '';
+      const I = this._kidInfo(k), SC = this._kidSchool(k), u = (I.used != null ? ` · ${Math.round(I.used)} Min. heute` : '') + (SC.has && SC.st === 'free' ? ' · schulfrei' : '');
       return `<button class="xr kid" data-act="kid" data-i="${i}"><div class="ico">${ic('phone', 19)}</div><div><div class="t">${esc(k.title || (k.name + 's Handy'))}</div><div class="s">${I.usable ? 'Nutzbar' : esc(I.reason)}${I.usable && I.bonus > 0 ? ' · Bonus' : ''}${u}</div></div><span class="kdot ${I.off ? 'off' : I.usable ? 'ok' : 'lk'}"></span></button>`;
     });
   }
   _sKid() {
     const i = this._sheet.i || 0, k = this._kids()[i];
     if (!k) return `<div class="grab"></div><div class="sh"><div class="ico">${ic('phone', 24)}</div><div><h2>Handy</h2><p>Nicht verfügbar</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div><div class="empty">Das Gerät wurde in Home Assistant nicht gefunden. Ist die Family-Link-Integration geladen?</div>`;
-    const I = this._kidInfo(k), ttl = k.title || (k.name + 's Handy'), nxt = this._kidNext(k), busy = !!this._kidBusy, ok = Date.now() < (this._kidUntil || 0) && this._kidPin;
+    const I = this._kidInfo(k), ttl = k.title || (k.name + 's Handy'), nxt = this._kidNext(k), busy = !!this._kidBusy, SC = this._kidSchool(k), ok = Date.now() < (this._kidUntil || 0) && this._kidPin;
     const tiles = `<div class="dg kdg">${this._tile(I.used != null ? Math.round(I.used) + ' Min.' : '–', 'Heute genutzt', 'clock')}${this._tile(I.bonus > 0 ? Math.round(I.bonus) + ' Min.' : 'Kein', 'Bonuszeit', 'plus')}${this._tile(I.limit ? I.limit + ' Min.' : 'Kein Limit', 'Tageslimit', 'gauge')}${this._tile(nxt ? esc(nxt) : '–', 'Nächste Sperre', 'bed').replace('class="dt"', 'class="dt kfull"')}</div>`;
     const b = (a, cls, ico, txt, sub) => `<button class="kb ${cls || ''}" data-act="kact" data-i="${i}" data-a="${a}" ${busy ? 'disabled' : ''}>${ic(ico, 22)}<b>${txt}</b>${sub ? `<small>${sub}</small>` : ''}</button>`;
     return `<div class="grab"></div><div class="sh"><div class="ico">${ic('phone', 24)}</div><div><h2>${esc(ttl)}</h2><p>${I.off ? 'Keine Verbindung' : I.usable ? 'Nutzbar' : esc(I.reason)}${nxt && !I.off ? ' · ' + esc(nxt) : ''}</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
@@ -2905,10 +2924,11 @@ class HomeAurora extends HTMLElement {
       ${tiles}
       <div class="lab2">${ic(ok ? 'unlock' : 'lock', 13)} STEUERUNG · ${ok ? 'PIN akzeptiert' : 'nur mit PIN'}</div>
       <div class="kgrid k1">${I.usable ? b('sperren', 'danger', 'lock', 'Handy sperren', 'sofort, bis du es freigibst') : b('entsperren', 'good', 'unlock', 'Handy entsperren', 'hebt die Sperre auf')}</div>
+      ${SC.has ? `<div class="lab2">${ic('backpack', 13)} SCHULZEIT HEUTE</div><div class="ksc ${SC.tone}"><div class="ksi">${ic(SC.ico, 22)}</div><div><b>${esc(SC.title)}</b><span>${esc(SC.sub)}</span></div></div><div class="kgrid k2">${SC.mod ? b('schule_normal', '', 'refresh', 'Wie geplant', 'Schulzeit wiederherstellen') : ''}${!SC.mod && (SC.st === 'soon' || SC.st === 'run') ? b('schule_frei', '', 'sun', 'Heute schulfrei', 'nur heute, Plan bleibt') : ''}${!SC.mod && SC.st === 'run' ? b('schule_aus', '', 'check', 'Schule jetzt aus', 'Schulzeit sofort beenden') : ''}</div>` : ''}
       <div class="lab2">${ic('plus', 13)} BONUSZEIT GEBEN</div>
       <div class="kgrid k3">${b('bonus15', '', 'plus', '+15', 'Minuten')}${b('bonus30', '', 'plus', '+30', 'Minuten')}${b('bonus60', '', 'plus', '+60', 'Minuten')}</div>
       <div class="kgrid k2">${I.bonus > 0 ? b('bonus_reset', '', 'refresh', 'Bonus zurücksetzen', Math.round(I.bonus) + ' Min. aktiv') : ''}<button class="kb" data-act="kact" data-i="${i}" data-a="ring">${ic('bell', 22)}<b>Handy klingeln</b><small>zum Wiederfinden · ohne PIN</small></button></div>
-      <div class="card-note">Sperren und Bonuszeit funktionieren nur mit PIN. Ein Skript in Home Assistant prüft die PIN zusätzlich. Die PIN gilt danach 90 Sekunden. Ein aktiver Bonus hebt Schlafenszeit, Schulzeit und Tageslimit auf, aber nicht eine manuelle Sperre.</div>`;
+      <div class="card-note">Sperren, Bonuszeit und Schulzeit funktionieren nur mit PIN. Schulzeit ändert nur den heutigen Tag, der Wochenplan bleibt. An Ferien und Feiertagen setzt Home Assistant die Schulzeit automatisch auf frei. Ein Skript in Home Assistant prüft die PIN zusätzlich. Die PIN gilt danach 90 Sekunden. Ein aktiver Bonus hebt Schlafenszeit, Schulzeit und Tageslimit auf, aber nicht eine manuelle Sperre.</div>`;
   }
   _kidAct(i, a) {
     const k = this._kids()[i]; if (!k || this._kidBusy) return;
@@ -2917,7 +2937,7 @@ class HomeAurora extends HTMLElement {
     this._kidPend = { i, a }; this._pin = ''; this._pinBad = 0; this._sheet = { t: 'pin', kid: true, i }; this._renderSheet();
   }
   _kidRun(i, a) {
-    const MSG = { sperren: 'Handy gesperrt 🔒', entsperren: 'Handy entsperrt 🔓', bonus15: '+15 Min. Bonus gegeben', bonus30: '+30 Min. Bonus gegeben', bonus60: '+60 Min. Bonus gegeben', bonus_reset: 'Bonus zurückgesetzt' };
+    const MSG = { sperren: 'Handy gesperrt 🔒', entsperren: 'Handy entsperrt 🔓', bonus15: '+15 Min. Bonus gegeben', bonus30: '+30 Min. Bonus gegeben', bonus60: '+60 Min. Bonus gegeben', bonus_reset: 'Bonus zurückgesetzt', schule_frei: 'Heute schulfrei ☀️', schule_aus: 'Schule beendet ✓', schule_normal: 'Schulzeit wie geplant' };
     const sv = String(this._c.kidScript || 'script.kinderhandy_aktion').replace(/^script\./, '');
     this._kidBusy = a; if (this._sheet?.t === 'kid') this._renderSheet();
     let p; try { p = this._h.callService('script', sv, { aktion: a, pin: this._kidPin }); } catch (e) { p = Promise.reject(e); }
@@ -2928,7 +2948,7 @@ class HomeAurora extends HTMLElement {
     }).finally(() => { this._kidBusy = null; if (this._sheet?.t === 'kid') this._renderSheet(); });
   }
   _kidActTxt() {
-    const a = this._kidPend?.a, T = { sperren: 'das Sperren', entsperren: 'das Entsperren', bonus15: '+15 Min. Bonus', bonus30: '+30 Min. Bonus', bonus60: '+60 Min. Bonus', bonus_reset: 'das Zurücksetzen des Bonus' };
+    const a = this._kidPend?.a, T = { sperren: 'das Sperren', entsperren: 'das Entsperren', bonus15: '+15 Min. Bonus', bonus30: '+30 Min. Bonus', bonus60: '+60 Min. Bonus', bonus_reset: 'das Zurücksetzen des Bonus', schule_frei: 'Heute schulfrei', schule_aus: 'Schule jetzt aus', schule_normal: 'Schulzeit wie geplant' };
     return T[a] || 'Leonies Handy';
   }
   _kidPinOk(pin) {
