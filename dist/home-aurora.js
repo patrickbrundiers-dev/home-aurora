@@ -10,6 +10,7 @@ const DEFAULTS = {
   persons: ['person.home_sweet_home', 'person.jenny', 'person.leonie'],
   weather: 'weather.forecast_home',
   weatherCompact: 'weather.lippstadt_boekenfoer',
+  trend: 'sensor.kachelmannwetter_14_tage_trend',
   outdoor: { temp: 'sensor.hp2550a_pro_v1_9_3_outdoor_temperature', hum: 'sensor.hp2550a_pro_v1_9_3_humidity', wind: 'sensor.hp2550a_pro_v1_9_3_wind_speed', rain: 'sensor.hp2550a_pro_v1_9_3_rain_rate' },
   sun: 'sun.sun',
   radar: 'camera.precipitation',
@@ -1130,6 +1131,14 @@ const CSS4 = `
 .wxdt{width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,.75);flex:none}.wxdt.t{background:#fb7185}.wxdt.r{background:#38bdf8}
 .wxti{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:10.5px;color:#b8c4e6;text-align:center;max-width:66px}
 .wxt.nar{padding:8px 10px;font-size:11px}.wxt.nar .wxti{display:none}.wxt.nar .wxtr{line-height:1.45}
+.trc{position:relative;margin-top:6px}.trs0{display:block;overflow:visible}.tri{position:absolute;transform:translateX(-50%);pointer-events:none;line-height:0}.tri .wx *{animation:none!important}
+.trs0 .gl{stroke:rgba(var(--wh),.08);stroke-width:1}.trs0 .trwe{fill:rgba(var(--wh),.05)}.trs0 .trsel{fill:rgba(var(--wh),.1)}.trs0 .trax{fill:var(--tx3);font-size:9px;opacity:.7}
+.trs0 .trb.h{fill:rgba(251,113,133,.2)}.trs0 .trb.l{fill:rgba(96,165,250,.22)}.trs0 .trl{fill:none;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}.trs0 .trl.h{stroke:#fb7185}.trs0 .trl.l{stroke:#60a5fa}
+.trs0 .trp rect{fill:rgba(10,15,40,.62)}.trs0 .trp text{font-size:10.5px;font-weight:700;font-variant-numeric:tabular-nums}
+.trs0 .trs{fill:#facc15}.trs0 .trr{fill:#38bdf8}.trs0 .trm{fill:#7dd3fc;font-size:9.5px;font-weight:600}.trs0 .trdt{fill:var(--tx3);font-size:10px}.trs0 .trwd{fill:var(--tx);font-size:11.5px;font-weight:650}.trs0 .trhit{fill:transparent;cursor:pointer}
+.trdet{margin-top:10px;padding:10px 12px;border-radius:14px;background:rgba(var(--wh),.06);font-size:12.5px}.trdet>b{display:block;margin-bottom:6px}.trg{display:grid;align-items:center;grid-template-columns:auto 1fr;gap:3px 12px}.trg>span{display:flex;align-items:center;gap:7px;color:var(--tx2)}.trg>b{text-align:right;font-weight:650;font-variant-numeric:tabular-nums}.trg small{font-weight:500;color:var(--tx3)}
+.trdot{width:9px;height:9px;border-radius:50%;flex:none;background:#fff}.trdot.h{background:#fb7185}.trdot.l{background:#60a5fa}.trdot.r{background:#38bdf8}.trdot.r2{background:#7dd3fc}.trdot.s{background:#facc15}
+.trlg{display:inline-block;width:16px;height:3px;border-radius:2px;vertical-align:middle;margin:0 5px 2px 0}.trlg.h{background:#fb7185}.trlg.l{background:#60a5fa;margin-left:8px}
 `;
 const CSS2 = `
 
@@ -1759,7 +1768,7 @@ class HomeAurora extends HTMLElement {
           <div class="srow" style="margin-top:8px"><span>${up ? 'Noch <b>' + lh + ' h ' + lm + ' min</b> Tageslicht' : 'Sonne in <b>' + lh + ' h ' + lm + ' min</b>'}</span></div>
           <div class="moon">${this._moonSvg(mo.p)}<div><b>${mo.name}</b>${Math.round(mo.ill * 100)} % beleuchtet</div></div></div>
         <div class="c s12 wxcard" style="--i:2">${this._wxCard() || `<div class="h">${ic('thermo', 14)}Die nächsten 24 Stunden<span class="r">Temperatur &amp; Regenwahrscheinlichkeit</span></div>${this._meteo()}`}</div>
-        <div class="c s7" style="--i:3"><div class="h">${ic('cloudsun', 14)}Die nächsten Tage</div>${days || '<div class="sk" style="height:200px"></div>'}</div>
+        <div class="c s7 trcard" style="--i:3">${this._trCard() || `<div class="h">${ic('cloudsun', 14)}Die nächsten Tage</div>${days || '<div class="sk" style="height:200px"></div>'}`}</div>
         <div class="s5 col"><div class="c" style="--i:4"><div class="h">${ic('wind', 14)}Wind</div>${this._compass(w)}</div>
           <div class="c" style="--i:5"><div class="h">${ic('drop', 14)}Details</div><div class="dg">${tile(de(w.hum, 0) + '<small class="u">%</small>', 'Luftfeuchte', 'drop')}${tile(de(dew, 1) + '<small class="u">°</small>', 'Taupunkt', 'thermo')}${tile(w.press ? de(w.press, 0) + '<small class="u">hPa</small>' : '–', 'Luftdruck', 'radar')}${tile(uv != null ? de(uv, 0) : '–', 'UV-Index', 'sun')}${tile(wa.cloud_coverage != null ? de(wa.cloud_coverage, 0) + '<small class="u">%</small>' : (sol != null ? de(sol, 0) + '<small class="u">W/m²</small>' : '–'), wa.cloud_coverage != null ? 'Bewölkung' : 'Sonnenstrahlung', 'cloudsun')}${tile(de(dayRain ?? w.rain ?? 0, 1) + '<small class="u">mm</small>', 'Regen heute', 'rain')}${tile(gm != null ? de(gm, 0) + '<small class="u">' + esc(w.windU) + '</small>' : '–', 'Stärkste Böe heute', 'wind')}${tile(sol != null ? de(sol, 0) + '<small class="u">W/m²</small>' : '–', 'Sonnenstrahlung', 'sun')}${tile(strikes != null ? de(strikes, 0) : '–', okv(lastStrike) ? 'Blitze · zuletzt ' + this._rel(lastStrike) + (sDist != null ? ' (' + de(sDist, 0) + ' km)' : '') : 'Blitze', 'bolt')}</div></div></div>
         <div class="c s6" style="--i:6"><div class="h">${ic('thermo', 14)}Temperatur &amp; Luftfeuchte draußen<span class="r">24 h</span></div>${this._trend({ id: 'out', temp: c.outdoor.temp, hum: c.outdoor.hum }, '#fb923c', { bare: true })}</div>
@@ -2412,7 +2421,7 @@ class HomeAurora extends HTMLElement {
   _sSet() {
     const th = this._themePref || this._c.theme || 'dark', am = String(this._ambMin());
     const seg = (act, cur, items) => `<div class="seg wide">${items.map(x => `<button class="${cur === x[0] ? 'on' : ''}" data-act="${act}" data-m="${x[0]}">${x[1]}</button>`).join('')}</div>`;
-    return `<div class="grab"></div><div class="sh"><div class="ico">${ic('cog', 24)}</div><div><h2>Darstellung &amp; Modi</h2><p>Home Aurora v5.2 · Build pz6</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
+    return `<div class="grab"></div><div class="sh"><div class="ico">${ic('cog', 24)}</div><div><h2>Darstellung &amp; Modi</h2><p>Home Aurora v5.2 · Build pz7</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
       <div class="lab2">DESIGN</div>${seg('theme', th, [['dark', 'Dunkel'], ['light', 'Hell'], ['auto', 'Automatisch']])}
       <div class="card-note">„Automatisch“ folgt dem Dunkel-/Hellmodus deines Home-Assistant-Profils. Die Auswahl gilt nur für dieses Gerät.</div>
       ${WALL_UI ? `      <div class="lab2">WANDTABLET-MODUS</div>
@@ -3493,6 +3502,61 @@ class HomeAurora extends HTMLElement {
     const Q = this._wxG, c = this.shadowRoot && this.shadowRoot.querySelector('.wxc'); if (!Q || !c || !this._wxSelT) return;
     const i = Q.hr.findIndex(d => d.ts === this._wxSelT); if (i >= 0) this._wxCur(c, i);
   }
+  /* ───────────── v14: 14-Tage-Trend (Kachelmann) – Linien für Höchst-/Tiefstwert, Flächen für die Bandbreite ───────────── */
+  _trDays() {
+    const e = this._c.trend, a = e && this._s(e) ? this._s(e).attributes : null, d = a && Array.isArray(a.days) ? a.days : null;
+    if (!d || d.length < 3) return null;
+    const CW = { clear: 'sunny', scattered: 'partlycloudy', broken: 'cloudy', overcast: 'cloudy' };
+    return d.slice(0, 14).map(x => {
+      const dt = new Date(x.date + 'T12:00:00');
+      let cond = x.condition;
+      if (!cond) cond = (x.precipitation_type && (x.precipitation || 0) >= 1) ? 'rainy' : (CW[x.cloud_word] || 'cloudy');
+      return { ...x, dt, cond, hi: x.temp_max, lo: x.temp_min, hh: x.temp_max_high ?? x.temp_max, hl: x.temp_max_low ?? x.temp_max, lh: x.temp_min_high ?? x.temp_min, ll: x.temp_min_low ?? x.temp_min };
+    });
+  }
+  _trCard() {
+    const D = this._trDays(); if (!D) return null;
+    const n = D.length, bw = (this._main && this._main.getBoundingClientRect().width) || 390, wide = bw > 700;
+    const W = Math.max(290, Math.min(900, Math.floor(wide ? (bw - 24) * 7 / 12 - 44 : bw - 62))), pl = 2, colW = (W - pl * 2) / n, X = i => pl + colW * (i + 0.5);
+    const CH = wide ? 200 : 168, yc = 52, hdr = 16, ico = 22, sunY = yc + CH + 8, rainY = sunY + 24, RH = 38, dateY = rainY + RH + 14, H = dateY + 4;
+    const vals = D.flatMap(d => [d.hh, d.hl, d.lh, d.ll, d.hi, d.lo]).filter(v => v != null);
+    const mn = Math.floor(Math.min(...vals) / 5) * 5, mx = Math.ceil(Math.max(...vals) / 5) * 5, Y = v => yc + 6 + (1 - (v - mn) / (mx - mn)) * (CH - 12);
+    let g = '';
+    const sel = Math.min(this._trI ?? 0, n - 1);
+    D.forEach((d, i) => { if (d.is_weekend) g += `<rect x="${(pl + colW * i).toFixed(1)}" y="0" width="${colW.toFixed(1)}" height="${H}" class="trwe"/>`; });
+    g += `<rect x="${(pl + colW * sel).toFixed(1)}" y="0" width="${colW.toFixed(1)}" height="${H}" class="trsel"/>`;
+    for (let v = mn; v <= mx; v += 5) g += `<line class="gl" x1="${pl}" x2="${W - pl}" y1="${Y(v).toFixed(1)}" y2="${Y(v).toFixed(1)}"/><text class="trax" x="${pl + 1}" y="${(Y(v) - 3).toFixed(1)}">${v}°</text>`;
+    const band = (up, lo) => { const u = D.map((d, i) => [X(i), Y(d[up])]), l = D.map((d, i) => [X(i), Y(d[lo])]).reverse(); return `${smooth(u)}L${l[0][0].toFixed(1)} ${l[0][1].toFixed(1)}${smooth(l).replace(/^M[^C]*/, '')}Z`; };
+    if (D.every(d => d.hh != null && d.hl != null)) g += `<path class="trb h" d="${band('hh', 'hl')}"/>`;
+    if (D.every(d => d.lh != null && d.ll != null)) g += `<path class="trb l" d="${band('lh', 'll')}"/>`;
+    const line = k => { const pts = D.map((d, i) => d[k] != null ? [X(i), Y(d[k])] : null); const run = pts.filter(Boolean); return run.length > 1 ? smooth(run) : ''; };
+    g += `<path class="trl h" d="${line('hi')}"/><path class="trl l" d="${line('lo')}"/>`;
+    const lab = (x, y, t, c) => `<g class="trp"><rect x="${(x - 11).toFixed(1)}" y="${(y - 8).toFixed(1)}" width="22" height="15" rx="7"/><text x="${x.toFixed(1)}" y="${(y + 3).toFixed(1)}" text-anchor="middle" fill="${c}">${Math.round(t)}°</text></g>`;
+    D.forEach((d, i) => { if (d.hi != null) g += lab(X(i), Y(d.hi) - 12, d.hi, '#fda4af'); if (d.lo != null) g += lab(X(i), Y(d.lo) + 14, d.lo, '#93c5fd'); });
+    /* Sonne + Regen */
+    const pm = Math.max(8, ...D.map(d => d.precipitation || 0));
+    D.forEach((d, i) => {
+      const x = pl + colW * i + 2, w = colW - 4, s = Math.max(0, Math.min(100, d.sun_hours_relative ?? 0)) / 100;
+      g += `<rect x="${x.toFixed(1)}" y="${sunY}" width="${w.toFixed(1)}" height="18" rx="5" class="trs" style="opacity:${(0.18 + s * 0.82).toFixed(2)}"/>`;
+      const p = d.precipitation || 0, pb = Math.max(p > 0.05 ? 2 : 0, p / pm * (RH - 12)), pr = (d.precipitation_probability_1mm ?? 100) / 100;
+      g += `<rect x="${x.toFixed(1)}" y="${(rainY + RH - pb).toFixed(1)}" width="${w.toFixed(1)}" height="${pb.toFixed(1)}" rx="3" class="trr" style="opacity:${(0.45 + 0.55 * pr).toFixed(2)}"/>`;
+      if (p >= 1 && colW >= 20) g += `<text class="trm" x="${X(i).toFixed(1)}" y="${(rainY + RH - pb - 3).toFixed(1)}" text-anchor="middle">${de(p, p < 10 ? 1 : 0)}</text>`;
+      g += `<text class="trdt" x="${X(i).toFixed(1)}" y="${dateY}" text-anchor="middle">${d.dt.getDate()}.</text>`;
+      g += `<text class="trwd" x="${X(i).toFixed(1)}" y="${hdr - 3}" text-anchor="middle">${d.dt.toLocaleDateString('de-DE', { weekday: 'short' }).replace('.', '')}</text>`;
+      g += `<rect class="trhit" data-act="trsel" data-i="${i}" x="${(pl + colW * i).toFixed(1)}" y="0" width="${colW.toFixed(1)}" height="${H}"/>`;
+    });
+    const icons = D.map((d, i) => `<div class="tri" style="left:${(X(i) / W * 100).toFixed(2)}%;top:${hdr + 2}px">${wx(d.cond, ico)}</div>`).join('');
+    const d = D[sel], f = (v, k = 0) => v == null ? '–' : de(v, k), rg = (a, b, k = 0) => a == null || b == null ? '' : ` <small>(${de(a, k)}–${de(b, k)})</small>`;
+    const det = `<div class="trdet"><b>${d.dt.toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long' })}</b>
+      <div class="trg"><span><i class="trdot h"></i>Höchstwert</span><b>${f(d.hi ?? (d.hl != null && d.hh != null ? (d.hl + d.hh) / 2 : null))} °C${rg(d.hl, d.hh)}</b>
+      <span><i class="trdot l"></i>Tiefstwert</span><b>${f(d.lo ?? (d.ll != null && d.lh != null ? (d.ll + d.lh) / 2 : null))} °C${rg(d.ll, d.lh)}</b>
+      <span><i class="trdot r"></i>Niederschlag</span><b>${f(d.precipitation, 1)} mm${rg(d.precipitation_low, d.precipitation_high, 1)}</b>
+      <span><i class="trdot r2"></i>Regen ≥ 1 mm</span><b>${f(d.precipitation_probability_1mm)} %</b>
+      <span><i class="trdot s"></i>Sonne</span><b>${f(d.sun_hours, 1)} h${d.sun_hours_relative != null ? ` <small>(${f(d.sun_hours_relative)} %)</small>` : ''}</b></div></div>`;
+    return `<div class="h">${ic('cloudsun', 14)}14-Tage-Trend<span class="r">Kachelmann</span></div>
+      <div class="trc" style="--trw:${W}px"><svg class="trs0" viewBox="0 0 ${W} ${H}" width="100%" style="aspect-ratio:${W}/${H}">${g}</svg>${icons}</div>${det}
+      <div class="card-note" style="margin-top:8px"><span class="trlg h"></span>Höchstwert <span class="trlg l"></span>Tiefstwert · Flächen = Bandbreite der Prognose · gelb = Sonnenanteil · blaue Balken = Regen (mm) · antippen für Details</div>`;
+  }
 
   /* ───────────── Rendern ───────────── */
   _navHtml() {
@@ -3745,6 +3809,7 @@ class HomeAurora extends HTMLElement {
       case 'calmode': this._calMode = el.dataset.m === 'list' ? 'list' : 'month'; this._renderSheet(); break;
       case 'calday': { const k = +el.dataset.d, d = new Date(k), t0 = new Date(); t0.setHours(0, 0, 0, 0); this._calSel = k; this._calMo = Math.max(0, Math.min(2, (d.getFullYear() - t0.getFullYear()) * 12 + d.getMonth() - t0.getMonth())); this._renderSheet(); break; }
       case 'calmo': { const n = +el.dataset.n, t0 = new Date(); t0.setHours(0, 0, 0, 0); this._calMo = n === 0 ? 0 : Math.max(0, Math.min(2, (this._calMo || 0) + n)); this._calSel = n === 0 ? +t0 : null; if (n !== 0) { const f = new Date(t0.getFullYear(), t0.getMonth() + this._calMo, 1); this._calSel = this._calMo === 0 ? +t0 : +f; } this._renderSheet(); break; }
+      case 'trsel': this._trI = +el.dataset.i; this._render(); break;
       case 'wxspan': this._wxSpan = +el.dataset.n; this._wxSelT = null; this._render(); break;
       case 'wxmode': this._wxMode = el.dataset.m; this._enter = true; this._counted = false; this._render(); break;
       case 'pcmd': h.callService(el.dataset.d, el.dataset.s, { entity_id: e }); this._toast(el.dataset.msg || 'Gesendet'); break;
