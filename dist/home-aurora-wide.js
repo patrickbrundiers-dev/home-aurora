@@ -1131,17 +1131,12 @@ const CSS4 = `
 .wxdt{width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,.75);flex:none}.wxdt.t{background:#fb7185}.wxdt.r{background:#38bdf8}
 .wxti{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:10.5px;color:#b8c4e6;text-align:center;max-width:66px}
 .wxt.nar{padding:8px 10px;font-size:11px}.wxt.nar .wxti{display:none}.wxt.nar .wxtr{line-height:1.45}
-.trc{position:relative;margin-top:6px}.trs0{display:block;overflow:visible}.tri{position:absolute;transform:translateX(-50%);pointer-events:none;line-height:0}.tri .wx *{animation:none!important}
-.trs0 .gl{stroke:rgba(var(--wh),.08);stroke-width:1}.trs0 .trwe{fill:rgba(var(--wh),.05)}.trs0 .trsel{fill:rgba(var(--wh),.1)}.trs0 .trax{fill:var(--tx3);font-size:9px;opacity:.7}
-.trs0 .trb.h{fill:rgba(251,113,133,.2)}.trs0 .trb.l{fill:rgba(96,165,250,.22)}.trs0 .trl{fill:none;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}.trs0 .trl.h{stroke:#fb7185}.trs0 .trl.l{stroke:#60a5fa}
-.trs0 .trp rect{fill:rgba(10,15,40,.62)}.trs0 .trp text{font-size:10.5px;font-weight:700;font-variant-numeric:tabular-nums}
-.trs0 .trs{fill:#facc15}.trs0 .trr{fill:#38bdf8}.trs0 .trm{fill:#7dd3fc;font-size:9.5px;font-weight:600}.trs0 .trdt{fill:var(--tx3);font-size:10px}.trs0 .trwd{fill:var(--tx);font-size:11.5px;font-weight:650}.trs0 .trhit{fill:transparent;cursor:pointer}
-.trdet{margin-top:10px;padding:10px 12px;border-radius:14px;background:rgba(var(--wh),.06);font-size:12.5px}.trdh{display:block;margin-bottom:6px}.trg{display:grid;gap:3px}.tri2{display:flex;align-items:center;justify-content:space-between;gap:12px}.tri2>span{display:flex;align-items:center;gap:7px;color:var(--tx2)}.tri2>b{font-weight:650;font-variant-numeric:tabular-nums;text-align:right}.tri2 small{font-weight:500;color:var(--tx3)}
-.trdet.w{display:flex;align-items:center;gap:32px;padding:12px 16px}.trdet.w .trdh{margin:0;flex:none;font-size:14px}.trdet.w .trg{display:flex;flex:1;flex-wrap:wrap;justify-content:space-between;gap:8px 24px}.trdet.w .tri2{flex-direction:column;align-items:flex-start;gap:3px}.trdet.w .tri2>b{font-size:15px;text-align:left}
-.c.aln{display:flex;flex-direction:column}.c.aln>:nth-child(2){margin:auto 0}
-.sec{grid-column:span 12;font-size:11.5px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--tx3);padding:8px 6px 0}
 .trdot{width:9px;height:9px;border-radius:50%;flex:none;background:#fff}.trdot.h{background:#fb7185}.trdot.l{background:#60a5fa}.trdot.r{background:#38bdf8}.trdot.r2{background:#7dd3fc}.trdot.s{background:#facc15}
 .trlg{display:inline-block;width:16px;height:3px;border-radius:2px;vertical-align:middle;margin:0 5px 2px 0}.trlg.h{background:#fb7185}.trlg.l{background:#60a5fa;margin-left:8px}
+.trw{position:relative;touch-action:pan-y;-webkit-user-select:none;user-select:none}.trw svg.wxs{position:absolute;left:0;overflow:visible;display:block}
+.wxs .trb.h{fill:rgba(251,113,133,.2)}.wxs .trb.l{fill:rgba(96,165,250,.22)}.wxs .trl{fill:none;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}.wxs .trl.h{stroke:#fb7185}.wxs .trl.l{stroke:#60a5fa}
+.wxs .trp rect{fill:rgba(10,15,40,.62)}.wxs .trp text{font-size:10.5px;font-weight:700;font-variant-numeric:tabular-nums}.wxs .trs{fill:#facc15}.wxs .trhit{fill:transparent;cursor:pointer}
+.wxt .wxtr{white-space:nowrap}.wxdt.b{background:#60a5fa}.wxdt.s{background:#facc15}.wxtr small{font-weight:500;color:#9fb0d8}
 `;
 const CSS2 = `
 
@@ -2421,7 +2416,7 @@ class HomeAurora extends HTMLElement {
   _sSet() {
     const th = this._themePref || this._c.theme || 'dark', am = String(this._ambMin());
     const seg = (act, cur, items) => `<div class="seg wide">${items.map(x => `<button class="${cur === x[0] ? 'on' : ''}" data-act="${act}" data-m="${x[0]}">${x[1]}</button>`).join('')}</div>`;
-    return `<div class="grab"></div><div class="sh"><div class="ico">${ic('cog', 24)}</div><div><h2>Darstellung &amp; Modi</h2><p>Home Aurora v5.2 · Build pz9</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
+    return `<div class="grab"></div><div class="sh"><div class="ico">${ic('cog', 24)}</div><div><h2>Darstellung &amp; Modi</h2><p>Home Aurora v5.2 · Build pz10</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
       <div class="lab2">DESIGN</div>${seg('theme', th, [['dark', 'Dunkel'], ['light', 'Hell'], ['auto', 'Automatisch']])}
       <div class="card-note">„Automatisch“ folgt dem Dunkel-/Hellmodus deines Home-Assistant-Profils. Die Auswahl gilt nur für dieses Gerät.</div>
       ${WALL_UI ? `      <div class="lab2">WANDTABLET-MODUS</div>
@@ -3502,7 +3497,7 @@ class HomeAurora extends HTMLElement {
     const Q = this._wxG, c = this.shadowRoot && this.shadowRoot.querySelector('.wxc'); if (!Q || !c || !this._wxSelT) return;
     const i = Q.hr.findIndex(d => d.ts === this._wxSelT); if (i >= 0) this._wxCur(c, i);
   }
-  /* ───────────── v14: 14-Tage-Trend (Kachelmann) – Linien für Höchst-/Tiefstwert, Flächen für die Bandbreite ───────────── */
+  /* ───────────── v14: 14-Tage-Trend (Kachelmann) – gleiche Bauweise wie die Kompakt-Vorhersage ───────────── */
   _trDays() {
     const e = this._c.trend, a = e && this._s(e) ? this._s(e).attributes : null, d = a && Array.isArray(a.days) ? a.days : null;
     if (!d || d.length < 3) return null;
@@ -3514,45 +3509,70 @@ class HomeAurora extends HTMLElement {
       return { ...x, dt, cond, hi: x.temp_max, lo: x.temp_min, hh: x.temp_max_high ?? x.temp_max, hl: x.temp_max_low ?? x.temp_max, lh: x.temp_min_high ?? x.temp_min, ll: x.temp_min_low ?? x.temp_min };
     });
   }
-  _trCard() {
-    const D = this._trDays(); if (!D) return null;
-    const n = D.length, bw = (this._main && this._main.getBoundingClientRect().width) || 390, wide = bw > 700;
-    const W = Math.max(290, Math.min(1180, Math.floor(bw - 62))), pl = 2, colW = (W - pl * 2) / n, X = i => pl + colW * (i + 0.5);
-    const CH = wide ? 200 : 168, yc = 52, hdr = 16, ico = 22, sunY = yc + CH + 8, rainY = sunY + 24, RH = 38, dateY = rainY + RH + 14, H = dateY + 4;
-    const vals = D.flatMap(d => [d.hh, d.hl, d.lh, d.ll, d.hi, d.lo]).filter(v => v != null);
-    const mn = Math.floor(Math.min(...vals) / 5) * 5, mx = Math.ceil(Math.max(...vals) / 5) * 5, Y = v => yc + 6 + (1 - (v - mn) / (mx - mn)) * (CH - 12);
+  _trGeo() {
+    const D0 = this._trDays(); if (!D0) return null;
+    const bw = (this._main && this._main.getBoundingClientRect().width) || 0, W = Math.max(290, Math.min(1180, Math.floor((bw || 390) - 62)));
+    const span = this._trSpan || (W < 600 ? 10 : 14), D = D0.slice(0, span);
+    return { W, span, D, n: D.length };
+  }
+  _trChart(G) {
+    const { W, D, n } = G, wide = W > 640, HT = wide ? 220 : 170, L = 32, Rr = 30, pw = W - L - Rr, colW = pw / n, X = i => L + colW * (i + 0.5), pt = 8, ph = HT - pt - 3, top = 54;
+    const vals = D.flatMap(d => [d.hh, d.hl, d.lh, d.ll, d.hi, d.lo]).filter(v => v != null), lo = Math.min(...vals), hi = Math.max(...vals), steps = [2, 4, 5, 8, 10, 20];
+    const step = steps.find(s => Math.ceil(hi / s) - Math.floor(lo / s) <= 5) || 20;
+    let y0 = Math.floor(lo / step) * step, y1 = Math.ceil(hi / step) * step; if (y1 - y0 < step * 2) y1 = y0 + step * 2;
+    const nl = Math.round((y1 - y0) / step) + 1, Y = v => pt + (1 - (v - y0) / (y1 - y0)) * ph;
+    const pm = Math.max(...D.map(d => d.precipitation || 0)), q = [0.25, 0.5, 1, 2, 5, 10, 20, 50].find(v => v * (nl - 1) >= Math.max(pm, 0.01)) || 50, rm = q * (nl - 1);
+    const fmt = v => (Math.round(v * 100) / 100).toString().replace('.', ',');
     let g = '';
-    const sel = Math.min(this._trI ?? 0, n - 1);
-    D.forEach((d, i) => { if (d.is_weekend) g += `<rect x="${(pl + colW * i).toFixed(1)}" y="0" width="${colW.toFixed(1)}" height="${H}" class="trwe"/>`; });
-    g += `<rect x="${(pl + colW * sel).toFixed(1)}" y="0" width="${colW.toFixed(1)}" height="${H}" class="trsel"/>`;
-    for (let v = mn; v <= mx; v += 5) g += `<line class="gl" x1="${pl}" x2="${W - pl}" y1="${Y(v).toFixed(1)}" y2="${Y(v).toFixed(1)}"/><text class="trax" x="${pl + 1}" y="${(Y(v) - 3).toFixed(1)}">${v}°</text>`;
-    const band = (up, lo) => { const u = D.map((d, i) => [X(i), Y(d[up])]), l = D.map((d, i) => [X(i), Y(d[lo])]).reverse(); return `${smooth(u)}L${l[0][0].toFixed(1)} ${l[0][1].toFixed(1)}${smooth(l).replace(/^M[^C]*/, '')}Z`; };
+    /* Wochenende dunkel hinterlegt (wie die Nacht in der Kompakt-Vorhersage) */
+    D.forEach((d, i) => { if (d.is_weekend) g += `<rect class="wxn" x="${(L + colW * i).toFixed(1)}" y="0" width="${colW.toFixed(1)}" height="${HT}"/>`; });
+    /* Gitter + Achsen */
+    for (let k = 0; k < nl; k++) {
+      const v = y0 + k * step, yy = Y(v).toFixed(1);
+      g += `<line class="gl" x1="${L}" x2="${L + pw}" y1="${yy}" y2="${yy}"/><text x="${L - 6}" y="${yy}" text-anchor="end" dy=".35em">${v}°</text><text x="${L + pw + 6}" y="${yy}" dy=".35em" class="mm">${fmt(k * q)}</text>`;
+    }
+    /* Wochenwechsel */
+    D.forEach((d, i) => { if (i > 0 && d.dt.getDay() === 1) g += `<line class="dl" x1="${(L + colW * i).toFixed(1)}" x2="${(L + colW * i).toFixed(1)}" y1="0" y2="${HT}"/>`; });
+    /* Regen */
+    const bwid = Math.max(4, Math.min(colW * 0.4, 34));
+    D.forEach((d, i) => { const p = d.precipitation || 0; if (p > 0.04) { const h = Math.max(1.5, Math.min(1, p / rm) * ph), pr = (d.precipitation_probability_1mm ?? 100) / 100; g += `<rect class="wxr" style="opacity:${(0.45 + 0.4 * pr).toFixed(2)}" x="${(X(i) - bwid / 2).toFixed(1)}" y="${(pt + ph - h).toFixed(1)}" width="${bwid.toFixed(1)}" height="${h.toFixed(1)}" rx="2"/>`; } });
+    /* Bandbreite + Linien */
+    const band = (up, lw) => { const u = D.map((d, i) => [X(i), Y(d[up])]), l = D.map((d, i) => [X(i), Y(d[lw])]).reverse(); return `${smooth(u)}L${l[0][0].toFixed(1)} ${l[0][1].toFixed(1)}${smooth(l).replace(/^M[^C]*/, '')}Z`; };
     if (D.every(d => d.hh != null && d.hl != null)) g += `<path class="trb h" d="${band('hh', 'hl')}"/>`;
     if (D.every(d => d.lh != null && d.ll != null)) g += `<path class="trb l" d="${band('lh', 'll')}"/>`;
-    const line = k => { const pts = D.map((d, i) => d[k] != null ? [X(i), Y(d[k])] : null); const run = pts.filter(Boolean); return run.length > 1 ? smooth(run) : ''; };
+    const line = k => { const run = D.map((d, i) => d[k] != null ? [X(i), Y(d[k])] : null).filter(Boolean); return run.length > 1 ? smooth(run) : ''; };
     g += `<path class="trl h" d="${line('hi')}"/><path class="trl l" d="${line('lo')}"/>`;
-    const lab = (x, y, t, c) => `<g class="trp"><rect x="${(x - 11).toFixed(1)}" y="${(y - 8).toFixed(1)}" width="22" height="15" rx="7"/><text x="${x.toFixed(1)}" y="${(y + 3).toFixed(1)}" text-anchor="middle" fill="${c}">${Math.round(t)}°</text></g>`;
-    D.forEach((d, i) => { if (d.hi != null) g += lab(X(i), Y(d.hi) - 12, d.hi, '#fda4af'); if (d.lo != null) g += lab(X(i), Y(d.lo) + 14, d.lo, '#93c5fd'); });
-    /* Sonne + Regen */
-    const pm = Math.max(8, ...D.map(d => d.precipitation || 0));
-    D.forEach((d, i) => {
-      const x = pl + colW * i + 2, w = colW - 4, s = Math.max(0, Math.min(100, d.sun_hours_relative ?? 0)) / 100;
-      g += `<rect x="${x.toFixed(1)}" y="${sunY}" width="${w.toFixed(1)}" height="18" rx="5" class="trs" style="opacity:${(0.18 + s * 0.82).toFixed(2)}"/>`;
-      const p = d.precipitation || 0, pb = Math.max(p > 0.05 ? 2 : 0, p / pm * (RH - 12)), pr = (d.precipitation_probability_1mm ?? 100) / 100;
-      g += `<rect x="${x.toFixed(1)}" y="${(rainY + RH - pb).toFixed(1)}" width="${w.toFixed(1)}" height="${pb.toFixed(1)}" rx="3" class="trr" style="opacity:${(0.45 + 0.55 * pr).toFixed(2)}"/>`;
-      if (p >= 1 && colW >= 20) g += `<text class="trm" x="${X(i).toFixed(1)}" y="${(rainY + RH - pb - 3).toFixed(1)}" text-anchor="middle">${de(p, p < 10 ? 1 : 0)}</text>`;
-      g += `<text class="trdt" x="${X(i).toFixed(1)}" y="${dateY}" text-anchor="middle">${d.dt.getDate()}.</text>`;
-      g += `<text class="trwd" x="${X(i).toFixed(1)}" y="${hdr - 3}" text-anchor="middle">${d.dt.toLocaleDateString('de-DE', { weekday: 'short' }).replace('.', '')}</text>`;
-      g += `<rect class="trhit" data-act="trsel" data-i="${i}" x="${(pl + colW * i).toFixed(1)}" y="0" width="${colW.toFixed(1)}" height="${H}"/>`;
-    });
-    const icons = D.map((d, i) => `<div class="tri" style="left:${(X(i) / W * 100).toFixed(2)}%;top:${hdr + 2}px">${wx(d.cond, ico)}</div>`).join('');
-    const d = D[sel], f = (v, k = 0) => v == null ? '–' : de(v, k), rg = (a, b, k = 0) => a == null || b == null ? '' : ` <small>(${de(a, k)}–${de(b, k)})</small>`;
-    const it = (cl, l, v) => `<div class="tri2"><span><i class="trdot ${cl}"></i>${l}</span><b>${v}</b></div>`;
-    const det = `<div class="trdet${wide ? ' w' : ''}"><b class="trdh">${d.dt.toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long' })}</b>
-      <div class="trg">${it('h', 'Höchstwert', `${f(d.hi ?? (d.hl != null && d.hh != null ? (d.hl + d.hh) / 2 : null))} °C${rg(d.hl, d.hh)}`)}${it('l', 'Tiefstwert', `${f(d.lo ?? (d.ll != null && d.lh != null ? (d.ll + d.lh) / 2 : null))} °C${rg(d.ll, d.lh)}`)}${it('r', 'Niederschlag', `${f(d.precipitation, 1)} mm${rg(d.precipitation_low, d.precipitation_high, 1)}`)}${it('r2', 'Regen ≥ 1 mm', `${f(d.precipitation_probability_1mm)} %`)}${it('s', 'Sonne', `${f(d.sun_hours, 1)} h${d.sun_hours_relative != null ? ` <small>(${f(d.sun_hours_relative)} %)</small>` : ''}`)}</div></div>`;
-    return `<div class="h">${ic('cloudsun', 14)}14-Tage-Trend<span class="r">Kachelmann</span></div>
-      <div class="trc" style="--trw:${W}px"><svg class="trs0" viewBox="0 0 ${W} ${H}" width="100%" style="aspect-ratio:${W}/${H}">${g}</svg>${icons}</div>${det}
-      <div class="card-note" style="margin-top:8px"><span class="trlg h"></span>Höchstwert <span class="trlg l"></span>Tiefstwert · Flächen = Bandbreite der Prognose · gelb = Sonnenanteil · blaue Balken = Regen (mm) · antippen für Details</div>`;
+    const lab = (x, y, t, c) => `<g class="trp"><rect x="${(x - 11).toFixed(1)}" y="${(y - 8).toFixed(1)}" width="22" height="15" rx="7"/><text x="${x.toFixed(1)}" y="${(y + 3).toFixed(1)}" text-anchor="middle" fill="${c}" dy="0">${Math.round(t)}°</text></g>`;
+    D.forEach((d, i) => { if (colW < 24 && i % 2) return; if (d.hi != null) g += lab(X(i), Y(d.hi) - 12, d.hi, '#fda4af'); if (d.lo != null) g += lab(X(i), Y(d.lo) + 14, d.lo, '#93c5fd'); });
+    /* Auswahl-Cursor */
+    const sel = this._trI != null && this._trI < n ? this._trI : null;
+    if (sel != null) { const d = D[sel], yv = d.hi ?? (d.hl != null && d.hh != null ? (d.hl + d.hh) / 2 : y0); g += `<line class="wxcl" x1="${X(sel).toFixed(1)}" x2="${X(sel).toFixed(1)}" y1="0" y2="${HT}"/><circle class="wxcd" r="5" cx="${X(sel).toFixed(1)}" cy="${Y(yv).toFixed(1)}"/>`; }
+    /* Sonnenanteil (Streifen unter dem Diagramm) */
+    D.forEach((d, i) => { const s = Math.max(0, Math.min(100, d.sun_hours_relative ?? 0)) / 100; g += `<rect class="trs" style="opacity:${(0.2 + s * 0.8).toFixed(2)}" x="${(L + colW * i + 2).toFixed(1)}" y="${HT + 8}" width="${(colW - 4).toFixed(1)}" height="14" rx="5"/>`; });
+    D.forEach((d, i) => { g += `<rect class="trhit" data-act="trsel" data-i="${i}" x="${(L + colW * i).toFixed(1)}" y="0" width="${colW.toFixed(1)}" height="${HT + 26}"/>`; });
+    /* Tageslabels + Symbole (wie in der Kompakt-Vorhersage) */
+    const isz = wide ? 28 : 22, tk = new Date(); tk.setHours(0, 0, 0, 0);
+    const days = D.map((d, i) => { const dn = d.dt.toLocaleDateString('de-DE', { weekday: 'short' }).replace('.', ''); return `<div class="wxd" style="left:${(L + colW * i).toFixed(1)}px;width:${colW.toFixed(1)}px">${dn}${colW > 62 ? `<small>${d.dt.getDate()}.${d.dt.getMonth() + 1}.</small>` : ''}</div>`; }).join('');
+    const icons = D.map((d, i) => `<div class="wxi" style="left:${X(i).toFixed(1)}px">${wx(d.cond, isz)}</div>`).join('');
+    const nar = W < 600;
+    let tip = '';
+    if (sel != null) {
+      const d = D[sel], f = (v, k = 0) => v == null ? '–' : de(v, k), rg = (a, b, k = 0) => nar || a == null || b == null ? '' : ` <small>(${de(a, k)}–${de(b, k)})</small>`;
+      const tw = nar ? 168 : 280, x = X(sel), left = x > W * 0.52 ? Math.max(0, x - 12 - tw) : Math.min(W - tw, x + 12);
+      const mid = (a, b) => a != null && b != null ? (a + b) / 2 : null;
+      tip = `<div class="wxt${nar ? ' nar' : ''}" style="left:${left.toFixed(0)}px;top:${top + (nar ? 2 : 6)}px;width:${tw}px"><div class="wxth"><b>${d.dt.toLocaleDateString('de-DE', nar ? { weekday: 'short', day: 'numeric', month: 'numeric' } : { weekday: 'long', day: 'numeric', month: 'long' })}</b></div>
+        <div class="wxtl"><div class="wxtr"><i class="wxdt t"></i>Höchstwert<b>${f(d.hi ?? mid(d.hl, d.hh))} °C${rg(d.hl, d.hh)}</b></div>
+        <div class="wxtr"><i class="wxdt b"></i>Tiefstwert<b>${f(d.lo ?? mid(d.ll, d.lh))} °C${rg(d.ll, d.lh)}</b></div>
+        <div class="wxtr"><i class="wxdt r"></i>Niederschlag<b>${f(d.precipitation, 1)} mm${rg(d.precipitation_low, d.precipitation_high, 1)}</b></div>
+        <div class="wxtr"><i class="wxdt"></i>Regen ≥ 1 mm<b>${f(d.precipitation_probability_1mm)} %</b></div>
+        <div class="wxtr"><i class="wxdt s"></i>Sonne<b>${f(d.sun_hours, 1)} h${d.sun_hours_relative != null ? ` <small>(${f(d.sun_hours_relative)} %)</small>` : ''}</b></div></div><div class="wxti">${wx(d.cond, 38)}<span>${COND[d.cond] || ''}</span></div></div>`;
+    }
+    return `<div class="trw" data-w="${W}" style="width:${W}px;height:${top + HT + 30}px">${days}${icons}<svg class="wxs" width="${W}" height="${HT + 26}" viewBox="0 0 ${W} ${HT + 26}" style="top:${top}px">${g}</svg>${tip}</div>`;
+  }
+  _trCard() {
+    const G = this._trGeo(); if (!G) return null;
+    const chips = [[7, '7 Tage'], [10, '10 Tage'], [14, '14 Tage']].map(x => `<button class="qfc ${x[0] === G.span ? 'on' : ''}" data-act="trspan" data-n="${x[0]}">${x[1]}</button>`).join('');
+    return `<div class="h">${ic('cloudsun', 14)}14-Tage-Trend<span class="r">Kachelmann</span></div><div class="qfl wxsp">${chips}</div><div class="wxwrap">${this._trChart(G)}</div><div class="card-note" style="margin-top:6px">Tippen für Details · Höchst- (rot) und Tiefstwert (blau) mit Bandbreite der Prognose, Regen (Balken, mm), Sonnenanteil (gelb) · Wochenende dunkel hinterlegt</div>`;
   }
 
   /* ───────────── Rendern ───────────── */
@@ -3806,7 +3826,8 @@ class HomeAurora extends HTMLElement {
       case 'calmode': this._calMode = el.dataset.m === 'list' ? 'list' : 'month'; this._renderSheet(); break;
       case 'calday': { const k = +el.dataset.d, d = new Date(k), t0 = new Date(); t0.setHours(0, 0, 0, 0); this._calSel = k; this._calMo = Math.max(0, Math.min(2, (d.getFullYear() - t0.getFullYear()) * 12 + d.getMonth() - t0.getMonth())); this._renderSheet(); break; }
       case 'calmo': { const n = +el.dataset.n, t0 = new Date(); t0.setHours(0, 0, 0, 0); this._calMo = n === 0 ? 0 : Math.max(0, Math.min(2, (this._calMo || 0) + n)); this._calSel = n === 0 ? +t0 : null; if (n !== 0) { const f = new Date(t0.getFullYear(), t0.getMonth() + this._calMo, 1); this._calSel = this._calMo === 0 ? +t0 : +f; } this._renderSheet(); break; }
-      case 'trsel': this._trI = +el.dataset.i; this._render(); break;
+      case 'trsel': this._trI = this._trI === +el.dataset.i ? null : +el.dataset.i; this._render(); break;
+      case 'trspan': this._trSpan = +el.dataset.n; this._trI = null; this._render(); break;
       case 'wxspan': this._wxSpan = +el.dataset.n; this._wxSelT = null; this._render(); break;
       case 'wxmode': this._wxMode = el.dataset.m; this._enter = true; this._counted = false; this._render(); break;
       case 'pcmd': h.callService(el.dataset.d, el.dataset.s, { entity_id: e }); this._toast(el.dataset.msg || 'Gesendet'); break;
