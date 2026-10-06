@@ -1070,6 +1070,7 @@ const CSS4 = `
 .cmg{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}.cmw{font-size:10.5px;letter-spacing:.1em;color:var(--tx3);text-align:center;padding:4px 0;text-transform:uppercase}
 .cmd{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:4px;min-height:54px;padding:7px 2px 5px;border-radius:14px;border:1px solid transparent;background:rgba(var(--wh),.04);color:var(--tx);font:inherit;font-size:14.5px;font-weight:550;font-variant-numeric:tabular-nums}.cmd .dots{display:flex;gap:3px;min-height:6px}.cmd .dots i{width:6px;height:6px;border-radius:50%;background:var(--ec)}.cmd.out{opacity:.35}.cmd.today{border-color:rgba(var(--wh),.4)}.cmd.today .n{color:var(--acc)}.cmd.sel{background:rgba(var(--wh),.17);border-color:rgba(var(--wh),.32)}
 .cmsel{margin:16px 2px 8px;font-size:13px;color:var(--tx3)}.cmsel b{color:var(--tx);font-size:15px;font-weight:650}
+.dg.tvdg{grid-template-columns:repeat(2,minmax(0,1fr))}@media (min-width:560px){.dg.tvdg{grid-template-columns:repeat(4,minmax(0,1fr))}}
 .kb.danger{background:rgba(251,113,133,.16);border-color:rgba(251,113,133,.4);color:#fda4af}.kb.good{background:rgba(52,211,153,.16);border-color:rgba(52,211,153,.4);color:#6ee7b7}
 .app.light .kb.danger{color:#be123c}.app.light .kb.good{color:#047857}
 .dg.kdg{grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px}.dg.kdg .dt{min-width:0;grid-column:auto!important;padding:12px 12px}.dg.kdg .dt .v{font-size:19px;overflow-wrap:anywhere}.dg.kdg .dt.kfull{grid-column:1/-1!important}
@@ -1567,7 +1568,7 @@ class HomeAurora extends HTMLElement {
     const xr = [];
     if (this._s(ex.waste)) { const WL = this._waste(); xr.push(`<button class="xr" data-act="waste"><div class="ico">${ic('trash', 19)}</div><div><div class="t">Müllabfuhr</div><div class="s">${WL && WL.length ? WL.slice(0, 2).map(x => this._dayTxt(x) + ' ' + esc(x.name)).join(' · ') : esc(this._val(ex.waste))}</div></div></button>`); }
     if (this._s(ex.fuel)) xr.push(`<button class="xr" data-act="fuel"><div class="ico">${ic('fuel', 19)}</div><div><div class="t">Tanken · günstigster Preis</div><div class="s">${esc(this._val(ex.fuel))} ${esc(this._unit(ex.fuel))}${this._s(ex.fuelName) && okv(this._val(ex.fuelName)) ? ' · ' + esc(this._val(ex.fuelName)) : ''}</div></div></button>`);
-    if (this._s(ex.kids)) xr.push(`<button class="xr" data-act="toggle" data-e="${ex.kids}"><div class="ico">${ic('shield', 19)}</div><div><div class="t">Kindersicherung TV</div><div class="s">${this._val(ex.kids) === 'on' ? 'Aktiv' : 'Aus'}</div></div><span class="sw ${this._val(ex.kids) === 'on' ? 'on' : ''}"></span></button>`);
+    const tvR = this._tvRows(); if (tvR.length) xr.push(...tvR); else if (this._s(ex.kids)) xr.push(`<button class="xr" data-act="toggle" data-e="${ex.kids}"><div class="ico">${ic('shield', 19)}</div><div><div class="t">Kindersicherung TV</div><div class="s">${this._val(ex.kids) === 'on' ? 'Aktiv' : 'Aus'}</div></div><span class="sw ${this._val(ex.kids) === 'on' ? 'on' : ''}"></span></button>`);
     xr.splice(Math.min(xr.length, 1), 0, ...this._cleanRows());
     xr.push(...this._kidRows());
     if (this._s(ex.winter)) xr.push(`<button class="xr" data-act="more" data-e="${ex.winter}"><div class="ico">${ic(this._val(ex.winter) === 'on' ? 'thermo' : 'sun', 19)}</div><div><div class="t">Heizmodus</div><div class="s">${this._val(ex.winter) === 'on' ? 'Wintermodus aktiv' : 'Sommerbetrieb'}</div></div></button>`);
@@ -2394,7 +2395,7 @@ class HomeAurora extends HTMLElement {
   _sSet() {
     const th = this._themePref || this._c.theme || 'dark', am = String(this._ambMin());
     const seg = (act, cur, items) => `<div class="seg wide">${items.map(x => `<button class="${cur === x[0] ? 'on' : ''}" data-act="${act}" data-m="${x[0]}">${x[1]}</button>`).join('')}</div>`;
-    return `<div class="grab"></div><div class="sh"><div class="ico">${ic('cog', 24)}</div><div><h2>Darstellung &amp; Modi</h2><p>Home Aurora v5.2</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
+    return `<div class="grab"></div><div class="sh"><div class="ico">${ic('cog', 24)}</div><div><h2>Darstellung &amp; Modi</h2><p>Home Aurora v5.2 · Build tv1</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
       <div class="lab2">DESIGN</div>${seg('theme', th, [['dark', 'Dunkel'], ['light', 'Hell'], ['auto', 'Automatisch']])}
       <div class="card-note">„Automatisch“ folgt dem Dunkel-/Hellmodus deines Home-Assistant-Profils. Die Auswahl gilt nur für dieses Gerät.</div>
       ${WALL_UI ? `      <div class="lab2">WANDTABLET-MODUS</div>
@@ -2990,11 +2991,16 @@ class HomeAurora extends HTMLElement {
     }).finally(() => { this._kidBusy = null; if (this._sheet?.t === 'kid') this._renderSheet(); });
   }
   _kidActTxt() {
-    const a = this._kidPend?.a, T = { sperren: 'das Sperren', entsperren: 'das Entsperren', bonus15: '+15 Min. Bonus', bonus30: '+30 Min. Bonus', bonus60: '+60 Min. Bonus', bonus_reset: 'das Zurücksetzen des Bonus', schule_frei: 'Heute schulfrei', schule_aus: 'Schule jetzt aus', schule_normal: 'Schulzeit wie geplant' };
-    return T[a] || 'Leonies Handy';
+    const a = this._kidPend?.a, T = { sperren: 'das Sperren', entsperren: 'das Entsperren', bonus15: '+15 Min. Bonus', bonus30: '+30 Min. Bonus', bonus60: '+60 Min. Bonus', bonus_reset: 'das Zurücksetzen des Bonus', schule_frei: 'Heute schulfrei', schule_aus: 'Schule jetzt aus', schule_normal: 'Schulzeit wie geplant', tv_entsperren: 'das Entsperren des Fernsehers', tv_schutz_aus: 'das Ausschalten der Kindersicherung', tv_bestaetigen: 'die Bestätigung' };
+    return T[a] || (this._kidPend?.tv ? 'den Fernseher' : 'Leonies Handy');
   }
   _kidPinOk(pin) {
     const p = this._kidPend || { i: this._sheet?.i || 0, a: null };
+    if (p.tv) {
+      this._kidPin = pin; this._kidUntil = Date.now() + 9e4; this._kidPend = null; this._sheet = { t: 'tv' }; this._renderSheet();
+      clearTimeout(this._kidTm); this._kidTm = setTimeout(() => { this._kidPin = ''; if (this._sheet?.t === 'tv') this._renderSheet(); }, 9.1e4);
+      this._tvRun(p.op, p.e); return;
+    }
     this._kidPin = pin; this._kidUntil = Date.now() + 9e4; this._kidPend = null;
     this._sheet = { t: 'kid', i: p.i }; this._renderSheet();
     clearTimeout(this._kidTm); this._kidTm = setTimeout(() => { this._kidPin = ''; if (this._sheet?.t === 'kid') this._renderSheet(); }, 9.1e4);
@@ -3185,6 +3191,75 @@ class HomeAurora extends HTMLElement {
   _pzDone(e) { this._h.callService('putzplan', 'mark_done', { entity_id: e }); this._toast((this._name(e).replace(/^Putzplan\s+/, '')) + ' erledigt ✓ · Rückgängig', 4500, { act: 'pzundo', e }); }
   _pzUndo(e) { this._h.callService('putzplan', 'undo_done', { entity_id: e }); this._toast('Rückgängig gemacht'); }
 
+  /* ───────────── v11: Kindersicherung TV (Integration „kindersicherung“) ───────────── */
+  _tvs() {
+    const E = this._h?.entities || {}, D = this._h?.devices || {}, S = this._h?.states || {}, g = {};
+    for (const id in E) {
+      const r = E[id]; if (!r || r.platform !== 'kindersicherung' || !S[id]) continue;
+      const k = r.device_id || id, o = g[k] || (g[k] = { dev: k, e: {} }), dom = id.split('.')[0], fn = String(S[id].attributes?.friendly_name || '');
+      const dn = D[k] && (D[k].name_by_user || D[k].name) || ''; if (dn) o.name = dn;
+      const nm = (dn && fn.startsWith(dn) ? fn.slice(dn.length) : fn).trim().toLowerCase();
+      if (dom === 'binary_sensor') o.e.locked = id;
+      else if (dom === 'sensor') { if (/gesperrt bis/.test(nm)) o.e.until = id; else if (/fehlversuche/.test(nm)) o.e.attempts = id; else if (/falsche/.test(nm)) o.e.wrong = id; else if (/best[aä]tigungen/.test(nm)) o.e.confs = id; else if (/zeit/.test(nm)) o.e.timeouts = id; else if (/sperren$/.test(nm)) o.e.locks = id; }
+      else if (dom === 'switch') { if (/kindersicherung aktiv|aktiv$/.test(nm)) o.e.enabled = id; else if (/best[aä]tigung/.test(nm)) o.e.confirm = id; }
+      else if (dom === 'button') { if (/entsperren/.test(nm)) o.e.unlock = id; else if (/sperren/.test(nm)) o.e.lock = id; }
+    }
+    return Object.values(g).filter(o => o.e.locked || o.e.enabled).map(o => {
+      const e = o.e, st = id => id && S[id], v = id => st(id)?.state, n = id => { const x = parseFloat(v(id)); return isNaN(x) ? null : x; };
+      const la = st(e.locked)?.attributes || {}, name = o.name || String(la.friendly_name || 'Fernseher').replace(/\s+Gesperrt$/i, '');
+      const locked = v(e.locked) === 'on', enabled = e.enabled ? v(e.enabled) === 'on' : true, waiting = !!st(e.confirm)?.attributes?.waiting;
+      let until = okv(v(e.until)) ? new Date(v(e.until)) : (la.lock_until ? new Date(la.lock_until) : null); if (until && isNaN(until)) until = null;
+      const att = la.attempts != null ? Number(la.attempts) : n(e.attempts), max = la.max_attempts != null ? Number(la.max_attempts) : null;
+      const tone = !enabled ? 'warn' : locked ? 'hot' : waiting ? 'warn' : 'live';
+      const h1 = !enabled ? 'Kindersicherung aus' : locked ? 'Gesperrt' : waiting ? 'Wartet auf Bestätigung' : 'Freigegeben';
+      const parts = []; if (locked && until) parts.push('bis ' + hhmm(until) + ' Uhr'); if (att != null) parts.push(`Fehlversuche ${att}${max ? ' von ' + max : ''}`);
+      const h2 = !enabled ? 'Der Fernseher ist nicht geschützt' : parts.join(' · ') || (locked ? 'Sperre aktiv' : 'Keine Sperre aktiv');
+      return { id: o.dev, name, e, locked, enabled, waiting, until, att, max, tone, h1, h2, short: name.replace(/\s*TV$/i, ''), n: { confs: n(e.confs), wrong: n(e.wrong), locks: n(e.locks), timeouts: n(e.timeouts) } };
+    }).sort((a, b) => a.name.localeCompare(b.name, 'de'));
+  }
+  _tvRows() {
+    const T = this._tvs(); if (!T.length) return [];
+    const bad = T.some(t => t.locked), warn = T.some(t => !t.enabled || t.waiting);
+    const s = T.map(t => `${esc(t.short)} ${t.locked ? 'gesperrt' : !t.enabled ? 'Schutz aus' : t.waiting ? 'wartet' : 'frei'}`).join(' · ');
+    return [`<button class="xr kid" data-act="tv"><div class="ico">${ic('shield', 19)}</div><div><div class="t">Kindersicherung TV</div><div class="s">${s}</div></div><span class="kdot ${bad ? 'lk' : warn ? 'off' : 'ok'}"></span></button>`];
+  }
+  _sTv() {
+    const T = this._tvs(), busy = !!this._tvBusy, ok = Date.now() < (this._kidUntil || 0) && this._kidPin;
+    const head = (p) => `<div class="grab"></div><div class="sh"><div class="ico">${ic('shield', 24)}</div><div><h2>Kindersicherung TV</h2><p>${p}</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>`;
+    if (!T.length) return head('Nicht verfügbar') + `<div class="empty">Keine Fernseher gefunden. Ist die Integration „Kindersicherung“ eingerichtet?</div>`;
+    const b = (a, e, cls, ico, txt, sub) => `<button class="kb ${cls || ''}" data-act="tvact" data-a="${a}" data-e="${e}" ${busy ? 'disabled' : ''}>${ic(ico, 22)}<b>${txt}</b>${sub ? `<small>${sub}</small>` : ''}</button>`;
+    const body = T.map(t => {
+      const tiles = [['confs', 'Bestätigungen', 'check'], ['wrong', 'Falsche Codes', 'close'], ['locks', 'Sperrungen', 'lock'], ['timeouts', 'Zeitüberschr.', 'clock']].filter(x => t.n[x[0]] != null).map(x => this._tile(Math.round(t.n[x[0]]), x[1], x[2])).join('');
+      const btn = [];
+      if (t.e.unlock && (t.locked || (t.att || 0) > 0)) btn.push(b('entsperren', t.e.unlock, 'good', 'unlock', 'Entsperren', 'Sperre aufheben · PIN'));
+      if (t.e.lock && !t.locked) btn.push(b('sperren', t.e.lock, 'danger', 'lock', 'Jetzt sperren', 'sofort sperren'));
+      if (t.waiting && t.e.confirm) btn.push(b('bestaetigen', t.e.confirm, 'good', 'check', 'Bestätigen', 'Fernsehen freigeben · PIN'));
+      if (t.e.enabled) btn.push(t.enabled ? b('schutz_aus', t.e.enabled, '', 'shield', 'Schutz ausschalten', 'nur mit PIN') : b('schutz_an', t.e.enabled, 'good', 'shield', 'Schutz einschalten', 'Kindersicherung aktivieren'));
+      return `<div class="lab2">${ic('tv' in ICONS ? 'tv' : 'shield', 13)} ${esc(t.name).toUpperCase()}</div>
+        <div class="vst ${t.tone}"><div class="vsi">${ic(t.locked ? 'lock' : t.enabled ? 'unlock' : 'shield', 26)}</div><div class="vsx"><div class="vkick">STATUS</div><div class="vh1">${esc(t.h1)}</div><div class="vh2">${esc(t.h2)}</div></div></div>
+        ${tiles ? `<div class="dg kdg tvdg">${tiles}</div>` : ''}
+        <div class="kgrid k2">${btn.join('')}</div>`;
+    }).join('');
+    const sum = T.map(t => `${esc(t.short)}: ${t.locked ? 'gesperrt' : !t.enabled ? 'Schutz aus' : t.waiting ? 'wartet' : 'frei'}`).join(' · ');
+    return head(sum) + `<div class="lab2" style="margin-top:2px">${ic(ok ? 'unlock' : 'lock', 13)} ${ok ? 'PIN akzeptiert' : 'Entsperren, Bestätigen und Ausschalten nur mit PIN'}</div>` + body + `<div class="card-note">Die Integration „Kindersicherung“ sperrt den Fernseher nach zu vielen falschen Codes automatisch. Entsperren, Bestätigen und das Ausschalten des Schutzes brauchen die PIN (Home Assistant prüft sie zusätzlich). Sperren und Einschalten gehen ohne PIN. Die PIN gilt danach 90 Sekunden.</div>`;
+  }
+  _tvAct(a, e) {
+    if (!e || this._tvBusy) return;
+    if (a === 'sperren') { this._h.callService('button', 'press', { entity_id: e }); this._toast('Fernseher gesperrt 🔒'); return; }
+    if (a === 'schutz_an') { this._h.callService('switch', 'turn_on', { entity_id: e }); this._toast('Kindersicherung eingeschaltet 🛡️'); return; }
+    if (Date.now() < (this._kidUntil || 0) && this._kidPin) return this._tvRun(a, e);
+    this._kidPend = { tv: true, a: 'tv_' + a, op: a, e }; this._pin = ''; this._pinBad = 0; this._sheet = { t: 'pin', kid: true, tv: true }; this._renderSheet();
+  }
+  _tvRun(a, e) {
+    const MSG = { entsperren: 'Fernseher entsperrt 🔓', schutz_aus: 'Kindersicherung ausgeschaltet', bestaetigen: 'Bestätigt ✓' };
+    this._tvBusy = a; if (this._sheet?.t === 'tv') this._renderSheet();
+    let p; try { p = this._h.callService('script', 'kindersicherung_aktion', { aktion: a, entity_id: e, pin: this._kidPin }); } catch (x) { p = Promise.reject(x); }
+    Promise.resolve(p).then(() => this._toast(MSG[a] || 'Erledigt')).catch(x => {
+      const m = String((x && (x.message || x.error)) || x || '');
+      if (/pin/i.test(m)) { this._kidUntil = 0; this._kidPin = ''; this._toast('Falsche PIN ✕'); } else this._toast('Aktion fehlgeschlagen' + (m ? ': ' + m : ''), 4200);
+    }).finally(() => { this._tvBusy = null; if (this._sheet?.t === 'tv') this._renderSheet(); });
+  }
+
   /* ───────────── Rendern ───────────── */
   _navHtml() {
     return `<div class="logo"></div>${(WALL_UI ? [...TABS, ['clean', 'Putzplan', 'broom']] : TABS).map(t => `<button class="nb ${this._v === t[0] ? 'on' : ''}" data-act="nav" data-v="${t[0]}">${ic(t[2], 24)}<span class="lab">${t[1]}</span></button>`).join('')}
@@ -3240,7 +3315,7 @@ class HomeAurora extends HTMLElement {
     const st = this._sh.scrollTop;
     if (this._sheet.t === 'sched' && this._schedEl && this._sh.contains(this._schedEl)) { this._schedEl.hass = this._h; this._ov.classList.add('show'); return; }
     const r = this._sheet.t === 'room' ? this._c.rooms.find(x => x.id === this._sheet.id) : null;
-    const T = { vroom: () => this._sVRoom(this._sheet.e), persons: () => this._sPersons(), quick: () => this._sQuick(), vent: () => this._sVent(), cal: () => this._sCal(), bat: () => this._sBat(), doors: () => this._sDoors(), sys: () => this._sSys(), waste: () => this._sWaste(), power: () => this._sPower(), sched: () => this._sSched(), set: () => this._sSet(), warn: () => this._sWarn(), radar: () => this._sRadar(), pin: () => this._sPin(), fuel: () => this._sFuel(), plants: () => this._sPlants(), heat: () => this._sHeat(), kid: () => this._sKid(), clean: () => this._sClean() };
+    const T = { vroom: () => this._sVRoom(this._sheet.e), persons: () => this._sPersons(), quick: () => this._sQuick(), vent: () => this._sVent(), cal: () => this._sCal(), bat: () => this._sBat(), doors: () => this._sDoors(), sys: () => this._sSys(), waste: () => this._sWaste(), power: () => this._sPower(), sched: () => this._sSched(), set: () => this._sSet(), warn: () => this._sWarn(), radar: () => this._sRadar(), pin: () => this._sPin(), fuel: () => this._sFuel(), plants: () => this._sPlants(), heat: () => this._sHeat(), kid: () => this._sKid(), clean: () => this._sClean(), tv: () => this._sTv() };
     const qn = this.shadowRoot.getElementById('qname'), qv = qn ? qn.value : null, qf = qn && this.shadowRoot.activeElement === qn;
     const pq = this.shadowRoot.getElementById('pzq'), pqf = pq && this.shadowRoot.activeElement === pq, pqs = pq ? pq.selectionStart : 0;
     const html = r ? this._sRoom(r) : (T[this._sheet.t] || (() => this._sLights()))(), key = this._sheet.t + ':' + (this._sheet.id || this._sheet.e || '');
@@ -3417,6 +3492,8 @@ class HomeAurora extends HTMLElement {
       case 'pzstart': { const st = this._pzSt(); if (st) { st.cf = true; this._pzRefresh(); } break; }
       case 'pzcancel': { const st = this._pzSt(); if (st) { st.cf = false; this._pzRefresh(); } break; }
       case 'pzgo': this._pzStart(); break;
+      case 'tv': this._sheet = { t: 'tv' }; this._renderSheet(); break;
+      case 'tvact': this._tvAct(el.dataset.a, el.dataset.e); break;
       case 'kact': this._kidAct(parseInt(el.dataset.i, 10) || 0, el.dataset.a); break;
       case 'pk': this._pinKey(el.dataset.k); break;
       case 'pdel': this._pin = (this._pin || '').slice(0, -1); this._renderSheet(); break;
