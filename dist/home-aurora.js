@@ -1113,6 +1113,10 @@ const CSS4 = `
 .vr.pz{padding:11px 12px;gap:11px;margin-bottom:7px}.vr.pz .t{white-space:normal;overflow:visible;text-overflow:clip;line-height:1.25}.vr.pz .s{line-height:1.3}
 .vr.pz .vbt{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:42px}.vr.pz .pzb{padding:0 14px}.vr.pz .pzu{padding:0 12px;color:var(--tx2)}
 @media (max-width:860px){.vr.pz .pzb{width:44px;height:44px;min-height:0;padding:0;border-radius:50%}.vr.pz .pzb span{display:none}.vr.pz .pzb svg{width:20px;height:20px}.vr.pz .pzu{padding:0 12px;font-size:12px}}
+.pzstb{display:inline-flex;align-items:center;gap:6px;margin-left:auto}.pzstb svg{opacity:.8}
+.pzsb{display:flex;align-items:flex-end;gap:8px;height:128px;margin:10px 0 2px;padding:0 2px}.pzsb .c1{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:4px}.pzsb .c1 i{display:block;width:100%;max-width:40px;border-radius:9px 9px 4px 4px;background:rgba(var(--wh),.16)}.pzsb .c1.t i{background:#34d399}.pzsb .c1 b{font-size:12px;font-weight:650;font-variant-numeric:tabular-nums;min-height:15px}.pzsb .c1 span{font-size:11px;color:var(--tx3)}.pzsb .c1.t span{color:var(--tx);font-weight:600}
+.qfc.pzsc{cursor:default}.qfc.pzsc b{margin-left:4px;color:#34d399;font-variant-numeric:tabular-nums}
+.pzsr{display:flex;align-items:center;gap:10px;padding:8px 4px;border-bottom:1px solid var(--line)}.pzsr:last-of-type{border-bottom:0}.pzsr .pzt{font-size:12.5px;color:var(--tx3);font-variant-numeric:tabular-nums;min-width:44px}.pzsr .ico{width:30px;height:30px;border-radius:10px;display:grid;place-items:center;background:rgba(var(--wh),.07);flex:none}.pzsr .t{font-size:14px;font-weight:550;line-height:1.25}.pzsr .s{font-size:12px;color:var(--tx3)}.pzsr>div:last-child{min-width:0}.pzsn{font-size:12.5px;color:var(--tx3);padding:6px 4px}
 `;
 const CSS2 = `
 
@@ -2395,7 +2399,7 @@ class HomeAurora extends HTMLElement {
   _sSet() {
     const th = this._themePref || this._c.theme || 'dark', am = String(this._ambMin());
     const seg = (act, cur, items) => `<div class="seg wide">${items.map(x => `<button class="${cur === x[0] ? 'on' : ''}" data-act="${act}" data-m="${x[0]}">${x[1]}</button>`).join('')}</div>`;
-    return `<div class="grab"></div><div class="sh"><div class="ico">${ic('cog', 24)}</div><div><h2>Darstellung &amp; Modi</h2><p>Home Aurora v5.2 · Build pz1</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
+    return `<div class="grab"></div><div class="sh"><div class="ico">${ic('cog', 24)}</div><div><h2>Darstellung &amp; Modi</h2><p>Home Aurora v5.2 · Build pz2</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
       <div class="lab2">DESIGN</div>${seg('theme', th, [['dark', 'Dunkel'], ['light', 'Hell'], ['auto', 'Automatisch']])}
       <div class="card-note">„Automatisch“ folgt dem Dunkel-/Hellmodus deines Home-Assistant-Profils. Die Auswahl gilt nur für dieses Gerät.</div>
       ${WALL_UI ? `      <div class="lab2">WANDTABLET-MODUS</div>
@@ -3172,7 +3176,7 @@ class HomeAurora extends HTMLElement {
         ? `<div class="pzcf"><div class="pzct">Aufgaben verteilen?</div><div class="pzcs">${U.length} Aufgaben ohne Startdatum werden auf die nächsten Wochen verteilt: heute ${p0}, in den nächsten 7 Tagen ${p7}. Pro Aufgabe lässt sich das später mit „Rückgängig“ zurücknehmen.</div><div class="pzcb"><button class="vbt pzgo" data-act="pzgo">Jetzt starten</button><button class="vbt" data-act="pzcancel">Abbrechen</button></div></div>`
         : `<button class="vbt pzgo pzgo1" data-act="pzstart">${ic('play', 16)}<span>${fresh ? 'Plan starten' : U.length + ' Aufgaben ohne Startdatum verteilen'}</span></button>`;
     }
-    const chips = `<div class="qfl" style="margin-top:12px">${[['due', 'Fällig'], ['all', 'Alle']].map(x => `<button class="qfc ${x[0] === f && !q ? 'on' : ''}" data-act="pzf" data-e="${x[0]}">${x[1]}</button>`).join('')}</div><input id="pzq" class="pzq" type="search" placeholder="Aufgabe oder Raum suchen …" value="${esc(st.q || '')}" autocomplete="off" enterkeyhint="search">`;
+    const chips = `<div class="qfl" style="margin-top:12px">${[['due', 'Fällig'], ['all', 'Alle']].map(x => `<button class="qfc ${x[0] === f && !q ? 'on' : ''}" data-act="pzf" data-e="${x[0]}">${x[1]}</button>`).join('')}<button class="qfc pzstb" data-act="pzstat">${ic('list', 13)} Letzte 7 Tage</button></div><input id="pzq" class="pzq" type="search" placeholder="Aufgabe oder Raum suchen …" value="${esc(st.q || '')}" autocomplete="off" enterkeyhint="search">`;
     const view = q ? 'all' : f;
     const doneT = view === 'due' ? T.filter(t => t.today) : [];
     const list = q ? T.filter(t => (t.name + ' ' + t.room).toLowerCase().includes(q)) : view === 'due' ? T.filter(t => !t.today && (t.st === 'overdue' || t.st === 'due_soon')) : T;
@@ -3288,6 +3292,58 @@ class HomeAurora extends HTMLElement {
     }).finally(() => { this._tvBusy = null; if (this._sheet?.t === 'tv') this._renderSheet(); });
   }
 
+  /* ───────────── v12: Putzplan-Statistik · letzte 7 Tage (aus dem Verlauf von Home Assistant) ───────────── */
+  _pzDayKey(ms) { const d = new Date(ms); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+  async _pzLoadStat(force) {
+    const c = this._pzS;
+    if (!force && c && c.ok && Date.now() - c.t < 6e4) return;
+    if (this._pzSBusy) return; this._pzSBusy = true;
+    const T = this._pzTasks(), info = {}; T.forEach(t => { info[t.e] = t; });
+    const d0 = new Date(); d0.setHours(0, 0, 0, 0); d0.setDate(d0.getDate() - 6);
+    const from = d0.getTime(), st = from - 2 * 864e5;
+    try {
+      const res = await this._h.callWS({ type: 'history/history_during_period', start_time: new Date(st).toISOString(), end_time: new Date().toISOString(), entity_ids: T.map(t => t.e), include_start_time_state: true, significant_changes_only: false, minimal_response: false, no_attributes: false });
+      const evs = [];
+      for (const e in res) {
+        let prevLd, at = {}, mine = [];
+        for (const x of res[e] || []) {
+          if (x.a) at = x.a; else if (x.attributes) at = x.attributes;
+          const ts = x.lu != null ? x.lu * 1000 : (x.last_updated ? new Date(x.last_updated).getTime() : st), ld = at.last_done || null;
+          if (prevLd !== undefined && ld && ld !== prevLd) {
+            if (ld === this._pzDayKey(ts)) mine.push({ e, ts, ld });
+            else if (prevLd && ld < prevLd) { const i = mine.map(m => m.ld).lastIndexOf(prevLd); if (i >= 0) mine.splice(i, 1); }
+          }
+          prevLd = ld;
+        }
+        const t = info[e];
+        for (const m of mine) if (m.ts >= from) evs.push({ e, ts: m.ts, name: t ? t.name : (at.task_name || e), room: t ? t.room : (at.room || 'Allgemein'), t });
+      }
+      evs.sort((a, b) => b.ts - a.ts);
+      this._pzS = { ok: true, t: Date.now(), evs, from };
+    } catch (err) { this._pzS = { ok: false, t: Date.now(), evs: [], from }; }
+    this._pzSBusy = false;
+    if (this._sheet && this._sheet.t === 'pzstat') this._renderSheet();
+  }
+  _sPzStat() {
+    const S = this._pzS, back = !WALL_UI ? `<button class="vbt" data-act="pzback" style="margin-top:14px;width:100%">${ic('chevron', 15)}<span>Zurück zum Putzplan</span></button>` : '';
+    const head = p => `<div class="grab"></div><div class="sh"><div class="ico">${ic('broom', 24)}</div><div><h2>Putzplan · letzte 7 Tage</h2><p>${p}</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>`;
+    if (!S) return head('Lade Verlauf …') + `<div class="empty">Verlauf wird geladen …</div>`;
+    if (!S.ok) return head('Nicht verfügbar') + `<div class="empty">Der Verlauf konnte nicht geladen werden.</div><button class="vbt" data-act="pzstatr" style="width:100%">${ic('refresh', 15)}<span>Nochmal versuchen</span></button>` + back;
+    const days = [], today = new Date(); today.setHours(0, 0, 0, 0);
+    for (let i = 0; i < 7; i++) { const d = new Date(today); d.setDate(d.getDate() - i); days.push({ d, k: this._pzDayKey(d.getTime()), ev: [] }); }
+    const by = {}; days.forEach(x => { by[x.k] = x; });
+    for (const ev of S.evs) { const x = by[this._pzDayKey(ev.ts)]; if (x) x.ev.push(ev); }
+    const tot = S.evs.length, mx = Math.max(1, ...days.map(x => x.ev.length)), wd = d => d.toLocaleDateString('de-DE', { weekday: 'short' }).replace('.', '');
+    const bars = days.slice().reverse().map((x, i) => `<div class="c1${x.k === days[0].k ? ' t' : ''}"><b>${x.ev.length || ''}</b><i style="height:${x.ev.length ? Math.max(6, Math.round(88 * x.ev.length / mx)) : 3}px"></i><span>${x.k === days[0].k ? 'Heute' : wd(x.d)}</span></div>`).join('');
+    const rooms = {}; S.evs.forEach(ev => { rooms[ev.room] = (rooms[ev.room] || 0) + 1; });
+    const rl = Object.keys(rooms).sort((a, b) => rooms[b] - rooms[a] || a.localeCompare(b, 'de'));
+    const chips = rl.length ? `<div class="lab2" style="margin-top:14px">NACH RAUM</div><div class="qfl">${rl.map(r => `<span class="qfc pzsc">${esc(r)} <b>${rooms[r]}</b></span>`).join('')}</div>` : '';
+    const lbl = (x, i) => (i === 0 ? 'HEUTE' : i === 1 ? 'GESTERN' : x.d.toLocaleDateString('de-DE', { weekday: 'long' }).toUpperCase()) + ' · ' + x.d.toLocaleDateString('de-DE', { day: 'numeric', month: 'short' }).toUpperCase() + ' · ' + x.ev.length + ' erledigt';
+    const list = days.map((x, i) => `<div class="lab2" style="margin-top:14px">${lbl(x, i)}</div>` + (x.ev.length ? x.ev.map(ev => `<div class="pzsr"><span class="pzt">${hhmm(ev.ts)}</span><div class="ico">${ic(ev.t ? this._pzIcon(ev.t) : 'broom', 17)}</div><div><div class="t">${esc(ev.name)}</div><div class="s">${esc(ev.room)}</div></div></div>`).join('') : `<div class="pzsn">nichts erledigt</div>`)).join('');
+    const avg = (tot / 7).toFixed(1).replace('.', ',');
+    return head(tot ? `${tot} ${tot === 1 ? 'Aufgabe' : 'Aufgaben'} erledigt · Ø ${avg} pro Tag` : 'Noch nichts erledigt') + `<div class="pzsb">${bars}</div>` + chips + list + `<div class="card-note">Die Zeiten kommen aus dem Verlauf von Home Assistant. Erledigungen vor dem Start des Putzplans sind nicht enthalten.</div>` + back;
+  }
+
   /* ───────────── Rendern ───────────── */
   _navHtml() {
     return `<div class="logo"></div>${(WALL_UI ? [...TABS, ['clean', 'Putzplan', 'broom']] : TABS).map(t => `<button class="nb ${this._v === t[0] ? 'on' : ''}" data-act="nav" data-v="${t[0]}">${ic(t[2], 24)}<span class="lab">${t[1]}</span></button>`).join('')}
@@ -3343,7 +3399,7 @@ class HomeAurora extends HTMLElement {
     const st = this._sh.scrollTop;
     if (this._sheet.t === 'sched' && this._schedEl && this._sh.contains(this._schedEl)) { this._schedEl.hass = this._h; this._ov.classList.add('show'); return; }
     const r = this._sheet.t === 'room' ? this._c.rooms.find(x => x.id === this._sheet.id) : null;
-    const T = { vroom: () => this._sVRoom(this._sheet.e), persons: () => this._sPersons(), quick: () => this._sQuick(), vent: () => this._sVent(), cal: () => this._sCal(), bat: () => this._sBat(), doors: () => this._sDoors(), sys: () => this._sSys(), waste: () => this._sWaste(), power: () => this._sPower(), sched: () => this._sSched(), set: () => this._sSet(), warn: () => this._sWarn(), radar: () => this._sRadar(), pin: () => this._sPin(), fuel: () => this._sFuel(), plants: () => this._sPlants(), heat: () => this._sHeat(), kid: () => this._sKid(), clean: () => this._sClean(), tv: () => this._sTv() };
+    const T = { vroom: () => this._sVRoom(this._sheet.e), persons: () => this._sPersons(), quick: () => this._sQuick(), vent: () => this._sVent(), cal: () => this._sCal(), bat: () => this._sBat(), doors: () => this._sDoors(), sys: () => this._sSys(), waste: () => this._sWaste(), power: () => this._sPower(), sched: () => this._sSched(), set: () => this._sSet(), warn: () => this._sWarn(), radar: () => this._sRadar(), pin: () => this._sPin(), fuel: () => this._sFuel(), plants: () => this._sPlants(), heat: () => this._sHeat(), kid: () => this._sKid(), clean: () => this._sClean(), tv: () => this._sTv(), pzstat: () => this._sPzStat() };
     const qn = this.shadowRoot.getElementById('qname'), qv = qn ? qn.value : null, qf = qn && this.shadowRoot.activeElement === qn;
     const pq = this.shadowRoot.getElementById('pzq'), pqf = pq && this.shadowRoot.activeElement === pq, pqs = pq ? pq.selectionStart : 0;
     const html = r ? this._sRoom(r) : (T[this._sheet.t] || (() => this._sLights()))(), key = this._sheet.t + ':' + (this._sheet.id || this._sheet.e || '');
@@ -3517,6 +3573,9 @@ class HomeAurora extends HTMLElement {
       case 'pzdone': this._pzDone(e); break;
       case 'pzundo': this._pzUndo(e); this._tst.classList.remove('show'); break;
       case 'pzroom': if (this._pzSt()) { this._pzCol = this._pzCol || {}; this._pzCol[el.dataset.id] = el.dataset.c !== '1'; this._pzRefresh(); } break;
+      case 'pzstat': this._sheet = { t: 'pzstat' }; this._renderSheet(); this._pzLoadStat(); break;
+      case 'pzstatr': this._pzS = null; this._renderSheet(); this._pzLoadStat(true); break;
+      case 'pzback': if (WALL_UI) this._closeSheet(); else { this._sheet = { t: 'clean' }; this._renderSheet(); } break;
       case 'pzstart': { const st = this._pzSt(); if (st) { st.cf = true; this._pzRefresh(); } break; }
       case 'pzcancel': { const st = this._pzSt(); if (st) { st.cf = false; this._pzRefresh(); } break; }
       case 'pzgo': this._pzStart(); break;
