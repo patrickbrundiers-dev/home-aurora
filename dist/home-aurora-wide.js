@@ -1126,8 +1126,8 @@ const CSS4 = `
 .wxd{position:absolute;top:0;height:22px;display:flex;align-items:center;justify-content:center;gap:5px;font-size:12.5px;font-weight:650;white-space:nowrap;overflow:hidden;color:var(--tx)}.wxd small{font-size:10.5px;font-weight:500;color:var(--tx3)}
 .wxi{position:absolute;top:22px;width:34px;margin-left:-17px;height:30px;display:grid;place-items:center;pointer-events:none}.wxi .wx *{animation:none!important}
 .wxw{position:absolute;width:34px;margin-left:-17px;text-align:center;font-size:10px;line-height:1;color:var(--tx3);font-variant-numeric:tabular-nums;pointer-events:none}.wxw svg{display:block;margin:0 auto 3px}
-.wxt{position:absolute;z-index:4;box-sizing:border-box;padding:10px 12px;border-radius:14px;background:rgba(10,15,40,.92);border:1px solid rgba(255,255,255,.16);color:#e9efff;box-shadow:0 10px 30px rgba(0,0,0,.4);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);display:flex;gap:8px;pointer-events:none;font-size:12px}
-.wxtl{flex:1;min-width:0}.wxtl>b{display:block;font-size:11.5px;margin-bottom:5px;color:#fff}.wxtr{display:flex;align-items:center;gap:6px;line-height:1.55}.wxtr b{margin-left:auto;font-weight:650;font-variant-numeric:tabular-nums}
+.wxt{position:absolute;z-index:4;box-sizing:border-box;padding:10px 12px;border-radius:14px;background:rgba(10,15,40,.92);border:1px solid rgba(255,255,255,.16);color:#e9efff;box-shadow:0 10px 30px rgba(0,0,0,.4);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);display:flex;flex-wrap:wrap;gap:4px 8px;pointer-events:none;font-size:12px}
+.wxtl{flex:1;min-width:0}.wxth{flex:0 0 100%;font-size:11.5px;color:#fff;margin-bottom:1px;white-space:nowrap}.wxth b{display:block}.wxtl>b{display:inline}.wxtr{display:flex;align-items:center;gap:6px;line-height:1.55}.wxtr b{margin-left:auto;font-weight:650;font-variant-numeric:tabular-nums}
 .wxdt{width:9px;height:9px;border-radius:50%;background:rgba(255,255,255,.75);flex:none}.wxdt.t{background:#fb7185}.wxdt.r{background:#38bdf8}
 .wxti{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:10.5px;color:#b8c4e6;text-align:center;max-width:66px}
 .wxt.nar{padding:8px 10px;font-size:11px}.wxt.nar .wxti{display:none}.wxt.nar .wxtr{line-height:1.45}
@@ -2421,7 +2421,7 @@ class HomeAurora extends HTMLElement {
   _sSet() {
     const th = this._themePref || this._c.theme || 'dark', am = String(this._ambMin());
     const seg = (act, cur, items) => `<div class="seg wide">${items.map(x => `<button class="${cur === x[0] ? 'on' : ''}" data-act="${act}" data-m="${x[0]}">${x[1]}</button>`).join('')}</div>`;
-    return `<div class="grab"></div><div class="sh"><div class="ico">${ic('cog', 24)}</div><div><h2>Darstellung &amp; Modi</h2><p>Home Aurora v5.2 · Build pz7</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
+    return `<div class="grab"></div><div class="sh"><div class="ico">${ic('cog', 24)}</div><div><h2>Darstellung &amp; Modi</h2><p>Home Aurora v5.2 · Build pz8</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
       <div class="lab2">DESIGN</div>${seg('theme', th, [['dark', 'Dunkel'], ['light', 'Hell'], ['auto', 'Automatisch']])}
       <div class="card-note">„Automatisch“ folgt dem Dunkel-/Hellmodus deines Home-Assistant-Profils. Die Auswahl gilt nur für dieses Gerät.</div>
       ${WALL_UI ? `      <div class="lab2">WANDTABLET-MODUS</div>
@@ -3467,7 +3467,7 @@ class HomeAurora extends HTMLElement {
   _wxTip(i) {
     const Q = this._wxG, d = Q.hr[i], x = Q.X(d.ts), v = Q.kw, f = (a, u, n = 0) => a == null ? '–' : de(a * (u || 1), n);
     const dt = new Date(d.ts);
-    return { x, y: Q.Y(Q.T[i]), html: `<div class="wxtl"><b>${dt.toLocaleDateString('de-DE', Q.W < 600 ? { weekday: 'short', day: 'numeric', month: 'numeric' } : { weekday: 'long', day: 'numeric', month: 'long' })}, ${hhmm(d.ts)} Uhr</b>
+    return { x, y: Q.Y(Q.T[i]), html: `<div class="wxth"><b>${dt.toLocaleDateString('de-DE', Q.W < 600 ? { weekday: 'short', day: 'numeric', month: 'numeric' } : { weekday: 'long', day: 'numeric', month: 'long' })}, ${hhmm(d.ts)} Uhr</b></div><div class="wxtl">
       <div class="wxtr"><i class="wxdt t"></i>Temperatur<b>${de(d.temperature, 1)} °C</b></div>
       ${d.dew_point != null ? `<div class="wxtr"><i class="wxdt"></i>Taupunkt<b>${de(d.dew_point, 1)} °C</b></div>` : ''}
       ${d.wind_gust_speed != null ? `<div class="wxtr"><i class="wxdt"></i>Windböen<b>${Math.round(d.wind_gust_speed * v)} ${esc(Q.wu === 'm/s' ? 'km/h' : Q.wu)}</b></div>` : ''}
@@ -3479,7 +3479,7 @@ class HomeAurora extends HTMLElement {
     const t = this._wxTip(i), s = c.querySelector('svg.wxs'), ln = s.querySelector('.wxcl'), dot = s.querySelector('.wxcd'), tip = c.querySelector('.wxt');
     ln.setAttribute('x1', t.x); ln.setAttribute('x2', t.x); ln.style.display = ''; dot.setAttribute('cx', t.x); dot.setAttribute('cy', t.y); dot.style.display = '';
     tip.innerHTML = t.html; tip.style.display = '';
-    const nar = Q.W < 600, tw = nar ? 168 : 232, left = t.x > Q.W * 0.52 ? Math.max(0, t.x - 12 - tw) : Math.min(Q.W - tw, t.x + 12);
+    const nar = Q.W < 600, tw = nar ? 168 : 252, left = t.x > Q.W * 0.52 ? Math.max(0, t.x - 12 - tw) : Math.min(Q.W - tw, t.x + 12);
     tip.classList.toggle('nar', nar);
     tip.style.left = left + 'px'; tip.style.top = (Q.top + (nar ? 2 : 6)) + 'px'; tip.style.width = tw + 'px';
   }
