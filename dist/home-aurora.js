@@ -27,7 +27,7 @@ const DEFAULTS = {
     rainRate: 'sensor.hp2550a_pro_v1_9_3_rain_rate', rainEvent: 'sensor.hp2550a_pro_v1_9_3_event_rain', rainHour: 'sensor.hp2550a_pro_v1_9_3_hourly_rain', dayRain: 'sensor.hp2550a_pro_v1_9_3_daily_rain', rainWeek: 'sensor.hp2550a_pro_v1_9_3_weekly_rain', rainMonth: 'sensor.hp2550a_pro_v1_9_3_monthly_rain', rainYear: 'sensor.hp2550a_pro_v1_9_3_yearly_rain',
     uv: 'sensor.hp2550a_pro_v1_9_3_uv_index', solar: 'sensor.hp2550a_pro_v1_9_3_solar_radiation', lux: 'sensor.hp2550a_pro_v1_9_3_solar_lux',
     strikes: 'sensor.hp2550a_pro_v1_9_3_lightning_strikes', lastStrike: 'sensor.hp2550a_pro_v1_9_3_last_lightning_strike', strikeDist: 'sensor.hp2550a_pro_v1_9_3_lightning_strike_distance',
-    indoor: [['sensor.hp2550a_pro_v1_9_3_indoor_temperature', 'sensor.hp2550a_pro_v1_9_3_indoor_humidity', 'sensor.hp2550a_pro_v1_9_3_indoor_dewpoint'], ['sensor.hp2550a_pro_v1_9_3_temperature_2', 'sensor.hp2550a_pro_v1_9_3_humidity_2', 'sensor.hp2550a_pro_v1_9_3_dewpoint_2']],
+    indoor: [['sensor.hp2550a_pro_v1_9_3_indoor_temperature', 'sensor.hp2550a_pro_v1_9_3_indoor_humidity', 'sensor.hp2550a_pro_v1_9_3_indoor_dewpoint', 'Wohnzimmer'], ['sensor.hp2550a_pro_v1_9_3_temperature_2', 'sensor.hp2550a_pro_v1_9_3_humidity_2', 'sensor.hp2550a_pro_v1_9_3_dewpoint_2', 'Badezimmer']],
     batteryPct: ['sensor.hp2550a_pro_v1_9_3_wh57_battery'], batteryBin: ['binary_sensor.hp2550a_pro_v1_9_3_wh65_battery', 'binary_sensor.hp2550a_pro_v1_9_3_wh25_battery', 'binary_sensor.hp2550a_pro_v1_9_3_battery_2'],
   },
   kidScript: 'script.kinderhandy_aktion',
@@ -1137,6 +1137,17 @@ const CSS4 = `
 .wxs .trb.h{fill:rgba(251,113,133,.2)}.wxs .trb.l{fill:rgba(96,165,250,.22)}.wxs .trl{fill:none;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}.wxs .trl.h{stroke:#fb7185}.wxs .trl.l{stroke:#60a5fa}
 .wxs .trp rect{fill:rgba(10,15,40,.62)}.wxs .trp text{font-size:10.5px;font-weight:700;font-variant-numeric:tabular-nums}.wxs .trs{fill:#facc15}.wxs .trhit{fill:transparent;cursor:pointer}
 .wxt .wxtr{white-space:nowrap}.wxdt.b{background:#60a5fa}.wxdt.s{background:#facc15}.wxtr small{font-weight:500;color:#9fb0d8}
+.grs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:6px}.gr{position:relative;display:flex;flex-direction:column;align-items:center;text-align:center}
+.gr svg{width:100%;max-width:150px;height:auto;display:block}.gr .gv{position:absolute;left:0;right:0;top:0;aspect-ratio:1;max-width:150px;margin:0 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;padding-bottom:6px}
+.gr .gv b{font-size:30px;font-weight:300;letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1}.gr .gv small{font-size:12px;color:var(--tx2);margin-top:3px}
+.gr .gl2{font-size:13px;font-weight:600;margin-top:2px}.gr .gs{font-size:11.5px;color:var(--tx2);margin-top:2px}
+.hlr{display:flex;gap:18px;margin-top:10px;font-size:14px}.hlr span{display:inline-flex;align-items:center;gap:6px}.hlr b{font-weight:600;color:#fff}.hlr i{font-style:normal;font-size:12px;opacity:.7}
+.bchs{display:flex;flex-wrap:wrap;gap:8px}.bch{display:inline-flex;align-items:center;gap:7px;padding:7px 12px;border-radius:12px;background:rgba(var(--wh),.06);font-size:13px}.bch i{width:8px;height:8px;border-radius:50%}.bch b{font-weight:600}
+@media (max-width:860px){.grs{grid-template-columns:repeat(2,minmax(0,1fr));row-gap:16px}.gr .gv b{font-size:26px}}
+.ins{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}.inc{flex:1 1 150px;display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:14px;background:rgba(var(--wh),.05);min-width:0}.inc .n{display:flex;align-items:center;gap:6px;flex:1;min-width:0;font-size:13px;color:var(--tx2);overflow:hidden;white-space:nowrap;text-overflow:ellipsis}.inc b{font-size:17px;font-weight:600;font-variant-numeric:tabular-nums}.inc .hm{font-size:12px;color:var(--tx2);min-width:34px;text-align:right}
+.r7h{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--tx2);margin:14px 0 6px}.r7{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;align-items:end}.r7>div{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:3px;height:70px}.r7 b{font-size:10.5px;font-weight:600;color:#bae6fd;min-height:12px;font-variant-numeric:tabular-nums}.r7 i{width:100%;max-width:26px;border-radius:5px;background:linear-gradient(180deg,#38bdf8,#818cf8);display:block}.r7 span{font-size:10.5px;color:var(--tx2)}
+.hb{margin-top:4px}.hbt{position:relative;height:10px;border-radius:6px;background:linear-gradient(90deg,#60a5fa 0%,#34d399 25%,#fde047 50%,#fb923c 75%,#fb7185 90%,#c084fc 100%);opacity:.9}.hbt i{position:absolute;top:-4px;width:6px;height:18px;margin-left:-3px;border-radius:3px;background:#fff;box-shadow:0 0 8px rgba(0,0,0,.5)}.hbl{display:flex;justify-content:space-between;font-size:10.5px;color:var(--tx2);margin-top:5px}
+@media (max-width:860px){.inc{flex:1 1 100%}.heatg{grid-template-columns:repeat(3,minmax(0,1fr))!important}}
 `;
 const CSS2 = `
 
@@ -2103,44 +2114,79 @@ class HomeAurora extends HTMLElement {
   _sv(k) { return this._num(this._c.station[k]); }
   _enum(k) { const e = this._c.station[k], v = this._val(e); return !okv(v) || v === 'outside_calculable_range' ? '' : (ENUM[v] || String(v).replace(/_/g, ' ')); }
   _seg() { return `<div class="seg"><button class="${this._wxMode === 'fc' ? 'on' : ''}" data-act="wxmode" data-m="fc">${ic('cloudsun', 16)}Vorhersage</button><button class="${this._wxMode === 'station' ? 'on' : ''}" data-act="wxmode" data-m="station">${ic('radar', 16)}Wetterstation</button></div>`; }
+  async _loadRain7() {
+    const e = this._c.station.dayRain;
+    if (!e || this._rb || (this._rn7t && Date.now() - this._rn7t < 6e5)) return;
+    this._rb = true;
+    const t0 = new Date(); t0.setHours(0, 0, 0, 0); t0.setDate(t0.getDate() - 6);
+    try {
+      const r = await this._h.callWS({ type: 'recorder/statistics_during_period', start_time: t0.toISOString(), statistic_ids: [e], period: 'day', types: ['change'] });
+      const m = {}; for (const x of (r?.[e] || [])) m[new Date(x.start).toDateString()] = (m[new Date(x.start).toDateString()] || 0) + (x.change || 0);
+      this._rn7 = Array.from({ length: 7 }, (_, i) => { const d = new Date(+t0 + i * 864e5); return { d, v: m[d.toDateString()] || 0 }; });
+    } catch (err) { this._rn7 = null; }
+    this._rn7t = Date.now(); this._rb = false; this._renderSoon();
+  }
+  _gring(f, col, val, unit, label, sub) {
+    const a1 = 135 + 270 * clamp(f, 0.015, 1);
+    return `<div class="gr"><svg viewBox="0 0 120 120"><path d="${arc(60, 60, 48, 135, 405)}" fill="none" stroke="rgba(${WH},.09)" stroke-width="9" stroke-linecap="round"/>${f != null ? `<path d="${arc(60, 60, 48, 135, a1)}" fill="none" stroke="${col}" stroke-width="9" stroke-linecap="round" style="filter:drop-shadow(0 0 6px ${col})"/>` : ''}</svg><div class="gv"><b>${val}</b><small>${unit}</small></div><div class="gl2">${label}</div><div class="gs">${sub || '&nbsp;'}</div></div>`;
+  }
   _vStation() {
     const c = this._c, st = c.station, w = this._wxNow(), night = this._app?.dataset.tod === 'night';
     const t = this._sv('temp') ?? w.temp, hum = this._sv('hum') ?? w.hum, feels = this._sv('feels'), dew = this._sv('dew');
     const cond = this._val(c.stationWeather) && okv(this._val(c.stationWeather)) ? this._val(c.stationWeather) : w.cond;
     this._need.add(st.temp); this._need.add(st.hum); this._need.add(st.press);
-    const ht = this._hist[st.temp]?.pts?.map(p => p[1]) || [], mn = ht.length ? Math.min(...ht) : null, mx = ht.length ? Math.max(...ht) : null;
+    const hpts = (this._hist[st.temp]?.pts || []).filter(p => !isNaN(p[1])), ht = hpts.map(p => p[1]);
+    const mn = ht.length ? Math.min(...ht) : null, mx = ht.length ? Math.max(...ht) : null;
+    const tOf = v => { const p = hpts.find(q => q[1] === v); return p ? hhmm(p[0]) : ''; };
     const hp = this._hist[st.press]?.pts?.map(p => p[1]) || [], dP = hp.length > 4 ? hp[hp.length - 1] - hp[0] : null;
     const upd = this._s(st.temp)?.last_updated, comf = this._enum('humidexL') || this._enum('dewL');
     const spd = this._sv('speed') ?? w.wind, uv = this._sv('uv'), sol = this._sv('solar'), lux = this._sv('lux');
     const uvL = uv == null ? '' : uv < 3 ? 'Niedrig' : uv < 6 ? 'Mäßig' : uv < 8 ? 'Hoch' : uv < 11 ? 'Sehr hoch' : 'Extrem';
     const uvC = uv == null ? '#94a3b8' : uv < 3 ? '#34d399' : uv < 6 ? '#fbbf24' : uv < 8 ? '#fb923c' : uv < 11 ? '#fb7185' : '#c084fc';
     const T = (v, d, u) => v == null ? '–' : de(v, d) + (u ? '<small class="u">' + u + '</small>' : '');
-    const hero = `<div class="c sky s8" style="--i:0;background:${this._sky(cond, night)}"><div class="skyin">
-        <div class="wtop"><div><div class="hello" style="color:rgba(255,255,255,.75)">${esc(st.name)}</div><div class="wtemp big" data-count="${t ?? 0}" data-d="1">${de(t)}<small class="u" style="color:rgba(255,255,255,.8)">°</small></div><div class="wcond">${feels != null ? 'Gefühlt ' + de(feels, 1) + '°' : (COND[cond] || cond)}${comf ? ' · ' + esc(comf) : ''}</div>${mn != null ? `<div class="hl2">24 h: Tief ${de(mn, 1)}° · Hoch ${de(mx, 1)}°</div>` : ''}</div>${wx(cond, 130)}</div>
-        <div class="chips"><span class="chip">${ic('drop', 14)}Luftfeuchte <b>${de(hum, 0)} %</b></span>${dew != null ? `<span class="chip">${ic('thermo', 14)}Taupunkt <b>${de(dew, 1)}°</b></span>` : ''}<span class="chip">${ic('wind', 14)}Wind <b>${de(spd, 0)} km/h</b></span>${this._sv('dayRain') != null ? `<span class="chip">${ic('rain', 14)}Regen heute <b>${de(this._sv('dayRain'), 1)} mm</b></span>` : ''}${upd && this._rel(upd) !== '–' ? (this._stale(st.temp, 60) != null ? `<span class="chip stc">${ic('clock', 14)}Keine Daten seit <b>${this._agoTxt(this._stale(st.temp, 60))}</b></span>` : `<span class="chip">Aktualisiert <b>${this._rel(upd)}</b></span>`) : ''}</div></div></div>`;
-    const sunc = `<div class="c s4" style="--i:1"><div class="h">${ic('sun', 14)}Sonne &amp; Licht</div><div class="uvr"><svg viewBox="0 0 120 70"><path d="${arc(60, 62, 48, 180, 360)}" fill="none" stroke="rgba(${WH},.1)" stroke-width="10" stroke-linecap="round"/>${uv != null && uv > 0 ? `<path d="${arc(60, 62, 48, 180, 180 + 180 * clamp(uv / 11, .02, 1))}" fill="none" stroke="${uvC}" stroke-width="10" stroke-linecap="round" style="filter:drop-shadow(0 0 6px ${uvC})"/>` : ''}</svg><div class="uvv"><div class="big">${uv != null ? de(uv, 0) : '–'}</div><span>UV · ${uvL || '–'}</span></div></div>
-        <div class="dg" style="grid-template-columns:1fr 1fr">${this._tile(T(sol, 0, 'W/m²'), 'Strahlung', 'sun')}${this._tile(lux == null ? '–' : lux >= 1000 ? de(lux / 1000, 1) + '<small class="u">klx</small>' : de(lux, 0) + '<small class="u">lx</small>', 'Helligkeit', 'bulb')}</div></div>`;
-    const wind = `<div class="c s6" style="--i:4"><div class="h">${ic('wind', 14)}Wind</div>${this._compass({ ...w, wind: spd })}<div class="dg" style="margin-top:14px">${this._tile(T(this._sv('gust'), 0, 'km/h'), 'Böe jetzt', 'wind')}${this._tile(T(this._sv('maxGust'), 0, 'km/h'), 'Stärkste heute', 'wind')}${this._tile(this._sv('dir10') != null ? de(this._sv('dir10'), 0) + '<small class="u">°</small>' : '–', 'Ø Richtung 10 min', 'radar')}</div></div>`;
-    const rr = [['Stunde', 'rainHour'], ['Heute', 'dayRain'], ['Woche', 'rainWeek'], ['Monat', 'rainMonth']].map(r => [r[0], this._sv(r[1])]), rmax = Math.max(...rr.map(r => r[1] ?? 0), 1);
-    const rain = `<div class="c s6" style="--i:5"><div class="h">${ic('rain', 14)}Regen<span class="r">${(this._sv('rainRate') || 0) > 0 ? 'Es regnet' : 'Trocken'}</span></div>
-        <div class="rrt"><div><div class="big" style="font-size:44px">${T(this._sv('rainRate') ?? 0, 1)}</div><div class="l" style="font-size:12px;color:var(--tx2);margin-top:4px">mm/h · Regenrate</div></div><div><div class="big" style="font-size:44px">${T(this._sv('rainYear'), 0)}</div><div class="l" style="font-size:12px;color:var(--tx2);margin-top:4px">mm in diesem Jahr</div></div></div>
-        ${rr.map(r => `<div class="rrow"><span>${r[0]}</span><div class="pc2" style="width:auto;flex:1"><i style="width:${clamp((r[1] ?? 0) / rmax * 100, r[1] ? 3 : 0, 100)}%;background:linear-gradient(90deg,#38bdf8,#818cf8)"></i></div><b>${r[1] != null ? de(r[1], 1) + ' mm' : '–'}</b></div>`).join('')}${this._sv('rainEvent') ? `<div class="card-note">Aktuelles Ereignis: ${de(this._sv('rainEvent'), 1)} mm</div>` : ''}</div>`;
-    const dTxt = dP == null ? '' : Math.abs(dP) < 1 ? 'Stabil' : dP > 0 ? 'Steigend' : 'Fallend';
-    const press = `<div class="c s6" style="--i:6"><div class="h">${ic('radar', 14)}Luftdruck<span class="r">${dTxt ? dTxt + ' · ' + (dP > 0 ? '+' : '') + de(dP, 1) + ' hPa / 24 h' : ''}</span></div><div class="big" style="font-size:44px;margin-bottom:6px">${T(this._sv('press'), 1, 'hPa')}</div>${this._chart([{ e: st.press, name: 'Luftdruck', color: '#a78bfa' }], { h: 170, dec: 0 })}</div>`;
-    const air = `<div class="c s6" style="--i:7"><div class="h">${ic('drop', 14)}Luft &amp; Feuchte</div><div class="dg">${this._tile(T(hum, 0, '%'), 'Luftfeuchte', 'drop')}${this._tile(T(this._sv('absHum'), 1, 'g/m³'), 'Absolute Feuchte', 'drop')}${this._tile(T(dew, 1, '°'), 'Taupunkt' + (this._enum('dewL') ? ' · ' + this._enum('dewL') : ''), 'thermo')}${this._tile(T(this._sv('frost'), 1, '°'), 'Frostpunkt' + (this._enum('frostRisk') ? ' · ' + this._enum('frostRisk') : ''), 'thermo')}${this._tile(T(this._sv('vpd'), 2, 'hPa'), 'Dampfdruckdefizit', 'gauge')}${this._tile(T(this._sv('enthalpy'), 1, 'kJ/kg'), 'Enthalpie', 'bolt')}</div></div>`;
-    const wc = this._sv('windchill');
-    const comfort = `<div class="c s6" style="--i:8"><div class="h">${ic('thermo', 14)}Komfort &amp; Gefühlte Temperatur</div><div class="dg">${this._tile(T(feels, 1, '°'), 'Gefühlt', 'thermo')}${this._tile(T(this._sv('humidex'), 1, '°'), 'Humidex' + (this._enum('humidexL') ? ' · ' + this._enum('humidexL') : ''), 'sun')}${this._tile(T(this._sv('heat'), 1, '°'), 'Hitzeindex', 'flame')}${wc != null ? this._tile(T(wc, 1, '°'), 'Windchill', 'wind') : ''}${this._tile(T(this._sv('simmer'), 1, '°'), 'Simmer' + (this._enum('simmerL') ? ' · ' + this._enum('simmerL') : ''), 'flame')}${this._enum('thom') ? this._tile(`<span style="font-size:16px">${esc(this._enum('thom'))}</span>`, 'Thom-Unbehagen', 'user') : ''}</div></div>`;
+    const dirs = ['N', 'NO', 'O', 'SO', 'S', 'SW', 'W', 'NW'], bear = this._sv('dir'), dTxt0 = bear != null ? dirs[Math.round(bear / 45) % 8] + ' · ' + de(bear, 0) + '°' : '';
+    const inR = st.indoor.filter(r => this._s(r[0]) && okv(this._val(r[0]))), avg = a => a.length ? a.reduce((x, y) => x + y, 0) / a.length : null;
+    const inT = avg(inR.map(r => this._num(r[0])).filter(v => v != null)), inH = avg(inR.map(r => this._num(r[1])).filter(v => v != null));
+    this._loadRain7();
+    const r7 = this._rn7 && this._rn7.length ? this._rn7 : null;
+    const spread = t != null && dew != null ? t - dew : null, fr = this._sv('frost');
+    const warn = t != null && (t <= 2 || (fr != null && fr < 0 && t < 4)) ? ['Frostgefahr', '#93c5fd'] : spread != null && spread <= 1.5 && hum >= 95 ? ['Nebel möglich', '#cbd5e1'] : null;
+    const batLow = st.batteryBin.some(e => this._val(e) === 'on');
+    const hero = `<div class="c sky s5" style="--i:0;background:${this._sky(cond, night)}"><div class="skyin">
+        <div class="wtop"><div><div class="hello" style="color:rgba(255,255,255,.75)">${esc(st.name)}</div><div class="wtemp big" data-count="${t ?? 0}" data-d="1">${de(t)}<small class="u" style="color:rgba(255,255,255,.8)">°</small></div><div class="wcond">${feels != null ? 'Gefühlt ' + de(feels, 1) + '°' : (COND[cond] || cond)}${comf ? ' · ' + esc(comf) : ''}</div></div>${wx(cond, 110)}</div>
+        ${mn != null ? `<div class="hlr"><span style="color:#93c5fd">${ic('thermo', 14)}Tief <b>${de(mn, 1)}°</b><i>${tOf(mn)}</i></span><span style="color:#fda4af">${ic('thermo', 14)}Hoch <b>${de(mx, 1)}°</b><i>${tOf(mx)}</i></span></div>` : ''}
+        <div class="chips">${dew != null ? `<span class="chip">${ic('thermo', 14)}Taupunkt <b>${de(dew, 1)}°</b></span>` : ''}${upd && this._rel(upd) !== '–' ? (this._stale(st.temp, 60) != null ? `<span class="chip stc">${ic('clock', 14)}Keine Daten seit <b>${this._agoTxt(this._stale(st.temp, 60))}</b></span>` : `<span class="chip">Aktualisiert <b>${this._rel(upd)}</b></span>`) : ''}${warn ? `<span class="chip" style="color:${warn[1]}">${ic('thermo', 14)}<b>${warn[0]}</b></span>` : ''}${batLow ? `<span class="chip stc">${ic('battery', 14)}<b>Batterie schwach</b></span>` : ''}</div></div></div>`;
+    const rings = `<div class="c s7" style="--i:1"><div class="h">${ic('gauge', 14)}Jetzt<span class="r">Außen · Innen</span></div><div class="grs">
+        ${this._gring(t == null ? 0 : clamp((t + 10) / 50, 0, 1), t == null ? '#94a3b8' : tempCol(t), de(t, 1), '°C', 'Außen', feels != null ? 'Gefühlt ' + de(feels, 1) + '°' : '')}
+        ${this._gring(hum == null ? 0 : hum / 100, '#38bdf8', de(hum, 0), '%', 'Luftfeuchte', dew != null ? 'Taupunkt ' + de(dew, 1) + '°' : '')}
+        ${this._gring(spd == null ? 0 : clamp(spd / 60, 0, 1), '#5eead4', de(spd, 1), 'km/h', 'Wind', dTxt0)}
+        ${this._gring(inT == null ? 0 : clamp((inT - 5) / 30, 0, 1), inT == null ? '#94a3b8' : tempCol(inT), de(inT, 1), '°C', inR.length > 1 ? 'Innen Ø' : 'Innen', inH != null ? 'Feuchte ' + de(inH, 0) + ' %' : '')}</div>
+        ${inR.length ? `<div class="ins">${inR.map(r => `<div class="inc"><span class="n">${ic('home', 14)}${esc(r[3] || this._name(r[0]).replace(/^HP2550A_Pro_V[\d.]+\s*/i, '') || 'Innen')}</span><b>${de(this._num(r[0]), 1)}°</b><span class="hm">${this._num(r[1]) != null ? de(this._num(r[1]), 0) + ' %' : ''}</span></div>`).join('')}</div>` : ''}</div>`;
+    const sunc = `<div class="c s4" style="--i:2"><div class="h">${ic('sun', 14)}Sonne &amp; Licht<span class="r" style="color:${uvC}">UV ${uv != null ? de(uv, 0) : '–'} · ${uvL || '–'}</span></div>${this._sunArc()}
+        <div class="dg" style="grid-template-columns:1fr 1fr;margin-top:10px">${this._tile(T(sol, 0, 'W/m²'), 'Strahlung', 'sun')}${this._tile(lux == null ? '–' : lux >= 1000 ? de(lux / 1000, 1) + '<small class="u">klx</small>' : de(lux, 0) + '<small class="u">lx</small>', 'Helligkeit', 'bulb')}</div></div>`;
+    const rr = [['Stunde', 'rainHour'], ['Heute', 'dayRain'], ['Woche', 'rainWeek'], ['Monat', 'rainMonth'], ['Jahr', 'rainYear']].map(r => [r[0], this._sv(r[1])]), rmax = Math.max(...rr.map(r => r[1] ?? 0), 1);
+    const rate = this._sv('rainRate') || 0;
+    const rain = `<div class="c s4" style="--i:3"><div class="h">${ic('rain', 14)}Regen<span class="r">${rate > 0 ? 'Es regnet' : 'Trocken'}</span></div>
+        <div class="rrt"><div><div class="big" style="font-size:40px">${T(rate, 1)}</div><div class="l" style="font-size:12px;color:var(--tx2);margin-top:4px">mm/h · Rate</div></div><div><div class="big" style="font-size:40px">${T(this._sv('rainEvent') ?? 0, 1)}</div><div class="l" style="font-size:12px;color:var(--tx2);margin-top:4px">mm · Ereignis</div></div></div>
+        ${rr.map(r => `<div class="rrow"><span>${r[0]}</span><div class="pc2" style="width:auto;flex:1"><i style="width:${clamp((r[1] ?? 0) / rmax * 100, r[1] ? 3 : 0, 100)}%;background:linear-gradient(90deg,#38bdf8,#818cf8)"></i></div><b>${r[1] != null ? de(r[1], r[0] === 'Jahr' ? 0 : 1) + ' mm' : '–'}</b></div>`).join('')}${r7 ? `<div class="r7h">Letzte 7 Tage</div><div class="r7">${r7.map(d => `<div><b>${d.v >= 0.05 ? de(d.v, 1) : ''}</b><i style="height:${Math.max(d.v >= 0.05 ? 4 : 2, d.v / Math.max(...r7.map(x => x.v), 1) * 38).toFixed(0)}px"></i><span>${d.d.toLocaleDateString('de-DE', { weekday: 'short' }).replace('.', '')}</span></div>`).join('')}</div>` : ''}</div>`;
+    const dT = dP == null ? '' : Math.abs(dP) < 1 ? 'Stabil' : dP > 0 ? 'Steigend' : 'Fallend';
+    const d3 = hp.length > 12 ? hp[hp.length - 1] - hp[hp.length - 10] : null;
+    const pTxt = d3 == null ? '' : d3 <= -3 ? 'Druck fällt schnell – Sturm oder Unwetter möglich' : d3 <= -1 ? 'Druck fällt – Wetter wird unbeständiger' : d3 >= 3 ? 'Druck steigt schnell – rasche Besserung' : d3 >= 1 ? 'Druck steigt – Wetter beruhigt sich' : 'Druck stabil – kaum Änderung';
+    const press = `<div class="c s4" style="--i:4"><div class="h">${ic('radar', 14)}Luftdruck<span class="r">${dT ? dT + ' · ' + (dP > 0 ? '+' : '') + de(dP, 1) + ' hPa' : ''}</span></div><div class="big" style="font-size:40px;margin-bottom:6px">${T(this._sv('press'), 1, 'hPa')}</div>${this._chart([{ e: st.press, name: 'Luftdruck', color: '#a78bfa' }], { h: 140, dec: 0 })}${pTxt ? `<div class="card-note" style="margin-top:8px">${pTxt} <small>(3 h: ${d3 > 0 ? '+' : ''}${de(d3, 1)} hPa)</small></div>` : ''}</div>`;
+    const mgS = this._s(st.maxGust), gT = mgS && (this._sv('maxGust') || 0) > 0 && new Date(mgS.last_changed).toDateString() === new Date().toDateString() ? ' · ' + hhmm(mgS.last_changed) : '';
+    const wind = `<div class="c s4" style="--i:6"><div class="h">${ic('wind', 14)}Wind</div>${this._compass({ ...w, wind: spd })}<div class="dg" style="margin-top:12px;grid-template-columns:1fr 1fr">${this._tile(T(this._sv('gust'), 0, 'km/h'), 'Böe jetzt', 'wind')}${this._tile(T(this._sv('maxGust'), 0, 'km/h'), (gT ? 'Max. Böe' + gT : 'Stärkste heute'), 'wind')}</div></div>`;
     const ls = this._val(st.lastStrike), dist = this._sv('strikeDist'), recent = okv(ls) && Date.now() - new Date(ls).getTime() < 90 * 6e4;
-    const bolt = `<div class="c s6" style="--i:9"><div class="h">${ic('bolt', 14)}Blitze<span class="r" style="${recent ? 'color:var(--warm)' : ''}">${recent ? 'Aktiv in der Nähe' : 'Ruhig'}</span></div><div class="dg">${this._tile(T(this._sv('strikes'), 0), 'Blitze heute', 'bolt')}${this._tile(okv(ls) ? this._rel(ls) : '–', 'Letzter Blitz', 'cal')}${this._tile(T(dist, 0, 'km'), 'Entfernung', 'radar')}</div></div>`;
-    const inRows = st.indoor.filter(r => this._s(r[0]) && okv(this._val(r[0]))).map(r => `<div class="vr"><div class="ico">${ic('home', 19)}</div><div><div class="t">${esc(this._name(r[0]).replace(/^HP2550A_Pro_V[\d.]+\s*/i, '') || 'Innen')}</div><div class="s">Taupunkt ${r[2] && this._num(r[2]) != null ? de(this._num(r[2]), 1) + '°' : '–'}</div></div><div class="m">${de(this._num(r[0]), 1)} °C<small>${this._num(r[1]) != null ? de(this._num(r[1]), 0) + ' %' : ''}</small></div></div>`).join('');
-    const indoor = `<div class="c s6" style="--i:10"><div class="h">${ic('home', 14)}Innensensoren</div>${inRows || '<div class="empty">Keine Innensensoren</div>'}</div>`;
-    const bat = st.batteryPct.filter(e => this._s(e) && okv(this._val(e))).map(e => this._batRow({ e, v: this._num(e), n: this._clean(this._name(e)).replace(/^HP2550A_Pro_V[\d.]+\s*/i, '') }));
-    const bin = st.batteryBin.filter(e => this._s(e) && okv(this._val(e))).map(e => `<div class="bt ${this._val(e) === 'on' ? 'low' : ''}"><div class="t">${esc(this._name(e).replace(/^HP2550A_Pro_V[\d.]+\s*/i, ''))}</div><b style="width:auto;color:${this._val(e) === 'on' ? '#fb7185' : '#34d399'}">${this._val(e) === 'on' ? 'schwach' : 'OK'}</b></div>`);
-    const sens = `<div class="c s6" style="--i:11"><div class="h">${ic('battery', 14)}Sensor-Batterien</div>${bat.join('')}${bin.join('')}${bat.length + bin.length ? '' : '<div class="empty">Keine Daten</div>'}</div>`;
+    const bolt = `<div class="c s4" style="--i:7"><div class="h">${ic('bolt', 14)}Blitze<span class="r" style="${recent ? 'color:var(--warm)' : ''}">${recent ? 'Aktiv in der Nähe' : 'Ruhig'}</span></div><div class="dg" style="grid-template-columns:1fr 1fr">${this._tile(T(this._sv('strikes'), 0), 'Heute', 'bolt')}${this._tile(T(dist, 0, 'km'), 'Entfernung', 'radar')}</div>${okv(ls) ? `<div class="card-note" style="margin-top:8px">Letzter Blitz: ${this._rel(ls)}</div>` : ''}</div>`;
+    const hx = this._sv('humidex'), hxF = hx == null ? null : clamp((hx - 10) / 40, 0, 1);
+    const hband = hxF == null ? '' : `<div class="hb"><div class="hbt"><i style="left:${(hxF * 100).toFixed(1)}%"></i></div><div class="hbl"><span>Kühl</span><span>Angenehm</span><span>Schwül</span><span>Hitze</span><span>Gefahr</span></div></div>`;
+    const heat = `<div class="c s4" style="--i:8"><div class="h">${ic('flame', 14)}Hitze &amp; Komfort<span class="r">${esc(this._enum('humidexL') || '')}</span></div>${hband}<div class="dg heatg" style="margin-top:12px">${this._tile(T(feels, 1, '°'), 'Gefühlt', 'thermo')}${this._tile(T(this._sv('humidex'), 1, '°'), 'Humidex', 'sun')}${this._tile(T(this._sv('heat'), 1, '°'), 'Hitzeindex', 'flame')}</div></div>`;
+    const bat = st.batteryPct.filter(e => this._s(e) && okv(this._val(e))).map(e => `<span class="bch"><i style="background:${this._num(e) < 25 ? '#fb7185' : '#34d399'}"></i>${esc(this._clean(this._name(e)).replace(/^HP2550A_Pro_V[\d.]+\s*/i, ''))} <b>${de(this._num(e), 0)} %</b></span>`);
+    const bin = st.batteryBin.filter(e => this._s(e) && okv(this._val(e))).map(e => `<span class="bch"><i style="background:${this._val(e) === 'on' ? '#fb7185' : '#34d399'}"></i>${esc(this._name(e).replace(/^HP2550A_Pro_V[\d.]+\s*/i, ''))} <b>${this._val(e) === 'on' ? 'schwach' : 'OK'}</b></span>`);
+    const sens = `<div class="c s4" style="--i:9"><div class="h">${ic('battery', 14)}Sensor-Batterien</div><div class="bchs">${bat.concat(bin).join('') || '<div class="empty">Keine Daten</div>'}</div></div>`;
     return `<div class="vh"><div><h1>Wetter</h1><p>${esc(st.name)}${upd && this._rel(upd) !== '–' ? ' · ' + this._rel(upd) : ''}</p></div>${this._seg()}</div>
-      <div class="bento">${hero}${sunc}
-        <div class="c s12" style="--i:2"><div class="h">${ic('thermo', 14)}Temperatur &amp; Luftfeuchte<span class="r">24 h</span></div>${this._trend({ id: 'stn', temp: st.temp, hum: st.hum }, '#fb923c', { bare: true, h: 150 })}</div>
-        ${wind}${rain}${press}${air}${comfort}${bolt}${indoor}${sens}</div>`;
+      <div class="bento">${hero}${rings}${sunc}${rain}${press}
+        <div class="c s8" style="--i:5"><div class="h">${ic('thermo', 14)}Temperatur &amp; Luftfeuchte<span class="r">24 h</span></div>${this._trend({ id: 'stn', temp: st.temp, hum: st.hum }, '#fb923c', { bare: true, h: 170 })}</div>
+        ${wind}${heat}${bolt}${sens}</div>`;
   }
 
   /* ───────────── Sheets ───────────── */
@@ -2416,7 +2462,7 @@ class HomeAurora extends HTMLElement {
   _sSet() {
     const th = this._themePref || this._c.theme || 'dark', am = String(this._ambMin());
     const seg = (act, cur, items) => `<div class="seg wide">${items.map(x => `<button class="${cur === x[0] ? 'on' : ''}" data-act="${act}" data-m="${x[0]}">${x[1]}</button>`).join('')}</div>`;
-    return `<div class="grab"></div><div class="sh"><div class="ico">${ic('cog', 24)}</div><div><h2>Darstellung &amp; Modi</h2><p>Home Aurora v5.2 · Build pz10</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
+    return `<div class="grab"></div><div class="sh"><div class="ico">${ic('cog', 24)}</div><div><h2>Darstellung &amp; Modi</h2><p>Home Aurora v5.2 · Build pz11</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
       <div class="lab2">DESIGN</div>${seg('theme', th, [['dark', 'Dunkel'], ['light', 'Hell'], ['auto', 'Automatisch']])}
       <div class="card-note">„Automatisch“ folgt dem Dunkel-/Hellmodus deines Home-Assistant-Profils. Die Auswahl gilt nur für dieses Gerät.</div>
       ${WALL_UI ? `      <div class="lab2">WANDTABLET-MODUS</div>
