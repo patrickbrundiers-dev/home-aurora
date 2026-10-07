@@ -3241,10 +3241,10 @@ class HomeAurora extends HTMLElement {
         ? `<div class="pzcf"><div class="pzct">Aufgaben verteilen?</div><div class="pzcs">${U.length} Aufgaben ohne Startdatum werden auf die nächsten Wochen verteilt: heute ${p0}, in den nächsten 7 Tagen ${p7}. Pro Aufgabe lässt sich das später mit „Rückgängig“ zurücknehmen.</div><div class="pzcb"><button class="vbt pzgo" data-act="pzgo">Jetzt starten</button><button class="vbt" data-act="pzcancel">Abbrechen</button></div></div>`
         : `<button class="vbt pzgo pzgo1" data-act="pzstart">${ic('play', 16)}<span>${fresh ? 'Plan starten' : U.length + ' Aufgaben ohne Startdatum verteilen'}</span></button>`;
     }
-    const chips = `<div class="qfl" style="margin-top:12px">${[['due', 'Fällig'], ['all', 'Alle']].map(x => `<button class="qfc ${x[0] === f && !q ? 'on' : ''}" data-act="pzf" data-e="${x[0]}">${x[1]}</button>`).join('')}<button class="qfc pzstb" data-act="pzstat">${ic('list', 13)} Letzte 7 Tage</button></div><input id="pzq" class="pzq" type="search" placeholder="Aufgabe oder Raum suchen …" value="${esc(st.q || '')}" autocomplete="off" enterkeyhint="search">`;
+    const nToday = T.filter(t => t.today).length;
+    const chips = `<div class="qfl" style="margin-top:12px">${[['due', 'Fällig'], ['today', 'Heute'], ['all', 'Alle']].map(x => `<button class="qfc ${x[0] === f && !q ? 'on' : ''}" data-act="pzf" data-e="${x[0]}"${x[0] === 'today' ? ' aria-label="Heute erledigt"' : ''}>${x[1]}${x[0] === 'today' && nToday ? `<b style="margin-left:6px;font-weight:700;font-variant-numeric:tabular-nums">${nToday}</b>` : ''}</button>`).join('')}<button class="qfc pzstb" data-act="pzstat" aria-label="Letzte 7 Tage">${ic('list', 13)} 7 Tage</button></div><input id="pzq" class="pzq" type="search" placeholder="Aufgabe oder Raum suchen …" value="${esc(st.q || '')}" autocomplete="off" enterkeyhint="search">`;
     const view = q ? 'all' : f;
-    const doneT = view === 'due' ? T.filter(t => t.today) : [];
-    const list = q ? T.filter(t => (t.name + ' ' + t.room).toLowerCase().includes(q)) : view === 'due' ? T.filter(t => !t.today && (t.st === 'overdue' || t.st === 'due_soon')) : T;
+    const list = q ? T.filter(t => (t.name + ' ' + t.room).toLowerCase().includes(q)) : view === 'due' ? T.filter(t => !t.today && (t.st === 'overdue' || t.st === 'due_soon')) : view === 'today' ? T.filter(t => t.today) : T;
     const rooms = {}; for (const t of list) (rooms[t.room] = rooms[t.room] || []).push(t);
     const key = r => Math.min(...rooms[r].map(t => this._pzRank(t)));
     const order = Object.keys(rooms).sort((a, b) => key(a) - key(b) || a.localeCompare(b, 'de'));
@@ -3261,9 +3261,9 @@ class HomeAurora extends HTMLElement {
       const info = view === 'all' || q ? `<span class="pzp"><i style="width:${Math.round(100 * cur / all.length)}%"></i></span><span class="pzc">${cur}/${all.length}</span>` : `<span class="pzc">${rooms[r].length}</span>`;
       return `<div class="pzg"><button class="pzh${col ? ' c' : ''}" data-act="pzroom" data-id="${esc(k)}" data-c="${col ? 1 : 0}"><span class="pzn">${esc(r.toUpperCase())}</span>${kid ? `<span class="pzs" title="in den letzten 7 Tagen erledigt">★ ${star} diese Woche</span>` : ''}${info}<span class="pzv">${ic('chevron', 14)}</span></button>${col ? '' : sortR(rooms[r]).map(row).join('')}</div>`;
     };
-    const body = order.length ? order.map(group).join('') : q ? `<div class="empty">Keine Aufgabe zu „${esc(st.q)}“ gefunden.</div>` : `<div class="empty">Nichts fällig. Unter „Alle" siehst du alle ${T.length} Aufgaben.</div>`;
-    const doneS = doneT.length ? `<div class="lab2">HEUTE ERLEDIGT · ${doneT.length}</div>${doneT.map(row).join('')}` : '';
-    return status + go + chips + `<div class="pzl">${body}</div>` + doneS + `<div class="card-note">„Erledigt" setzt das Datum auf heute, nach rechts wischen geht auch. Intervalle und Aufgaben änderst du in der Putzplan-Integration.</div>`;
+    const body = order.length ? order.map(group).join('') : q ? `<div class="empty">Keine Aufgabe zu „${esc(st.q)}“ gefunden.</div>` : view === 'today' ? `<div class="empty">Heute noch nichts erledigt.</div>` : `<div class="empty">Nichts fällig. Unter „Alle" siehst du alle ${T.length} Aufgaben.</div>`;
+    const doneS = view === 'today' && list.length ? `<div class="lab2">HEUTE ERLEDIGT · ${list.length}</div>` : '';
+    return status + go + chips + doneS + `<div class="pzl">${body}</div>` + `<div class="card-note">„Erledigt" setzt das Datum auf heute, nach rechts wischen geht auch. Intervalle und Aufgaben änderst du in der Putzplan-Integration.</div>`;
   }
   _pzOpt(e, k, prev) {
     this._pzO = this._pzO || {};
