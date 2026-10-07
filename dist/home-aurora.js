@@ -1371,7 +1371,7 @@ class HomeAurora extends HTMLElement {
   _tick() {
     const h = this._h; let sig = this._isLight() + '|';
     for (const e of this._watch) sig += (h.states[e]?.last_updated || '-') + '|';
-    for (const k in h.states) if (k.startsWith('light.') || this._isBat(k) || this._isContact(k) || k.includes(this._pid) || h.states[k].attributes?.putzplan_task) sig += h.states[k].last_updated;
+    for (const k in h.states) if (k.startsWith('light.') || (k.startsWith('sensor.') && k.includes('timer')) || this._isBat(k) || this._isContact(k) || k.includes(this._pid) || h.states[k].attributes?.putzplan_task) sig += h.states[k].last_updated;
     const va = h.states[this._c.stats.vent]?.attributes?.raeume; if (va) for (const r of va) if (r.entity_id) sig += (h.states[r.entity_id]?.last_updated || '-');
     if (sig === this._sig) return;
     if (this._rweb && this._v === 'weather' && Date.now() - this._lastRender < 3e5) return;
@@ -1893,9 +1893,10 @@ class HomeAurora extends HTMLElement {
     else if (pr && !pr.offline && pr.st === 'finish') { const ag = this._age(this._c.printer.prefix + 'druckstatus'); if (ag != null && ag < 3 * 36e5) A.push({ id: 'prn', cls: 'ok', icon: 'check', text: 'Druck fertig', sub: 'vor ' + this._agoTxt(ag), act: 'nav', attrs: 'data-v="printer"' }); }
     if (pr && !pr.offline && !(pr.st === 'failed') && (this._val(c.printer.error) === 'on' || this._val(c.printer.hms) === 'on')) A.push({ id: 'prerr', crit: true, cls: 'bad', icon: 'alert', text: 'Druckerfehler gemeldet', sub: '', act: 'nav', attrs: 'data-v="printer"' });
     A.push(...this._alertsHome());
+    A.unshift(...this._tmrAlerts());
     return A;
   }
-  _alertHtml(a) { return `<button class="al ${a.cls}${a.crit ? ' crit' : ''}" data-act="${a.act}" ${a.attrs || ''}>${ic(a.icon, 16)}<span>${esc(a.text)}${a.sub ? ` <small>${esc(a.sub)}</small>` : ''}</span>${a.pct != null && !isNaN(a.pct) ? `<i class="alb"><u style="width:${clamp(a.pct, 0, 100)}%"></u></i>` : ''}</button>`; }
+  _alertHtml(a) { return `<button class="al ${a.cls}${a.crit ? ' crit' : ''}" data-act="${a.act}" ${a.attrs || ''}>${ic(a.icon, 16)}<span>${esc(a.text)}${a.sub ? ` <small${a.tmr ? ` data-tmr="${a.tmr}"` : ''}>${esc(a.sub)}</small>` : ''}</span>${a.pct != null && !isNaN(a.pct) ? `<i class="alb"><u style="width:${clamp(a.pct, 0, 100)}%"></u></i>` : ''}</button>`; }
 
   /* ───────────── Termine ───────────── */
   async _loadCal() {
@@ -2464,7 +2465,7 @@ class HomeAurora extends HTMLElement {
   _sSet() {
     const th = this._themePref || this._c.theme || 'dark', am = String(this._ambMin());
     const seg = (act, cur, items) => `<div class="seg wide">${items.map(x => `<button class="${cur === x[0] ? 'on' : ''}" data-act="${act}" data-m="${x[0]}">${x[1]}</button>`).join('')}</div>`;
-    return `<div class="grab"></div><div class="sh"><div class="ico">${ic('cog', 24)}</div><div><h2>Darstellung &amp; Modi</h2><p>Home Aurora v5.2 · Build pz12</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
+    return `<div class="grab"></div><div class="sh"><div class="ico">${ic('cog', 24)}</div><div><h2>Darstellung &amp; Modi</h2><p>Home Aurora v5.2 · Build pz13</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
       <div class="lab2">DESIGN</div>${seg('theme', th, [['dark', 'Dunkel'], ['light', 'Hell'], ['auto', 'Automatisch']])}
       <div class="card-note">„Automatisch“ folgt dem Dunkel-/Hellmodus deines Home-Assistant-Profils. Die Auswahl gilt nur für dieses Gerät.</div>
       ${WALL_UI ? `      <div class="lab2">WANDTABLET-MODUS</div>
@@ -3623,6 +3624,36 @@ class HomeAurora extends HTMLElement {
     const chips = [[7, '7 Tage'], [10, '10 Tage'], [14, '14 Tage']].map(x => `<button class="qfc ${x[0] === G.span ? 'on' : ''}" data-act="trspan" data-n="${x[0]}">${x[1]}</button>`).join('');
     return `<div class="h">${ic('cloudsun', 14)}14-Tage-Trend<span class="r">Kachelmann</span></div><div class="qfl wxsp">${chips}</div><div class="wxwrap">${this._trChart(G)}</div><div class="card-note" style="margin-top:6px">Tippen für Details · Höchst- (rot) und Tiefstwert (blau) mit Bandbreite der Prognose, Regen (Balken, mm), Sonnenanteil (gelb) · Wochenende dunkel hinterlegt</div>`;
   }
+  /* ───────────── v15: Alexa-Timer (Sensoren „Nächster Timer") als Live-Countdown ───────────── */
+  _timers() {
+    const h = this._h, now = Date.now(), seen = new Set(), out = [];
+    for (const k in h.states) {
+      if (!k.startsWith('sensor.') || !/(nachster|naechster|next)_timer(_\d+)?$/.test(k)) continue;
+      const s = h.states[k], t = new Date(s.state).getTime();
+      if (isNaN(t) || t < now - 120e3 || t > now + 48 * 36e5) continue;
+      const nm = String(s.attributes?.friendly_name || k).replace(/\s*(n[äa]e?chster|next)\s*timer\s*$/i, '').trim() || 'Alexa', key = nm + '|' + t;
+      if (seen.has(key)) continue; seen.add(key); out.push({ e: k, name: nm, t });
+    }
+    return out.sort((a, b) => a.t - b.t);
+  }
+  _tmrFmt(ms) {
+    const s = Math.ceil(ms / 1000);
+    if (s <= 0) return 'abgelaufen';
+    const hh = Math.floor(s / 3600), mm = Math.floor(s % 3600 / 60), ss = s % 60, p = n => String(n).padStart(2, '0');
+    return hh ? `${hh}:${p(mm)}:${p(ss)}` : `${mm}:${p(ss)}`;
+  }
+  _tmrAlerts() {
+    const now = Date.now();
+    return this._timers().map(x => { const left = x.t - now; return { id: 'tmr' + x.e, crit: left <= 0, cls: left <= 0 ? 'warn' : 'info', icon: 'clock', text: 'Timer · ' + x.name, sub: this._tmrFmt(left), tmr: x.t, act: 'nav', attrs: 'data-v="home"' }; });
+  }
+  _tmrTick() {
+    const root = this.shadowRoot; if (!root) return;
+    const els = root.querySelectorAll('[data-tmr]'); if (!els.length) return;
+    const now = Date.now();
+    els.forEach(el => { const t = this._tmrFmt(+el.dataset.tmr - now); if (el._l !== t) { el._l = t; el.textContent = t; } });
+    const ex = [...els].reduce((m, el) => Math.max(m, +el.dataset.tmr - now <= -120e3 ? 2 : +el.dataset.tmr - now <= 0 ? 1 : 0), 0);
+    if (ex !== (this._tmrEx || 0)) { this._tmrEx = ex; this._sig = ''; this._tick(); }
+  }
 
   /* ───────────── Rendern ───────────── */
   _navHtml() {
@@ -3708,6 +3739,7 @@ class HomeAurora extends HTMLElement {
     if (this._amb) { if (this._ambBy === 'night' && !nt) this._ambOff(); else { const s = this._clockStr(); if (this._ambClk !== s) { this._ambClk = s; this._ambRender(); } } }
     else if (nt && vis && Date.now() - this._lastAct > nt.after * 6e4) { this._ambOn(); this._ambBy = 'night'; }
     else if (WALL_UI && this._ambMin() > 0 && Date.now() - this._lastAct > this._ambMin() * 6e4 && vis) { this._ambOn(); this._ambBy = 'day'; }
+    this._tmrTick();
     const el = this.shadowRoot?.getElementById('clk');
     if (!el) return;
     const s = this._clockStr();
