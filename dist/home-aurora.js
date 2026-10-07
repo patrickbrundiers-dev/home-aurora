@@ -3186,7 +3186,7 @@ class HomeAurora extends HTMLElement {
   async _pzStart() {
     const P = this._pzPlan(), g = {};
     for (const p of P) (g[p.last] = g[p.last] || []).push(p.e);
-    const st = this._pzSt(); if (st) { st.cf = false; st.f = 'due'; }
+    const st = this._pzSt(); if (st) { st.cf = false; st.f = 'today'; }
     try { await Promise.all(Object.keys(g).map(d => this._h.callService('putzplan', 'update_task', { entity_id: g[d], last_done: d }))); } catch (err) { this._toast('Start fehlgeschlagen'); return; }
     const t0 = P.filter(p => p.o === 0).length;
     this._toast(`Plan gestartet · heute ${t0} ${t0 === 1 ? 'Aufgabe' : 'Aufgaben'}`, 3500); this._pzRefresh();
@@ -3228,7 +3228,7 @@ class HomeAurora extends HTMLElement {
     return h + `<div class="pzpage">${this._cleanBody(this._pzSt())}</div>`;
   }
   _cleanBody(st) {
-    const S = this._pzSum(), T = S.T, f = st.f || (S.over.length || S.soon.length ? 'due' : 'all'), q = (st.q || '').trim().toLowerCase();
+    const S = this._pzSum(), T = S.T, f = st.f || 'today', q = (st.q || '').trim().toLowerCase();
     const sched = T.filter(t => t.st !== 'as_needed'), U = T.filter(t => t.st === 'unknown'), fresh = U.length > 0 && U.length === sched.length;
     const plan = U.length ? this._pzPlan() : [], p0 = plan.filter(p => p.o === 0).length, p7 = plan.filter(p => p.o < 7).length;
     const tone = fresh ? 'hot' : S.over.length ? 'hot' : S.soon.length ? 'warn' : 'live';
@@ -3243,7 +3243,7 @@ class HomeAurora extends HTMLElement {
     }
     const isToday = t => t.today || t.st === 'overdue' || (t.st === 'due_soon' && t.until === 0);
     const nToday = T.filter(t => !t.today && isToday(t)).length;
-    const chips = `<div class="qfl" style="margin-top:12px">${[['due', 'Fällig'], ['today', 'Heute'], ['all', 'Alle']].map(x => `<button class="qfc ${x[0] === f && !q ? 'on' : ''}" data-act="pzf" data-e="${x[0]}"${x[0] === 'today' ? ' aria-label="Heute: überfällig, heute fällig und erledigt"' : ''}>${x[1]}${x[0] === 'today' && nToday ? `<b style="margin-left:6px;font-weight:700;font-variant-numeric:tabular-nums">${nToday}</b>` : ''}</button>`).join('')}<button class="qfc pzstb" data-act="pzstat" aria-label="Letzte 7 Tage">${ic('list', 13)} 7 Tage</button></div><input id="pzq" class="pzq" type="search" placeholder="Aufgabe oder Raum suchen …" value="${esc(st.q || '')}" autocomplete="off" enterkeyhint="search">`;
+    const chips = `<div class="qfl" style="margin-top:12px">${[['today', 'Heute'], ['due', 'Fällig'], ['all', 'Alle']].map(x => `<button class="qfc ${x[0] === f && !q ? 'on' : ''}" data-act="pzf" data-e="${x[0]}"${x[0] === 'today' ? ' aria-label="Heute: überfällig, heute fällig und erledigt"' : ''}>${x[1]}${x[0] === 'today' && nToday ? `<b style="margin-left:6px;font-weight:700;font-variant-numeric:tabular-nums">${nToday}</b>` : ''}</button>`).join('')}<button class="qfc pzstb" data-act="pzstat" aria-label="Letzte 7 Tage">${ic('list', 13)} 7 Tage</button></div><input id="pzq" class="pzq" type="search" placeholder="Aufgabe oder Raum suchen …" value="${esc(st.q || '')}" autocomplete="off" enterkeyhint="search">`;
     const view = q ? 'all' : f;
     const list = q ? T.filter(t => (t.name + ' ' + t.room).toLowerCase().includes(q)) : view === 'due' ? T.filter(t => !t.today && (t.st === 'overdue' || t.st === 'due_soon')) : view === 'today' ? T.filter(isToday) : T;
     const rooms = {}; for (const t of list) (rooms[t.room] = rooms[t.room] || []).push(t);
