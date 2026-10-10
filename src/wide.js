@@ -20,6 +20,8 @@ const CSSW = `
    unter 1200px (Tablet hochkant) stehen die Hinweise in einer eigenen Zeile */
 .ctop .alerts{flex:0 1 auto;min-width:0;overflow-x:auto;scrollbar-width:none}.ctop .alerts::-webkit-scrollbar{display:none}
 @media (max-width:1199px){.ctop{flex-wrap:wrap}.ctop .alerts{flex:1 1 100%}}
+/* bis 1500 px: Platz für Schnellaktionen – Musik/Wandtablet nur als Symbol, Zusatzzeilen bei vielen Hinweisen weg */
+@media (max-width:1499px){.ctop .tb:not(.on){padding:9px 11px}.ctop .tb:not(.on) span{display:none}.ctop .alerts.many .al small{display:none}.ctop .qa{min-width:150px}}
 .ctop .gap{flex:1}
 .ctop .tb{flex:none;display:flex;align-items:center;gap:8px;padding:9px 14px;border-radius:999px;background:rgba(var(--wh),.07);border:1px solid var(--line);font-size:13px;color:var(--tx2);white-space:nowrap}
 .ctop .tb:hover{color:var(--tx);background:rgba(var(--wh),.12)}
@@ -183,8 +185,8 @@ class HomeAuroraWide extends HomeAurora {
     const cal = this._calCard(7, 1, 8), pow = this._powerCard(8);
     const vh = typeof innerHeight === 'number' ? innerHeight : 800;
     return `<div class="cock">
-      <div class="ctop">${AL.length ? `<div class="alerts">${AL.map(a => this._alertHtml(a)).join('')}</div>` : ''}${q || '<div class="gap"></div>'}
-        ${this._musicTb()}<button class="tb" data-act="ambient">${ic('expand', 15)}Wandtablet</button></div>
+      <div class="ctop">${AL.length ? `<div class="alerts${AL.length > 2 ? ' many' : ''}">${AL.map(a => this._alertHtml(a)).join('')}</div>` : ''}${q || '<div class="gap"></div>'}
+        ${this._musicTb()}<button class="tb" data-act="ambient" aria-label="Wandtablet-Modus">${ic('expand', 15)}<span>Wandtablet</span></button></div>
       <div class="stg">
         ${this._stat(1, 'bulb', 'Lichter an', L, L ? 'hot' : '', L ? esc(this._lightsOn().slice(0, 2).map(e => this._name(e)).join(', ')) + (L > 2 ? ' …' : '') : 'Alles aus', 'lights')}
         ${this._stat(2, 'window', 'Fenster offen', open.length, open.length ? 'bad' : 'cool', this._winSub(open), 'doors')}

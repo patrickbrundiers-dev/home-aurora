@@ -1262,83 +1262,17 @@
 "last_updated": "2026-01-01T12:00:00+00:00",
 "state": "heat"
 },
-"climate.wohnzimmer_bt": {
-"attributes": {
-"batteries": "{\"sensor.0x00158d008b860ecb_temperature\": {\"battery\": \"97\", \"battery_id\": \"sensor.0x00158d008b860ecb_battery\"}, \"sensor.0x00158d008b860ecb_humidity\": {\"battery\": \"97\", \"battery_id\": \"sensor.0x00158d008b860ecb_battery\"}, \"sensor.hp2550a_pro_v1_9_3_outdoor_temperature\": {\"battery\": \"off\", \"battery_id\": \"binary_sensor.hp2550a_pro_v1_9_3_wh65_battery\"}}",
-"bt_preset_cool_temperature": null,
-"bt_preset_cool_temperatures": "{\"none\": 24.0, \"away\": 28.0, \"boost\": 28.0, \"comfort\": 24.0, \"eco\": 27.0, \"home\": 24.0, \"sleep\": 22.0, \"activity\": 23.0}",
-"bt_preset_heat_temperatures": "{\"none\": 20.0, \"away\": 16.0, \"boost\": 24.0, \"comfort\": 21.0, \"eco\": 19.0, \"home\": 20.0, \"sleep\": 18.0, \"activity\": 22.0}",
-"call_for_heat": true,
-"current_humidity": 57.33,
-"current_temperature": 20.6,
-"degraded_mode": false,
-"door_open": false,
-"errors": "[]",
-"external_temp_ema": 20.64,
-"friendly_name": "Wohnzimmer BT",
-"heat_loss": 0.00843,
-"heating_power": 0.01,
-"heating_power_norm": null,
-"hvac_action": "idle",
-"hvac_modes": [
-"heat",
-"off"
-],
-"last_change": "2026-10-10T18:18:29.136581+02:00",
-"main_mode": "off",
-"max_temp": 30.0,
-"min_temp": 5.0,
-"next_valve_maintenance": "2026-10-13T14:20:11.361182+02:00",
-"off_temperature": 16.0,
-"preset_mode": "none",
-"preset_modes": [
-"none",
-"eco",
-"comfort",
-"sleep",
-"boost",
-"away",
-"home",
-"activity"
-],
-"preset_temperature": null,
-"saved_temperature": null,
-"supported_features": 401,
-"target_temp_step": 0.5,
-"temp_slope_K_min": 0.0074,
-"temperature": 20.0,
-"tolerance": 0.5,
-"unavailable_sensors": [],
-"window_open": false
-},
-"context": {
-"id": "fixture"
-},
-"entity_id": "climate.wohnzimmer_bt",
-"last_changed": "2026-01-01T12:00:00+00:00",
-"last_updated": "2026-01-01T12:00:00+00:00",
-"state": "heat"
-},
 "climate.wohnzimmer_esstisch": {
 "attributes": {
-"current_temperature": 18.6,
-"friendly_name": "Wohnzimmer Esstisch-",
+"current_temperature": 20.4,
+"friendly_name": "Wohnzimmer Esstisch",
 "hvac_modes": [
 "off",
 "heat"
 ],
-"max_temp": 30.0,
-"min_temp": 5.0,
-"preset_mode": "manual",
-"preset_modes": [
-"none",
-"manual",
-"away",
-"auto"
-],
-"supported_features": 401,
-"target_temp_step": 0.5,
-"temperature": 19.5
+"max_temp": 30,
+"min_temp": 5,
+"temperature": 21
 },
 "context": {
 "id": "fixture"
@@ -1421,24 +1355,15 @@
 },
 "climate.wohnzimmer_hinter_sofa": {
 "attributes": {
-"current_temperature": 18.9,
-"friendly_name": "Wohnzimmer hinter Sofa-",
+"current_temperature": 20.6,
+"friendly_name": "Wohnzimmer hinter Sofa",
 "hvac_modes": [
 "off",
 "heat"
 ],
-"max_temp": 30.0,
-"min_temp": 5.0,
-"preset_mode": "manual",
-"preset_modes": [
-"none",
-"manual",
-"away",
-"auto"
-],
-"supported_features": 401,
-"target_temp_step": 0.5,
-"temperature": 19.5
+"max_temp": 30,
+"min_temp": 5,
+"temperature": 21
 },
 "context": {
 "id": "fixture"
@@ -1450,24 +1375,15 @@
 },
 "climate.wohnzimmer_wintergarten": {
 "attributes": {
-"current_temperature": 19.1,
+"current_temperature": 19.8,
 "friendly_name": "Wohnzimmer Wintergarten",
 "hvac_modes": [
 "off",
 "heat"
 ],
-"max_temp": 30.0,
-"min_temp": 5.0,
-"preset_mode": "manual",
-"preset_modes": [
-"none",
-"manual",
-"away",
-"auto"
-],
-"supported_features": 401,
-"target_temp_step": 0.5,
-"temperature": 19.5
+"max_temp": 30,
+"min_temp": 5,
+"temperature": 21.5
 },
 "context": {
 "id": "fixture"
@@ -10264,6 +10180,28 @@
 "last_updated": "2026-01-01T12:00:00+00:00",
 "state": "100"
 },
+"sensor.wohnzimmer_heizung_status": {
+"attributes": {
+"current_setpoint": 21,
+"decision_status": "Komfortbetrieb nach Zeitplan",
+"enabled": true,
+"friendly_name": "Heizung Status",
+"manual_override": false,
+"mode": "comfort",
+"next_event": "2026-01-01T22:00:00+00:00",
+"preheat_minutes": 0,
+"present": true,
+"target_temperature": 21,
+"window_open": false
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "sensor.wohnzimmer_heizung_status",
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00",
+"state": "Komfortbetrieb"
+},
 "sensor.wohnzimmer_hinter_sofa_battery": {
 "attributes": {
 "device_class": "battery",
@@ -10456,6 +10394,18 @@
 "last_changed": "2026-01-01T12:00:00+00:00",
 "last_updated": "2026-01-01T12:00:00+00:00",
 "state": "off"
+},
+"switch.wohnzimmer_heizung_regelung_aktiv": {
+"attributes": {
+"friendly_name": "Heizung Regelung aktiv"
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "switch.wohnzimmer_heizung_regelung_aktiv",
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00",
+"state": "on"
 },
 "text.gr_kinderzimmer_1_hz_schedule_settings": {
 "attributes": {

@@ -26,7 +26,7 @@
   _musicTb() {
     const L = this._spk(); if (!L.length) return '';
     const N = this._spkNow(L);
-    return `<button class="tb mus ${N && N.pl ? 'on' : ''}" data-act="music">${ic(N && N.pl ? 'music' : 'announce', 15)}<span>${N && N.pl ? esc(N.title || N.name) : 'Musik &amp; Durchsage'}</span></button>`;
+    return `<button class="tb mus ${N && N.pl ? 'on' : ''}" data-act="music" aria-label="Musik und Durchsage">${ic(N && N.pl ? 'music' : 'announce', 15)}<span>${N && N.pl ? esc(N.title || N.name) : 'Musik &amp; Durchsage'}</span></button>`;
   }
   _sMusic() {
     const M = this._c.music || {}, L = this._spk(), all = M.all && this._s(M.all.notify) ? M.all : null;

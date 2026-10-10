@@ -41,7 +41,7 @@
     return (c.vol ? b('volume_down', 'minus', 'Leiser') : '') + main + (c.vol ? b('volume_up', 'plus', 'Lauter') : '');
   }
   _sRoom(r) {
-    const I = this._room(r), cl = I.cl, heat = I.act === 'heating', off = I.mode === 'off';
+    const I = this._room(r), cl = I.cl, heat = I.act === 'heating', off = I.mode === 'off', auto = !off && I.dh?.auto;
     const rank = { playing: 0, paused: 1, buffering: 1, idle: 2, on: 3, standby: 4, off: 5 }, groups = new Map();
     (r.media || []).forEach((item, gi) => {
       for (const e of (Array.isArray(item) ? item : [item])) {
@@ -60,8 +60,8 @@
         ${live ? this._mpBtns(e, pl) : ''}</div>`;
     }).join('');
     return `<div class="grab"></div><div class="sh"><div class="ico">${ic(r.icon, 24)}</div><div><h2>${esc(r.name)}</h2><p>${I.temp != null ? de(I.temp) + ' °C' : ''}${I.hum != null ? ' · ' + de(I.hum, 0) + ' % Luftfeuchte' : ''}${I.open ? ' · Fenster offen' : ''}${I.stale != null ? ` · <span class="stl">Sensor seit ${this._agoTxt(I.stale)} ohne Meldung</span>` : ''}</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
-      ${cl ? `<div class="sctl"><div class="htap" data-act="heat" data-room="${r.id}" role="button" aria-label="Heizung öffnen">${off ? `<div class="big" style="font-size:46px">Aus</div>` : `<div class="big">${de(I.target)}<small class="u">°</small></div>`}<div class="l">${off ? 'Heizung ist ausgeschaltet' : heat ? 'Heizt auf Zieltemperatur' : 'Zieltemperatur'}<span class="hmore">Heizung ${ic('chevron', 12)}</span></div></div>
-        <div style="display:flex;gap:10px;align-items:center">${off ? `<button class="qb on" data-act="hvac" data-e="${r.climate}">${ic('power', 16)}Einschalten</button>` : `<button class="rbn" data-act="temp" data-e="${r.climate}" data-d="-0.5">${ic('minus', 22)}</button><button class="rbn" data-act="temp" data-e="${r.climate}" data-d="0.5">${ic('plus', 22)}</button><button class="rbn" style="color:#fb923c;background:rgba(251,146,60,.2)" data-act="hvac" data-e="${r.climate}">${ic('power', 20)}</button>`}</div></div>` : ''}
+      ${cl ? `<div class="sctl"><div class="htap" data-act="heat" data-room="${r.id}" role="button" aria-label="Heizung öffnen">${off ? `<div class="big" style="font-size:46px">Aus</div>` : `<div class="big">${de(I.target)}<small class="u">°</small></div>`}<div class="l">${off ? 'Heizung ist ausgeschaltet' : auto ? 'Automatik' + (I.dh.label ? ' · ' + esc(I.dh.label) : '') : heat ? 'Heizt auf Zieltemperatur' : 'Zieltemperatur'}<span class="hmore">Heizung ${ic('chevron', 12)}</span></div></div>
+        <div style="display:flex;gap:10px;align-items:center">${off ? `<button class="qb on" data-act="hvac" data-e="${r.climate}">${ic('power', 16)}Einschalten</button>` : auto ? `<button class="rbn" style="color:#fb923c;background:rgba(251,146,60,.2)" data-act="hvac" data-e="${r.climate}">${ic('power', 20)}</button>` : `<button class="rbn" data-act="temp" data-e="${r.climate}" data-d="-0.5">${ic('minus', 22)}</button><button class="rbn" data-act="temp" data-e="${r.climate}" data-d="0.5">${ic('plus', 22)}</button><button class="rbn" style="color:#fb923c;background:rgba(251,146,60,.2)" data-act="hvac" data-e="${r.climate}">${ic('power', 20)}</button>`}</div></div>` : ''}
       ${this._humHint(r, I)}${this._trend(r, I.temp != null ? tempCol(I.temp) : '#fb923c')}
       ${this._roomVent(r)}
       ${I.lights.length ? `<div class="lab2">LICHTER · ${I.on.length}/${I.lights.length}</div><div class="lg">${I.lights.map(e => this._lightTile(e)).join('')}</div>` : ''}
