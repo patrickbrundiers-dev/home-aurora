@@ -18,3 +18,26 @@ jobs:
           node --check dist/home-aurora-wide.js
       - name: dist/ passt zu src/ (sonst node scripts/build.mjs ausführen)
         run: node scripts/build.mjs --check
+
+  render:
+    # Rendert beide Karten headless mit test/fixture-states.json (bereinigte Beispielzustände)
+    # und schlägt fehl, wenn eine Ansicht oder ein Fenster leer bleibt oder einen JavaScript-Fehler wirft.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Playwright mit Chromium installieren
+        run: |
+          npm i --no-save playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Ansichtstest Handy und Wide
+        run: node scripts/render-test.mjs --shots shots
+      - name: Screenshots aufheben
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots
+          path: shots/
+          retention-days: 7

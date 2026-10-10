@@ -3,6 +3,12 @@ const CSSW = `
 /* Gerüst: volle Breite, Startseite füllt genau den Bildschirm */
 @media (min-width:861px){.app.wide .shell{grid-template-columns:84px minmax(0,1fr)}.app.wide main{max-width:none;padding:16px 20px 16px 4px}.app.wide .vh h1{font-size:28px}}
 
+/* Sparprofil fürs Wandtablet: weniger Unschärfe hinter den Karten, kein Körnungs-Overlay, Hintergrund-Farbflächen
+   bewegen sich in kleinen Schritten statt mit 60 Bildern/s (bei der langsamen Drift nicht zu sehen). So muss die
+   Glas-Unschärfe der Karten nur noch bei jedem Partikel-Bild (30/s) neu berechnet werden. */
+.app.wide .c:not(.sky){backdrop-filter:blur(14px) saturate(140%);-webkit-backdrop-filter:blur(14px) saturate(140%)}
+.app.wide .blob{filter:blur(60px);animation-timing-function:steps(240)}.app.wide .b4,.app.wide .grain{display:none}
+
 /* Startseite = Cockpit */
 .cock{display:flex;flex-direction:column;gap:12px}
 @media (min-width:1200px){.cock{height:var(--cockh,calc(100vh - var(--header-height,0px) - 32px));min-height:620px}}
