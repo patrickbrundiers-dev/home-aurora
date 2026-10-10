@@ -1,12 +1,14 @@
 /* ───────────── Helfer ───────────── */
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-const de = (v, d = 1) => (v == null || isNaN(v)) ? '–' : Number(v).toLocaleString('de-DE', { minimumFractionDigits: d, maximumFractionDigits: d });
+const NF = {}; // Zahlenformate je Nachkommastellen, einmal erzeugt (toLocaleString legt bei jedem Aufruf ein neues an)
+const de = (v, d = 1) => (v == null || isNaN(v)) ? '–' : (NF[d] || (NF[d] = new Intl.NumberFormat('de-DE', { minimumFractionDigits: d, maximumFractionDigits: d }))).format(Number(v));
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const tempHue = t => 215 - clamp((t - 14) / 14, 0, 1) * 190;
 const tempCol = (t, l = 62) => `hsl(${tempHue(t)} 92% ${l}%)`;
 const okv = v => v !== undefined && v !== null && v !== 'unavailable' && v !== 'unknown';
 const dom = e => e.split('.')[0];
-const hhmm = d => d ? new Date(d).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }) : '–';
+const HM = new Intl.DateTimeFormat('de-DE', { hour: '2-digit', minute: '2-digit' });
+const hhmm = d => { if (!d) return '–'; const t = new Date(d); return isNaN(t) ? 'Invalid Date' : HM.format(t); };
 const COND = {
   sunny: 'Sonnig', 'clear-night': 'Klare Nacht', partlycloudy: 'Teils bewölkt', cloudy: 'Bewölkt', rainy: 'Regen', pouring: 'Starkregen',
   lightning: 'Gewitter', 'lightning-rainy': 'Gewitter & Regen', snowy: 'Schnee', 'snowy-rainy': 'Schneeregen', fog: 'Nebel', hail: 'Hagel',

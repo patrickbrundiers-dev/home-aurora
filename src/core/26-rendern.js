@@ -3,7 +3,12 @@
     return `<div class="logo"></div>${(WALL_UI && this._pzView() ? [...TABS, ['clean', 'Putzplan', 'broom']] : TABS).map(t => `<button class="nb ${this._v === t[0] ? 'on' : ''}" data-act="nav" data-v="${t[0]}">${ic(t[2], 24)}<span class="lab">${t[1]}</span></button>`).join('')}
       <div class="sp"></div>${this._lockBtn()}<button class="nb gear" data-act="settings">${ic('cog', 24)}<span class="lab">Einstellungen</span></button>`;
   }
-  _render() {
+  /* Suchen über alle Entitäten (Lichter, Batterien, Putzplan) laufen pro Zeichenvorgang nur einmal: _memo merkt sich
+     ihr Ergebnis, solange _render bzw. _renderSheet läuft, und vergisst es danach wieder. */
+  _memo(k, fn) { if (!this._mm) return fn(); return k in this._mm ? this._mm[k] : (this._mm[k] = fn()); }
+  _render() { const top = !this._mm; if (top) this._mm = {}; try { this._render0(); } finally { if (top) this._mm = null; } }
+  _renderSheet() { const top = !this._mm; if (top) this._mm = {}; try { this._renderSheet0(); } finally { if (top) this._mm = null; } }
+  _render0() {
     if (!this._h || !this._built) return;
     this._lastRender = Date.now();
     // Bildschirmschoner offen: nur ihn aktualisieren, das Dashboard dahinter erst beim Beenden neu zeichnen.
@@ -12,6 +17,7 @@
     this._need = new Set();
     const views = { clean: () => this._vClean(), home: () => this._vHome(), rooms: () => this._vRooms(), climate: () => this._vClimate(), bath: () => this._vBath(), weather: () => this._vWeather(), printer: () => this._vPrinter() };
     this._main.className = this._enter ? 'enter' : '';
+    this._rc = (this._rc || 0) + 1;
     this._morph(this._main, (views[this._v] || views.home)());
     this._morph(this._nav, this._navHtml());
     if (this._sheet) this._renderSheet();
@@ -53,7 +59,7 @@
     while (ac.length > bc.length) a.removeChild(a.lastChild);
   }
   _renderSoon() { clearTimeout(this._rs); this._rs = setTimeout(() => this._render(), 140); }
-  _renderSheet() {
+  _renderSheet0() {
     const st = this._sh.scrollTop;
     if (this._sheet.t === 'sched' && this._schedEl && this._sh.contains(this._schedEl)) { this._schedEl.hass = this._h; this._ov.classList.add('show'); return; }
     const r = this._sheet.t === 'room' ? this._c.rooms.find(x => x.id === this._sheet.id) : null;
