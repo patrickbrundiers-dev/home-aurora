@@ -23,3 +23,5 @@ node scripts/build.mjs --check  # prüft, ob dist/ zum Quellcode passt
 ```
 
 Banner, Versionen und Kartenbeschreibungen stehen in `scripts/build.mjs`.
+
+Bei jedem Push prüft eine GitHub Action die Syntax beider Bundles und `node scripts/build.mjs --check`.
