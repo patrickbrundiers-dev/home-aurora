@@ -16,6 +16,10 @@ const CSSW = `
 .ctop{display:flex;align-items:center;gap:10px;min-height:40px;flex:none}
 .ctop .alerts{margin:0;flex-wrap:nowrap;flex:none}.ctop .qa{margin:0;padding:2px 0;flex:1 1 0;min-width:0;flex-wrap:nowrap;overflow-x:auto;-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent);padding-right:24px}
 .ctop .al,.ctop .qp{flex:none;white-space:nowrap}
+/* Viele Hinweise oder schmaler Bildschirm: Hinweise scrollen seitlich statt die Knöpfe rechts aus dem Bild zu schieben;
+   unter 1200px (Tablet hochkant) stehen die Hinweise in einer eigenen Zeile */
+.ctop .alerts{flex:0 1 auto;min-width:0;overflow-x:auto;scrollbar-width:none}.ctop .alerts::-webkit-scrollbar{display:none}
+@media (max-width:1199px){.ctop{flex-wrap:wrap}.ctop .alerts{flex:1 1 100%}}
 .ctop .gap{flex:1}
 .ctop .tb{flex:none;display:flex;align-items:center;gap:8px;padding:9px 14px;border-radius:999px;background:rgba(var(--wh),.07);border:1px solid var(--line);font-size:13px;color:var(--tx2);white-space:nowrap}
 .ctop .tb:hover{color:var(--tx);background:rgba(var(--wh),.12)}
@@ -125,23 +129,35 @@ class HomeAuroraWide extends HomeAurora {
     this._fitting = true;
     try { this._fitColsX(el); } finally { this._fitting = false; }
   }
+  /* Jede Messung (over) erzwingt ein neues Layout und kostet auf dem Tablet spürbar Zeit. Darum:
+     - ändert sich seit der letzten Verteilung nichts (gleiches Rendern, gleiche Größen), wird nichts neu gemessen;
+     - die Suche startet bei der zuletzt passenden Zeilenzahl statt jedes Mal bei null (meist 2 Messungen statt eine je Zeile). */
   _fitColsX(el) {
-    for (const col of el.querySelectorAll('.col')) {
+    const cols = [...el.querySelectorAll('.col')];
+    const sig = () => `${this._rc}|${innerWidth}x${innerHeight}|` + cols.map(c => c.clientWidth + 'x' + c.clientHeight + '/' + c.scrollHeight + ':' + [...c.children].map(k => k.scrollHeight).join(',')).join(';');
+    if (this._fitSig && this._fitSig === sig()) return;
+    const prev = this._fitN || (this._fitN = {});
+    cols.forEach((col, ci) => {
       const fi = [...col.querySelectorAll('.fi')];
-      if (!fi.length && !col.querySelector('.hero')) continue;
+      if (!fi.length && !col.querySelector('.hero')) return;
       const over = () => col.scrollHeight > col.clientHeight + 1 || [...col.children].some(c => c.scrollHeight > c.clientHeight + 1 || [...c.children].some(k => k.clientHeight && k.scrollHeight > k.clientHeight + 1 && getComputedStyle(k).overflowY === 'hidden'));
       const grp = new Map();
       fi.forEach((x, k) => { const g = x.dataset.fg || 'i' + k; if (!grp.has(g)) grp.set(g, { p: +x.dataset.fp || 9, k, el: [] }); grp.get(g).el.push(x); });
       const G = [...grp.values()].sort((a, b) => a.p - b.p || a.k - b.k);
+      const show = n => G.forEach((g, i) => g.el.forEach(x => x.classList.toggle('fh', i >= n)));
+      /* Ergebnis wie zuvor: so viele Zeilen (in Reihenfolge) wie ohne Abschneiden passen, -1 wenn nicht einmal ohne Zeilen */
       const fill = tight => {
-        fi.forEach(x => x.classList.add('fh')); col.classList.toggle('tight', tight);
-        if (over()) return -1;
-        let n = 0;
-        for (const g of G) {
-          g.el.forEach(x => x.classList.remove('fh'));
-          if (over()) { g.el.forEach(x => x.classList.add('fh')); break; }
-          n++;
+        col.classList.toggle('tight', tight);
+        const key = ci + (tight ? 't' : '') + ':' + G.length;
+        let n = Math.min(prev[key] ?? 0, G.length);
+        show(n);
+        if (over()) {
+          while (n > 0) { n--; show(n); if (!over()) break; }
+          if (n === 0 && over()) { prev[key] = 0; return -1; }
+        } else {
+          while (n < G.length) { show(n + 1); if (over()) { show(n); break; } n++; }
         }
+        prev[key] = n;
         return n;
       };
       /* Hero mit Ringen und Personen bevorzugen; kompakt nur, wenn es sonst nicht passt oder dadurch deutlich mehr Zeilen Platz haben */
@@ -151,7 +167,8 @@ class HomeAuroraWide extends HomeAurora {
         const n = (+m.dataset.n || 0) + (m.closest('.c')?.querySelectorAll('.fi.fh:not(.ccd)').length || 0);
         m.textContent = n > 0 ? (m.dataset.full ? `+ ${n} weitere` : `+ ${n} weitere · `) : '';
       }
-    }
+    });
+    this._fitSig = sig();
   }
   setConfig(cfg) { super.setConfig({ ambient_night: { from: '23:00', to: '06:00', after: 1 }, ...(cfg || {}) }); }
 

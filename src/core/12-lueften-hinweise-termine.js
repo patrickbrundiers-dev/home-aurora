@@ -55,7 +55,8 @@
     return (dc === 'window' || dc === 'door' || dc === 'opening') && !/_status$|_window_open$|p2s_|klodeckel|^binary_sensor\.fenster_und_turen$/.test(k);
   }
   _clean(n) { return String(n || '').replace(/\s*(contact|kontakt|battery( level)?|batterie(stand)?|akku(stand)?)\s*$/i, '').trim(); }
-  _batteries() {
+  _batteries() { return this._memo('bat', () => this._batteries0()); }
+  _batteries0() {
     const out = [];
     for (const k in this._h.states) if (this._isBat(k)) { const v = parseFloat(this._h.states[k].state); if (!isNaN(v)) out.push({ e: k, v, n: this._clean(this._name(k)) }); }
     out.sort((a, b) => a.v - b.v || a.n.localeCompare(b.n, 'de'));

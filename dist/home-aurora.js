@@ -226,13 +226,15 @@ const ic = (n, s = 22, sw = 1.7) => `<svg class="i" width="${s}" height="${s}" v
 
 /* ───────────── Helfer ───────────── */
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-const de = (v, d = 1) => (v == null || isNaN(v)) ? '–' : Number(v).toLocaleString('de-DE', { minimumFractionDigits: d, maximumFractionDigits: d });
+const NF = {}; // Zahlenformate je Nachkommastellen, einmal erzeugt (toLocaleString legt bei jedem Aufruf ein neues an)
+const de = (v, d = 1) => (v == null || isNaN(v)) ? '–' : (NF[d] || (NF[d] = new Intl.NumberFormat('de-DE', { minimumFractionDigits: d, maximumFractionDigits: d }))).format(Number(v));
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const tempHue = t => 215 - clamp((t - 14) / 14, 0, 1) * 190;
 const tempCol = (t, l = 62) => `hsl(${tempHue(t)} 92% ${l}%)`;
 const okv = v => v !== undefined && v !== null && v !== 'unavailable' && v !== 'unknown';
 const dom = e => e.split('.')[0];
-const hhmm = d => d ? new Date(d).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }) : '–';
+const HM = new Intl.DateTimeFormat('de-DE', { hour: '2-digit', minute: '2-digit' });
+const hhmm = d => { if (!d) return '–'; const t = new Date(d); return isNaN(t) ? 'Invalid Date' : HM.format(t); };
 const COND = {
   sunny: 'Sonnig', 'clear-night': 'Klare Nacht', partlycloudy: 'Teils bewölkt', cloudy: 'Bewölkt', rainy: 'Regen', pouring: 'Starkregen',
   lightning: 'Gewitter', 'lightning-rainy': 'Gewitter & Regen', snowy: 'Schnee', 'snowy-rainy': 'Schneeregen', fog: 'Nebel', hail: 'Hagel',
@@ -1438,7 +1440,7 @@ class HomeAurora extends HTMLElement {
   _attr(e, a) { return this._h.states[e]?.attributes?.[a]; }
   _name(e) { const n = this._attr(e, 'friendly_name'); return n ? (String(n).replace(/^[A-Z0-9]{2,6}_[A-Z0-9]{10,}\s+(?=\S)/, '') || n) : e; }
   _unit(e) { return this._attr(e, 'unit_of_measurement') || ''; }
-  _lights() { return Object.keys(this._h.states).filter(k => k.startsWith('light.') && this._h.states[k].state !== 'unavailable').sort((a, b) => this._name(a).localeCompare(this._name(b), 'de')); }
+  _lights() { return this._memo('lights', () => Object.keys(this._h.states).filter(k => k.startsWith('light.') && this._h.states[k].state !== 'unavailable').sort((a, b) => this._name(a).localeCompare(this._name(b), 'de'))); }
   _lightsOn() { return this._lights().filter(e => this._val(e) === 'on'); }
   _glow(on) {
     const cs = on.map(e => this._attr(e, 'rgb_color')).filter(Boolean);
@@ -1889,7 +1891,8 @@ class HomeAurora extends HTMLElement {
     return (dc === 'window' || dc === 'door' || dc === 'opening') && !/_status$|_window_open$|p2s_|klodeckel|^binary_sensor\.fenster_und_turen$/.test(k);
   }
   _clean(n) { return String(n || '').replace(/\s*(contact|kontakt|battery( level)?|batterie(stand)?|akku(stand)?)\s*$/i, '').trim(); }
-  _batteries() {
+  _batteries() { return this._memo('bat', () => this._batteries0()); }
+  _batteries0() {
     const out = [];
     for (const k in this._h.states) if (this._isBat(k)) { const v = parseFloat(this._h.states[k].state); if (!isNaN(v)) out.push({ e: k, v, n: this._clean(this._name(k)) }); }
     out.sort((a, b) => a.v - b.v || a.n.localeCompare(b.n, 'de'));
@@ -2574,7 +2577,7 @@ class HomeAurora extends HTMLElement {
   _sSet() {
     const th = this._themePref || this._c.theme || 'dark', am = String(this._ambMin());
     const seg = (act, cur, items) => `<div class="seg wide">${items.map(x => `<button class="${cur === x[0] ? 'on' : ''}" data-act="${act}" data-m="${x[0]}">${x[1]}</button>`).join('')}</div>`;
-    return `<div class="grab"></div><div class="sh"><div class="ico">${ic('cog', 24)}</div><div><h2>Darstellung &amp; Modi</h2><p>Home Aurora v5.2 · Build pz17</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
+    return `<div class="grab"></div><div class="sh"><div class="ico">${ic('cog', 24)}</div><div><h2>Darstellung &amp; Modi</h2><p>Home Aurora v5.2 · Build pz18</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
       <div class="lab2">DESIGN</div>${seg('theme', th, [['dark', 'Dunkel'], ['light', 'Hell'], ['auto', 'Automatisch']])}
       <div class="card-note">„Automatisch“ folgt dem Dunkel-/Hellmodus deines Home-Assistant-Profils. Die Auswahl gilt nur für dieses Gerät.</div>
       ${WALL_UI ? `      <div class="lab2">WANDTABLET-MODUS</div>
@@ -3225,7 +3228,8 @@ class HomeAurora extends HTMLElement {
   }
 
   /* ───────────── v10: Putzplan (Integration „putzplan“) ───────────── */
-  _pzTasks() {
+  _pzTasks() { return this._memo('pz', () => this._pzTasks0()); }
+  _pzTasks0() {
     const st = this._h.states, out = [];
     for (const e in st) {
       const s = st[e], a = s.attributes || {};
@@ -3839,7 +3843,12 @@ class HomeAurora extends HTMLElement {
     return `<div class="logo"></div>${(WALL_UI && this._pzView() ? [...TABS, ['clean', 'Putzplan', 'broom']] : TABS).map(t => `<button class="nb ${this._v === t[0] ? 'on' : ''}" data-act="nav" data-v="${t[0]}">${ic(t[2], 24)}<span class="lab">${t[1]}</span></button>`).join('')}
       <div class="sp"></div>${this._lockBtn()}<button class="nb gear" data-act="settings">${ic('cog', 24)}<span class="lab">Einstellungen</span></button>`;
   }
-  _render() {
+  /* Suchen über alle Entitäten (Lichter, Batterien, Putzplan) laufen pro Zeichenvorgang nur einmal: _memo merkt sich
+     ihr Ergebnis, solange _render bzw. _renderSheet läuft, und vergisst es danach wieder. */
+  _memo(k, fn) { if (!this._mm) return fn(); return k in this._mm ? this._mm[k] : (this._mm[k] = fn()); }
+  _render() { const top = !this._mm; if (top) this._mm = {}; try { this._render0(); } finally { if (top) this._mm = null; } }
+  _renderSheet() { const top = !this._mm; if (top) this._mm = {}; try { this._renderSheet0(); } finally { if (top) this._mm = null; } }
+  _render0() {
     if (!this._h || !this._built) return;
     this._lastRender = Date.now();
     // Bildschirmschoner offen: nur ihn aktualisieren, das Dashboard dahinter erst beim Beenden neu zeichnen.
@@ -3848,6 +3857,7 @@ class HomeAurora extends HTMLElement {
     this._need = new Set();
     const views = { clean: () => this._vClean(), home: () => this._vHome(), rooms: () => this._vRooms(), climate: () => this._vClimate(), bath: () => this._vBath(), weather: () => this._vWeather(), printer: () => this._vPrinter() };
     this._main.className = this._enter ? 'enter' : '';
+    this._rc = (this._rc || 0) + 1;
     this._morph(this._main, (views[this._v] || views.home)());
     this._morph(this._nav, this._navHtml());
     if (this._sheet) this._renderSheet();
@@ -3889,7 +3899,7 @@ class HomeAurora extends HTMLElement {
     while (ac.length > bc.length) a.removeChild(a.lastChild);
   }
   _renderSoon() { clearTimeout(this._rs); this._rs = setTimeout(() => this._render(), 140); }
-  _renderSheet() {
+  _renderSheet0() {
     const st = this._sh.scrollTop;
     if (this._sheet.t === 'sched' && this._schedEl && this._sh.contains(this._schedEl)) { this._schedEl.hass = this._h; this._ov.classList.add('show'); return; }
     const r = this._sheet.t === 'room' ? this._c.rooms.find(x => x.id === this._sheet.id) : null;

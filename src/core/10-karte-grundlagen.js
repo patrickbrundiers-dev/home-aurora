@@ -87,7 +87,7 @@ class HomeAurora extends HTMLElement {
   _attr(e, a) { return this._h.states[e]?.attributes?.[a]; }
   _name(e) { const n = this._attr(e, 'friendly_name'); return n ? (String(n).replace(/^[A-Z0-9]{2,6}_[A-Z0-9]{10,}\s+(?=\S)/, '') || n) : e; }
   _unit(e) { return this._attr(e, 'unit_of_measurement') || ''; }
-  _lights() { return Object.keys(this._h.states).filter(k => k.startsWith('light.') && this._h.states[k].state !== 'unavailable').sort((a, b) => this._name(a).localeCompare(this._name(b), 'de')); }
+  _lights() { return this._memo('lights', () => Object.keys(this._h.states).filter(k => k.startsWith('light.') && this._h.states[k].state !== 'unavailable').sort((a, b) => this._name(a).localeCompare(this._name(b), 'de'))); }
   _lightsOn() { return this._lights().filter(e => this._val(e) === 'on'); }
   _glow(on) {
     const cs = on.map(e => this._attr(e, 'rgb_color')).filter(Boolean);

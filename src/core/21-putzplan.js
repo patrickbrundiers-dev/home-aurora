@@ -1,5 +1,6 @@
   /* ───────────── v10: Putzplan (Integration „putzplan“) ───────────── */
-  _pzTasks() {
+  _pzTasks() { return this._memo('pz', () => this._pzTasks0()); }
+  _pzTasks0() {
     const st = this._h.states, out = [];
     for (const e in st) {
       const s = st[e], a = s.attributes || {};
