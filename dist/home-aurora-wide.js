@@ -524,6 +524,7 @@ const CSS3 = `
 /* v5: Ambient */
 .amb{position:fixed;inset:0;z-index:80;display:none;background:radial-gradient(120% 100% at 50% 0%,#101a3a,#03050d 70%);color:#f4f7ff;overflow:hidden;cursor:pointer;--wh:255,255,255;--tx:#f4f7ff;--tx2:rgba(244,247,255,.66);--tx3:rgba(244,247,255,.4);--line:rgba(255,255,255,.12)}
 .amb.show{display:grid;place-items:center;animation:fade .6s both}
+.app.ambon>.bg,.app.ambon>.shell,.app.ambon>.ov{visibility:hidden}.app.ambon>.bg *,.app.ambon>.shell *{animation-play-state:paused!important}
 .ambin{display:flex;flex-direction:column;align-items:center;gap:18px;padding:24px;text-align:center;transition:transform 4s ease-in-out;max-width:100%}
 .ambc{font-size:min(26vw,220px);font-weight:200;line-height:1;letter-spacing:-.03em}.ambc span{opacity:.5;animation:blink 2s steps(2) infinite}@keyframes blink{50%{opacity:.15}}
 .ambd{font-size:clamp(16px,3vw,26px);color:var(--tx2)}
@@ -1406,7 +1407,7 @@ class HomeAurora extends HTMLElement {
   _tick() {
     const h = this._h; let sig = this._isLight() + '|';
     for (const e of this._watch) sig += (h.states[e]?.last_updated || '-') + '|';
-    for (const k in h.states) if (k.startsWith('light.') || (k.startsWith('sensor.') && k.includes('timer')) || this._isBat(k) || this._isContact(k) || k.includes(this._pid) || h.states[k].attributes?.putzplan_task || (k.startsWith('text.') && k.includes('_schedule_'))) sig += h.states[k].last_updated;
+    for (const k of this._xIds()) sig += (h.states[k]?.last_updated || '-');
     const va = h.states[this._c.stats.vent]?.attributes?.raeume; if (va) for (const r of va) if (r.entity_id) sig += (h.states[r.entity_id]?.last_updated || '-');
     if (sig === this._sig) return;
     if (this._rweb && this._v === 'weather' && Date.now() - this._lastRender < 3e5) return;
@@ -1416,6 +1417,18 @@ class HomeAurora extends HTMLElement {
     if (gap < 1200) { if (!this._rt) this._rt = setTimeout(() => { this._rt = 0; if (!this._busy) this._render(); else this._dirty = true; }, 1200 - gap); return; }
     cancelAnimationFrame(this._raf);
     this._raf = requestAnimationFrame(() => this._render());
+  }
+
+  /* Weitere Entitäten, deren Änderung neu zeichnet (Lichter, Timer, Batterien, Kontakte, Drucker, Putzplan, Thermostat-Pläne).
+     Die Suche über alle Entitäten kostet bei ~2.500 Entitäten spürbar Zeit pro HA-Update, darum wird die Liste
+     gemerkt und nur jede Minute (oder wenn eine gemerkte Entität verschwindet) neu aufgebaut. */
+  _xIds() {
+    const h = this._h, now = Date.now();
+    if (this._xw && now - this._xwT < 6e4 && this._xw.every(k => k in h.states)) return this._xw;
+    const l = [];
+    for (const k in h.states) if (k.startsWith('light.') || (k.startsWith('sensor.') && k.includes('timer')) || this._isBat(k) || this._isContact(k) || k.includes(this._pid) || h.states[k].attributes?.putzplan_task || (k.startsWith('text.') && k.includes('_schedule_'))) l.push(k);
+    this._xw = l; this._xwT = now;
+    return l;
   }
 
   /* ───────────── Daten-Helfer ───────────── */
@@ -2561,7 +2574,7 @@ class HomeAurora extends HTMLElement {
   _sSet() {
     const th = this._themePref || this._c.theme || 'dark', am = String(this._ambMin());
     const seg = (act, cur, items) => `<div class="seg wide">${items.map(x => `<button class="${cur === x[0] ? 'on' : ''}" data-act="${act}" data-m="${x[0]}">${x[1]}</button>`).join('')}</div>`;
-    return `<div class="grab"></div><div class="sh"><div class="ico">${ic('cog', 24)}</div><div><h2>Darstellung &amp; Modi</h2><p>Home Aurora v5.2 · Build pz16</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
+    return `<div class="grab"></div><div class="sh"><div class="ico">${ic('cog', 24)}</div><div><h2>Darstellung &amp; Modi</h2><p>Home Aurora v5.2 · Build pz17</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
       <div class="lab2">DESIGN</div>${seg('theme', th, [['dark', 'Dunkel'], ['light', 'Hell'], ['auto', 'Automatisch']])}
       <div class="card-note">„Automatisch“ folgt dem Dunkel-/Hellmodus deines Home-Assistant-Profils. Die Auswahl gilt nur für dieses Gerät.</div>
       ${WALL_UI ? `      <div class="lab2">WANDTABLET-MODUS</div>
@@ -2595,12 +2608,16 @@ class HomeAurora extends HTMLElement {
     if (!WALL_UI) return;
     if (this._amb || !this._amb_el) return;
     this._amb = true; this._ambClk = ''; this._amb_el.classList.add('show'); this._ambRender(true); this._fullyApply();
+    // Dashboard dahinter ist verdeckt: Partikel, Radar und CSS-Animationen anhalten (spart Tablet-Leistung und Wärme).
+    this._app.classList.add('ambon'); this._fxStop(); this._rdr?.pause();
     try { navigator.wakeLock?.request('screen').then(l => { this._wl = l; }).catch(() => {}); } catch (e) { /* optional */ }
   }
   _ambOff(home) {
     if (!this._amb) return;
     this._amb = false; this._ambBy = null; this._lastAct = Date.now(); this._amb_el?.classList.remove('show'); this._fullyApply();
-    if (home && this._built) { this._swallow = Date.now() + 800; this._v = 'home'; this._closeSheet(); this._enter = true; this._counted = false; this._sig = ''; this._render(); }
+    this._app?.classList.remove('ambon'); if (this.isConnected) this._fxStart();
+    if (home && this._built) { this._swallow = Date.now() + 800; this._v = 'home'; this._closeSheet(); this._enter = true; this._counted = false; }
+    if (this._built && this.isConnected) { this._sig = ''; this._render(); }
     try { this._wl?.release(); } catch (e) { /* optional */ } this._wl = null;
   }
   _ambRender(first) {
@@ -3824,7 +3841,10 @@ class HomeAurora extends HTMLElement {
   }
   _render() {
     if (!this._h || !this._built) return;
-    this._lastRender = Date.now(); this._applyTheme();
+    this._lastRender = Date.now();
+    // Bildschirmschoner offen: nur ihn aktualisieren, das Dashboard dahinter erst beim Beenden neu zeichnen.
+    if (this._amb) { this._ambRender(); return; }
+    this._applyTheme();
     this._need = new Set();
     const views = { clean: () => this._vClean(), home: () => this._vHome(), rooms: () => this._vRooms(), climate: () => this._vClimate(), bath: () => this._vBath(), weather: () => this._vWeather(), printer: () => this._vPrinter() };
     this._main.className = this._enter ? 'enter' : '';
@@ -4120,10 +4140,13 @@ class HomeAurora extends HTMLElement {
     if (k !== this._fx.kind) { this._fx = { kind: k, p: [] }; }
   }
   _fxStart() {
-    if (this._fxRaf || !this._cv || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (this._fxRaf || this._amb || !this._cv || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     const cv = this._cv, ctx = cv.getContext('2d');
-    const loop = () => {
+    let last = 0;
+    const loop = (ts = performance.now()) => {
       this._fxRaf = requestAnimationFrame(loop);
+      if (last && ts - last < 32) return;
+      const k = last ? Math.min(3, (ts - last) / 16.7) : 1; last = ts;
       const dpr = Math.min(2, window.devicePixelRatio || 1), W = cv.clientWidth, H = cv.clientHeight;
       if (!W || !H) return;
       if (cv.width !== Math.round(W * dpr) || cv.height !== Math.round(H * dpr)) { cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); this._fx.p = []; }
@@ -4134,10 +4157,10 @@ class HomeAurora extends HTMLElement {
         f.p = Array.from({ length: n }, () => ({ x: Math.random() * W, y: Math.random() * vh, v: .5 + Math.random(), r: Math.random(), a: Math.random() * 6.28 }));
       }
       for (const p of f.p) {
-        if (f.kind === 'rain') { p.y += 9 * p.v; p.x -= 1.6 * p.v; if (p.y > vh) { p.y = -20; p.x = Math.random() * W; } ctx.strokeStyle = `rgba(147,197,253,${.12 + .2 * p.r})`; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p.x + 3, p.y + 14 * p.v); ctx.stroke(); }
-        else if (f.kind === 'snow') { p.y += .7 * p.v; p.a += .01; p.x += Math.sin(p.a) * .5; if (p.y > vh) { p.y = -6; p.x = Math.random() * W; } ctx.fillStyle = `rgba(255,255,255,${.25 + .4 * p.r})`; ctx.beginPath(); ctx.arc(p.x, p.y, 1 + 2 * p.r, 0, 6.28); ctx.fill(); }
-        else if (f.kind === 'stars') { p.a += .02 * p.v; ctx.fillStyle = `rgba(255,255,255,${.1 + .5 * Math.abs(Math.sin(p.a))})`; ctx.beginPath(); ctx.arc(p.x, p.y * .6, .6 + 1.2 * p.r, 0, 6.28); ctx.fill(); }
-        else { p.y -= .12 * p.v; p.x += Math.sin(p.a += .004) * .15; if (p.y < -10) { p.y = vh + 10; p.x = Math.random() * W; } const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, 7 + 9 * p.r); g.addColorStop(0, `rgba(180,230,255,${.22 + .2 * p.r})`); g.addColorStop(1, 'rgba(180,230,255,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(p.x, p.y, 16, 0, 6.28); ctx.fill(); }
+        if (f.kind === 'rain') { p.y += 9 * p.v * k; p.x -= 1.6 * p.v * k; if (p.y > vh) { p.y = -20; p.x = Math.random() * W; } ctx.strokeStyle = `rgba(147,197,253,${.12 + .2 * p.r})`; ctx.lineWidth = 1.2; ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p.x + 3, p.y + 14 * p.v); ctx.stroke(); }
+        else if (f.kind === 'snow') { p.y += .7 * p.v * k; p.a += .01 * k; p.x += Math.sin(p.a) * .5 * k; if (p.y > vh) { p.y = -6; p.x = Math.random() * W; } ctx.fillStyle = `rgba(255,255,255,${.25 + .4 * p.r})`; ctx.beginPath(); ctx.arc(p.x, p.y, 1 + 2 * p.r, 0, 6.28); ctx.fill(); }
+        else if (f.kind === 'stars') { p.a += .02 * p.v * k; ctx.fillStyle = `rgba(255,255,255,${.1 + .5 * Math.abs(Math.sin(p.a))})`; ctx.beginPath(); ctx.arc(p.x, p.y * .6, .6 + 1.2 * p.r, 0, 6.28); ctx.fill(); }
+        else { p.y -= .12 * p.v * k; p.x += Math.sin(p.a += .004 * k) * .15 * k; if (p.y < -10) { p.y = vh + 10; p.x = Math.random() * W; } const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, 7 + 9 * p.r); g.addColorStop(0, `rgba(180,230,255,${.22 + .2 * p.r})`); g.addColorStop(1, 'rgba(180,230,255,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(p.x, p.y, 16, 0, 6.28); ctx.fill(); }
       }
     };
     loop();
@@ -4183,6 +4206,12 @@ class HomeAuroraEditor extends HTMLElement {
 const CSSW = `
 /* Gerüst: volle Breite, Startseite füllt genau den Bildschirm */
 @media (min-width:861px){.app.wide .shell{grid-template-columns:84px minmax(0,1fr)}.app.wide main{max-width:none;padding:16px 20px 16px 4px}.app.wide .vh h1{font-size:28px}}
+
+/* Sparprofil fürs Wandtablet: weniger Unschärfe hinter den Karten, kein Körnungs-Overlay, Hintergrund-Farbflächen
+   bewegen sich in kleinen Schritten statt mit 60 Bildern/s (bei der langsamen Drift nicht zu sehen). So muss die
+   Glas-Unschärfe der Karten nur noch bei jedem Partikel-Bild (30/s) neu berechnet werden. */
+.app.wide .c:not(.sky){backdrop-filter:blur(14px) saturate(140%);-webkit-backdrop-filter:blur(14px) saturate(140%)}
+.app.wide .blob{filter:blur(60px);animation-timing-function:steps(240)}.app.wide .b4,.app.wide .grain{display:none}
 
 /* Startseite = Cockpit */
 .cock{display:flex;flex-direction:column;gap:12px}

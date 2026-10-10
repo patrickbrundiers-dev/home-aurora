@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 // Erzeugt dist/home-aurora.js (Handy) und dist/home-aurora-wide.js (Querformat) aus src/.
-// src/core.js ist der gemeinsame Code mit @@PLATZHALTERN@@, src/wide.js der Zusatz nur für Wide.
+// src/core/*.js ist der gemeinsame Code mit @@PLATZHALTERN@@, nach Bereichen auf Dateien verteilt und in
+// Namensreihenfolge (00-…, 01-…) aneinandergehängt; src/wide.js ist der Zusatz nur für Wide.
 // Aufruf: node scripts/build.mjs          → schreibt beide Dateien nach dist/
 //         node scripts/build.mjs --check  → prüft nur, ob dist/ aktuell ist (Exit 1 bei Abweichung)
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -35,10 +36,10 @@ const TARGETS = [
   },
 ];
 
-const core = read('src/core.js');
+const core = readdirSync(join(root, 'src/core')).filter((f) => f.endsWith('.js')).sort().map((f) => read(`src/core/${f}`)).join('');
 const wideExt = read('src/wide.js');
 const WIDE_MARK = '//@@WIDE_ONLY@@\n';
-if (core.split(WIDE_MARK).length !== 2) throw new Error(`src/core.js: ${WIDE_MARK.trim()} muss genau einmal vorkommen`);
+if (core.split(WIDE_MARK).length !== 2) throw new Error(`src/core/: ${WIDE_MARK.trim()} muss genau einmal vorkommen`);
 
 function render({ wide, vars }) {
   let out = core.replace(WIDE_MARK, () => (wide ? wideExt : ''));
