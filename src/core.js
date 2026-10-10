@@ -1106,6 +1106,9 @@ const CSS4 = `
 .pzh .pzp{flex:1;min-width:24px;max-width:110px;height:4px;border-radius:4px;background:rgba(var(--wh),.1);overflow:hidden;margin-left:auto}.pzh .pzp i{display:block;height:100%;border-radius:4px;background:#34d399}
 .pzh .pzc{font-size:11px;color:var(--tx3);font-variant-numeric:tabular-nums;margin-left:auto}.pzh .pzp+.pzc{margin-left:0}
 .pzh .pzv{display:grid;place-items:center;color:var(--tx3);transition:transform .2s;transform:rotate(90deg)}.pzh.c .pzv{transform:rotate(0)}
+.pzhome svg{transform:rotate(180deg)}
+.fi.fh{display:none!important}
+.cc2 .t{white-space:normal;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;line-height:1.3}
 .vr.pz[data-sw]{touch-action:pan-y;position:relative}.vr.pz.swp{background-image:linear-gradient(90deg,rgba(52,211,153,calc(var(--sw,0)*.4)),transparent 70%);transition:none}.vr.pz:not(.swp){transition:transform .2s}
 .pzgo{margin-top:12px;width:100%;min-height:46px;display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:16px;background:rgba(56,189,248,.18);border:1px solid rgba(56,189,248,.45);color:#7dd3fc;font-weight:600;font-size:14px}.app.light .pzgo{color:#0369a1}
 .pzcf{margin-top:12px;padding:14px 16px;border-radius:20px;border:1px solid rgba(56,189,248,.35);background:rgba(56,189,248,.08)}.pzct{font-weight:600;font-size:15px}.pzcs{font-size:12.5px;color:var(--tx2);margin-top:5px;line-height:1.4}
@@ -1267,7 +1270,7 @@ const CSS2 = `
 .pn .big{font-size:42px}.pn .l{font-size:12.5px;color:var(--tx2);margin-top:4px}
 .pnimg{width:100%;border-radius:18px;margin-top:12px;display:block;max-height:200px;object-fit:cover}
 .bt{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:16px;background:rgba(var(--wh),.045);margin-bottom:6px;min-height:50px}
-.bt .t{font-size:13.5px;font-weight:500;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.bt .t{font-size:13.5px;font-weight:500;min-width:0;overflow-wrap:anywhere;line-height:1.3;flex:1}
 .bt .pc2{width:70px;height:7px;border-radius:4px;background:rgba(var(--wh),.12);overflow:hidden;flex:none}.bt .pc2 i{display:block;height:100%;border-radius:4px}
 .bt b{font-size:13px;width:44px;text-align:right;font-weight:600;flex:none}
 .bt.low b{color:var(--bad)}.bt.mid b{color:var(--warm)}
@@ -1326,7 +1329,7 @@ class HomeAurora extends HTMLElement {
   setConfig(cfg) {
     const c = cfg || {};
     this._c = Object.assign({}, DEFAULTS, c, { outdoor: { ...DEFAULTS.outdoor, ...(c.outdoor || {}) }, stats: { ...DEFAULTS.stats, ...(c.stats || {}) }, extras: { ...DEFAULTS.extras, ...(c.extras || {}) }, bath: { ...DEFAULTS.bath, ...(c.bath || {}) }, station: { ...DEFAULTS.station, ...(c.station || {}) }, alerts: { ...DEFAULTS.alerts, ...(c.alerts || {}) }, plant: { ...DEFAULTS.plant, ...(c.plant || {}) }, printer: { ...DEFAULTS.printer, ...(c.printer || {}) }, power: { ...DEFAULTS.power, ...(c.power || {}) }, wasteNames: { ...DEFAULTS.wasteNames, ...(c.wasteNames || {}) } });
-    try { this._themePref = localStorage.getItem('home-aurora-theme'); this._ambPref = localStorage.getItem('home-aurora-amb'); this._nightPref = localStorage.getItem('home-aurora-ambnight'); this._fuPref = localStorage.getItem('home-aurora-fully'); } catch (e) { /* kein Speicher */ }
+    try { this._themePref = localStorage.getItem('home-aurora-theme'); this._ambPref = localStorage.getItem('home-aurora-amb'); this._nightPref = localStorage.getItem('home-aurora-ambnight'); this._fuPref = localStorage.getItem('home-aurora-fully'); this._pzvPref = localStorage.getItem('home-aurora-pzview'); } catch (e) { /* kein Speicher */ }
     const w = new Set();
     const walk = o => { if (typeof o === 'string') { if (/^[a-z_]+\.[a-z0-9_]+$/.test(o)) w.add(o); } else if (Array.isArray(o)) o.forEach(walk); else if (o && typeof o === 'object') Object.values(o).forEach(walk); };
     walk(this._c);
@@ -1388,7 +1391,7 @@ class HomeAurora extends HTMLElement {
   _val(e) { const s = e && this._h.states[e]; return s ? s.state : undefined; }
   _num(e) { const v = parseFloat(this._val(e)); return isNaN(v) ? null : v; }
   _attr(e, a) { return this._h.states[e]?.attributes?.[a]; }
-  _name(e) { return this._attr(e, 'friendly_name') || e; }
+  _name(e) { const n = this._attr(e, 'friendly_name'); return n ? (String(n).replace(/^[A-Z0-9]{2,6}_[A-Z0-9]{10,}\s+(?=\S)/, '') || n) : e; }
   _unit(e) { return this._attr(e, 'unit_of_measurement') || ''; }
   _lights() { return Object.keys(this._h.states).filter(k => k.startsWith('light.') && this._h.states[k].state !== 'unavailable').sort((a, b) => this._name(a).localeCompare(this._name(b), 'de')); }
   _lightsOn() { return this._lights().filter(e => this._val(e) === 'on'); }
@@ -1839,7 +1842,7 @@ class HomeAurora extends HTMLElement {
     const dc = this._h.states[k]?.attributes?.device_class;
     return (dc === 'window' || dc === 'door' || dc === 'opening') && !/_status$|_window_open$|p2s_|klodeckel|^binary_sensor\.fenster_und_turen$/.test(k);
   }
-  _clean(n) { return String(n || '').replace(/\s*(contact|kontakt|battery|batterie)\s*$/i, '').trim(); }
+  _clean(n) { return String(n || '').replace(/\s*(contact|kontakt|battery( level)?|batterie(stand)?|akku(stand)?)\s*$/i, '').trim(); }
   _batteries() {
     const out = [];
     for (const k in this._h.states) if (this._isBat(k)) { const v = parseFloat(this._h.states[k].state); if (!isNaN(v)) out.push({ e: k, v, n: this._clean(this._name(k)) }); }
@@ -1960,22 +1963,23 @@ class HomeAurora extends HTMLElement {
     for (const a of M.values()) a.sort((x, y) => (y.allDay - x.allDay) || x.s - y.s);
     return M;
   }
-  _calCard(i, n) {
+  _calCard(i, n, fit = 0) {
     if (!this._c.calendars.some(c => this._s(c[0]))) return '';
     const open = `data-act="cal"`;
     if (!this._cal) return `<div class="c" style="--i:${i}"><div class="h">${ic('cal', 14)}Termine</div><div class="sk" style="height:140px"></div></div>`;
     const { list, t0 } = this._calList(), W = this._waste(), skipW = !!(W && W.length);
-    const L = list.filter(ev => !(skipW && /müll|muell|abfall/i.test(ev.cal + ' ' + ev.calName))), lim = n || 4, shown = L.slice(0, lim), more = L.length - shown.length;
+    const L = list.filter(ev => !(skipW && /müll|muell|abfall/i.test(ev.cal + ' ' + ev.calName))), lim = n || 4, shown = L.slice(0, lim + fit), more = L.length - shown.length;
     let body = '', last = null;
-    for (const ev of shown) {
+    shown.forEach((ev, k) => {
+      const fx = k >= lim ? ` fi fh" data-fp="${k - lim < 2 ? 1 : 3}" data-fg="cal${k}` : '';
       if (ev.dk !== last) {
         last = ev.dk; const diff = Math.round((ev.dk - +t0) / 864e5);
-        body += `<div class="ccd"><b>${diff === 0 ? 'Heute' : diff === 1 ? 'Morgen' : ev.day.toLocaleDateString('de-DE', { weekday: 'long' })}</b>${ev.day.toLocaleDateString('de-DE', { weekday: 'short', day: 'numeric', month: 'short' })}</div>`;
+        body += `<div class="ccd${fx}"><b>${diff === 0 ? 'Heute' : diff === 1 ? 'Morgen' : ev.day.toLocaleDateString('de-DE', { weekday: 'long' })}</b>${ev.day.toLocaleDateString('de-DE', { weekday: 'short', day: 'numeric', month: 'short' })}</div>`;
       }
-      body += `<div class="cc2" style="--ec:${ev.col}"><i></i><div class="t">${esc(ev.title)}</div><div class="w">${ev.allDay ? esc(ev.calName) : hhmm(ev.s)}</div></div>`;
-    }
+      body += `<div class="cc2${fx}" style="--ec:${ev.col}"><i></i><div class="t">${esc(ev.title)}</div><div class="w">${ev.allDay ? esc(ev.calName) : hhmm(ev.s)}</div></div>`;
+    });
     if (!shown.length) body = `<div class="empty">🗓️ Keine Termine in den nächsten ${this._c.calendarDays} Tagen</div>`;
-    return `<div class="c calc tap" style="--i:${i}" ${open}><div class="h">${ic('cal', 14)}Termine<span class="r">Kalender${ic('chevron', 13)}</span></div>${body}${more > 0 ? `<div class="ccm">+ ${more} weitere</div>` : ''}</div>`;
+    return `<div class="c calc tap" style="--i:${i}" ${open}><div class="h">${ic('cal', 14)}Termine<span class="r">Kalender${ic('chevron', 13)}</span></div>${body}${more > 0 || fit ? `<div class="ccm fm" data-n="${more}" data-full="1">${more > 0 ? `+ ${more} weitere` : ''}</div>` : ''}</div>`;
   }
   _sCal() {
     const head = `<div class="grab"></div><div class="sh"><div class="ico">${ic('cal', 24)}</div><div><h2>Kalender</h2><p>${this._calMode === 'list' ? `nächste ${this._c.calendarDays} Tage` : 'Monatsansicht'}</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>`;
@@ -2407,10 +2411,10 @@ class HomeAurora extends HTMLElement {
     const P = this._powerData(); if (!P.devs.length) return '';
     const act = P.devs.filter(d => d.w >= 1).slice(0, 4), mx = Math.max(...act.map(d => d.w), 1);
     const col = P.total > 800 ? '#fb923c' : P.total > 300 ? '#fbbf24' : '#34d399';
-    const rows = act.length ? act.map(d => `<div class="bt"><div class="t">${esc(d.n)}</div><div class="pc2"><i style="width:${clamp(d.w / mx * 100, 4, 100)}%;background:${col}"></i></div><b>${de(d.w, 0)} W</b></div>`).join('') : `<div class="okc"><span>${ic('check', 14)}Alle Geräte im Standby</span></div>`;
+    const rows = act.length ? act.map(d => `<div class="bt fi" data-fp="2"><div class="t">${esc(d.n)}</div><div class="pc2"><i style="width:${clamp(d.w / mx * 100, 4, 100)}%;background:${col}"></i></div><b>${de(d.w, 0)} W</b></div>`).join('') : `<div class="okc"><span>${ic('check', 14)}Alle Geräte im Standby</span></div>`;
     return `<div class="c tap" style="--i:${i}" data-act="power"><div class="h">${ic('bolt', 14)}Strom<span class="r">${P.devs.length} Geräte</span></div>
       <div class="pwr"><div class="big" style="font-size:44px;color:${col}">${de(P.total, 0)}<small class="u"> W</small></div><div class="pwk">${P.kwh != null ? `<b>${de(P.kwh, 1)}</b> kWh heute` : 'jetzt gemessen'}</div></div>${rows}
-      ${P.pv.today != null ? `<div class="card-note">☀️ Solar-Prognose heute ${de(P.pv.today, 1)} kWh</div>` : '<div class="card-note">tippen für alle Geräte</div>'}</div>`;
+      ${P.pv.today != null ? `<div class="card-note fi" data-fp="4">☀️ Solar-Prognose heute ${de(P.pv.today, 1)} kWh</div>` : '<div class="card-note fi" data-fp="4">tippen für alle Geräte</div>'}</div>`;
   }
   _sPower() {
     const P = this._powerData(), pr = this._price(), rg = this._pwr || 0;
@@ -2465,7 +2469,7 @@ class HomeAurora extends HTMLElement {
   _sSet() {
     const th = this._themePref || this._c.theme || 'dark', am = String(this._ambMin());
     const seg = (act, cur, items) => `<div class="seg wide">${items.map(x => `<button class="${cur === x[0] ? 'on' : ''}" data-act="${act}" data-m="${x[0]}">${x[1]}</button>`).join('')}</div>`;
-    return `<div class="grab"></div><div class="sh"><div class="ico">${ic('cog', 24)}</div><div><h2>Darstellung &amp; Modi</h2><p>Home Aurora v5.2 · Build pz13</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
+    return `<div class="grab"></div><div class="sh"><div class="ico">${ic('cog', 24)}</div><div><h2>Darstellung &amp; Modi</h2><p>Home Aurora v5.2 · Build pz15</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
       <div class="lab2">DESIGN</div>${seg('theme', th, [['dark', 'Dunkel'], ['light', 'Hell'], ['auto', 'Automatisch']])}
       <div class="card-note">„Automatisch“ folgt dem Dunkel-/Hellmodus deines Home-Assistant-Profils. Die Auswahl gilt nur für dieses Gerät.</div>
       ${WALL_UI ? `      <div class="lab2">WANDTABLET-MODUS</div>
@@ -2474,6 +2478,8 @@ class HomeAurora extends HTMLElement {
       <div class="card-note" style="margin-top:12px">Nachts automatisch${this._nightCfg() ? ` (${this._nightCfg().from}–${this._nightCfg().to} Uhr, nach ${this._nightCfg().after} Min)` : ''}</div>${seg('ambnight', this._nightCfg() ? '1' : '0', [['1', 'An'], ['0', 'Aus']])}
       ` : ''}
       ${this._fullySet()}
+      ${this._pzSum().T.length ? `<div class="lab2">PUTZPLAN</div>${seg('pzview', this._pzView() ? '1' : '0', [['1', 'Eigene Ansicht'], ['0', 'Fenster']])}
+      <div class="card-note">Wie sich der Putzplan beim Antippen öffnet: als eigene Seite mit „Zurück“ oder als Fenster über der Startseite. Gilt nur für dieses Gerät.</div>` : ''}
       <div class="lab2">SCHNELLAKTIONEN</div>
       <button class="xr" style="width:100%" data-act="qedit"><div class="ico">${ic('sparkle', 19)}</div><div><div class="t">Schnellaktionen bearbeiten</div><div class="s">Szenen &amp; Skripte hinzufügen, sortieren, neue Szene speichern</div></div></button>
       <div class="lab2">SCHNELLZUGRIFF</div>
@@ -3197,7 +3203,7 @@ class HomeAurora extends HTMLElement {
     return [`<button class="xr kid" data-act="pz"><div class="ico">${ic('broom', 19)}</div><div><div class="t">Putzplan</div><div class="s">Alles sauber</div></div><span class="kdot ok"></span></button>`];
   }
   /* Karte „Heute putzen“ für die Startseite (n = max. Zeilen) */
-  _pzCard(i, n) {
+  _pzCard(i, n, fit = 0) {
     const S = this._pzSum(); if (!S.T.length) return '';
     const sched = S.T.filter(t => t.st !== 'as_needed'), U = S.T.filter(t => t.st === 'unknown');
     if (U.length && U.length === sched.length) return `<button class="c pzc pzfresh tap" style="--i:${i}" data-act="pz"><div class="ico">${ic('broom', 20)}</div><div><div class="t">Putzplan · noch nicht gestartet</div><div class="s">${U.length} Aufgaben – jetzt auf die Wochen verteilen</div></div><span class="pzv">${ic('chevron', 16)}</span></button>`;
@@ -3205,9 +3211,9 @@ class HomeAurora extends HTMLElement {
     const done = S.T.filter(t => t.today).length, tot = due.length + done;
     if (!tot) return '';
     if (!due.length) return `<button class="c pzc pzfresh tap" style="--i:${i}" data-act="pz"><div class="ico ok">${ic('check', 20)}</div><div><div class="t">Heute alles geputzt</div><div class="s">${done} ${done === 1 ? 'Aufgabe' : 'Aufgaben'} erledigt</div></div><span class="pzv">${ic('chevron', 16)}</span></button>`;
-    const rows = due.slice(0, n).map(t => `<div class="pzr ${t.st === 'overdue' ? 'o' : 'd'}" data-sw="${esc(t.e)}"><div class="ico">${ic(this._pzIcon(t), 18)}</div><div><div class="t">${esc(t.name)}</div><div class="s">${esc(t.st === 'overdue' ? 'Überfällig seit ' + t.over + (t.over === 1 ? ' Tag' : ' Tagen') + ' · ' + t.room : t.room + (t.iv ? ' · ' + this._pzIv(t.iv) : ''))}</div></div><button class="pzb2" data-act="pzdone" data-e="${esc(t.e)}" aria-label="Erledigt">${ic('check', 18)}</button></div>`).join('');
+    const rows = due.slice(0, n + fit).map((t, k) => `<div class="pzr ${t.st === 'overdue' ? 'o' : 'd'}${k >= n ? ' fi fh" data-fp="1' : ''}" data-sw="${esc(t.e)}"><div class="ico">${ic(this._pzIcon(t), 18)}</div><div><div class="t">${esc(t.name)}</div><div class="s">${esc(t.st === 'overdue' ? 'Überfällig seit ' + t.over + (t.over === 1 ? ' Tag' : ' Tagen') + ' · ' + t.room : t.room + (t.iv ? ' · ' + this._pzIv(t.iv) : ''))}</div></div><button class="pzb2" data-act="pzdone" data-e="${esc(t.e)}" aria-label="Erledigt">${ic('check', 18)}</button></div>`).join('');
     const more = due.length - rows.split('class="pzr ').length + 1;
-    return `<div class="c pzc fix" style="--i:${i}"><div class="h">${ic('broom', 14)}Heute putzen<span class="r">${done} von ${tot} erledigt</span></div><div class="pzbar"><i style="width:${Math.round(100 * done / tot)}%"></i></div>${rows}<button class="pzmore" data-act="pz">${more > 0 ? '+ ' + more + ' weitere · ' : ''}Putzplan öffnen<span class="pzv">${ic('chevron', 14)}</span></button></div>`;
+    return `<div class="c pzc fix" style="--i:${i}"><div class="h">${ic('broom', 14)}Heute putzen<span class="r">${done} von ${tot} erledigt</span></div><div class="pzbar"><i style="width:${Math.round(100 * done / tot)}%"></i></div>${rows}<button class="pzmore" data-act="pz"><span class="fm" data-n="${more}">${more > 0 ? '+ ' + more + ' weitere · ' : ''}</span>Putzplan öffnen<span class="pzv">${ic('chevron', 14)}</span></button></div>`;
   }
   _cleanAlerts() { return []; }
   _pzSt() { return this._sheet && this._sheet.t === 'clean' ? this._sheet : this._v === 'clean' ? (this._pzp = this._pzp || {}) : null; }
@@ -3216,6 +3222,8 @@ class HomeAurora extends HTMLElement {
     if (this._sheet && this._sheet.t === 'clean') this._renderSheet(); else { this._sig = ''; this._render(); }
     if (foc) { const p2 = this.shadowRoot.getElementById('pzq'); if (p2) { p2.focus(); try { p2.setSelectionRange(pos, pos); } catch (x) { } } }
   }
+  /* Putzplan als eigene Ansicht (Standard) oder als Fenster; pro Gerät umschaltbar, Vorgabe per YAML putzplan_view: false */
+  _pzView() { return this._pzvPref != null ? this._pzvPref === '1' : this._c?.putzplan_view !== false; }
   _sClean() {
     const S = this._pzSum(), T = S.T;
     const head = `<div class="grab"></div><div class="sh"><div class="ico">${ic('broom', 24)}</div><div><h2>Putzplan</h2><p>${T.length} Aufgaben${S.over.length ? ' · ' + S.over.length + ' überfällig' : ''}</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>`;
@@ -3224,7 +3232,7 @@ class HomeAurora extends HTMLElement {
   }
   _vClean() {
     const S = this._pzSum(), T = S.T;
-    const h = `<div class="vh"><div><h1>Putzplan</h1><p>${T.length} Aufgaben${S.over.length ? ' · ' + S.over.length + ' überfällig' : ''}</p></div></div>`;
+    const h = `<div class="vh"><div><h1>Putzplan</h1><p>${T.length} Aufgaben${S.over.length ? ' · ' + S.over.length + ' überfällig' : ''}</p></div><button class="vbt big pzhome" data-act="nav" data-v="home">${ic('chevron', 15)}<span>Zurück</span></button></div>`;
     if (!T.length) return h + '<div class="empty">Keine Putzplan-Aufgaben gefunden. Ist die Integration „Putzplan“ geladen?</div>';
     return h + `<div class="pzpage">${this._cleanBody(this._pzSt())}</div>`;
   }
@@ -3392,7 +3400,7 @@ class HomeAurora extends HTMLElement {
     if (this._sheet && this._sheet.t === 'pzstat') this._renderSheet();
   }
   _sPzStat() {
-    const S = this._pzS, back = !WALL_UI ? `<button class="vbt" data-act="pzback" style="margin-top:14px;width:100%">${ic('chevron', 15)}<span>Zurück zum Putzplan</span></button>` : '';
+    const S = this._pzS, back = !this._pzView() ? `<button class="vbt" data-act="pzback" style="margin-top:14px;width:100%">${ic('chevron', 15)}<span>Zurück zum Putzplan</span></button>` : '';
     const head = p => `<div class="grab"></div><div class="sh"><div class="ico">${ic('broom', 24)}</div><div><h2>Putzplan · letzte 7 Tage</h2><p>${p}</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>`;
     if (!S) return head('Lade Verlauf …') + `<div class="empty">Verlauf wird geladen …</div>`;
     if (!S.ok) return head('Nicht verfügbar') + `<div class="empty">Der Verlauf konnte nicht geladen werden.</div><button class="vbt" data-act="pzstatr" style="width:100%">${ic('refresh', 15)}<span>Nochmal versuchen</span></button>` + back;
@@ -3657,7 +3665,7 @@ class HomeAurora extends HTMLElement {
 
   /* ───────────── Rendern ───────────── */
   _navHtml() {
-    return `<div class="logo"></div>${(WALL_UI ? [...TABS, ['clean', 'Putzplan', 'broom']] : TABS).map(t => `<button class="nb ${this._v === t[0] ? 'on' : ''}" data-act="nav" data-v="${t[0]}">${ic(t[2], 24)}<span class="lab">${t[1]}</span></button>`).join('')}
+    return `<div class="logo"></div>${(WALL_UI && this._pzView() ? [...TABS, ['clean', 'Putzplan', 'broom']] : TABS).map(t => `<button class="nb ${this._v === t[0] ? 'on' : ''}" data-act="nav" data-v="${t[0]}">${ic(t[2], 24)}<span class="lab">${t[1]}</span></button>`).join('')}
       <div class="sp"></div>${this._lockBtn()}<button class="nb gear" data-act="settings">${ic('cog', 24)}<span class="lab">Einstellungen</span></button>`;
   }
   _render() {
@@ -3878,20 +3886,21 @@ class HomeAurora extends HTMLElement {
       case 'settings': this._sheet = { t: 'set' }; this._renderSheet(); break;
       case 'quick': this._quickRun(e); break;
       case 'theme': this._themePref = el.dataset.m; try { localStorage.setItem('home-aurora-theme', el.dataset.m); } catch (er) { /* ok */ } this._render(); break;
+      case 'pzview': this._pzvPref = el.dataset.m; try { localStorage.setItem('home-aurora-pzview', el.dataset.m); } catch (er) { /* ok */ } if (el.dataset.m === '0' && this._v === 'clean') this._v = 'home'; this._sig = ''; this._render(); this._renderSheet(); break;
       case 'ambnight': this._nightPref = el.dataset.m; try { localStorage.setItem('home-aurora-ambnight', el.dataset.m); } catch (er) { /* ok */ } this._renderSheet(); break;
       case 'ambafter': this._ambPref = el.dataset.m; try { localStorage.setItem('home-aurora-amb', el.dataset.m); } catch (er) { /* ok */ } this._lastAct = Date.now(); this._renderSheet(); break;
       case 'ambient': this._closeSheet(); this._ambOn(); break;
       case 'radar': this._sheet = { t: 'radar' }; this._renderSheet(); break;
       case 'lock': this._lockToggle(); break;
       case 'kid': this._sheet = { t: 'kid', i: parseInt(el.dataset.i, 10) || 0 }; this._renderSheet(); break;
-      case 'pz': if (WALL_UI) { this._v = 'clean'; this._enter = true; this._counted = false; this._closeSheet(); this._render(); } else { this._sheet = { t: 'clean' }; this._renderSheet(); } break;
+      case 'pz': if (!this._pzView()) { this._sheet = { t: 'clean' }; this._renderSheet(); break; } this._v = 'clean'; this._enter = true; this._counted = false; this._closeSheet(); this._render(); this.scrollIntoView?.({ block: 'start' }); break;
       case 'pzf': { const st = this._pzSt(); if (st) { st.f = e; st.q = ''; this._pzRefresh(); } break; }
       case 'pzdone': this._pzDone(e); break;
       case 'pzundo': this._pzUndo(e); this._tst.classList.remove('show'); break;
       case 'pzroom': if (this._pzSt()) { this._pzCol = this._pzCol || {}; this._pzCol[el.dataset.id] = el.dataset.c !== '1'; this._pzRefresh(); } break;
       case 'pzstat': this._sheet = { t: 'pzstat' }; this._renderSheet(); this._pzLoadStat(); break;
       case 'pzstatr': this._pzS = null; this._renderSheet(); this._pzLoadStat(true); break;
-      case 'pzback': if (WALL_UI) this._closeSheet(); else { this._sheet = { t: 'clean' }; this._renderSheet(); } break;
+      case 'pzback': if (this._pzView()) this._closeSheet(); else { this._sheet = { t: 'clean' }; this._renderSheet(); } break;
       case 'pzstart': { const st = this._pzSt(); if (st) { st.cf = true; this._pzRefresh(); } break; }
       case 'pzcancel': { const st = this._pzSt(); if (st) { st.cf = false; this._pzRefresh(); } break; }
       case 'pzgo': this._pzStart(); break;
@@ -3978,6 +3987,7 @@ class HomeAurora extends HTMLElement {
 const EDITOR_SCHEMA = [
   { name: 'theme', selector: { select: { mode: 'dropdown', options: [{ value: 'dark', label: 'Dunkel' }, { value: 'light', label: 'Hell' }, { value: 'auto', label: 'Automatisch (wie Home Assistant)' }] } } },
   { name: 'ambient_after', selector: { select: { mode: 'dropdown', options: [{ value: 0, label: 'Aus' }, { value: 2, label: 'Nach 2 Minuten' }, { value: 5, label: 'Nach 5 Minuten' }, { value: 10, label: 'Nach 10 Minuten' }, { value: 30, label: 'Nach 30 Minuten' }] } } },
+  { name: 'putzplan_view', selector: { boolean: {} } },
   { name: 'weather', selector: { entity: { domain: 'weather' } } },
   { name: 'persons', selector: { entity: { domain: 'person', multiple: true } } },
   { name: 'radar', selector: { entity: { domain: 'camera' } } },
@@ -3985,7 +3995,7 @@ const EDITOR_SCHEMA = [
   { name: 'calendarDays', selector: { number: { min: 3, max: 60, mode: 'box' } } },
   { name: 'batteryLow', selector: { number: { min: 5, max: 50, mode: 'box', unit_of_measurement: '%' } } },
 ];
-const EDITOR_LABELS = { theme: 'Design', ambient_after: 'Wandtablet-Modus automatisch starten', weather: 'Wetter-Entität', persons: 'Personen', radar: 'Regenradar-Kamera', radarUrl: 'Eigene Radar-URL (optional, Live-Karte)', calendarDays: 'Termine: Tage voraus', batteryLow: 'Batterie schwach ab' };
+const EDITOR_LABELS = { theme: 'Design', ambient_after: 'Wandtablet-Modus automatisch starten', weather: 'Wetter-Entität', persons: 'Personen', radar: 'Regenradar-Kamera', radarUrl: 'Eigene Radar-URL (optional, Live-Karte)', putzplan_view: 'Putzplan als eigene Ansicht öffnen (sonst als Fenster)', calendarDays: 'Termine: Tage voraus', batteryLow: 'Batterie schwach ab' };
 class HomeAuroraEditor extends HTMLElement {
   setConfig(c) { this._c = c || {}; this._draw(); }
   set hass(h) { this._h = h; if (this._f) this._f.hass = h; }
@@ -4003,7 +4013,7 @@ class HomeAuroraEditor extends HTMLElement {
       note.textContent = 'Räume, Kalender, Drucker, Stromgeräte und Schnellaktionen stellst du im YAML-Editor ein (siehe Kommentare in home-aurora.js).';
       this.appendChild(this._f); this.appendChild(note);
     }
-    this._f.hass = this._h; this._f.schema = WALL_UI ? EDITOR_SCHEMA : EDITOR_SCHEMA.filter(s => s.name !== 'ambient_after'); this._f.data = { theme: 'dark', ambient_after: 0, ...this._c };
+    this._f.hass = this._h; this._f.schema = WALL_UI ? EDITOR_SCHEMA : EDITOR_SCHEMA.filter(s => s.name !== 'ambient_after'); this._f.data = { theme: 'dark', ambient_after: 0, putzplan_view: true, ...this._c };
   }
 }
 //@@WIDE_ONLY@@
