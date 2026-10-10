@@ -13,6 +13,7 @@ const CSSW = `
 .ctop .gap{flex:1}
 .ctop .tb{flex:none;display:flex;align-items:center;gap:8px;padding:9px 14px;border-radius:999px;background:rgba(var(--wh),.07);border:1px solid var(--line);font-size:13px;color:var(--tx2);white-space:nowrap}
 .ctop .tb:hover{color:var(--tx);background:rgba(var(--wh),.12)}
+.ctop .tb.mus span{max-width:170px;overflow:hidden;text-overflow:ellipsis}.ctop .tb.mus.on{color:#5eead4;border-color:rgba(94,234,212,.4);background:rgba(94,234,212,.12)}
 .stg{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;flex:none}
 .app.wide .stg .st{grid-column:auto;display:grid;grid-template-columns:auto auto minmax(0,1fr);grid-template-areas:"ico num lab" "ico num sub";align-items:center;column-gap:14px;row-gap:1px;min-height:0;padding:12px 16px;border-radius:24px}
 .app.wide .st .top{grid-area:ico}.app.wide .st .ico{width:44px;height:44px;border-radius:15px}
@@ -155,12 +156,12 @@ class HomeAuroraWide extends HomeAurora {
     const wxCard = `<div class="c wxh tap fix" style="--i:2;--wglow:${this._wxGlow(w.cond)}" data-act="nav" data-v="weather">
         <div class="wtop"><div><div class="wtemp big" data-count="${w.temp ?? 0}" data-d="1">${de(w.temp)}<small class="u">°C</small></div><div class="wcond">${COND[w.cond] || w.cond}</div></div>${wx(w.cond, 72)}</div>
         <div><div class="chips"><span class="chip">${ic('drop', 14)}<b>${de(w.hum, 0)}</b>%</span><span class="chip">${ic('wind', 14)}<b>${de(w.wind, 0)}</b> ${esc(w.windU)}</span>${w.rain ? `<span class="chip">${ic('rain', 14)}<b>${de(w.rain)}</b> ${esc(w.rainU)}</span>` : ''}${sunChip}</div>${mini ? `<div class="mini">${mini}</div>` : ''}</div></div>`;
-    const pz0 = this._pzCard(6, 1, 7), alltag = [...xr.filter(x => !/Heizmodus/.test(x) && !(this._pzCard(6, 2) && /Tanken/.test(x))), this._plantRow(), this._sysRow()].filter(Boolean).slice(0, pz0 ? 3 : 5);
+    const pz0 = this._pzCard(6, 1, 7), alltag = [...xr.filter(x => !/Heizmodus|data-act="music"/.test(x) && !(this._pzCard(6, 2) && /Tanken/.test(x))), this._plantRow(), this._sysRow()].filter(Boolean).slice(0, pz0 ? 3 : 5);
     const cal = this._calCard(7, 1, 8), pow = this._powerCard(8);
     const vh = typeof innerHeight === 'number' ? innerHeight : 800;
     return `<div class="cock">
       <div class="ctop">${AL.length ? `<div class="alerts">${AL.map(a => this._alertHtml(a)).join('')}</div>` : ''}${q || '<div class="gap"></div>'}
-        <button class="tb" data-act="ambient">${ic('expand', 15)}Wandtablet</button></div>
+        ${this._musicTb()}<button class="tb" data-act="ambient">${ic('expand', 15)}Wandtablet</button></div>
       <div class="stg">
         ${this._stat(1, 'bulb', 'Lichter an', L, L ? 'hot' : '', L ? esc(this._lightsOn().slice(0, 2).map(e => this._name(e)).join(', ')) + (L > 2 ? ' …' : '') : 'Alles aus', 'lights')}
         ${this._stat(2, 'window', 'Fenster offen', open.length, open.length ? 'bad' : 'cool', this._winSub(open), 'doors')}
