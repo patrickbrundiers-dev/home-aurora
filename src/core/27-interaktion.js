@@ -97,6 +97,7 @@
       case 'settemp': h.callService('climate', 'set_temperature', { entity_id: e, temperature: parseFloat(el.dataset.v) }); break;
       case 'cpreset': h.callService('climate', 'set_preset_mode', { entity_id: e, preset_mode: el.dataset.m }); break;
       case 'chvac': h.callService('climate', 'set_hvac_mode', { entity_id: e, hvac_mode: el.dataset.m }); break;
+      case 'dhmode': this._dhSet(this._c.rooms.find(r => r.id === el.dataset.room), el.dataset.m); break;
       case 'maps': { const u = `https://www.google.com/maps/dir/?api=1&destination=${el.dataset.lat},${el.dataset.lon}`; try { window.open(u, '_blank', 'noopener'); } catch (er) { /* ok */ } break; }
       case 'fuauto': this._fuPref = el.dataset.m; try { localStorage.setItem('home-aurora-fully', el.dataset.m); } catch (er) { /* ok */ } this._fuLast = null; this._fullyApply(true); this._renderSheet(); break;
       case 'fuelk': this._fuelK = el.dataset.k; this._renderSheet(); break;
@@ -165,12 +166,29 @@
         else { this._armed = false; clearTimeout(this._at); h.callService('light', 'turn_off', { entity_id: this._lightsOn() }); this._toast('Alle Lichter ausgeschaltet'); }
         break;
       case 'temp': {
+        const R = this._dhRoom(e);
+        // alle Thermostate des Raums gleich verschieben, damit ihr Abstand zueinander bleibt
+        if (R) { for (const cl of this._dh(R).trv) { if (!okv(cl.state)) continue; const x = cl.attributes; h.callService('climate', 'set_temperature', { entity_id: cl.entity_id, temperature: clamp(Math.round(((x.temperature ?? 20) + parseFloat(el.dataset.d)) * 2) / 2, x.min_temp ?? 5, x.max_temp ?? 30) }); } break; }
         const cl = this._s(e); if (!cl) break;
         const cur = cl.attributes.temperature ?? cl.attributes.current_temperature ?? 20;
         const nt = clamp(Math.round((cur + parseFloat(el.dataset.d)) * 2) / 2, cl.attributes.min_temp ?? 5, cl.attributes.max_temp ?? 30);
         h.callService('climate', 'set_temperature', { entity_id: e, temperature: nt }); break;
       }
-      case 'hvac': h.callService('climate', 'set_hvac_mode', { entity_id: e, hvac_mode: this._val(e) === 'off' ? 'heat' : 'off' }); break;
+      case 'hvac': {
+        const R = this._dhRoom(e);
+        if (R) { this._dhSet(R, this._dh(R).mode === 'off' ? 'auto' : 'off'); break; }
+        h.callService('climate', 'set_hvac_mode', { entity_id: e, hvac_mode: this._val(e) === 'off' ? 'heat' : 'off' }); break;
+      }
     }
+  }
+  /* Raum mit Heizungssteuerung zum Thermostat e (nur der Hauptthermostat steht in data-e) */
+  _dhRoom(e) { return this._c.rooms.find(r => r.heat && r.climate === e) || null; }
+  /* auto: Regelung übernimmt · heat: Manuell (Regelung aus, Thermostate an) · off: Regelung und alle Thermostate aus */
+  _dhSet(r, m) {
+    const D = r && this._dh(r); if (!D) return;
+    const h = this._h, ids = D.trv.map(s => s.entity_id);
+    if (r.heat.switch && this._s(r.heat.switch)) h.callService('switch', m === 'auto' ? 'turn_on' : 'turn_off', { entity_id: r.heat.switch });
+    if (ids.length && (m === 'off' || D.mode === 'off')) h.callService('climate', 'set_hvac_mode', { entity_id: ids, hvac_mode: m === 'off' ? 'off' : 'heat' });
+    this._toast(m === 'auto' ? `${r.name}: Automatik an` : m === 'off' ? `${r.name}: Heizung aus` : `${r.name}: manuelle Steuerung`);
   }
 

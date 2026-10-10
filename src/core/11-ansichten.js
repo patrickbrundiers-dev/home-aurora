@@ -52,7 +52,7 @@
   /* ───────────── Ansicht: Klima ───────────── */
   _dial(r, i) {
     const I = this._room(r), cl = I.cl; if (!cl) return '';
-    const cur = cl.attributes.current_temperature ?? I.temp, tg = cl.attributes.temperature, heat = I.act === 'heating', off = I.mode === 'off';
+    const cur = cl.attributes.current_temperature ?? I.temp, tg = cl.attributes.temperature, heat = I.act === 'heating', off = I.mode === 'off', auto = !off && I.dh?.auto;
     const fc = clamp(((cur ?? 10) - 10) / 20, 0, 1), ft = clamp(((tg ?? 10) - 10) / 20, 0, 1), a1 = 135 + 270 * fc, at = 135 + 270 * ft;
     const col = cur != null ? tempCol(cur) : '#94a3b8';
     const tx = 100 + 84 * Math.cos(at * Math.PI / 180), ty = 100 + 84 * Math.sin(at * Math.PI / 180);
@@ -61,9 +61,9 @@
       <div class="dctr"><svg class="dsvg" viewBox="0 0 200 170"><path d="${arc(100, 100, 84, 135, 405)}" fill="none" stroke="rgba(${WH},.09)" stroke-width="12" stroke-linecap="round"/>
         ${cur != null ? `<path d="${arc(100, 100, 84, 135, Math.max(135.5, a1))}" fill="none" stroke="${col}" stroke-width="12" stroke-linecap="round" style="filter:drop-shadow(0 0 10px ${col});opacity:${off ? .35 : 1}"/>` : ''}
         ${tg != null && !off ? `<circle cx="${tx.toFixed(1)}" cy="${ty.toFixed(1)}" r="9" fill="${FG}" style="filter:drop-shadow(0 0 8px rgba(${WH},.8))"/><circle cx="${tx.toFixed(1)}" cy="${ty.toFixed(1)}" r="3.500" fill="${col}"/>` : ''}</svg>
-        <div class="mid htap" data-act="heat" data-room="${r.id}"><div class="cur big">${de(cur)}<small class="u">°</small></div><div class="tg">${off ? 'Heizung aus' : 'Ziel <b>' + de(tg) + '°</b>'}</div></div></div>
-      <div class="dst ${heat ? 'heat' : ''}">${heat ? ic('flame', 14) + 'Heizt gerade' : (off ? 'Aus' : 'Bereit')}</div>
-      <div class="dbt"><button class="rbn" data-act="temp" data-e="${r.climate}" data-d="-0.5">${ic('minus', 22)}</button><button class="rbn" data-act="temp" data-e="${r.climate}" data-d="0.5">${ic('plus', 22)}</button></div></div>`;
+        <div class="mid htap" data-act="heat" data-room="${r.id}"><div class="cur big">${de(cur)}<small class="u">°</small></div><div class="tg">${off ? 'Heizung aus' : (auto ? 'Automatik' : 'Ziel') + ' <b>' + de(tg) + '°</b>'}</div></div></div>
+      <div class="dst ${heat ? 'heat' : ''}">${heat ? ic('flame', 14) + 'Heizt gerade' : (off ? 'Aus' : esc(I.dh?.label || 'Bereit'))}</div>
+      <div class="dbt">${auto ? `<button class="qb on" data-act="heat" data-room="${r.id}">${ic('clock', 14)}Automatik</button>` : `<button class="rbn" data-act="temp" data-e="${r.climate}" data-d="-0.5">${ic('minus', 22)}</button><button class="rbn" data-act="temp" data-e="${r.climate}" data-d="0.5">${ic('plus', 22)}</button>`}</div></div>`;
   }
   _tempSeries(out = true) {
     const c = this._c, pal = ['#fb923c', '#a78bfa', '#f472b6', '#34d399', '#38bdf8', '#facc15', '#94a3b8'];
@@ -139,7 +139,7 @@
   }
   _meteo() {
     const hr = (this._fc?.hourly || []).slice(0, 24);
-    if (hr.length < 4) return '<div class="sk" style="height:200px"></div>';
+    if (hr.length < 4) return this._fc ? '<div class="empty sm">Keine stündliche Vorhersage verfügbar</div>' : '<div class="sk" style="height:200px"></div>';
     const N = hr.length, T = hr.map(d => d.temperature), mn = Math.min(...T), mx = Math.max(...T), rg = Math.max(mx - mn, 2);
     const X = i => (i + .5) / N * 100, Y = t => (1 - (t - mn) / rg) * 66 + 14;
     const pts = hr.map((d, i) => [X(i), Y(d.temperature)]), path = smooth(pts);
@@ -180,10 +180,10 @@
           <div class="wtop"><div><div class="hello" style="color:rgba(255,255,255,.75)">Jetzt bei dir</div><div class="wtemp big" data-count="${w.temp ?? 0}" data-d="1">${de(w.temp)}<small class="u" style="color:rgba(255,255,255,.8)">°</small></div><div class="wcond">${COND[w.cond] || w.cond}${feels != null ? ' · gefühlt ' + de(feels, 0) + '°' : ''}</div>${d0 ? `<div class="hl2">Höchstwert ${de(d0.temperature, 0)}° · Tiefstwert ${de(d0.templow ?? d0.temperature - 5, 0)}°</div>` : ''}</div>${wx(w.cond, 150)}</div>
           <div class="chips"><span class="chip">${ic('drop', 14)}Luftfeuchte <b>${de(w.hum, 0)} %</b></span><span class="chip">${ic('wind', 14)}Wind <b>${de(w.wind, 0)} ${esc(w.windU)}</b></span><span class="chip">${ic('rain', 14)}Regen <b>${de(w.rain ?? 0)} ${esc(w.rainU)}</b></span>${w.press ? `<span class="chip">${ic('radar', 14)}<b>${de(w.press, 0)} hPa</b></span>` : ''}</div></div></div>
         <div class="c s4" style="--i:1"><div class="h">${ic('sun', 14)}Sonne &amp; Mond</div>${this._sunArc()}
-          <div class="srow" style="margin-top:8px"><span>${up ? 'Noch <b>' + lh + ' h ' + lm + ' min</b> Tageslicht' : 'Sonne in <b>' + lh + ' h ' + lm + ' min</b>'}</span></div>
+          ${isNaN(lh) ? '' : `<div class="srow" style="margin-top:8px"><span>${up ? 'Noch <b>' + lh + ' h ' + lm + ' min</b> Tageslicht' : 'Sonne in <b>' + lh + ' h ' + lm + ' min</b>'}</span></div>`}
           <div class="moon">${this._moonSvg(mo.p)}<div><b>${mo.name}</b>${Math.round(mo.ill * 100)} % beleuchtet</div></div></div>
         <div class="c s12 wxcard" style="--i:5">${this._wxCard() || `<div class="h">${ic('thermo', 14)}Die nächsten 24 Stunden<span class="r">Temperatur &amp; Regenwahrscheinlichkeit</span></div>${this._meteo()}`}</div>
-        <div class="c s12 trcard" style="--i:6">${this._trCard() || `<div class="h">${ic('cloudsun', 14)}Die nächsten Tage</div>${days || '<div class="sk" style="height:200px"></div>'}`}</div>
+        <div class="c s12 trcard" style="--i:6">${this._trCard() || `<div class="h">${ic('cloudsun', 14)}Die nächsten Tage</div>${days || (this._fc ? '<div class="empty sm">Keine Vorhersage verfügbar</div>' : '<div class="sk" style="height:200px"></div>')}`}</div>
         ${this._radarCard(7, 's12')}
       </div>`;
   }

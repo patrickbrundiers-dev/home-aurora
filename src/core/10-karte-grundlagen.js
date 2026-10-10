@@ -94,14 +94,26 @@ class HomeAurora extends HTMLElement {
     if (!cs.length) return '251,191,36';
     return [0, 1, 2].map(i => Math.round(cs.reduce((a, c) => a + c[i], 0) / cs.length)).join(',');
   }
+  /* Räume mit der Integration „Dynamische Heizungssteuerung“ (dynamic_heating): sie regelt mehrere Thermostate nach
+     Zeitplan, Anwesenheit und Wetter. Die Karte zeigt dann deren Ziel und Status statt des Sollwerts eines Thermostats. */
+  _dh(r) {
+    if (!r.heat) return null;
+    const st = this._s(r.heat.status), a = st?.attributes || {}, auto = this._val(r.heat.switch) === 'on' && a.enabled !== false;
+    const trv = [r.climate, ...(r.climate_more || [])].map(e => this._s(e)).filter(Boolean);
+    const heating = trv.some(s => { const x = s.attributes; return x.hvac_action === 'heating' || (x.hvac_action == null && s.state !== 'off' && x.temperature != null && x.current_temperature != null && x.temperature > x.current_temperature + 0.2); });
+    const target = auto ? (a.current_setpoint ?? a.target_temperature ?? trv[0]?.attributes.temperature) : trv[0]?.attributes.temperature;
+    return { st, a, auto, trv, mode: trv.length && trv.every(s => s.state === 'off') ? 'off' : 'heat', act: heating ? 'heating' : 'idle', target, label: st && okv(st.state) ? st.state : '' };
+  }
   _room(r) {
-    const cl = r.climate ? this._s(r.climate) : null;
+    let cl = r.climate ? this._s(r.climate) : null;
+    const dh = cl ? this._dh(r) : null;
+    if (dh) cl = { ...cl, state: dh.mode, attributes: { ...cl.attributes, temperature: dh.target, current_temperature: (r.temp && this._num(r.temp)) ?? cl.attributes.current_temperature, hvac_action: dh.act } };
     const lights = (r.lights || []).filter(e => this._s(e) && this._val(e) !== 'unavailable');
     const on = lights.filter(e => this._val(e) === 'on');
     const win = (r.window || []).filter(e => this._s(e));
     return {
       temp: r.temp ? this._num(r.temp) : null, hum: r.hum ? this._num(r.hum) : null, cl, lights, on, win,
-      open: win.some(e => this._val(e) === 'on'), stale: r.temp ? this._stale(r.temp) : null, target: cl?.attributes?.temperature, act: cl?.attributes?.hvac_action, mode: cl?.state, glow: this._glow(on),
+      open: win.some(e => this._val(e) === 'on'), stale: r.temp ? this._stale(r.temp) : null, target: cl?.attributes?.temperature, act: cl?.attributes?.hvac_action, mode: cl?.state, glow: this._glow(on), dh,
     };
   }
   _openRooms() { return this._c.rooms.filter(r => this._room(r).open).map(r => r.name); }
@@ -193,7 +205,7 @@ class HomeAurora extends HTMLElement {
   _spark(e) {
     const d = this._hist[e];
     if (!d) { this._need.add(e); return '<div class="sk"></div>'; }
-    if (d.pts.length < 2) return '<div class="sk" style="animation:none;opacity:.5"></div>';
+    if (d.pts.length < 2) return '';
     const vs = d.pts.map(p => p[1]), mn = Math.min(...vs), mx = Math.max(...vs), rg = Math.max(mx - mn, 1);
     const pts = d.pts.map((p, i) => [i / (d.pts.length - 1) * 200, 40 - (p[1] - mn) / rg * 32]);
     const path = smooth(pts), col = tempCol(vs[vs.length - 1]);
@@ -205,7 +217,11 @@ class HomeAurora extends HTMLElement {
     const data = series.map(s => ({ ...s, pts: this._hist[s.e]?.pts || [] }));
     if (data.some(s => !this._hist[s.e])) return `<div class="sk" style="height:${H}px"></div>`;
     const all = data.flatMap(s => s.pts.map(p => p[1]));
-    if (!all.length) return '<div class="empty">Noch keine Verlaufsdaten</div>';
+    // ohne Verlauf (Recorder schließt die Sensoren aus, frisch eingerichtet): wenigstens die aktuellen Werte zeigen
+    if (!all.length) {
+      const now = series.map(s => [s, this._num(s.e)]).filter(x => x[1] != null);
+      return now.length ? `<div class="chips nowv">${now.map(([s, v]) => `<span class="chip"><i class="cdot" style="background:${s.color}"></i>${esc(s.name)} <b>${de(v, opt.dec ?? 1)}${opt.unit ?? '°'}</b></span>`).join('')}</div><div class="empty sm">Noch kein Verlauf aufgezeichnet</div>` : '<div class="empty sm">Noch kein Verlauf aufgezeichnet</div>';
+    }
     let mn = Math.min(...all), mx = Math.max(...all);
     if (mx - mn < 2) { mn -= 1; mx += 1; }
     const pad = (mx - mn) * .1; mn -= pad; mx += pad;

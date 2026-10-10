@@ -160,7 +160,7 @@
     return `<div class="grab"></div><div class="sh"><div class="ico">${ic('bolt', 24)}</div><div><h2>Strom</h2><p>${P.devs.length} gemessene Geräte</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
       <div class="dg"><div class="dt"><div class="v">${de(P.total, 0)}<small class="u">W</small></div><div class="l">${ic('bolt', 13)}Jetzt</div></div><div class="dt"><div class="v">${P.kwh != null ? de(P.kwh, 1) : '–'}<small class="u">kWh</small></div><div class="l">${ic('clock', 13)}Heute</div></div>${cost ? `<div class="dt"><div class="v">${cost}</div><div class="l">${ic('bolt', 13)}Kosten heute</div></div>` : ''}</div>
       <div class="seg wide" style="margin-top:12px">${[[0, 'Heute'], [7, '7 Tage'], [30, '30 Tage']].map(x => `<button class="${rg === x[0] ? 'on' : ''}" data-act="prange" data-n="${x[0]}">${x[1]}</button>`).join('')}</div>
-      ${rg ? this._powerRange(rg) : `${series.length ? `<div class="lab2">VERLAUF · 24 STUNDEN</div>${this._chart(series, { h: 190, dec: 0 })}` : ''}
+      ${rg ? this._powerRange(rg) : `${series.length ? `<div class="lab2">VERLAUF · 24 STUNDEN</div>${this._chart(series, { h: 190, dec: 0, unit: ' W' })}` : ''}
       <div class="lab2">GERÄTE</div>${P.devs.map(row).join('')}${pvRow}`}`;
   }
 

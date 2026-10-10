@@ -93,7 +93,7 @@ const DEFAULTS = {
     ],
   },
   rooms: [
-    { id: 'wohnzimmer', name: 'Wohnzimmer', icon: 'sofa', temp: 'sensor.0x00158d008b860ecb_temperature', hum: 'sensor.0x00158d008b860ecb_humidity', climate: 'climate.wohnzimmer_bt', window: ['binary_sensor.fenster_wohnzimmer'], lights: ['light.wohnzimmer_sofa', 'light.sofa_indirekt', 'light.bilderleiste', 'light.flur_vorne_1'], media: ['media_player.wohnzimmer_google_tv', ['media_player.wohnzimmer', 'media_player.wohnzimmer_wohnzimmer']] },
+    { id: 'wohnzimmer', name: 'Wohnzimmer', icon: 'sofa', temp: 'sensor.0x00158d008b860ecb_temperature', hum: 'sensor.0x00158d008b860ecb_humidity', climate: 'climate.wohnzimmer_esstisch', climate_more: ['climate.wohnzimmer_hinter_sofa', 'climate.wohnzimmer_wintergarten'], heat: { status: 'sensor.wohnzimmer_heizung_status', switch: 'switch.wohnzimmer_heizung_regelung_aktiv' }, window: ['binary_sensor.fenster_wohnzimmer'], lights: ['light.wohnzimmer_sofa', 'light.sofa_indirekt', 'light.bilderleiste', 'light.flur_vorne_1'], media: ['media_player.wohnzimmer_google_tv', ['media_player.wohnzimmer', 'media_player.wohnzimmer_wohnzimmer']] },
     { id: 'kueche', name: 'Küche', icon: 'cook', temp: 'sensor.kuche_temperatur_temperature', hum: 'sensor.kuche_temperatur_humidity', window: ['binary_sensor.balkontur_contact'], lights: ['light.kuche_kochfeld', 'light.lsc_smart_led_strip_rgbcctic_5m'], media: [['media_player.jenny_patrick', 'media_player.kuche_jenny_patrick']] },
     { id: 'schlafzimmer', name: 'Schlafzimmer', icon: 'bed', temp: 'sensor.schlafzimmer_temperatur_temperature', hum: 'sensor.schlafzimmer_temperatur_humidity', climate: 'climate.schlafzimmer_bt', window: ['binary_sensor.fenster_schlafzimmer'], lights: ['light.bett_patrick', 'light.schlafzimmer_patrick_nachtlicht', 'light.jenny_nachtlicht', 'light.schlafzimmer'], media: ['media_player.fernseher_im_schlafzimmer', 'media_player.fernseher_im_schlafzimmer_2'] },
     { id: 'leonie', name: 'Leonie', icon: 'star', temp: 'sensor.leonie_temp_temperature', hum: 'sensor.leonie_temp_humidity', climate: 'climate.leonie_bt', window: ['binary_sensor.leonie_leonie_fenster'], lights: ['light.leonie_bett_licht'], media: ['media_player.leonie_leonie_alexa'] },
@@ -456,7 +456,7 @@ input[type=range]::-moz-range-thumb{width:18px;height:18px;border:0;border-radiu
 .sctl{display:flex;align-items:center;justify-content:space-between;padding:16px;border-radius:24px;background:rgba(var(--wh),.05);border:1px solid var(--line);margin-bottom:6px}
 .sctl .big{font-size:44px}.sctl .l{font-size:12px;color:var(--tx2);margin-top:4px}
 .toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);z-index:60;padding:10px 16px;border-radius:14px;background:#0b1226;border:1px solid var(--line);font-size:13px;opacity:0;pointer-events:none;transition:.3s}.toast.show{opacity:1}
-.empty{padding:22px;text-align:center;color:var(--tx3);font-size:14px;border-radius:20px;border:1px dashed var(--line)}
+.empty{padding:22px;text-align:center;color:var(--tx3);font-size:14px;border-radius:20px;border:1px dashed var(--line)}.empty.sm{padding:10px 14px;font-size:13px;border-radius:14px}.nowv{margin:4px 0 10px}.nowv .cdot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:2px}
 /* Touch & Mobil */
 button,.tap,.lt,.vc,.vr,.xr{-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 .rm,.st,.lt,.xr,.vc{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
@@ -1447,14 +1447,26 @@ class HomeAurora extends HTMLElement {
     if (!cs.length) return '251,191,36';
     return [0, 1, 2].map(i => Math.round(cs.reduce((a, c) => a + c[i], 0) / cs.length)).join(',');
   }
+  /* Räume mit der Integration „Dynamische Heizungssteuerung“ (dynamic_heating): sie regelt mehrere Thermostate nach
+     Zeitplan, Anwesenheit und Wetter. Die Karte zeigt dann deren Ziel und Status statt des Sollwerts eines Thermostats. */
+  _dh(r) {
+    if (!r.heat) return null;
+    const st = this._s(r.heat.status), a = st?.attributes || {}, auto = this._val(r.heat.switch) === 'on' && a.enabled !== false;
+    const trv = [r.climate, ...(r.climate_more || [])].map(e => this._s(e)).filter(Boolean);
+    const heating = trv.some(s => { const x = s.attributes; return x.hvac_action === 'heating' || (x.hvac_action == null && s.state !== 'off' && x.temperature != null && x.current_temperature != null && x.temperature > x.current_temperature + 0.2); });
+    const target = auto ? (a.current_setpoint ?? a.target_temperature ?? trv[0]?.attributes.temperature) : trv[0]?.attributes.temperature;
+    return { st, a, auto, trv, mode: trv.length && trv.every(s => s.state === 'off') ? 'off' : 'heat', act: heating ? 'heating' : 'idle', target, label: st && okv(st.state) ? st.state : '' };
+  }
   _room(r) {
-    const cl = r.climate ? this._s(r.climate) : null;
+    let cl = r.climate ? this._s(r.climate) : null;
+    const dh = cl ? this._dh(r) : null;
+    if (dh) cl = { ...cl, state: dh.mode, attributes: { ...cl.attributes, temperature: dh.target, current_temperature: (r.temp && this._num(r.temp)) ?? cl.attributes.current_temperature, hvac_action: dh.act } };
     const lights = (r.lights || []).filter(e => this._s(e) && this._val(e) !== 'unavailable');
     const on = lights.filter(e => this._val(e) === 'on');
     const win = (r.window || []).filter(e => this._s(e));
     return {
       temp: r.temp ? this._num(r.temp) : null, hum: r.hum ? this._num(r.hum) : null, cl, lights, on, win,
-      open: win.some(e => this._val(e) === 'on'), stale: r.temp ? this._stale(r.temp) : null, target: cl?.attributes?.temperature, act: cl?.attributes?.hvac_action, mode: cl?.state, glow: this._glow(on),
+      open: win.some(e => this._val(e) === 'on'), stale: r.temp ? this._stale(r.temp) : null, target: cl?.attributes?.temperature, act: cl?.attributes?.hvac_action, mode: cl?.state, glow: this._glow(on), dh,
     };
   }
   _openRooms() { return this._c.rooms.filter(r => this._room(r).open).map(r => r.name); }
@@ -1546,7 +1558,7 @@ class HomeAurora extends HTMLElement {
   _spark(e) {
     const d = this._hist[e];
     if (!d) { this._need.add(e); return '<div class="sk"></div>'; }
-    if (d.pts.length < 2) return '<div class="sk" style="animation:none;opacity:.5"></div>';
+    if (d.pts.length < 2) return '';
     const vs = d.pts.map(p => p[1]), mn = Math.min(...vs), mx = Math.max(...vs), rg = Math.max(mx - mn, 1);
     const pts = d.pts.map((p, i) => [i / (d.pts.length - 1) * 200, 40 - (p[1] - mn) / rg * 32]);
     const path = smooth(pts), col = tempCol(vs[vs.length - 1]);
@@ -1558,7 +1570,11 @@ class HomeAurora extends HTMLElement {
     const data = series.map(s => ({ ...s, pts: this._hist[s.e]?.pts || [] }));
     if (data.some(s => !this._hist[s.e])) return `<div class="sk" style="height:${H}px"></div>`;
     const all = data.flatMap(s => s.pts.map(p => p[1]));
-    if (!all.length) return '<div class="empty">Noch keine Verlaufsdaten</div>';
+    // ohne Verlauf (Recorder schließt die Sensoren aus, frisch eingerichtet): wenigstens die aktuellen Werte zeigen
+    if (!all.length) {
+      const now = series.map(s => [s, this._num(s.e)]).filter(x => x[1] != null);
+      return now.length ? `<div class="chips nowv">${now.map(([s, v]) => `<span class="chip"><i class="cdot" style="background:${s.color}"></i>${esc(s.name)} <b>${de(v, opt.dec ?? 1)}${opt.unit ?? '°'}</b></span>`).join('')}</div><div class="empty sm">Noch kein Verlauf aufgezeichnet</div>` : '<div class="empty sm">Noch kein Verlauf aufgezeichnet</div>';
+    }
     let mn = Math.min(...all), mx = Math.max(...all);
     if (mx - mn < 2) { mn -= 1; mx += 1; }
     const pad = (mx - mn) * .1; mn -= pad; mx += pad;
@@ -1698,7 +1714,7 @@ class HomeAurora extends HTMLElement {
   /* ───────────── Ansicht: Klima ───────────── */
   _dial(r, i) {
     const I = this._room(r), cl = I.cl; if (!cl) return '';
-    const cur = cl.attributes.current_temperature ?? I.temp, tg = cl.attributes.temperature, heat = I.act === 'heating', off = I.mode === 'off';
+    const cur = cl.attributes.current_temperature ?? I.temp, tg = cl.attributes.temperature, heat = I.act === 'heating', off = I.mode === 'off', auto = !off && I.dh?.auto;
     const fc = clamp(((cur ?? 10) - 10) / 20, 0, 1), ft = clamp(((tg ?? 10) - 10) / 20, 0, 1), a1 = 135 + 270 * fc, at = 135 + 270 * ft;
     const col = cur != null ? tempCol(cur) : '#94a3b8';
     const tx = 100 + 84 * Math.cos(at * Math.PI / 180), ty = 100 + 84 * Math.sin(at * Math.PI / 180);
@@ -1707,9 +1723,9 @@ class HomeAurora extends HTMLElement {
       <div class="dctr"><svg class="dsvg" viewBox="0 0 200 170"><path d="${arc(100, 100, 84, 135, 405)}" fill="none" stroke="rgba(${WH},.09)" stroke-width="12" stroke-linecap="round"/>
         ${cur != null ? `<path d="${arc(100, 100, 84, 135, Math.max(135.5, a1))}" fill="none" stroke="${col}" stroke-width="12" stroke-linecap="round" style="filter:drop-shadow(0 0 10px ${col});opacity:${off ? .35 : 1}"/>` : ''}
         ${tg != null && !off ? `<circle cx="${tx.toFixed(1)}" cy="${ty.toFixed(1)}" r="9" fill="${FG}" style="filter:drop-shadow(0 0 8px rgba(${WH},.8))"/><circle cx="${tx.toFixed(1)}" cy="${ty.toFixed(1)}" r="3.500" fill="${col}"/>` : ''}</svg>
-        <div class="mid htap" data-act="heat" data-room="${r.id}"><div class="cur big">${de(cur)}<small class="u">°</small></div><div class="tg">${off ? 'Heizung aus' : 'Ziel <b>' + de(tg) + '°</b>'}</div></div></div>
-      <div class="dst ${heat ? 'heat' : ''}">${heat ? ic('flame', 14) + 'Heizt gerade' : (off ? 'Aus' : 'Bereit')}</div>
-      <div class="dbt"><button class="rbn" data-act="temp" data-e="${r.climate}" data-d="-0.5">${ic('minus', 22)}</button><button class="rbn" data-act="temp" data-e="${r.climate}" data-d="0.5">${ic('plus', 22)}</button></div></div>`;
+        <div class="mid htap" data-act="heat" data-room="${r.id}"><div class="cur big">${de(cur)}<small class="u">°</small></div><div class="tg">${off ? 'Heizung aus' : (auto ? 'Automatik' : 'Ziel') + ' <b>' + de(tg) + '°</b>'}</div></div></div>
+      <div class="dst ${heat ? 'heat' : ''}">${heat ? ic('flame', 14) + 'Heizt gerade' : (off ? 'Aus' : esc(I.dh?.label || 'Bereit'))}</div>
+      <div class="dbt">${auto ? `<button class="qb on" data-act="heat" data-room="${r.id}">${ic('clock', 14)}Automatik</button>` : `<button class="rbn" data-act="temp" data-e="${r.climate}" data-d="-0.5">${ic('minus', 22)}</button><button class="rbn" data-act="temp" data-e="${r.climate}" data-d="0.5">${ic('plus', 22)}</button>`}</div></div>`;
   }
   _tempSeries(out = true) {
     const c = this._c, pal = ['#fb923c', '#a78bfa', '#f472b6', '#34d399', '#38bdf8', '#facc15', '#94a3b8'];
@@ -1785,7 +1801,7 @@ class HomeAurora extends HTMLElement {
   }
   _meteo() {
     const hr = (this._fc?.hourly || []).slice(0, 24);
-    if (hr.length < 4) return '<div class="sk" style="height:200px"></div>';
+    if (hr.length < 4) return this._fc ? '<div class="empty sm">Keine stündliche Vorhersage verfügbar</div>' : '<div class="sk" style="height:200px"></div>';
     const N = hr.length, T = hr.map(d => d.temperature), mn = Math.min(...T), mx = Math.max(...T), rg = Math.max(mx - mn, 2);
     const X = i => (i + .5) / N * 100, Y = t => (1 - (t - mn) / rg) * 66 + 14;
     const pts = hr.map((d, i) => [X(i), Y(d.temperature)]), path = smooth(pts);
@@ -1826,10 +1842,10 @@ class HomeAurora extends HTMLElement {
           <div class="wtop"><div><div class="hello" style="color:rgba(255,255,255,.75)">Jetzt bei dir</div><div class="wtemp big" data-count="${w.temp ?? 0}" data-d="1">${de(w.temp)}<small class="u" style="color:rgba(255,255,255,.8)">°</small></div><div class="wcond">${COND[w.cond] || w.cond}${feels != null ? ' · gefühlt ' + de(feels, 0) + '°' : ''}</div>${d0 ? `<div class="hl2">Höchstwert ${de(d0.temperature, 0)}° · Tiefstwert ${de(d0.templow ?? d0.temperature - 5, 0)}°</div>` : ''}</div>${wx(w.cond, 150)}</div>
           <div class="chips"><span class="chip">${ic('drop', 14)}Luftfeuchte <b>${de(w.hum, 0)} %</b></span><span class="chip">${ic('wind', 14)}Wind <b>${de(w.wind, 0)} ${esc(w.windU)}</b></span><span class="chip">${ic('rain', 14)}Regen <b>${de(w.rain ?? 0)} ${esc(w.rainU)}</b></span>${w.press ? `<span class="chip">${ic('radar', 14)}<b>${de(w.press, 0)} hPa</b></span>` : ''}</div></div></div>
         <div class="c s4" style="--i:1"><div class="h">${ic('sun', 14)}Sonne &amp; Mond</div>${this._sunArc()}
-          <div class="srow" style="margin-top:8px"><span>${up ? 'Noch <b>' + lh + ' h ' + lm + ' min</b> Tageslicht' : 'Sonne in <b>' + lh + ' h ' + lm + ' min</b>'}</span></div>
+          ${isNaN(lh) ? '' : `<div class="srow" style="margin-top:8px"><span>${up ? 'Noch <b>' + lh + ' h ' + lm + ' min</b> Tageslicht' : 'Sonne in <b>' + lh + ' h ' + lm + ' min</b>'}</span></div>`}
           <div class="moon">${this._moonSvg(mo.p)}<div><b>${mo.name}</b>${Math.round(mo.ill * 100)} % beleuchtet</div></div></div>
         <div class="c s12 wxcard" style="--i:5">${this._wxCard() || `<div class="h">${ic('thermo', 14)}Die nächsten 24 Stunden<span class="r">Temperatur &amp; Regenwahrscheinlichkeit</span></div>${this._meteo()}`}</div>
-        <div class="c s12 trcard" style="--i:6">${this._trCard() || `<div class="h">${ic('cloudsun', 14)}Die nächsten Tage</div>${days || '<div class="sk" style="height:200px"></div>'}`}</div>
+        <div class="c s12 trcard" style="--i:6">${this._trCard() || `<div class="h">${ic('cloudsun', 14)}Die nächsten Tage</div>${days || (this._fc ? '<div class="empty sm">Keine Vorhersage verfügbar</div>' : '<div class="sk" style="height:200px"></div>')}`}</div>
         ${this._radarCard(7, 's12')}
       </div>`;
   }
@@ -2288,7 +2304,7 @@ class HomeAurora extends HTMLElement {
     return (c.vol ? b('volume_down', 'minus', 'Leiser') : '') + main + (c.vol ? b('volume_up', 'plus', 'Lauter') : '');
   }
   _sRoom(r) {
-    const I = this._room(r), cl = I.cl, heat = I.act === 'heating', off = I.mode === 'off';
+    const I = this._room(r), cl = I.cl, heat = I.act === 'heating', off = I.mode === 'off', auto = !off && I.dh?.auto;
     const rank = { playing: 0, paused: 1, buffering: 1, idle: 2, on: 3, standby: 4, off: 5 }, groups = new Map();
     (r.media || []).forEach((item, gi) => {
       for (const e of (Array.isArray(item) ? item : [item])) {
@@ -2307,8 +2323,8 @@ class HomeAurora extends HTMLElement {
         ${live ? this._mpBtns(e, pl) : ''}</div>`;
     }).join('');
     return `<div class="grab"></div><div class="sh"><div class="ico">${ic(r.icon, 24)}</div><div><h2>${esc(r.name)}</h2><p>${I.temp != null ? de(I.temp) + ' °C' : ''}${I.hum != null ? ' · ' + de(I.hum, 0) + ' % Luftfeuchte' : ''}${I.open ? ' · Fenster offen' : ''}${I.stale != null ? ` · <span class="stl">Sensor seit ${this._agoTxt(I.stale)} ohne Meldung</span>` : ''}</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
-      ${cl ? `<div class="sctl"><div class="htap" data-act="heat" data-room="${r.id}" role="button" aria-label="Heizung öffnen">${off ? `<div class="big" style="font-size:46px">Aus</div>` : `<div class="big">${de(I.target)}<small class="u">°</small></div>`}<div class="l">${off ? 'Heizung ist ausgeschaltet' : heat ? 'Heizt auf Zieltemperatur' : 'Zieltemperatur'}<span class="hmore">Heizung ${ic('chevron', 12)}</span></div></div>
-        <div style="display:flex;gap:10px;align-items:center">${off ? `<button class="qb on" data-act="hvac" data-e="${r.climate}">${ic('power', 16)}Einschalten</button>` : `<button class="rbn" data-act="temp" data-e="${r.climate}" data-d="-0.5">${ic('minus', 22)}</button><button class="rbn" data-act="temp" data-e="${r.climate}" data-d="0.5">${ic('plus', 22)}</button><button class="rbn" style="color:#fb923c;background:rgba(251,146,60,.2)" data-act="hvac" data-e="${r.climate}">${ic('power', 20)}</button>`}</div></div>` : ''}
+      ${cl ? `<div class="sctl"><div class="htap" data-act="heat" data-room="${r.id}" role="button" aria-label="Heizung öffnen">${off ? `<div class="big" style="font-size:46px">Aus</div>` : `<div class="big">${de(I.target)}<small class="u">°</small></div>`}<div class="l">${off ? 'Heizung ist ausgeschaltet' : auto ? 'Automatik' + (I.dh.label ? ' · ' + esc(I.dh.label) : '') : heat ? 'Heizt auf Zieltemperatur' : 'Zieltemperatur'}<span class="hmore">Heizung ${ic('chevron', 12)}</span></div></div>
+        <div style="display:flex;gap:10px;align-items:center">${off ? `<button class="qb on" data-act="hvac" data-e="${r.climate}">${ic('power', 16)}Einschalten</button>` : auto ? `<button class="rbn" style="color:#fb923c;background:rgba(251,146,60,.2)" data-act="hvac" data-e="${r.climate}">${ic('power', 20)}</button>` : `<button class="rbn" data-act="temp" data-e="${r.climate}" data-d="-0.5">${ic('minus', 22)}</button><button class="rbn" data-act="temp" data-e="${r.climate}" data-d="0.5">${ic('plus', 22)}</button><button class="rbn" style="color:#fb923c;background:rgba(251,146,60,.2)" data-act="hvac" data-e="${r.climate}">${ic('power', 20)}</button>`}</div></div>` : ''}
       ${this._humHint(r, I)}${this._trend(r, I.temp != null ? tempCol(I.temp) : '#fb923c')}
       ${this._roomVent(r)}
       ${I.lights.length ? `<div class="lab2">LICHTER · ${I.on.length}/${I.lights.length}</div><div class="lg">${I.lights.map(e => this._lightTile(e)).join('')}</div>` : ''}
@@ -2477,7 +2493,7 @@ class HomeAurora extends HTMLElement {
     return `<div class="grab"></div><div class="sh"><div class="ico">${ic('bolt', 24)}</div><div><h2>Strom</h2><p>${P.devs.length} gemessene Geräte</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
       <div class="dg"><div class="dt"><div class="v">${de(P.total, 0)}<small class="u">W</small></div><div class="l">${ic('bolt', 13)}Jetzt</div></div><div class="dt"><div class="v">${P.kwh != null ? de(P.kwh, 1) : '–'}<small class="u">kWh</small></div><div class="l">${ic('clock', 13)}Heute</div></div>${cost ? `<div class="dt"><div class="v">${cost}</div><div class="l">${ic('bolt', 13)}Kosten heute</div></div>` : ''}</div>
       <div class="seg wide" style="margin-top:12px">${[[0, 'Heute'], [7, '7 Tage'], [30, '30 Tage']].map(x => `<button class="${rg === x[0] ? 'on' : ''}" data-act="prange" data-n="${x[0]}">${x[1]}</button>`).join('')}</div>
-      ${rg ? this._powerRange(rg) : `${series.length ? `<div class="lab2">VERLAUF · 24 STUNDEN</div>${this._chart(series, { h: 190, dec: 0 })}` : ''}
+      ${rg ? this._powerRange(rg) : `${series.length ? `<div class="lab2">VERLAUF · 24 STUNDEN</div>${this._chart(series, { h: 190, dec: 0, unit: ' W' })}` : ''}
       <div class="lab2">GERÄTE</div>${P.devs.map(row).join('')}${pvRow}`}`;
   }
 
@@ -2577,7 +2593,7 @@ class HomeAurora extends HTMLElement {
   _sSet() {
     const th = this._themePref || this._c.theme || 'dark', am = String(this._ambMin());
     const seg = (act, cur, items) => `<div class="seg wide">${items.map(x => `<button class="${cur === x[0] ? 'on' : ''}" data-act="${act}" data-m="${x[0]}">${x[1]}</button>`).join('')}</div>`;
-    return `<div class="grab"></div><div class="sh"><div class="ico">${ic('cog', 24)}</div><div><h2>Darstellung &amp; Modi</h2><p>Home Aurora v5.2 · Build pz18</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
+    return `<div class="grab"></div><div class="sh"><div class="ico">${ic('cog', 24)}</div><div><h2>Darstellung &amp; Modi</h2><p>Home Aurora v5.2 · Build pz19</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
       <div class="lab2">DESIGN</div>${seg('theme', th, [['dark', 'Dunkel'], ['light', 'Hell'], ['auto', 'Automatisch']])}
       <div class="card-note">„Automatisch“ folgt dem Dunkel-/Hellmodus deines Home-Assistant-Profils. Die Auswahl gilt nur für dieses Gerät.</div>
       ${WALL_UI ? `      <div class="lab2">WANDTABLET-MODUS</div>
@@ -3025,6 +3041,23 @@ class HomeAurora extends HTMLElement {
     const avg = `<div class="tavg">${TS ? `<span style="color:${col}">${ic('thermo', 13)}Ø ${de(TS.av, 1)} °C</span>` : ''}${HS ? `<span style="color:#38bdf8">${ic('drop', 13)}Ø ${de(HS.av, 0)} %</span>` : ''}</div>`;
     return `${opt.bare ? '' : '<div class="lab2">TEMPERATUR &amp; LUFTFEUCHTE · 24 H</div>'}<div class="${opt.bare ? 'trend tb' : 'sctl trend'}" style="display:block"><div class="trow">${side(TS, 1, '°', col, 'thermo', false)}<div class="tmid">${svg}</div>${side(HS, 0, '%', '#38bdf8', 'drop', true)}</div><div class="tax"><span>${hh(t0)}</span><span>${hh((t0 + t1) / 2)}</span><span>${hh(t1)}</span></div>${avg}</div>`;
   }
+  /* Heizung eines Raums mit „Dynamischer Heizungssteuerung“: Ziel kommt von der Regelung, mehrere Thermostate */
+  _sHeatDh(r, I, D, o) {
+    const a = D.a, m = o.off ? 'off' : D.auto ? 'auto' : 'heat';
+    const seg = `<div class="seg hseg">${[['auto', 'Automatik'], ['heat', 'Manuell'], ['off', 'Aus']].map(([k, l]) => `<button class="${m === k ? 'on' : ''}" data-act="dhmode" data-room="${r.id}" data-m="${k}">${l}</button>`).join('')}</div>`;
+    const side = o.auto ? `<div class="hctl"><div class="hset"><b>${de(I.target)}</b><span>Ziel der Automatik °C</span></div></div>` : o.ctl;
+    const nx = a.next_event ? new Date(a.next_event) : null, pm = parseFloat(a.preheat_minutes);
+    const tiles = `<div class="dg">${this._tile(I.open || a.window_open ? 'Offen' : 'Zu', 'Fenster', 'window')}${nx && !isNaN(nx) ? this._tile((nx.toDateString() === new Date().toDateString() ? '' : nx.toLocaleDateString('de-DE', { weekday: 'short' }) + ' ') + hhmm(nx), 'Nächster Wechsel', 'clock') : ''}${!isNaN(pm) && pm > 0 ? this._tile(de(pm, 0) + ' Min.', 'Vorheizen', 'flame') : ''}${a.present != null ? this._tile(a.present ? 'Ja' : 'Nein', 'Jemand da', 'home') : ''}</div>`;
+    const short = s => esc((s.attributes.friendly_name || s.entity_id).replace(new RegExp('^' + r.name + '\\s*', 'i'), '').replace(/[\s-]+$/, '') || s.entity_id);
+    const trv = `<div class="lab2">THERMOSTATE · ${D.trv.length}</div><div class="mcol">${D.trv.map(s => { const x = s.attributes, un = !okv(s.state); return `<div class="xr"><div class="ico">${ic('thermo', 19)}</div><div class="grow" data-act="more" data-e="${s.entity_id}"><div class="t">${short(s)}</div><div class="s">${un ? 'nicht erreichbar' : s.state === 'off' ? 'Aus' : `misst ${de(x.current_temperature)} ° · Soll ${de(x.temperature)} °`}</div></div></div>`; }).join('')}</div>`;
+    const note = a.decision_status && okv(a.decision_status) && a.decision_status !== D.label ? `<div class="card-note">${esc(String(a.decision_status))}</div>` : '';
+    [r.temp, r.hum].forEach(x => { if (x && !this._hist[x]) this._need.add(x); });
+    return `<div class="grab"></div><div class="sh"><div class="ico">${ic(r.icon, 24)}</div><div><h2>Heizung · ${esc(r.name)}</h2><p>${esc(o.status)}</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
+      <div class="hhero ${o.heat ? 'heat' : ''}">${o.dial}<div class="hside">${side}${seg}</div></div>
+      ${note}<div class="lab2">STATUS</div>${tiles}${trv}
+      ${this._trend(r, o.col)}
+      <div class="hbtns"><button class="qb" data-act="sched">${ic('clock', 14)}Heizungsplan</button><button class="qb" data-act="room" data-room="${r.id}">${ic(r.icon, 14)}Zurück zum Raum</button></div>`;
+  }
   _sHeat() {
     const r = this._c.rooms.find(x => x.id === this._sheet.id); if (!r || !r.climate) return `<div class="grab"></div><div class="empty">Kein Thermostat für diesen Raum.</div>`;
     const I = this._room(r), cl = I.cl, at = cl?.attributes || {}, e = r.climate, off = I.mode === 'off', heat = I.act === 'heating';
@@ -3033,15 +3066,17 @@ class HomeAurora extends HTMLElement {
     const PL = { none: 'Manuell', eco: 'Eco', comfort: 'Komfort', sleep: 'Schlafen', boost: 'Boost', away: 'Abwesend', home: 'Zuhause', activity: 'Aktiv' };
     let pt = {}; try { pt = typeof at.bt_preset_heat_temperatures === 'string' ? JSON.parse(at.bt_preset_heat_temperatures) : (at.bt_preset_heat_temperatures || {}); } catch (x) { pt = {}; }
     const presets = (at.preset_modes || []).filter(m => m !== 'none');
-    const status = off ? 'Heizung aus' : I.open || at.window_open ? 'Fenster offen – Heizung pausiert' : heat ? 'Heizt gerade' : 'Bereit – Wunschtemperatur erreicht';
+    const D = I.dh, auto = !off && D?.auto;
+    const status = off ? 'Heizung aus' : I.open || at.window_open || D?.a.window_open ? 'Fenster offen – Heizung pausiert' : auto ? 'Automatik' + (D.label ? ' · ' + D.label : '') : heat ? 'Heizt gerade' : 'Bereit – Wunschtemperatur erreicht';
     const col = cur != null ? tempCol(cur) : '#fb923c', fc = clamp(((cur ?? 10) - 10) / 20, 0, 1), ft = clamp(((tg ?? 10) - 10) / 20, 0, 1), a1 = 135 + 270 * fc, a2 = 135 + 270 * ft;
     const tx = 100 + 84 * Math.cos(a2 * Math.PI / 180), ty = 100 + 84 * Math.sin(a2 * Math.PI / 180);
     const dial = `<div class="hdial"><svg viewBox="0 0 200 170"><path d="${arc(100, 100, 84, 135, 405)}" fill="none" stroke="rgba(${WH},.09)" stroke-width="12" stroke-linecap="round"/>${cur != null ? `<path d="${arc(100, 100, 84, 135, Math.max(135.5, a1))}" fill="none" stroke="${col}" stroke-width="12" stroke-linecap="round" style="filter:drop-shadow(0 0 10px ${col});opacity:${off ? .35 : 1}"/>` : ''}${tg != null && !off ? `<circle cx="${tx.toFixed(1)}" cy="${ty.toFixed(1)}" r="9" fill="${FG}"/><circle cx="${tx.toFixed(1)}" cy="${ty.toFixed(1)}" r="3.500" fill="${col}"/>` : ''}</svg>
-      <div class="mid"><div class="l">Aktuell</div><div class="cur big">${de(cur)}<small class="u">°</small></div><div class="tg">${off ? 'Heizung aus' : 'Ziel <b>' + de(tg) + '°</b>'}</div>${hum != null ? `<div class="hhum">${ic('drop', 12)}${de(hum, 0)} %</div>` : ''}</div></div>`;
+      <div class="mid"><div class="l">Aktuell</div><div class="cur big">${de(cur)}<small class="u">°</small></div><div class="tg">${off ? 'Heizung aus' : (auto ? 'Automatik' : 'Ziel') + ' <b>' + de(tg) + '°</b>'}</div>${hum != null ? `<div class="hhum">${ic('drop', 12)}${de(hum, 0)} %</div>` : ''}</div></div>`;
     const ctl = `<div class="hctl"><button class="rbn" data-act="temp" data-e="${e}" data-d="-0.5" ${off ? 'disabled' : ''}>${ic('minus', 22)}</button><div class="hset"><b>${off ? '–' : de(tg)}</b><span>Wunsch °C</span></div><button class="rbn" data-act="temp" data-e="${e}" data-d="0.5" ${off ? 'disabled' : ''}>${ic('plus', 22)}</button></div>`;
     const modes = (at.hvac_modes || ['heat', 'off']).filter(m => ['heat', 'off', 'auto', 'heat_cool'].includes(m)), ML = { heat: 'Heizen', off: 'Aus', auto: 'Auto', heat_cool: 'Auto' };
     const seg = `<div class="seg hseg">${modes.map(m => `<button class="${I.mode === m ? 'on' : ''}" data-act="chvac" data-e="${e}" data-m="${m}">${ML[m]}</button>`).join('')}</div>`;
     const pre = presets.length ? `<div class="lab2">VOREINSTELLUNGEN</div><div class="hpre">${presets.map(m => `<button class="${at.preset_mode === m ? 'on' : ''}" data-act="cpreset" data-e="${e}" data-m="${m}"><b>${esc(PL[m] || m)}</b>${pt[m] != null ? `<span>${de(pt[m], 1)}°</span>` : ''}</button>`).join('')}</div>` : '';
+    if (D) return this._sHeatDh(r, I, D, { dial, ctl, status, heat, off, auto, col });
     const lc = at.last_change ? new Date(at.last_change).getTime() : new Date(cl.last_changed).getTime(), vm = at.next_valve_maintenance ? new Date(at.next_valve_maintenance) : null;
     const tiles = `<div class="dg">${this._tile(I.open || at.window_open ? 'Offen' : 'Zu', 'Fenster', 'window')}${this._tile(this._rel(lc).replace('vor ', ''), 'Letzte Änderung', 'clock')}${vm && !isNaN(vm) ? this._tile(vm.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' }), 'Ventilwartung', 'wrench') : ''}</div>`;
     const errs = (typeof at.errors === 'string' && at.errors !== '[]' && at.errors.length > 2 ? `<div class="card-note" style="color:#fb7185">Thermostat meldet: ${esc(at.errors)}</div>` : '') + (r.temp ? this._staleNote(r.temp) : '');
@@ -3439,7 +3474,7 @@ class HomeAurora extends HTMLElement {
   _musicTb() {
     const L = this._spk(); if (!L.length) return '';
     const N = this._spkNow(L);
-    return `<button class="tb mus ${N && N.pl ? 'on' : ''}" data-act="music">${ic(N && N.pl ? 'music' : 'announce', 15)}<span>${N && N.pl ? esc(N.title || N.name) : 'Musik &amp; Durchsage'}</span></button>`;
+    return `<button class="tb mus ${N && N.pl ? 'on' : ''}" data-act="music" aria-label="Musik und Durchsage">${ic(N && N.pl ? 'music' : 'announce', 15)}<span>${N && N.pl ? esc(N.title || N.name) : 'Musik &amp; Durchsage'}</span></button>`;
   }
   _sMusic() {
     const M = this._c.music || {}, L = this._spk(), all = M.all && this._s(M.all.notify) ? M.all : null;
@@ -4065,6 +4100,7 @@ class HomeAurora extends HTMLElement {
       case 'settemp': h.callService('climate', 'set_temperature', { entity_id: e, temperature: parseFloat(el.dataset.v) }); break;
       case 'cpreset': h.callService('climate', 'set_preset_mode', { entity_id: e, preset_mode: el.dataset.m }); break;
       case 'chvac': h.callService('climate', 'set_hvac_mode', { entity_id: e, hvac_mode: el.dataset.m }); break;
+      case 'dhmode': this._dhSet(this._c.rooms.find(r => r.id === el.dataset.room), el.dataset.m); break;
       case 'maps': { const u = `https://www.google.com/maps/dir/?api=1&destination=${el.dataset.lat},${el.dataset.lon}`; try { window.open(u, '_blank', 'noopener'); } catch (er) { /* ok */ } break; }
       case 'fuauto': this._fuPref = el.dataset.m; try { localStorage.setItem('home-aurora-fully', el.dataset.m); } catch (er) { /* ok */ } this._fuLast = null; this._fullyApply(true); this._renderSheet(); break;
       case 'fuelk': this._fuelK = el.dataset.k; this._renderSheet(); break;
@@ -4133,13 +4169,30 @@ class HomeAurora extends HTMLElement {
         else { this._armed = false; clearTimeout(this._at); h.callService('light', 'turn_off', { entity_id: this._lightsOn() }); this._toast('Alle Lichter ausgeschaltet'); }
         break;
       case 'temp': {
+        const R = this._dhRoom(e);
+        // alle Thermostate des Raums gleich verschieben, damit ihr Abstand zueinander bleibt
+        if (R) { for (const cl of this._dh(R).trv) { if (!okv(cl.state)) continue; const x = cl.attributes; h.callService('climate', 'set_temperature', { entity_id: cl.entity_id, temperature: clamp(Math.round(((x.temperature ?? 20) + parseFloat(el.dataset.d)) * 2) / 2, x.min_temp ?? 5, x.max_temp ?? 30) }); } break; }
         const cl = this._s(e); if (!cl) break;
         const cur = cl.attributes.temperature ?? cl.attributes.current_temperature ?? 20;
         const nt = clamp(Math.round((cur + parseFloat(el.dataset.d)) * 2) / 2, cl.attributes.min_temp ?? 5, cl.attributes.max_temp ?? 30);
         h.callService('climate', 'set_temperature', { entity_id: e, temperature: nt }); break;
       }
-      case 'hvac': h.callService('climate', 'set_hvac_mode', { entity_id: e, hvac_mode: this._val(e) === 'off' ? 'heat' : 'off' }); break;
+      case 'hvac': {
+        const R = this._dhRoom(e);
+        if (R) { this._dhSet(R, this._dh(R).mode === 'off' ? 'auto' : 'off'); break; }
+        h.callService('climate', 'set_hvac_mode', { entity_id: e, hvac_mode: this._val(e) === 'off' ? 'heat' : 'off' }); break;
+      }
     }
+  }
+  /* Raum mit Heizungssteuerung zum Thermostat e (nur der Hauptthermostat steht in data-e) */
+  _dhRoom(e) { return this._c.rooms.find(r => r.heat && r.climate === e) || null; }
+  /* auto: Regelung übernimmt · heat: Manuell (Regelung aus, Thermostate an) · off: Regelung und alle Thermostate aus */
+  _dhSet(r, m) {
+    const D = r && this._dh(r); if (!D) return;
+    const h = this._h, ids = D.trv.map(s => s.entity_id);
+    if (r.heat.switch && this._s(r.heat.switch)) h.callService('switch', m === 'auto' ? 'turn_on' : 'turn_off', { entity_id: r.heat.switch });
+    if (ids.length && (m === 'off' || D.mode === 'off')) h.callService('climate', 'set_hvac_mode', { entity_id: ids, hvac_mode: m === 'off' ? 'off' : 'heat' });
+    this._toast(m === 'auto' ? `${r.name}: Automatik an` : m === 'off' ? `${r.name}: Heizung aus` : `${r.name}: manuelle Steuerung`);
   }
 
   /* ───────────── Hintergrund-Effekte (Regen, Schnee, Sterne, Glühpunkte) ───────────── */
@@ -4234,6 +4287,8 @@ const CSSW = `
    unter 1200px (Tablet hochkant) stehen die Hinweise in einer eigenen Zeile */
 .ctop .alerts{flex:0 1 auto;min-width:0;overflow-x:auto;scrollbar-width:none}.ctop .alerts::-webkit-scrollbar{display:none}
 @media (max-width:1199px){.ctop{flex-wrap:wrap}.ctop .alerts{flex:1 1 100%}}
+/* bis 1500 px: Platz für Schnellaktionen – Musik/Wandtablet nur als Symbol, Zusatzzeilen bei vielen Hinweisen weg */
+@media (max-width:1499px){.ctop .tb:not(.on){padding:9px 11px}.ctop .tb:not(.on) span{display:none}.ctop .alerts.many .al small{display:none}.ctop .qa{min-width:150px}}
 .ctop .gap{flex:1}
 .ctop .tb{flex:none;display:flex;align-items:center;gap:8px;padding:9px 14px;border-radius:999px;background:rgba(var(--wh),.07);border:1px solid var(--line);font-size:13px;color:var(--tx2);white-space:nowrap}
 .ctop .tb:hover{color:var(--tx);background:rgba(var(--wh),.12)}
@@ -4397,8 +4452,8 @@ class HomeAuroraWide extends HomeAurora {
     const cal = this._calCard(7, 1, 8), pow = this._powerCard(8);
     const vh = typeof innerHeight === 'number' ? innerHeight : 800;
     return `<div class="cock">
-      <div class="ctop">${AL.length ? `<div class="alerts">${AL.map(a => this._alertHtml(a)).join('')}</div>` : ''}${q || '<div class="gap"></div>'}
-        ${this._musicTb()}<button class="tb" data-act="ambient">${ic('expand', 15)}Wandtablet</button></div>
+      <div class="ctop">${AL.length ? `<div class="alerts${AL.length > 2 ? ' many' : ''}">${AL.map(a => this._alertHtml(a)).join('')}</div>` : ''}${q || '<div class="gap"></div>'}
+        ${this._musicTb()}<button class="tb" data-act="ambient" aria-label="Wandtablet-Modus">${ic('expand', 15)}<span>Wandtablet</span></button></div>
       <div class="stg">
         ${this._stat(1, 'bulb', 'Lichter an', L, L ? 'hot' : '', L ? esc(this._lightsOn().slice(0, 2).map(e => this._name(e)).join(', ')) + (L > 2 ? ' …' : '') : 'Alles aus', 'lights')}
         ${this._stat(2, 'window', 'Fenster offen', open.length, open.length ? 'bad' : 'cool', this._winSub(open), 'doors')}

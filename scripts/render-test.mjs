@@ -6,6 +6,7 @@
 //   --shots   speichert je Ansicht einen Screenshot (PNG) in diesen Ordner
 //   --perf    misst zusätzlich die Last im Leerlauf und pro Home-Assistant-Update
 //   --only    nur eine Karte testen (aurora oder wide)
+//   --chaos   zusätzlich mit kaputten Zuständen: jede zweite Entität fehlt / alle „nicht verfügbar“ / gar keine
 // Chromium: Playwright muss installiert sein (npm i playwright); PW_CHROMIUM setzt optional den Browser-Pfad.
 import { readFileSync, mkdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
@@ -17,7 +18,17 @@ const arg = (n, d) => { const i = process.argv.indexOf(n); return i > 0 ? proces
 const statesFile = arg('--states', join(root, 'test/fixture-states.json'));
 const shots = arg('--shots', '');
 const perf = process.argv.includes('--perf');
-const states = JSON.parse(readFileSync(statesFile, 'utf8'));
+const states0 = JSON.parse(readFileSync(statesFile, 'utf8'));
+// --chaos: dieselben Prüfungen mit fehlenden bzw. nicht erreichbaren Geräten (z. B. umbenannt, Akku leer, Integration weg)
+const VARIANTS = [['', states0]];
+if (process.argv.includes('--chaos')) {
+  const ks = Object.keys(states0);
+  VARIANTS.push(['[jede 2. fehlt] ', Object.fromEntries(ks.filter((_, i) => i % 2).map((k) => [k, states0[k]]))]);
+  VARIANTS.push(['[nicht verfügbar] ', Object.fromEntries(ks.map((k) => [k, { ...states0[k], state: 'unavailable', attributes: { friendly_name: states0[k].attributes?.friendly_name } }]))]);
+  VARIANTS.push(['[unbekannt] ', Object.fromEntries(ks.map((k) => [k, { ...states0[k], state: 'unknown', attributes: {} }]))]);
+}
+// Text, der nie sichtbar sein darf (fehlende Werte, die durchrutschen)
+const BAD = /\b(undefined|NaN|Invalid Date|null)\b|\[object /;
 if (shots) mkdirSync(shots, { recursive: true });
 
 const VIEWS = ['home', 'rooms', 'climate', 'bath', 'weather', 'printer', 'clean'];
@@ -29,7 +40,7 @@ const TARGETS = [
 ];
 
 // Läuft im Browser: baut ein hass-Objekt, das für die Karte wie Home Assistant aussieht.
-function setup({ tag, states }) {
+function setup({ tag, states, hist }) {
   const fc = (type) => {
     const out = [], now = Date.now(), step = type === 'daily' ? 864e5 : 36e5;
     for (let i = 0; i < (type === 'daily' ? 14 : 48); i++) out.push({ datetime: new Date(now + i * step).toISOString(), condition: ['sunny', 'partlycloudy', 'cloudy', 'rainy'][i % 4], temperature: 12 + 6 * Math.sin(i / 4), templow: 6, precipitation: i % 4 === 3 ? 1.2 : 0, precipitation_probability: (i * 13) % 100, wind_speed: 10 + (i % 5), wind_bearing: 220, humidity: 70, is_daytime: (i % 24) > 6 && (i % 24) < 20 });
@@ -43,6 +54,17 @@ function setup({ tag, states }) {
     callApi: async () => [],
     callWS: async (m) => {
       if (m.type === 'call_service' && m.service === 'get_forecasts') { const e = m.target.entity_id; return { response: { [e]: { forecast: fc(m.service_data.type) } } }; }
+      // Verlauf: 24 h gleichmäßig verteilte Werte um den aktuellen Zustand (nur im Normaldurchlauf; die Chaos-Läufe testen „kein Verlauf“)
+      if (m.type === 'history/history_during_period') {
+        if (!hist) return {};
+        const o = {}, now = Date.now() / 1000;
+        for (const e of m.entity_ids || []) {
+          const st = states[e]; if (!st) continue;
+          const v = parseFloat(st.state);
+          o[e] = Array.from({ length: 48 }, (_, i) => ({ s: isNaN(v) ? st.state : String(Math.round((v + 1.5 * Math.sin(i / 7) + (i % 5) * 0.1) * 10) / 10), lu: now - (48 - i) * 1800 }));
+        }
+        return o;
+      }
       if (m.type === 'repairs/list_issues') return { issues: [] };
       if (m.type === 'schedule/list') return [];
       return {};
@@ -58,7 +80,7 @@ function setup({ tag, states }) {
 const browser = await chromium.launch({ executablePath: process.env.PW_CHROMIUM || undefined });
 let failed = 0;
 const only = arg('--only', '');
-for (const t of TARGETS.filter((x) => !only || x.tag.endsWith(only))) {
+for (const [vn, states] of VARIANTS) for (const t of TARGETS.filter((x) => !only || x.tag.endsWith(only))) {
   const page = await browser.newPage({ viewport: t.vp });
   const errors = [];
   page.on('pageerror', (e) => errors.push(e.message));
@@ -67,16 +89,23 @@ for (const t of TARGETS.filter((x) => !only || x.tag.endsWith(only))) {
   await page.route(/^https?:/, (r) => r.abort());
   await page.setContent('<!doctype html><html><head><meta charset="utf-8"></head><body style="margin:0;background:#000"></body></html>');
   await page.addScriptTag({ content: readFileSync(join(root, t.file), 'utf8') });
-  await page.evaluate(setup, { tag: t.tag, states });
+  await page.evaluate(setup, { tag: t.tag, states, hist: !vn });
   await page.waitForTimeout(800);
 
   const check = async (label, fn, a) => {
     const before = errors.length;
     const len = await page.evaluate(fn, a);
     await page.waitForTimeout(450);
-    const ok = len > 40 && errors.length === before;
+    // erst nach dem Nachladen (Verlauf, Vorhersage) prüfen, ob irgendwo Platzhalter wie „NaN“ stehen
+    const bad = await page.evaluate((re) => {
+      const w = document.createTreeWalker(window.__el.shadowRoot, NodeFilter.SHOW_TEXT), rx = new RegExp(re);
+      for (let n; (n = w.nextNode());) { if (n.parentElement?.closest('style,script')) continue; const m = n.data.match(rx); if (m) return `${m[0]} in „${n.data.trim().slice(0, 60)}“`; }
+      return '';
+    }, BAD.source);
+    const ok = len > (vn ? 10 : 40) && errors.length === before && !bad;
     if (!ok) failed++;
-    console.log(`${ok ? 'ok  ' : 'FAIL'} ${t.tag} ${label}${ok ? '' : ` (Text: ${len} Zeichen${errors.length > before ? ', Fehler: ' + errors.slice(before).join(' | ') : ''})`}`);
+    label = vn + label;
+    console.log(`${ok ? 'ok  ' : 'FAIL'} ${t.tag} ${label}${ok ? '' : ` (Text: ${len} Zeichen${bad ? ', zeigt „' + bad + '“' : ''}${errors.length > before ? ', Fehler: ' + errors.slice(before).join(' | ') : ''})`}`);
     if (shots) await page.screenshot({ path: join(shots, `${t.tag}-${label.replace(/[^a-z0-9]+/gi, '-')}.png`) });
   };
   for (const v of VIEWS) {
@@ -91,7 +120,7 @@ for (const t of TARGETS.filter((x) => !only || x.tag.endsWith(only))) {
     await page.evaluate(() => window.__el._ambOff(true));
   }
 
-  if (perf) {
+  if (perf && !vn) {
     await page.evaluate(() => { const el = window.__el; el._closeSheet(); el._v = 'home'; el._sig = ''; el._render(); });
     await page.waitForTimeout(1000);
     const cdp = await page.context().newCDPSession(page);
@@ -114,7 +143,7 @@ for (const t of TARGETS.filter((x) => !only || x.tag.endsWith(only))) {
       for (const x of seq) el.hass = x;
       return ((performance.now() - t0) / 300).toFixed(3);
     });
-    console.log(`perf ${t.tag} Änderungsprüfung pro HA-Update: ${tick} ms (${Object.keys(states).length} Entitäten)`);
+    console.log(`perf ${t.tag} Änderungsprüfung pro HA-Update: ${tick} ms (${Object.keys(states0).length} Entitäten)`);
   }
   if (errors.length) console.log(`Fehler gesamt ${t.tag}: ${[...new Set(errors)].join(' | ')}`);
   await page.close();
