@@ -42,6 +42,17 @@ const DEFAULTS = {
   calendarDays: 14,
   theme: 'dark', ambient_after: 0, radarUrl: '',
   quick: [['builtin:goodnight', 'Gute Nacht', 'moon'], ['scene.wohnzimmer_wohnzimmer_tv_schauen', 'TV schauen', 'tv'], ['scene.wohnzimmer_gemutlich', 'Gemütlich', 'sofa'], ['scene.wohnzimmer_normal', 'Normal', 'bulb'], ['scene.wohnzimmer_essenszeit', 'Essenszeit', 'cook'], ['script.essen', 'Essen', 'cook']],
+  music: {
+    all: { name: 'Überall', media: 'media_player.uberall', notify: 'notify.uberall_durchsagen' },
+    speakers: [
+      { name: 'Wohnzimmer', icon: 'sofa', media: ['media_player.wohnzimmer', 'media_player.wohnzimmer_wohnzimmer'], notify: 'notify.wohnzimmer_durchsagen' },
+      { name: 'Küche', icon: 'cook', media: ['media_player.jenny_patrick', 'media_player.kuche_jenny_patrick'], notify: 'notify.jenny_patrick_durchsagen' },
+      { name: 'Nele', icon: 'heart', media: ['media_player.kinderzimmer', 'media_player.nele_nele_alexa'], notify: 'notify.kinderzimmer_durchsagen' },
+      { name: 'Leonie', icon: 'star', media: ['media_player.leonie_leonie_alexa'], notify: 'notify.badezimmer_durchsagen' },
+      { name: 'Lisa', icon: 'sparkle', media: ['media_player.patricks_echo_dot'], notify: 'notify.patricks_echo_dot_durchsagen' },
+    ],
+    phrases: ['Essen ist fertig!', 'Bitte Zähne putzen.', 'Ab ins Bett, gute Nacht!', 'Wir fahren gleich los.'],
+  },
   wasteNames: { biomuell: ['Biotonne', '#a3e635'], papier: ['Papiertonne', '#60a5fa'], gelbe_tonne: ['Gelbe Tonne', '#facc15'], restmuell: ['Restmüll', '#94a3b8'], schadstoffe: ['Schadstoffmobil', '#fb923c'] },
   critical: ['light', 'climate', 'lock', 'cover', 'alarm_control_panel', 'vacuum', 'fan'],
   ignore: ['music_assistant', 'p2s_'],
@@ -138,6 +149,11 @@ const ICONS = {
   heart: '<path d="M12 20s-8-4.7-8-10.5A4.5 4.5 0 0 1 12 7a4.5 4.5 0 0 1 8 2.5C20 15.300 12 20 12 20z"/>',
   sparkle: '<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.200-1.800z"/><path d="M19 16l.7 2 2 .7-2 .7-.7 2-.7-2-2-.7 2-.7z"/>',
   play: '<path d="M7 4v16l13-8z"/>',
+  music: '<path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/>',
+  speaker: '<rect x="5" y="2.5" width="14" height="19" rx="3"/><circle cx="12" cy="14" r="3.5"/><path d="M12 7h.01"/>',
+  announce: '<path d="M3 10.5v3a1 1 0 0 0 1 1h3l6 4.5v-14L7 9.5H4a1 1 0 0 0-1 1z"/><path d="M16.5 8.5a5 5 0 0 1 0 7"/><path d="M19.2 5.8a9 9 0 0 1 0 12.4"/>',
+  prev: '<path d="M18 6 9 12l9 6z"/><path d="M6 6v12"/>',
+  next: '<path d="M6 6l9 6-9 6z"/><path d="M18 6v12"/>',
   pause: '<path d="M8 5v14M16 5v14"/>',
   chevron: '<path d="M9 6l6 6-6 6"/>',
   arrowdown: '<path d="M12 5v14M6 13l6 6 6-6"/>',
@@ -1049,6 +1065,10 @@ const CSS4 = `
 .sht .bd{flex:none;font-size:11.5px;font-weight:700;padding:4px 10px;border-radius:99px;background:rgba(251,146,60,.2);color:#fb923c}.sht .bd.off{background:rgba(var(--wh),.08);color:var(--tx2)}
 .swk{margin-top:12px;display:flex;flex-direction:column;gap:4px}.swr,.swa{display:grid;grid-template-columns:22px 1fr;gap:8px;align-items:center}.swr>span{font-size:11px;color:var(--tx3)}.swr.td>span{color:var(--tx);font-weight:700}
 .swt{position:relative;height:9px;border-radius:5px;background:rgba(var(--wh),.07);overflow:hidden}.swt i{position:absolute;top:0;bottom:0;border-radius:4px;background:#fb923c;opacity:.85}.swr.td .swt{background:rgba(var(--wh),.11)}.swt b{position:absolute;top:-1px;bottom:-1px;width:2px;background:#fff;border-radius:1px;box-shadow:0 0 6px rgba(255,255,255,.8)}
+.tpt{position:relative;height:20px;border-radius:6px;background:rgba(var(--wh),.06);overflow:hidden}.tpt i{position:absolute;top:0;bottom:0;border-right:1px solid rgba(0,0,0,.25);display:flex;align-items:center;justify-content:center}.tpt i em{font-style:normal;font-size:10.5px;font-weight:700;color:rgba(10,14,30,.85);white-space:nowrap}
+.tpt b{position:absolute;top:-1px;bottom:-1px;width:2px;background:#fff;border-radius:1px;box-shadow:0 0 6px rgba(255,255,255,.9)}.tpw{gap:5px}.tpd{font-size:12px;color:var(--tx2);margin:2px 0 2px 30px}
+.tpcs{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}.tpc{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;background:rgba(var(--wh),.06);border:1px solid var(--line);font-size:12px;color:var(--tx)}.tpc small{font-size:10.5px;color:var(--tx3)}.tpc.on small{color:#fb923c}
+.sch.tpl.on{border-color:rgba(251,146,60,.4)}
 .swa>div{display:flex;justify-content:space-between;font-size:10px;color:var(--tx3);font-style:normal}.swa em{font-style:normal;width:0;display:flex;justify-content:center;overflow:visible}.swa em:first-child{justify-content:flex-start}.swa em:last-child{justify-content:flex-end}
 .dg.dg3{grid-template-columns:repeat(3,minmax(0,1fr))}.dg3 .dt{padding:12px 10px;grid-column:auto!important}.dg3 .dt .v{font-size:21px}.hbtns{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
 @media (max-width:560px){.hhero{grid-template-columns:1fr}}
@@ -1312,6 +1332,18 @@ const CSS2 = `
 .mcol{display:flex;flex-direction:column;gap:8px}
 .mpr{cursor:default;gap:10px;padding:10px 12px}.mpr .grow{flex:1;min-width:0;cursor:pointer}.mpr .t{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .mpb{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;background:rgba(var(--wh),.08);border:1px solid var(--line);flex:none;transition:.2s}
+.spk{display:grid;grid-template-columns:56px minmax(0,1fr) auto;grid-template-areas:"art inf ctl" "vol vol vol";align-items:center;column-gap:12px;row-gap:10px;padding:12px;border-radius:20px;background:rgba(var(--wh),.05);border:1px solid var(--line);margin-bottom:8px;transition:.25s}
+.spk.on{border-color:rgba(94,234,212,.4);background:linear-gradient(135deg,rgba(94,234,212,.12),rgba(129,140,248,.10))}
+.spk .art{grid-area:art;width:56px;height:56px;border-radius:15px;background:rgba(var(--wh),.08) center/cover no-repeat;display:grid;place-items:center;color:var(--tx2);cursor:pointer}
+.spk .inf{grid-area:inf;min-width:0;cursor:pointer}.spk .n{font-weight:600;font-size:14.5px;display:flex;align-items:center;gap:8px}.spk .s{font-size:12.5px;color:var(--tx2);margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.spk .ctl{grid-area:ctl;display:flex;gap:6px}.spk .vol{grid-area:vol;display:flex;align-items:center;gap:10px;color:var(--tx3)}.spk .vol input{margin:0;flex:1}.spk .vp{width:44px;text-align:right;font-size:12px;color:var(--tx2);font-variant-numeric:tabular-nums}
+.eq{display:inline-flex;align-items:flex-end;gap:2px;height:12px}.eq i{width:3px;border-radius:1px;background:#5eead4;animation:eqb 1s ease-in-out infinite}.eq i:nth-child(2){animation-delay:-.4s}.eq i:nth-child(3){animation-delay:-.7s}
+@keyframes eqb{0%,100%{height:3px}50%{height:12px}}@media (prefers-reduced-motion:reduce){.eq i{animation:none;height:8px}}
+.annt,.annp{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}.annp{margin:10px 0 0}
+.annt button,.annp button{padding:8px 13px;border-radius:999px;background:rgba(var(--wh),.06);border:1px solid var(--line);font-size:13px;color:var(--tx2);transition:.2s;min-height:36px}
+.annt button.on{background:linear-gradient(135deg,rgba(94,234,212,.28),rgba(129,140,248,.28));color:var(--tx);border-color:rgba(var(--wh),.2)}.annp button{font-size:12.5px}.annp button:hover,.annt button:hover{color:var(--tx)}
+.xr.mus{cursor:pointer;flex-wrap:nowrap;min-width:0;overflow:hidden;padding:12px;gap:12px}.xr.mus .grow{min-width:0}.xr.mus .s{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media (max-width:359px){.spk{grid-template-columns:48px minmax(0,1fr);grid-template-areas:"art inf" "ctl ctl" "vol vol"}.spk .art{width:48px;height:48px}.spk .ctl:empty{display:none}}
 .mpb:active{transform:scale(.92)}.mpb.main{background:linear-gradient(135deg,rgba(94,234,212,.28),rgba(129,140,248,.28));border-color:rgba(var(--wh),.2)}
 @media (max-width:860px){.mpb{width:44px;height:44px}.mpr{flex-wrap:wrap}.mpr .grow{flex:1 1 calc(100% - 60px)}.ev{padding:10px}.dg .dt:last-child:nth-child(odd){grid-column:span 2}.alerts{gap:6px}.al{flex:none}.alerts{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin-inline:-14px;padding-inline:14px}.alerts::-webkit-scrollbar{display:none}.h .r{text-align:right}}
 `;
@@ -1374,7 +1406,7 @@ class HomeAurora extends HTMLElement {
   _tick() {
     const h = this._h; let sig = this._isLight() + '|';
     for (const e of this._watch) sig += (h.states[e]?.last_updated || '-') + '|';
-    for (const k in h.states) if (k.startsWith('light.') || (k.startsWith('sensor.') && k.includes('timer')) || this._isBat(k) || this._isContact(k) || k.includes(this._pid) || h.states[k].attributes?.putzplan_task) sig += h.states[k].last_updated;
+    for (const k in h.states) if (k.startsWith('light.') || (k.startsWith('sensor.') && k.includes('timer')) || this._isBat(k) || this._isContact(k) || k.includes(this._pid) || h.states[k].attributes?.putzplan_task || (k.startsWith('text.') && k.includes('_schedule_'))) sig += h.states[k].last_updated;
     const va = h.states[this._c.stats.vent]?.attributes?.raeume; if (va) for (const r of va) if (r.entity_id) sig += (h.states[r.entity_id]?.last_updated || '-');
     if (sig === this._sig) return;
     if (this._rweb && this._v === 'weather' && Date.now() - this._lastRender < 3e5) return;
@@ -1610,6 +1642,7 @@ class HomeAurora extends HTMLElement {
     const tvR = this._tvRows(); if (tvR.length) xr.push(...tvR); else if (this._s(ex.kids)) xr.push(`<button class="xr" data-act="toggle" data-e="${ex.kids}"><div class="ico">${ic('shield', 19)}</div><div><div class="t">Kindersicherung TV</div><div class="s">${this._val(ex.kids) === 'on' ? 'Aktiv' : 'Aus'}</div></div><span class="sw ${this._val(ex.kids) === 'on' ? 'on' : ''}"></span></button>`);
     xr.splice(Math.min(xr.length, 1), 0, ...this._cleanRows());
     xr.push(...this._kidRows());
+    { const mr = this._musicRow(); if (mr) xr.push(mr); }
     if (this._s(ex.winter)) xr.push(`<button class="xr" data-act="more" data-e="${ex.winter}"><div class="ico">${ic(this._val(ex.winter) === 'on' ? 'thermo' : 'sun', 19)}</div><div><div class="t">Heizmodus</div><div class="s">${this._val(ex.winter) === 'on' ? 'Wintermodus aktiv' : 'Sommerbetrieb'}</div></div></button>`);
     const sa = this._s(c.sun)?.attributes, sUp = this._val(c.sun) === 'above_horizon';
     const sunChip = sa ? `<span class="chip">${ic(sUp ? 'moon' : 'sun', 14)}<b>${hhmm(sUp ? sa.next_setting : sa.next_rising)}</b></span>` : '';
@@ -2437,6 +2470,7 @@ class HomeAurora extends HTMLElement {
     const D = this._schedD, ids = Object.keys(this._h.states).filter(k => k.startsWith('schedule.'));
     if (!D || Date.now() - D.t > 3e5) this._loadSchedules();
     const meta = new Map((D?.list || []).map(x => [`schedule.${x.id}`, x])), on = ids.filter(k => this._val(k) === 'on').length;
+    const TP = this._trvPlans(), nTP = TP.reduce((n, g) => n + g.th.length, 0), tab = !TP.length ? 'ha' : !ids.length ? 'trv' : this._schedTab || 'ha';
     const DAYS = [['monday', 'Mo'], ['tuesday', 'Di'], ['wednesday', 'Mi'], ['thursday', 'Do'], ['friday', 'Fr'], ['saturday', 'Sa'], ['sunday', 'So']];
     const mins = t => { const m = /^(\d+):(\d+)/.exec(t || ''); return m ? (+m[1]) * 60 + (+m[2]) : 0; };
     const nowD = new Date(), todayIdx = (nowD.getDay() + 6) % 7, nowPct = (nowD.getHours() * 60 + nowD.getMinutes()) / 14.4;
@@ -2446,8 +2480,11 @@ class HomeAurora extends HTMLElement {
       const week = m ? `<div class="swk">${DAYS.map(([d, l], di) => `<div class="swr ${di === todayIdx ? 'td' : ''}"><span>${l}</span><div class="swt">${(m[d] || []).map(b => { const f = mins(b.from), t = Math.min(mins(b.to) || 1440, 1440); return `<i style="left:${(f / 14.4).toFixed(2)}%;width:${Math.max((t - f) / 14.4, .6).toFixed(2)}%"></i>`; }).join('')}${di === todayIdx ? `<b style="left:${nowPct.toFixed(2)}%"></b>` : ''}</div></div>`).join('')}<div class="swa"><span></span><div><em>0</em><em>6</em><em>12</em><em>18</em><em>24</em></div></div></div>` : '';
       return `<div class="sch ${act ? 'on' : ''}"><div class="sht" data-act="more" data-e="${k}"><div class="ico">${ic('clock', 19)}</div><div class="tx"><div class="n">${esc(m?.name || a.friendly_name || this._name(k))}</div><div class="s">${ne ? (act ? 'Aktiv bis ' : 'Nächster Start ') + ne : (act ? 'Gerade aktiv' : 'Kein Termin geplant')}</div></div><div class="bd ${act ? '' : 'off'}">${act ? 'Aktiv' : 'Pause'}</div></div>${week}</div>`;
     };
-    return `<div class="grab"></div><div class="sh"><div class="ico">${ic('clock', 24)}</div><div><h2>Heizungsplan</h2><p>${ids.length ? ids.length + ' Zeitpläne · ' + on + ' gerade aktiv' : 'Keine Zeitpläne gefunden'}</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
-      ${ids.length ? `<div class="sl">${ids.sort((a, b) => (this._val(b) === 'on') - (this._val(a) === 'on') || this._name(a).localeCompare(this._name(b), 'de')).map(card).join('')}</div>` : `<div class="empty">🗓️ Es gibt noch keine Zeitpläne.<br><small>Lege unter Einstellungen → Geräte &amp; Dienste → Helfer einen „Zeitplan“ an.</small></div>`}`;
+    return `<div class="grab"></div><div class="sh"><div class="ico">${ic('clock', 24)}</div><div><h2>Heizungsplan</h2><p>${ids.length ? ids.length + ' Zeitpläne · ' + on + ' gerade aktiv' : 'Keine Zeitpläne gefunden'}${nTP ? ' · ' + nTP + ' Thermostat-Pläne' : ''}</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
+      ${TP.length && ids.length ? `<div class="seg wide" style="margin:6px 0 14px">${[['ha', 'Home Assistant · ' + ids.length], ['trv', 'Im Thermostat · ' + nTP]].map(x => `<button class="${tab === x[0] ? 'on' : ''}" data-act="schedtab" data-m="${x[0]}">${x[1]}</button>`).join('')}</div>` : ''}
+      ${tab === 'trv' ? '' : ids.length ? `<div class="sl">${ids.sort((a, b) => (this._val(b) === 'on') - (this._val(a) === 'on') || this._name(a).localeCompare(this._name(b), 'de')).map(card).join('')}</div>` : `<div class="empty">🗓️ Es gibt noch keine Zeitpläne.<br><small>Lege unter Einstellungen → Geräte &amp; Dienste → Helfer einen „Zeitplan“ an.</small></div>`}
+      ${TP.length && tab !== 'ha' ? `<div class="sl">${TP.map(g => this._trvCard(g)).join('')}</div>
+      <div class="card-note">Diese Wochenpläne liegen direkt in den Heizkörperthermostaten. Sie greifen nur, wenn das Thermostat auf Automatik steht („Plan aktiv“). Steht es auf „manuell“, regelt Home Assistant die Temperatur.</div>` : ''}`;
   }
   async _loadSchedules() {
     if (this._scB) return; this._scB = true;
@@ -2456,6 +2493,61 @@ class HomeAurora extends HTMLElement {
     if (this._sheet && this._sheet.t === 'sched') this._renderSheet();
   }
   _mountSched() {}
+  /* pz16: Wochenpläne, die direkt in den Heizkörperthermostaten liegen (text.*_schedule_settings bzw. text.*_schedule_<wochentag>) */
+  _trvPlans() {
+    const S = this._h.states, E = this._h.entities || {}, Dv = this._h.devices || {}, A = this._h.areas || {}, by = new Map();
+    const WD = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'], SH = { mon: 'Mo', tue: 'Di', wed: 'Mi', thu: 'Do', fri: 'Fr', sat: 'Sa', sun: 'So' }, ORD = Object.keys(SH);
+    for (const k in S) {
+      if (!k.startsWith('text.')) continue;
+      const m = /_schedule_(settings|monday|tuesday|wednesday|thursday|friday|saturday|sunday)$/.exec(k); if (!m || !okv(S[k].state) || !S[k].state.trim()) continue;
+      const did = E[k]?.device_id || k.slice(5).replace(/_schedule_.*$/, '');
+      if (!by.has(did)) by.set(did, { did, days: {}, set: null, ref: k });
+      const g = by.get(did); if (m[1] === 'settings') g.set = S[k].state.trim(); else g.days[m[1]] = S[k].state.trim();
+    }
+    const pts = (str, re) => str.split(re === 1 ? /\|/ : /\s+/).map(p => /^(\d{1,2}):(\d{2})[\/,](-?\d+(?:\.\d+)?)$/.exec(p.trim())).filter(Boolean).map(x => ({ m: Math.min(+x[1] * 60 + +x[2], 1440), t: +x[3] })).sort((a, b) => a.m - b.m);
+    const segs = (P, carry) => {
+      if (!P.length) return []; const out = [], c0 = carry ?? P[P.length - 1].t, add = (f, to, t) => { const l = out[out.length - 1]; if (l && l.t === t && l.to === f) l.to = to; else out.push({ f, to, t }); };
+      if (P[0].m > 0) add(0, P[0].m, c0); P.forEach((p, i) => { const to = i + 1 < P.length ? P[i + 1].m : 1440; if (to > p.m) add(p.m, to, p.t); }); return out;
+    };
+    const dayLbl = spec => { const d = spec.split(',').map(x => x.trim().slice(0, 3).toLowerCase()).filter(x => SH[x]).sort((a, b) => ORD.indexOf(a) - ORD.indexOf(b)); if (!d.length) return ''; const runs = []; d.forEach(x => { const r = runs[runs.length - 1]; if (r && ORD.indexOf(x) === ORD.indexOf(r[r.length - 1]) + 1) r.push(x); else runs.push([x]); }); return runs.map(r => r.length > 2 ? SH[r[0]] + '–' + SH[r[r.length - 1]] : r.map(x => SH[x]).join(', ')).join(', '); };
+    const out = [];
+    for (const g of by.values()) {
+      const cl = Object.keys(S).find(x => x.startsWith('climate.') && E[x]?.device_id && E[x].device_id === g.did);
+      const dev = Dv[g.did], ca = cl ? S[cl].attributes || {} : {};
+      const name = (dev && (dev.name_by_user || dev.name)) || ca.friendly_name || (S[g.ref].attributes.friendly_name || '').replace(/\s*Schedule.*$/i, '') || g.ref;
+      const area = A[(cl && E[cl]?.area_id) || dev?.area_id]?.name || '';
+      const pm = String(ca.preset_mode || '').toLowerCase(), active = cl ? (['auto', 'schedule', 'program', 'programme'].includes(pm) || this._val(cl) === 'auto') : null;
+      let rows, key;
+      if (WD.some(d => g.days[d])) {
+        let carry = null; for (let k = 6; k >= 0 && carry == null; k--) { const P = pts(g.days[WD[k]] || '', 0); if (P.length) carry = P[P.length - 1].t; }
+        rows = WD.map((d, di) => { const P = pts(g.days[d] || '', 0), sg = segs(P, carry); if (P.length) carry = P[P.length - 1].t; return { l: ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'][di], di, sg }; });
+        key = 'w:' + WD.map(d => g.days[d] || '').join('|');
+      } else if (g.set) {
+        const [spec, ...rest] = g.set.split('|'), P = pts(rest.join('|'), 1);
+        rows = [{ l: '', di: -1, days: dayLbl(spec || ''), sg: segs(P, null) }];
+        key = 's:' + g.set;
+      } else continue;
+      if (!rows.some(r => r.sg.length)) continue;
+      out.push({ name: name.trim(), area, cl, active, cur: ca.temperature, rows, key });
+    }
+    // Thermostate mit identischem Plan zu einer Karte zusammenfassen
+    const grp = new Map(); for (const x of out) { if (!grp.has(x.key)) grp.set(x.key, { rows: x.rows, th: [] }); grp.get(x.key).th.push(x); }
+    return [...grp.values()].sort((a, b) => b.th.length - a.th.length || a.th[0].name.localeCompare(b.th[0].name, 'de'));
+  }
+  _trvCard(G) {
+    const nowD = new Date(), td = (nowD.getDay() + 6) % 7, nm = nowD.getHours() * 60 + nowD.getMinutes();
+    const today = G.rows.find(r => r.di === td) || (G.rows.length === 1 ? G.rows[0] : null), seg = today?.sg.find(s => nm >= s.f && nm < s.to), nx = seg && today.sg.find(s => s.f > nm && s.t !== seg.t);
+    // kühl (blau) → warm (orange): 16 °C und weniger blau, ab 22 °C orange
+    const hcol = t => { const f = clamp((t - 16) / 6, 0, 1), A = [96, 165, 250], B = [251, 146, 60]; return `rgb(${A.map((a, k) => Math.round(a + (B[k] - a) * f)).join(',')})`; };
+    const bar = r => `<div class="tpt">${r.sg.map(s => { const w = (s.to - s.f) / 14.4; return `<i style="left:${(s.f / 14.4).toFixed(2)}%;width:${w.toFixed(2)}%;background:${hcol(s.t)}">${w >= 9 ? `<em>${de(s.t, s.t % 1 ? 1 : 0)}°</em>` : ''}</i>`; }).join('')}${r === today ? `<b style="left:${(nm / 14.4).toFixed(2)}%"></b>` : ''}</div>`;
+    const week = `<div class="swk tpw">${G.rows.map(r => r.di >= 0 ? `<div class="swr ${r.di === td ? 'td' : ''}"><span>${r.l}</span>${bar(r)}</div>` : `<div class="tpd">${r.days ? 'Gilt für ' + esc(r.days) : 'Keine Wochentage hinterlegt'}</div><div class="swr td"><span></span>${bar(r)}</div>`).join('')}<div class="swa"><span></span><div><em>0</em><em>6</em><em>12</em><em>18</em><em>24</em></div></div></div>`;
+    const act = G.th.filter(x => x.active).length, known = G.th.filter(x => x.active != null).length;
+    const mixed = act > 0 && act < known;
+    const chips = G.th.map(x => `<button class="tpc ${x.active ? 'on' : ''}" ${x.cl ? `data-act="more" data-e="${x.cl}"` : ''}><span>${esc(x.name)}</span>${x.active == null || !mixed ? '' : `<small>${x.active ? 'Plan aktiv' : 'manuell'}</small>`}</button>`).join('');
+    const sub = seg ? `Laut Plan jetzt ${de(seg.t, seg.t % 1 ? 1 : 0)} °C${nx ? ` · ab ${String(Math.floor(nx.f / 60)).padStart(2, '0')}:${String(nx.f % 60).padStart(2, '0')} ${de(nx.t, nx.t % 1 ? 1 : 0)} °C` : ''}` : 'Für heute kein Eintrag';
+    return `<div class="sch tpl ${act ? 'on' : ''}"><div class="sht"><div class="ico">${ic('thermo', 19)}</div><div class="tx"><div class="n">${G.th.length > 1 ? G.th.length + ' Thermostate' : esc(G.th[0].name)}</div><div class="s">${sub}</div></div>${known ? `<div class="bd ${act ? '' : 'off'}">${act ? (act === known ? 'Aktiv' : act + ' von ' + known + ' aktiv') : 'Manuell'}</div>` : ''}</div>
+      <div class="tpcs">${chips}</div>${week}</div>`;
+  }
 
   /* ───────────── v5: Regenradar ───────────── */
   _radarUrl() {
@@ -2469,7 +2561,7 @@ class HomeAurora extends HTMLElement {
   _sSet() {
     const th = this._themePref || this._c.theme || 'dark', am = String(this._ambMin());
     const seg = (act, cur, items) => `<div class="seg wide">${items.map(x => `<button class="${cur === x[0] ? 'on' : ''}" data-act="${act}" data-m="${x[0]}">${x[1]}</button>`).join('')}</div>`;
-    return `<div class="grab"></div><div class="sh"><div class="ico">${ic('cog', 24)}</div><div><h2>Darstellung &amp; Modi</h2><p>Home Aurora v5.2 · Build pz15</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
+    return `<div class="grab"></div><div class="sh"><div class="ico">${ic('cog', 24)}</div><div><h2>Darstellung &amp; Modi</h2><p>Home Aurora v5.2 · Build pz16</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
       <div class="lab2">DESIGN</div>${seg('theme', th, [['dark', 'Dunkel'], ['light', 'Hell'], ['auto', 'Automatisch']])}
       <div class="card-note">„Automatisch“ folgt dem Dunkel-/Hellmodus deines Home-Assistant-Profils. Die Auswahl gilt nur für dieses Gerät.</div>
       ${WALL_UI ? `      <div class="lab2">WANDTABLET-MODUS</div>
@@ -3299,6 +3391,68 @@ class HomeAurora extends HTMLElement {
   }
 
   /* ───────────── v11: Kindersicherung TV (Integration „kindersicherung“) ───────────── */
+  /* ───────────── pz16: Musik & Alexa (Lautsprecher steuern, Durchsagen) ───────────── */
+  _spk() {
+    const M = this._c.music || {}, rank = { playing: 0, paused: 1, buffering: 1, idle: 2, on: 3, standby: 4, off: 5 };
+    let list = M.speakers;
+    if (!list) list = Object.keys(this._h.states).filter(k => k.startsWith('media_player.') && this._attr(k, 'device_class') === 'speaker').map(k => ({ name: this._name(k), media: [k] }));
+    return list.map((x, i) => {
+      const ents = (Array.isArray(x.media) ? x.media : [x.media]).filter(e => { const s = this._s(e); return s && s.state !== 'unavailable'; });
+      if (!ents.length) return null;
+      // Steuerung über das Gerät mit Play/Pause (Alexa Media), sonst über das erste verfügbare
+      const score = e => (this._mpCaps(e).pp ? 0 : 20) + (rank[this._val(e)] ?? 9);
+      const e = ents.slice().sort((a, b) => score(a) - score(b))[0];
+      const live = ents.map(k => this._s(k)).sort((a, b) => (rank[a.state] ?? 9) - (rank[b.state] ?? 9))[0];
+      const a = live.attributes || {}, st = live.state;
+      return { i, name: x.name || this._name(e), icon: x.icon || 'speaker', e, ents, notify: x.notify && this._s(x.notify) ? x.notify : null, st, pl: st === 'playing', ps: st === 'paused', title: a.media_title || '', artist: a.media_artist || a.media_album_name || '', pic: a.entity_picture_local || a.entity_picture || '', vol: this._attr(e, 'volume_level') };
+    }).filter(Boolean);
+  }
+  _spkNow(L) { return L.find(x => x.pl) || L.find(x => x.ps && x.title) || null; }
+  _picUrl(p) { if (!p) return ''; return p.startsWith('/') && this._h.hassUrl ? this._h.hassUrl(p) : p; }
+  _musicRow() {
+    const L = this._spk(); if (!L.length) return '';
+    const N = this._spkNow(L);
+    const sub = N ? `${N.pl ? 'Spielt' : 'Pausiert'} · ${esc(N.title || 'Musik')}${N.artist ? ' – ' + esc(N.artist) : ''} · ${esc(N.name)}` : `${L.length} Lautsprecher · Durchsage senden`;
+    return `<div class="xr mpr mus" data-act="music"><div class="ico" style="${N && N.pl ? 'background:rgba(94,234,212,.2);color:#5eead4' : ''}">${ic('music', 19)}</div><div class="grow"><div class="t">Musik &amp; Alexa</div><div class="s">${sub}</div></div>${N ? this._mpBtns(N.e, N.pl).replace(/<button class="mpb"[^>]*data-s="volume_(down|up)"[^>]*>.*?<\/button>/g, '') : ''}</div>`;
+  }
+  _musicTb() {
+    const L = this._spk(); if (!L.length) return '';
+    const N = this._spkNow(L);
+    return `<button class="tb mus ${N && N.pl ? 'on' : ''}" data-act="music">${ic(N && N.pl ? 'music' : 'announce', 15)}<span>${N && N.pl ? esc(N.title || N.name) : 'Musik &amp; Durchsage'}</span></button>`;
+  }
+  _sMusic() {
+    const M = this._c.music || {}, L = this._spk(), all = M.all && this._s(M.all.notify) ? M.all : null;
+    const T = [...(all ? [['all', all.name || 'Überall']] : []), ...L.filter(x => x.notify).map(x => [String(x.i), x.name])];
+    if (!T.some(t => t[0] === this._annT)) this._annT = T[0]?.[0];
+    const pl = L.filter(x => x.pl).length;
+    const card = x => {
+      const c = this._mpCaps(x.e), f = this._attr(x.e, 'supported_features') || 0, b = (s, ico, l, main) => `<button class="mpb${main ? ' main' : ''}" data-act="mp" data-e="${x.e}" data-s="${s}" aria-label="${l}">${ic(ico, 18)}</button>`;
+      const pic = this._picUrl(x.pic), v = x.vol != null ? Math.round(x.vol * 100) : null;
+      const pp = x.pl ? (c.pause ? b('media_pause', 'pause', 'Pause', 1) : c.stop ? b('media_stop', 'close', 'Stopp', 1) : '') : (c.play && (x.ps || x.title) ? b('media_play', 'play', 'Wiedergabe', 1) : '');
+      const ctl = (f & 16 && (x.pl || x.ps) ? b('media_previous_track', 'prev', 'Zurück') : '') + pp + (f & 32 && (x.pl || x.ps) ? b('media_next_track', 'next', 'Weiter') : '');
+      return `<div class="spk ${x.pl ? 'on' : ''}"><div class="art" ${pic ? `style="background-image:url('${esc(pic)}')"` : ''} data-act="more" data-e="${x.e}">${pic ? '' : ic(x.icon, 24)}</div>
+        <div class="inf" data-act="more" data-e="${x.e}"><div class="n">${esc(x.name)}${x.pl ? '<span class="eq"><i></i><i></i><i></i></span>' : ''}</div><div class="s">${x.title ? esc(x.title) + (x.artist ? ' – ' + esc(x.artist) : '') : ({ idle: 'Bereit', off: 'Aus', standby: 'Standby', on: 'An', paused: 'Pausiert' })[x.st] || esc(x.st)}</div></div>
+        <div class="ctl">${ctl}</div>
+        ${v != null && c.vol ? `<div class="vol">${ic('speaker', 15)}<input type="range" min="0" max="100" value="${v}" style="--v:${v}%;--lc:94,234,212" data-act="vol" data-e="${x.e}" aria-label="Lautstärke ${esc(x.name)}"><span class="vp">${v} %</span></div>` : ''}</div>`;
+    };
+    return `<div class="grab"></div><div class="sh"><div class="ico">${ic('music', 24)}</div><div><h2>Musik &amp; Alexa</h2><p>${L.length} Lautsprecher · ${pl ? pl + ' spielt' + (pl > 1 ? 'en' : '') : 'gerade keine Musik'}</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
+      ${T.length ? `<div class="lab2">DURCHSAGE</div>
+      <div class="annt">${T.map(t => `<button class="${t[0] === this._annT ? 'on' : ''}" data-act="annt" data-i="${t[0]}">${esc(t[1])}</button>`).join('')}</div>
+      <div class="qnew"><input id="annq" type="text" maxlength="200" placeholder="Was soll Alexa sagen?" autocomplete="off" enterkeyhint="send"><button class="vbt big on" data-act="annsend">${ic('announce', 15)}Durchsagen</button></div>
+      ${(M.phrases || []).length ? `<div class="annp">${M.phrases.map((p, i) => `<button data-act="annph" data-i="${i}">${esc(p)}</button>`).join('')}</div>` : ''}` : ''}
+      <div class="lab2">LAUTSPRECHER · ${L.length}</div>${L.length ? L.map(card).join('') : '<div class="empty">Keine Lautsprecher gefunden</div>'}`;
+  }
+  async _annSend() {
+    const M = this._c.music || {}, inp = this.shadowRoot.getElementById('annq'), msg = (inp?.value || '').trim();
+    if (!msg) { this._toast('Bitte erst einen Text eingeben'); inp?.focus(); return; }
+    const L = this._spk(), x = this._annT === 'all' ? M.all : L.find(s => String(s.i) === this._annT), ent = x?.notify;
+    if (!ent) { this._toast('Kein Lautsprecher für die Durchsage gewählt'); return; }
+    try {
+      await this._h.callService('notify', 'send_message', { entity_id: ent, message: msg });
+      if (inp) inp.value = '';
+      this._toast(`Durchsage an ${x.name || 'Alexa'} gesendet`);
+    } catch (er) { this._toast('Durchsage hat nicht geklappt', 3600); }
+  }
   _tvs() {
     const E = this._h?.entities || {}, D = this._h?.devices || {}, S = this._h?.states || {}, g = {};
     for (const id in E) {
@@ -3719,14 +3873,16 @@ class HomeAurora extends HTMLElement {
     const st = this._sh.scrollTop;
     if (this._sheet.t === 'sched' && this._schedEl && this._sh.contains(this._schedEl)) { this._schedEl.hass = this._h; this._ov.classList.add('show'); return; }
     const r = this._sheet.t === 'room' ? this._c.rooms.find(x => x.id === this._sheet.id) : null;
-    const T = { vroom: () => this._sVRoom(this._sheet.e), persons: () => this._sPersons(), quick: () => this._sQuick(), vent: () => this._sVent(), cal: () => this._sCal(), bat: () => this._sBat(), doors: () => this._sDoors(), sys: () => this._sSys(), waste: () => this._sWaste(), power: () => this._sPower(), sched: () => this._sSched(), set: () => this._sSet(), warn: () => this._sWarn(), radar: () => this._sRadar(), pin: () => this._sPin(), fuel: () => this._sFuel(), plants: () => this._sPlants(), heat: () => this._sHeat(), kid: () => this._sKid(), clean: () => this._sClean(), tv: () => this._sTv(), pzstat: () => this._sPzStat() };
+    const T = { vroom: () => this._sVRoom(this._sheet.e), persons: () => this._sPersons(), quick: () => this._sQuick(), vent: () => this._sVent(), cal: () => this._sCal(), bat: () => this._sBat(), doors: () => this._sDoors(), sys: () => this._sSys(), waste: () => this._sWaste(), power: () => this._sPower(), sched: () => this._sSched(), set: () => this._sSet(), warn: () => this._sWarn(), radar: () => this._sRadar(), pin: () => this._sPin(), fuel: () => this._sFuel(), plants: () => this._sPlants(), heat: () => this._sHeat(), kid: () => this._sKid(), clean: () => this._sClean(), tv: () => this._sTv(), pzstat: () => this._sPzStat(), music: () => this._sMusic() };
     const qn = this.shadowRoot.getElementById('qname'), qv = qn ? qn.value : null, qf = qn && this.shadowRoot.activeElement === qn;
+    const an = this.shadowRoot.getElementById('annq'), av = an ? an.value : null, af = an && this.shadowRoot.activeElement === an;
     const pq = this.shadowRoot.getElementById('pzq'), pqf = pq && this.shadowRoot.activeElement === pq, pqs = pq ? pq.selectionStart : 0;
     const html = r ? this._sRoom(r) : (T[this._sheet.t] || (() => this._sLights()))(), key = this._sheet.t + ':' + (this._sheet.id || this._sheet.e || '');
     if (this._shKey === key && this._sh.firstChild) this._morph(this._sh, html); else this._sh.innerHTML = html;
     this._shKey = key;
     if (pqf) { const p2 = this.shadowRoot.getElementById('pzq'); if (p2) { p2.focus(); try { p2.setSelectionRange(pqs, pqs); } catch (x) { } } }
     if (qv != null) { const n2 = this.shadowRoot.getElementById('qname'); if (n2) { n2.value = qv; if (qf) n2.focus(); } }
+    if (av != null) { const a2 = this.shadowRoot.getElementById('annq'); if (a2 && a2 !== an) { a2.value = av; if (af) a2.focus(); } }
     if (this._sheet.t === 'sched') this._mountSched();
     this._sh.scrollTop = st;
     this._ov.classList.toggle('rdfull', this._sheet.t === 'radar'); this._ov.classList.add('show');
@@ -3806,13 +3962,14 @@ class HomeAurora extends HTMLElement {
     });
     root.addEventListener('input', ev => {
       if (ev.target.id === 'pzq') { const st = this._pzSt(); if (st) { st.q = ev.target.value; this._pzRefresh(); } return; }
-      const el = ev.target.closest('input[data-act="bright"]');
-      if (el) el.style.setProperty('--v', el.value + '%');
+      const el = ev.target.closest('input[data-act="bright"],input[data-act="vol"]');
+      if (el) { el.style.setProperty('--v', el.value + '%'); if (el.dataset.act === 'vol' && el.nextElementSibling) el.nextElementSibling.textContent = el.value + ' %'; }
     });
     root.addEventListener('change', ev => {
-      const el = ev.target.closest('input[data-act="bright"]');
+      const el = ev.target.closest('input[data-act="bright"],input[data-act="vol"]');
       if (!el) return;
-      this._h.callService('light', 'turn_on', { entity_id: el.dataset.e, brightness_pct: parseInt(el.value, 10) });
+      if (el.dataset.act === 'vol') this._h.callService('media_player', 'volume_set', { entity_id: el.dataset.e, volume_level: parseInt(el.value, 10) / 100 });
+      else this._h.callService('light', 'turn_on', { entity_id: el.dataset.e, brightness_pct: parseInt(el.value, 10) });
       this._busy = false;
       if (this._dirty) { this._dirty = false; this._sig = ''; this._tick(); }
     });
@@ -3842,6 +3999,7 @@ class HomeAurora extends HTMLElement {
     root.addEventListener('touchend', swEnd); root.addEventListener('touchcancel', swEnd);
     root.addEventListener('keydown', ev => {
       if (ev.key === 'Escape') this._closeSheet();
+      else if (ev.key === 'Enter' && ev.target.id === 'annq') { ev.preventDefault(); this._annSend(); }
     });
     root.addEventListener('contextmenu', ev => { if (ev.target.closest && ev.target.closest('[data-hold]')) ev.preventDefault(); });
   }
@@ -3883,6 +4041,11 @@ class HomeAurora extends HTMLElement {
       case 'sys': this._sheet = { t: 'sys' }; this._renderSheet(); this._loadSys(true); break;
       case 'power': this._sheet = { t: 'power' }; this._renderSheet(); this._loadPower(true); break;
       case 'sched': this._sheet = { t: 'sched' }; this._renderSheet(); break;
+      case 'schedtab': this._schedTab = el.dataset.m; this._renderSheet(); break;
+      case 'music': this._sheet = { t: 'music' }; this._renderSheet(); break;
+      case 'annt': this._annT = el.dataset.i; this._renderSheet(); break;
+      case 'annph': { const p = (this._c.music?.phrases || [])[+el.dataset.i], inp = this.shadowRoot.getElementById('annq'); if (p && inp) { inp.value = p; inp.focus(); } break; }
+      case 'annsend': this._annSend(); break;
       case 'settings': this._sheet = { t: 'set' }; this._renderSheet(); break;
       case 'quick': this._quickRun(e); break;
       case 'theme': this._themePref = el.dataset.m; try { localStorage.setItem('home-aurora-theme', el.dataset.m); } catch (er) { /* ok */ } this._render(); break;
