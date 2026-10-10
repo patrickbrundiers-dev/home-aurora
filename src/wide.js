@@ -8,7 +8,7 @@ const CSSW = `
 @media (min-width:1200px){.cock{height:var(--cockh,calc(100vh - var(--header-height,0px) - 32px));min-height:620px}}
 @supports (height:100dvh){@media (min-width:1200px){.cock{height:var(--cockh,calc(100dvh - var(--header-height,0px) - 32px))}}}
 .ctop{display:flex;align-items:center;gap:10px;min-height:40px;flex:none}
-.ctop .alerts{margin:0;flex-wrap:nowrap;flex:none}.ctop .qa{margin:0;padding:2px 0;flex:1 1 0;min-width:0;flex-wrap:nowrap;overflow-x:auto}
+.ctop .alerts{margin:0;flex-wrap:nowrap;flex:none}.ctop .qa{margin:0;padding:2px 0;flex:1 1 0;min-width:0;flex-wrap:nowrap;overflow-x:auto;-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent);padding-right:24px}
 .ctop .al,.ctop .qp{flex:none;white-space:nowrap}
 .ctop .gap{flex:1}
 .ctop .tb{flex:none;display:flex;align-items:center;gap:8px;padding:9px 14px;border-radius:999px;background:rgba(var(--wh),.07);border:1px solid var(--line);font-size:13px;color:var(--tx2);white-space:nowrap}
@@ -61,8 +61,9 @@ const CSSW = `
   .app.wide .sum{font-size:16px}.alt .xr .t{font-size:13.5px}
 }
 @media (max-height:899px),(max-width:1699px){.app.wide .hero .rings{display:none}.app.wide .hero{position:relative}.app.wide .hero .pp{position:absolute;top:3px;right:14px;margin:0!important;flex-wrap:nowrap;gap:6px;z-index:2}.app.wide .hero .pp .pc{padding:0;background:none;border:0;box-shadow:none;min-width:0;gap:0}.app.wide .hero .pp .pc>div:last-child{display:none}.app.wide .hero .pp .pc .av{width:28px;height:28px;font-size:12px;flex:none}}
+.col.tight .hero .rings{display:none}.col.tight .hero{position:relative}.col.tight .hero .pp{position:absolute;top:3px;right:14px;margin:0!important;flex-wrap:nowrap;gap:6px;z-index:2}.col.tight .hero .pp .pc{padding:0;background:none;border:0;box-shadow:none;min-width:0;gap:0}.col.tight .hero .pp .pc>div:last-child{display:none}.col.tight .hero .pp .pc .av{width:28px;height:28px;font-size:12px;flex:none}
 @media (min-height:940px){.rooms .rm .spark{display:block}}
-@media (max-height:959px){.col [data-act=power] .bt,.col [data-act=power] .card-note,.col [data-act=power] .okc{display:none}.col [data-act=power] .pwr{margin:0}}
+@media (max-height:959px){.col [data-act=power] .okc{display:none}}
 /* Niedrige Tablets (ca. 700–800 px Höhe, z. B. Vollbild-Browser): kompakter, damit nichts abgeschnitten wird */
 @media (min-width:1200px) and (max-height:820px){
   .app.wide .clock{font-size:clamp(54px,9.5vh,84px)}
@@ -70,14 +71,16 @@ const CSSW = `
   .app.wide .hero .pp{margin-top:8px!important;flex:none}.app.wide .hero{gap:8px}.col>.c{padding:13px 15px}
   .app.wide .hero .hl{overflow:hidden}
   .alt{gap:5px}.alt .xr{padding:5px 10px}.alt .xr .ico{width:30px;height:30px}
-  .rooms .rg{gap:8px}.rooms .rm{padding:8px 10px 9px;gap:2px}.rooms .rm .rb{flex-wrap:nowrap;white-space:nowrap;overflow:hidden;gap:6px;font-size:11.5px}
+  .rooms .rg{gap:8px}.rooms .rm{padding:8px 10px 9px;gap:2px}.rooms .rm .rb{flex-wrap:wrap;row-gap:1px;gap:6px;font-size:11.5px}
   .rooms .rm .rw,.rooms .rm .rw .ring{width:34px;height:34px}.rooms .rm .rv{font-size:22px}.rooms .rm .rt{font-size:12.5px}
 }
 .rooms .rm .rb{min-width:0}.rooms .rm{overflow:hidden}
+.alt .xr .s{white-space:normal;overflow:visible;text-overflow:clip}
 /* Tablet quer, schmaler: zwei Spalten, Seite scrollt */
 @media (max-width:1199px){
   .cock{height:auto;min-height:0}.cols{flex:none}.col>.grow,.col>.fix{flex:none}.rooms .rg{grid-auto-rows:auto}.chartc{min-height:300px}
-  .cols{grid-template-columns:minmax(0,1fr) minmax(0,1.5fr)}
+  .cols{grid-template-columns:minmax(0,1fr) minmax(0,1.5fr);align-items:start}
+  .col.c3{align-items:flex-start}
   .col.c3{grid-column:1 / -1;flex-direction:row;flex-wrap:wrap}.col.c3>.c{flex:1 1 280px}
   .rooms .rg{overflow:visible}
   .stg{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -103,6 +106,45 @@ class HomeAuroraWide extends HomeAurora {
     const t = el.getBoundingClientRect().top, pb = parseFloat(getComputedStyle(this._main).paddingBottom) || 16, ih = window.innerHeight || document.documentElement.clientHeight;
     if (!(ih > 0) || t > ih) return;
     this.style.setProperty('--cockh', Math.max(620, Math.floor(ih - t - pb)) + 'px');
+    this._fitCols(el);
+    /* Inhalte, die später nachladen (Termine, Strom, Verlauf), ändern die Kartengrößen: dann neu verteilen */
+    const refit = () => { const c = this._main && this._main.querySelector('.cock'); if (c && !this._fitting) this._fitCols(c); };
+    if (!this._fro && typeof ResizeObserver === 'function') this._fro = new ResizeObserver(() => { cancelAnimationFrame(this._froF); this._froF = requestAnimationFrame(refit); });
+    if (this._fro) for (const c of el.querySelectorAll('.col>.c')) this._fro.observe(c);
+    clearTimeout(this._fitT); this._fitT = setTimeout(refit, 700);
+  }
+  /* Spalten füllen: optionale Zeilen (.fi, data-fp = Reihenfolge) nur einblenden, solange nichts abgeschnitten wird */
+  _fitCols(el) {
+    this._fitting = true;
+    try { this._fitColsX(el); } finally { this._fitting = false; }
+  }
+  _fitColsX(el) {
+    for (const col of el.querySelectorAll('.col')) {
+      const fi = [...col.querySelectorAll('.fi')];
+      if (!fi.length && !col.querySelector('.hero')) continue;
+      const over = () => col.scrollHeight > col.clientHeight + 1 || [...col.children].some(c => c.scrollHeight > c.clientHeight + 1 || [...c.children].some(k => k.clientHeight && k.scrollHeight > k.clientHeight + 1 && getComputedStyle(k).overflowY === 'hidden'));
+      const grp = new Map();
+      fi.forEach((x, k) => { const g = x.dataset.fg || 'i' + k; if (!grp.has(g)) grp.set(g, { p: +x.dataset.fp || 9, k, el: [] }); grp.get(g).el.push(x); });
+      const G = [...grp.values()].sort((a, b) => a.p - b.p || a.k - b.k);
+      const fill = tight => {
+        fi.forEach(x => x.classList.add('fh')); col.classList.toggle('tight', tight);
+        if (over()) return -1;
+        let n = 0;
+        for (const g of G) {
+          g.el.forEach(x => x.classList.remove('fh'));
+          if (over()) { g.el.forEach(x => x.classList.add('fh')); break; }
+          n++;
+        }
+        return n;
+      };
+      /* Hero mit Ringen und Personen bevorzugen; kompakt nur, wenn es sonst nicht passt oder dadurch deutlich mehr Zeilen Platz haben */
+      const a = fill(false);
+      if (col.querySelector('.hero') && (a < 0 || a < G.length)) { const t = fill(true); if (a >= 0 && t < a + 2) fill(false); }
+      for (const m of col.querySelectorAll('.fm')) {
+        const n = (+m.dataset.n || 0) + (m.closest('.c')?.querySelectorAll('.fi.fh:not(.ccd)').length || 0);
+        m.textContent = n > 0 ? (m.dataset.full ? `+ ${n} weitere` : `+ ${n} weitere · `) : '';
+      }
+    }
   }
   setConfig(cfg) { super.setConfig({ ambient_night: { from: '23:00', to: '06:00', after: 1 }, ...(cfg || {}) }); }
 
@@ -113,8 +155,8 @@ class HomeAuroraWide extends HomeAurora {
     const wxCard = `<div class="c wxh tap fix" style="--i:2;--wglow:${this._wxGlow(w.cond)}" data-act="nav" data-v="weather">
         <div class="wtop"><div><div class="wtemp big" data-count="${w.temp ?? 0}" data-d="1">${de(w.temp)}<small class="u">°C</small></div><div class="wcond">${COND[w.cond] || w.cond}</div></div>${wx(w.cond, 72)}</div>
         <div><div class="chips"><span class="chip">${ic('drop', 14)}<b>${de(w.hum, 0)}</b>%</span><span class="chip">${ic('wind', 14)}<b>${de(w.wind, 0)}</b> ${esc(w.windU)}</span>${w.rain ? `<span class="chip">${ic('rain', 14)}<b>${de(w.rain)}</b> ${esc(w.rainU)}</span>` : ''}${sunChip}</div>${mini ? `<div class="mini">${mini}</div>` : ''}</div></div>`;
-    const pz0 = this._pzCard(6, 2), alltag = [...xr.filter(x => !/Heizmodus/.test(x) && !(this._pzCard(6, 2) && /Tanken/.test(x))), this._plantRow(), this._sysRow()].filter(Boolean).slice(0, pz0 ? 3 : 5);
-    const cal = this._calCard(7, 3), pow = this._powerCard(8);
+    const pz0 = this._pzCard(6, 1, 7), alltag = [...xr.filter(x => !/Heizmodus/.test(x) && !(this._pzCard(6, 2) && /Tanken/.test(x))), this._plantRow(), this._sysRow()].filter(Boolean).slice(0, pz0 ? 3 : 5);
+    const cal = this._calCard(7, 1, 8), pow = this._powerCard(8);
     const vh = typeof innerHeight === 'number' ? innerHeight : 800;
     return `<div class="cock">
       <div class="ctop">${AL.length ? `<div class="alerts">${AL.map(a => this._alertHtml(a)).join('')}</div>` : ''}${q || '<div class="gap"></div>'}
