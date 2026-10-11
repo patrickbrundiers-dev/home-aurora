@@ -4,7 +4,7 @@
   _sSet() {
     const th = this._themePref || this._c.theme || 'dark', am = String(this._ambMin());
     const seg = (act, cur, items) => `<div class="seg wide">${items.map(x => `<button class="${cur === x[0] ? 'on' : ''}" data-act="${act}" data-m="${x[0]}">${x[1]}</button>`).join('')}</div>`;
-    return `<div class="grab"></div><div class="sh"><div class="ico">${ic('cog', 24)}</div><div><h2>Darstellung &amp; Modi</h2><p>Home Aurora v5.2 · Build pz23</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
+    return `<div class="grab"></div><div class="sh"><div class="ico">${ic('cog', 24)}</div><div><h2>Darstellung &amp; Modi</h2><p>Home Aurora v5.2 · Build pz24</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
       <div class="lab2">DESIGN</div>${seg('theme', th, [['dark', 'Dunkel'], ['light', 'Hell'], ['auto', 'Automatisch']])}
       <div class="card-note">„Automatisch“ folgt dem Dunkel-/Hellmodus deines Home-Assistant-Profils. Die Auswahl gilt nur für dieses Gerät.</div>
       ${WALL_UI ? `      <div class="lab2">WANDTABLET-MODUS</div>
@@ -17,6 +17,8 @@
       <div class="card-note">Ausgeblendet verschwinden die Karte „Heute putzen“${WALL_UI ? ' und der Reiter in der Leiste' : ' und der Eintrag im Alltag'}. Die Aufgaben in Home Assistant bleiben unverändert. Gilt nur für dieses Gerät.</div>
       ${this._pzOn() ? `<div class="card-note" style="margin-top:12px">Beim Antippen öffnen als</div>${seg('pzview', this._pzView() ? '1' : '0', [['1', 'Eigene Ansicht'], ['0', 'Fenster']])}
       <div class="card-note">Eigene Seite mit „Zurück“ oder Fenster über der Startseite. Gilt nur für dieses Gerät.</div>` : ''}` : ''}
+      ${this._shopOk() || this._rcpOk() ? `<div class="lab2">EINKAUFSLISTE &amp; REZEPTE</div>${seg('shopshow', this._shopOn() ? '1' : '0', [['1', 'Sichtbar'], ['0', 'Ausgeblendet']])}
+      <div class="card-note">Ausgeblendet verschwindet der Eintrag „Einkaufsliste“ im Alltag. Die Listen in Home Assistant bleiben unverändert. Gilt nur für dieses Gerät.</div>` : ''}
       <div class="lab2">SCHNELLAKTIONEN</div>
       <button class="xr" style="width:100%" data-act="qedit"><div class="ico">${ic('sparkle', 19)}</div><div><div class="t">Schnellaktionen bearbeiten</div><div class="s">Szenen &amp; Skripte hinzufügen, sortieren, neue Szene speichern</div></div></button>
       <div class="lab2">SCHNELLZUGRIFF</div>

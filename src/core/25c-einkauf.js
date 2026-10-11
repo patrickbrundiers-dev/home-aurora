@@ -62,7 +62,10 @@
     return [...g.values()];
   }
   _shopDone() { return (this._shop?.items || []).filter(i => i.status === 'completed').sort((a, b) => String(b.completed || '').localeCompare(String(a.completed || ''))); }
+  /* Einkaufsliste & Rezepte zeigen oder ausblenden; pro Gerät umschaltbar, Vorgabe per YAML einkauf: false */
+  _shopOn() { return this._shsPref != null ? this._shsPref === '1' : this._c?.einkauf !== false; }
   _shopRow() {
+    if (!this._shopOn()) return '';
     if (!this._shopOk()) return this._rcpOk() ? `<button class="xr" data-act="shop"><div class="ico">${ic('cook', 19)}</div><div><div class="t">Rezepte</div><div class="s">${parseInt(this._val(this._shopC().recipes), 10) || 0} Rezepte</div></div></button>` : '';
     this._loadShop();
     const n = parseInt(this._val(this._shopC().list), 10) || 0, O = this._shop ? this._shopOpen() : [];
