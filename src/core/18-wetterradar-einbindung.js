@@ -4,8 +4,17 @@
     return Object.assign({
       wms: 'https://maps.dwd.de/geoserver/dwd/wms', radar: 'dwd:Niederschlagsradar', bolt: 'dwd:Blitzdichte', warn: 'dwd:Warnungen_Landkreise',
       base: { dark: ['https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}'], light: ['https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}'] }, past: 120, future: 120, zoom: 8, factor: 1, strikeKm: 50, rings: [10, 25],
-      mock: !!this._h?.config?.mock, ext: this._c.radarUrl || 'https://www.wetter.com/wetterkarten/regenradar/', kw: { storm: 'binary_sensor.kachelmannwetter_gewitter_erwartet' },
+      mock: !!this._h?.config?.mock, embed: this._c.radarUrl || this._rdEmbed(), kw: { storm: 'binary_sensor.kachelmannwetter_gewitter_erwartet' },
     }, u);
+  }
+  _rdEmbed() {
+    const c = this._h?.config || {}, la = (c.latitude ?? 51.7235).toFixed(3), lo = (c.longitude ?? 8.5633).toFixed(3);
+    return `https://radar.wo-cloud.com/mobile/embedded?wrx=${la},${lo}&wrm=8&wry=${la},${lo}`;
+  }
+  _rdSrc() { if (!this._rdSrcPref) { try { this._rdSrcPref = localStorage.getItem('home-aurora-rdsrc'); } catch (e) { /* ok */ } } return this._rdSrcPref === 'own' ? 'own' : 'wo'; }
+  _rdSetSrc(s) {
+    this._rdSrcPref = s === 'own' ? 'own' : 'wo'; try { localStorage.setItem('home-aurora-rdsrc', this._rdSrcPref); } catch (e) { /* ok */ }
+    this._rdr?.setSrc(this._rdSrcPref); this._main?.querySelectorAll('.rdc .h .rd-src').forEach(el => { el.outerHTML = rdSeg(this._rdSrcPref); });
   }
   _rdrWarns() {
     const out = [], A = this._c.alerts || {};
@@ -29,7 +38,7 @@
     r.setMode(sh); r.resume(); if (moved) r.resize(); r.upd();
   }
   _radarCard(i, cls = 's6') {
-    return `<div class="c ${cls} rdc" style="--i:${i}"><div class="h">${ic('radar', 14)}Regenradar<span class="r"><button class="rd-open" data-act="radar">${ic('expand', 14)}Vollbild</button></span></div><div class="rdslot" data-keep="1"></div></div>`;
+    return `<div class="c ${cls} rdc" style="--i:${i}"><div class="h">${ic('radar', 14)}Regenradar<span class="r">${rdSeg(this._rdSrc())}<button class="rd-open" data-act="radar">${ic('expand', 14)}<span class="rd-ol">Vollbild</span></button></span></div><div class="rdslot" data-keep="1"></div></div>`;
   }
   _sRadar() { return `<div class="rdslot full" data-keep="1"></div>`; }
   _sWarn() {

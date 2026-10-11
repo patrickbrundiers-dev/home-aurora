@@ -660,10 +660,12 @@ const RD_TYPES = {
 const RD_LEG = [[0.1, '#60a5fa', 'leicht'], [1, '#22c55e', 'mäßig'], [2.5, '#facc15', 'kräftig'], [10, '#ef4444', 'stark'], [30, '#d946ef', 'Unwetter']];
 const rdCol = v => { let c = RD_LEG[0][1]; for (const [t, k] of RD_LEG) if (v >= t) c = k; return c; };
 const rdHH = t => new Date(t).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+const RD_SRC = [['wo', 'WetterOnline'], ['own', 'Aurora']];
+const rdSeg = s => `<div class="rd-src">${RD_SRC.map(([k, n]) => `<button class="${k === s ? 'on' : ''}" data-act="rdsrc" data-s="${k}">${n}</button>`).join('')}</div>`;
 const RD_CARD = ['N', 'NO', 'O', 'SO', 'S', 'SW', 'W', 'NW'];
 const RD_HTML = () => `<div class="rd-map"><div class="rd-world"><div class="rd-base"></div><div class="rd-fr"></div><div class="rd-bl"></div><div class="rd-wn"></div><div class="rd-rf"></div><div class="rd-ov"></div></div></div>
-<canvas class="rd-wind"></canvas><div class="rd-fx"></div><div class="rd-vig"></div>
-<div class="rd-top"><div class="rd-l"><div class="rd-k">REGENRADAR</div><div class="rd-live"><i></i><span>live</span></div><a class="rd-ext" target="_blank" rel="noopener noreferrer">wetter.com${ic('chevron', 12)}</a><div class="rd-warns"></div></div>
+<div class="rd-emb"></div><canvas class="rd-wind"></canvas><div class="rd-fx"></div><div class="rd-vig"></div>
+<div class="rd-top"><div class="rd-l"><div class="rd-k">REGENRADAR</div><div class="rd-live"><i></i><span>live</span></div><div class="rd-srcw"></div><div class="rd-warns"></div></div>
 <div class="rd-r"><div class="rd-say"></div><div class="rd-sub"></div><div class="rd-leg">${RD_LEG.map(([v, c, n]) => `<span><i style="background:${c}"></i>${n}</span>`).join('')}</div><div class="rd-type"></div></div></div>
 <div class="rd-ctl"><button class="rd-cb z" data-rd="in" aria-label="Vergrößern">${ic('plus', 18)}</button><button class="rd-cb z" data-rd="out" aria-label="Verkleinern">${ic('minus', 18)}</button><button class="rd-cb z" data-rd="home" aria-label="Zu meinem Standort">${ic('radar', 18)}</button><button class="rd-cb ex" data-act="radar" aria-label="Vollbild">${ic('expand', 18)}</button></div>
 <button class="rd-cb rdx" data-act="close" aria-label="Schließen">${ic('close', 18)}</button>
@@ -682,18 +684,30 @@ class AuroraRadar {
     const r = this.root = document.createElement('div'); r.className = 'rdm'; r.innerHTML = RD_HTML();
     this.q = s => r.querySelector(s);
     this.world = this.q('.rd-world'); this.baseEl = this.q('.rd-base'); this.frEl = this.q('.rd-fr'); this.blEl = this.q('.rd-bl'); this.wnEl = this.q('.rd-wn'); this.rfEl = this.q('.rd-rf'); this.ovEl = this.q('.rd-ov'); this.map = this.q('.rd-map');
-    this.q('.rd-ext').href = this.cfg.ext;
     this.cv = this.q('.rd-wind'); this.ctx = this.cv.getContext('2d'); this.P = [];
     this.bindEvents();
     this.ro = new ResizeObserver(() => this.resize()); this.ro.observe(r);
-    this.setMode(false);
+    this.setMode(false); this.setSrc(host._rdSrc());
+  }
+  // Quelle: eingebettete Radar-Karte (iframe, z. B. WetterOnline) oder das eigene DWD-Radar
+  setSrc(s) {
+    this.src = s === 'own' ? 'own' : 'wo'; const emb = this.src !== 'own';
+    this.root.classList.toggle('emb', emb); this.q('.rd-srcw').innerHTML = rdSeg(this.src);
+    const box = this.q('.rd-emb');
+    if (emb) {
+      if (!this.ifr) { const f = this.ifr = document.createElement('iframe'); f.title = 'Regenradar'; f.loading = 'lazy'; f.allow = 'fullscreen'; f.src = this.cfg.embed; box.appendChild(f); }
+      if (!this.paused) { this.pause(); this.paused = false; }
+    } else {
+      if (this.ifr) { this.ifr.remove(); this.ifr = null; }
+      if (!this.paused) { this.paused = true; this.resume(); }
+    }
   }
   /* ── Steuerung ── */
   setMode(full) {
     this.full = !!full; this.root.classList.toggle('full', this.full);
     if (this.full) this.map.removeAttribute('data-act'); else this.map.setAttribute('data-act', 'radar');
   }
-  resume() { if (!this.paused) return; this.paused = false; this.resize(); this.refresh(); this.t5 = setInterval(() => this.refresh(), 3e5); this.tp = setInterval(() => this.stepPlay(), 480); this.raf(); }
+  resume() { if (!this.paused) return; this.paused = false; if (this.src !== 'own') return; this.resize(); this.refresh(); this.t5 = setInterval(() => this.refresh(), 3e5); this.tp = setInterval(() => this.stepPlay(), 480); this.raf(); }
   pause() { if (this.paused) return; this.paused = true; clearInterval(this.t5); clearInterval(this.tp); cancelAnimationFrame(this._raf); }
   destroy() { this.alive = false; this.pause(); this.ro.disconnect(); this.root.remove(); }
   bindEvents() {
@@ -1028,7 +1042,10 @@ const CSS4 = `
 .rd-say.t-dry{color:#7dd3fc}.rd-say.t-soon{color:#fcd34d}.rd-say.t-now{color:#60a5fa}
 .rd-sub{font-size:12px;color:#e2e8f0;text-shadow:0 1px 6px rgba(0,0,0,.7)}
 .rd-leg{display:flex;align-items:center;gap:2px;font-size:9.5px;color:#cbd5e1;text-shadow:0 1px 4px rgba(0,0,0,.7)}.rd-leg span{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:30px}.rd-leg i{display:block;width:100%;height:6px}.rd-leg span:first-child i{border-radius:3px 0 0 3px}.rd-leg span:last-child i{border-radius:0 3px 3px 0}.rdm:not(.full) .rd-leg span{min-width:22px;font-size:0}.rdm:not(.full) .rd-leg span:first-child,.rdm:not(.full) .rd-leg span:last-child{font-size:9px}.rdm:not(.full) .rd-leg span:first-child{align-items:flex-start}.rdm:not(.full) .rd-leg span:last-child{align-items:flex-end}
-.rd-ext{display:inline-flex;align-items:center;gap:3px;pointer-events:auto;font-size:11px;font-weight:600;color:#e2e8f0;text-decoration:none;padding:4px 8px 4px 10px;border-radius:999px;background:rgba(8,12,28,.66);border:1px solid rgba(255,255,255,.14);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}.rd-ext:hover{background:rgba(30,41,80,.85)}.rd-ext .i{width:12px;height:12px}
+.rd-src{display:inline-flex;pointer-events:auto;padding:3px;gap:2px;border-radius:999px;background:rgba(var(--wh),.08)}.rd-src button{border:0;border-radius:999px;padding:5px 11px;background:none;color:var(--tx2,#cbd5e1);font:inherit;font-size:12px;font-weight:600;cursor:pointer}.rd-src button.on{background:var(--acc,#5eead4);color:#04121a}
+.rdm .rd-src{background:rgba(8,12,28,.72);border:1px solid rgba(255,255,255,.14);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}.rdm .rd-src button{color:#e2e8f0}.rdm .rd-src button.on{color:#04121a}.rdm:not(.full) .rd-srcw{display:none}.rdc .h .r{display:flex;gap:8px;align-items:center}
+.rd-emb{position:absolute;inset:0;display:none;background:#0b1020}.rd-emb iframe{width:100%;height:100%;border:0;display:block}.rdm.emb .rd-emb{display:block}.rdm.full.emb .rd-emb{top:calc(68px + env(safe-area-inset-top,0px))}
+.rdm.emb .rd-map,.rdm.emb .rd-wind,.rdm.emb .rd-fx,.rdm.emb .rd-vig,.rdm.emb .rd-r,.rdm.emb .rd-live,.rdm.emb .rd-k,.rdm.emb .rd-warns,.rdm.emb .rd-ctl,.rdm.emb .rd-pills,.rdm.emb .rd-tl,.rdm.emb .rd-att,.rdm.emb .rd-err{display:none}.rdm.full.emb{background:#0b1020}.rdm.full.emb .rd-top{top:calc(14px + env(safe-area-inset-top,0px))}
 .rd-type:empty{display:none}.rd-type span{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:4px 10px;border-radius:999px;background:rgba(8,12,28,.7);border:1px solid rgba(255,255,255,.12)}
 .rd-warns{display:flex;flex-direction:column;gap:6px;align-items:flex-start;max-width:100%}.rd-warns:empty{display:none}
 .rd-w{display:inline-flex;align-items:center;gap:6px;border:1.5px solid transparent;border-radius:18px;padding:5px 11px;font:inherit;font-size:12px;font-weight:700;box-shadow:0 4px 14px rgba(0,0,0,.35);cursor:pointer;max-width:100%;text-align:left}.rd-w span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.rd-w.more{background:rgba(10,16,32,.78);color:#e2e8f0;border-color:rgba(255,255,255,.18)}
@@ -1057,7 +1074,7 @@ const CSS4 = `
 .wbox h3{margin:0;font-size:16px}.wt{display:flex;justify-content:space-between;gap:10px;font-size:12px;color:var(--tx2);font-variant-numeric:tabular-nums}
 .wd{margin:0;white-space:pre-line;font-size:14px;line-height:1.55;color:var(--tx)}.wi{border-radius:16px;padding:12px 14px;background:rgba(var(--wh),.06)}.wi b{display:block;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--tx2);margin-bottom:4px}.wi p{margin:0;white-space:pre-line;font-size:14px;line-height:1.55}.wbox small{color:var(--tx3);font-size:11px}
 .wo{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
-@media (max-width:640px){.rd-say{font-size:19px}.rdm.full .rd-say{font-size:22px}}
+@media (max-width:640px){.rd-ol{display:none}.rd-say{font-size:19px}.rdm.full .rd-say{font-size:22px}}
 .nb.lk.on{color:var(--acc,#5eead4)}
 .pinw{display:flex;flex-direction:column;align-items:center;gap:22px;padding:8px 0 4px}
 .pdots{display:flex;gap:16px;height:18px}.pdots i{width:14px;height:14px;border-radius:50%;border:2px solid rgba(var(--wh),.45);transition:background .12s,transform .12s}.pdots i.on{background:var(--acc,#5eead4);border-color:var(--acc,#5eead4);transform:scale(1.1)}
@@ -2692,7 +2709,7 @@ class HomeAurora extends HTMLElement {
   _sSet() {
     const th = this._themePref || this._c.theme || 'dark', am = String(this._ambMin());
     const seg = (act, cur, items) => `<div class="seg wide">${items.map(x => `<button class="${cur === x[0] ? 'on' : ''}" data-act="${act}" data-m="${x[0]}">${x[1]}</button>`).join('')}</div>`;
-    return `<div class="grab"></div><div class="sh"><div class="ico">${ic('cog', 24)}</div><div><h2>Darstellung &amp; Modi</h2><p>Home Aurora v5.2 · Build pz25</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
+    return `<div class="grab"></div><div class="sh"><div class="ico">${ic('cog', 24)}</div><div><h2>Darstellung &amp; Modi</h2><p>Home Aurora v5.2 · Build pz26</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
       <div class="lab2">DESIGN</div>${seg('theme', th, [['dark', 'Dunkel'], ['light', 'Hell'], ['auto', 'Automatisch']])}
       <div class="card-note">„Automatisch“ folgt dem Dunkel-/Hellmodus deines Home-Assistant-Profils. Die Auswahl gilt nur für dieses Gerät.</div>
       ${WALL_UI ? `      <div class="lab2">WANDTABLET-MODUS</div>
@@ -2988,8 +3005,17 @@ class HomeAurora extends HTMLElement {
     return Object.assign({
       wms: 'https://maps.dwd.de/geoserver/dwd/wms', radar: 'dwd:Niederschlagsradar', bolt: 'dwd:Blitzdichte', warn: 'dwd:Warnungen_Landkreise',
       base: { dark: ['https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}'], light: ['https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}'] }, past: 120, future: 120, zoom: 8, factor: 1, strikeKm: 50, rings: [10, 25],
-      mock: !!this._h?.config?.mock, ext: this._c.radarUrl || 'https://www.wetter.com/wetterkarten/regenradar/', kw: { storm: 'binary_sensor.kachelmannwetter_gewitter_erwartet' },
+      mock: !!this._h?.config?.mock, embed: this._c.radarUrl || this._rdEmbed(), kw: { storm: 'binary_sensor.kachelmannwetter_gewitter_erwartet' },
     }, u);
+  }
+  _rdEmbed() {
+    const c = this._h?.config || {}, la = (c.latitude ?? 51.7235).toFixed(3), lo = (c.longitude ?? 8.5633).toFixed(3);
+    return `https://radar.wo-cloud.com/mobile/embedded?wrx=${la},${lo}&wrm=8&wry=${la},${lo}`;
+  }
+  _rdSrc() { if (!this._rdSrcPref) { try { this._rdSrcPref = localStorage.getItem('home-aurora-rdsrc'); } catch (e) { /* ok */ } } return this._rdSrcPref === 'own' ? 'own' : 'wo'; }
+  _rdSetSrc(s) {
+    this._rdSrcPref = s === 'own' ? 'own' : 'wo'; try { localStorage.setItem('home-aurora-rdsrc', this._rdSrcPref); } catch (e) { /* ok */ }
+    this._rdr?.setSrc(this._rdSrcPref); this._main?.querySelectorAll('.rdc .h .rd-src').forEach(el => { el.outerHTML = rdSeg(this._rdSrcPref); });
   }
   _rdrWarns() {
     const out = [], A = this._c.alerts || {};
@@ -3013,7 +3039,7 @@ class HomeAurora extends HTMLElement {
     r.setMode(sh); r.resume(); if (moved) r.resize(); r.upd();
   }
   _radarCard(i, cls = 's6') {
-    return `<div class="c ${cls} rdc" style="--i:${i}"><div class="h">${ic('radar', 14)}Regenradar<span class="r"><button class="rd-open" data-act="radar">${ic('expand', 14)}Vollbild</button></span></div><div class="rdslot" data-keep="1"></div></div>`;
+    return `<div class="c ${cls} rdc" style="--i:${i}"><div class="h">${ic('radar', 14)}Regenradar<span class="r">${rdSeg(this._rdSrc())}<button class="rd-open" data-act="radar">${ic('expand', 14)}<span class="rd-ol">Vollbild</span></button></span></div><div class="rdslot" data-keep="1"></div></div>`;
   }
   _sRadar() { return `<div class="rdslot full" data-keep="1"></div>`; }
   _sWarn() {
@@ -4567,6 +4593,7 @@ class HomeAurora extends HTMLElement {
       case 'ambafter': this._ambPref = el.dataset.m; try { localStorage.setItem('home-aurora-amb', el.dataset.m); } catch (er) { /* ok */ } this._lastAct = Date.now(); this._renderSheet(); break;
       case 'ambient': this._closeSheet(); this._ambOn(); break;
       case 'radar': this._sheet = { t: 'radar' }; this._renderSheet(); break;
+      case 'rdsrc': this._rdSetSrc(el.dataset.s); break;
       case 'lock': this._lockToggle(); break;
       case 'kid': this._sheet = { t: 'kid', i: parseInt(el.dataset.i, 10) || 0 }; this._renderSheet(); break;
       case 'pz': if (!this._pzOn()) break; if (!this._pzView()) { this._sheet = { t: 'clean' }; this._renderSheet(); break; } this._v = 'clean'; this._enter = true; this._counted = false; this._closeSheet(); this._render(); this.scrollIntoView?.({ block: 'start' }); break;
@@ -4694,7 +4721,7 @@ const EDITOR_SCHEMA = [
   { name: 'calendarDays', selector: { number: { min: 3, max: 60, mode: 'box' } } },
   { name: 'batteryLow', selector: { number: { min: 5, max: 50, mode: 'box', unit_of_measurement: '%' } } },
 ];
-const EDITOR_LABELS = { theme: 'Design', ambient_after: 'Wandtablet-Modus automatisch starten', weather: 'Wetter-Entität', persons: 'Personen', radar: 'Regenradar-Kamera', radarUrl: 'Link für den wetter.com-Knopf im Regenradar (optional, z. B. die Seite deines Orts)', putzplan: 'Putzplan anzeigen', putzplan_view: 'Putzplan als eigene Ansicht öffnen (sonst als Fenster)', einkauf: 'Einkaufsliste & Rezepte anzeigen', calendarDays: 'Termine: Tage voraus', batteryLow: 'Batterie schwach ab' };
+const EDITOR_LABELS = { theme: 'Design', ambient_after: 'Wandtablet-Modus automatisch starten', weather: 'Wetter-Entität', persons: 'Personen', radar: 'Regenradar-Kamera', radarUrl: 'Adresse der eingebetteten Radar-Karte (optional, sonst WetterOnline für deinen Standort)', putzplan: 'Putzplan anzeigen', putzplan_view: 'Putzplan als eigene Ansicht öffnen (sonst als Fenster)', einkauf: 'Einkaufsliste & Rezepte anzeigen', calendarDays: 'Termine: Tage voraus', batteryLow: 'Batterie schwach ab' };
 class HomeAuroraEditor extends HTMLElement {
   setConfig(c) { this._c = c || {}; this._draw(); }
   set hass(h) { this._h = h; if (this._f) this._f.hass = h; }

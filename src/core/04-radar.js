@@ -17,10 +17,12 @@ const RD_TYPES = {
 const RD_LEG = [[0.1, '#60a5fa', 'leicht'], [1, '#22c55e', 'mäßig'], [2.5, '#facc15', 'kräftig'], [10, '#ef4444', 'stark'], [30, '#d946ef', 'Unwetter']];
 const rdCol = v => { let c = RD_LEG[0][1]; for (const [t, k] of RD_LEG) if (v >= t) c = k; return c; };
 const rdHH = t => new Date(t).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
+const RD_SRC = [['wo', 'WetterOnline'], ['own', 'Aurora']];
+const rdSeg = s => `<div class="rd-src">${RD_SRC.map(([k, n]) => `<button class="${k === s ? 'on' : ''}" data-act="rdsrc" data-s="${k}">${n}</button>`).join('')}</div>`;
 const RD_CARD = ['N', 'NO', 'O', 'SO', 'S', 'SW', 'W', 'NW'];
 const RD_HTML = () => `<div class="rd-map"><div class="rd-world"><div class="rd-base"></div><div class="rd-fr"></div><div class="rd-bl"></div><div class="rd-wn"></div><div class="rd-rf"></div><div class="rd-ov"></div></div></div>
-<canvas class="rd-wind"></canvas><div class="rd-fx"></div><div class="rd-vig"></div>
-<div class="rd-top"><div class="rd-l"><div class="rd-k">REGENRADAR</div><div class="rd-live"><i></i><span>live</span></div><a class="rd-ext" target="_blank" rel="noopener noreferrer">wetter.com${ic('chevron', 12)}</a><div class="rd-warns"></div></div>
+<div class="rd-emb"></div><canvas class="rd-wind"></canvas><div class="rd-fx"></div><div class="rd-vig"></div>
+<div class="rd-top"><div class="rd-l"><div class="rd-k">REGENRADAR</div><div class="rd-live"><i></i><span>live</span></div><div class="rd-srcw"></div><div class="rd-warns"></div></div>
 <div class="rd-r"><div class="rd-say"></div><div class="rd-sub"></div><div class="rd-leg">${RD_LEG.map(([v, c, n]) => `<span><i style="background:${c}"></i>${n}</span>`).join('')}</div><div class="rd-type"></div></div></div>
 <div class="rd-ctl"><button class="rd-cb z" data-rd="in" aria-label="Vergrößern">${ic('plus', 18)}</button><button class="rd-cb z" data-rd="out" aria-label="Verkleinern">${ic('minus', 18)}</button><button class="rd-cb z" data-rd="home" aria-label="Zu meinem Standort">${ic('radar', 18)}</button><button class="rd-cb ex" data-act="radar" aria-label="Vollbild">${ic('expand', 18)}</button></div>
 <button class="rd-cb rdx" data-act="close" aria-label="Schließen">${ic('close', 18)}</button>
@@ -39,18 +41,30 @@ class AuroraRadar {
     const r = this.root = document.createElement('div'); r.className = 'rdm'; r.innerHTML = RD_HTML();
     this.q = s => r.querySelector(s);
     this.world = this.q('.rd-world'); this.baseEl = this.q('.rd-base'); this.frEl = this.q('.rd-fr'); this.blEl = this.q('.rd-bl'); this.wnEl = this.q('.rd-wn'); this.rfEl = this.q('.rd-rf'); this.ovEl = this.q('.rd-ov'); this.map = this.q('.rd-map');
-    this.q('.rd-ext').href = this.cfg.ext;
     this.cv = this.q('.rd-wind'); this.ctx = this.cv.getContext('2d'); this.P = [];
     this.bindEvents();
     this.ro = new ResizeObserver(() => this.resize()); this.ro.observe(r);
-    this.setMode(false);
+    this.setMode(false); this.setSrc(host._rdSrc());
+  }
+  // Quelle: eingebettete Radar-Karte (iframe, z. B. WetterOnline) oder das eigene DWD-Radar
+  setSrc(s) {
+    this.src = s === 'own' ? 'own' : 'wo'; const emb = this.src !== 'own';
+    this.root.classList.toggle('emb', emb); this.q('.rd-srcw').innerHTML = rdSeg(this.src);
+    const box = this.q('.rd-emb');
+    if (emb) {
+      if (!this.ifr) { const f = this.ifr = document.createElement('iframe'); f.title = 'Regenradar'; f.loading = 'lazy'; f.allow = 'fullscreen'; f.src = this.cfg.embed; box.appendChild(f); }
+      if (!this.paused) { this.pause(); this.paused = false; }
+    } else {
+      if (this.ifr) { this.ifr.remove(); this.ifr = null; }
+      if (!this.paused) { this.paused = true; this.resume(); }
+    }
   }
   /* ── Steuerung ── */
   setMode(full) {
     this.full = !!full; this.root.classList.toggle('full', this.full);
     if (this.full) this.map.removeAttribute('data-act'); else this.map.setAttribute('data-act', 'radar');
   }
-  resume() { if (!this.paused) return; this.paused = false; this.resize(); this.refresh(); this.t5 = setInterval(() => this.refresh(), 3e5); this.tp = setInterval(() => this.stepPlay(), 480); this.raf(); }
+  resume() { if (!this.paused) return; this.paused = false; if (this.src !== 'own') return; this.resize(); this.refresh(); this.t5 = setInterval(() => this.refresh(), 3e5); this.tp = setInterval(() => this.stepPlay(), 480); this.raf(); }
   pause() { if (this.paused) return; this.paused = true; clearInterval(this.t5); clearInterval(this.tp); cancelAnimationFrame(this._raf); }
   destroy() { this.alive = false; this.pause(); this.ro.disconnect(); this.root.remove(); }
   bindEvents() {
