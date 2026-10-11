@@ -1367,7 +1367,7 @@ class HomeAurora extends HTMLElement {
     const c = cfg || {};
     this._c = Object.assign({}, DEFAULTS, c, { outdoor: { ...DEFAULTS.outdoor, ...(c.outdoor || {}) }, stats: { ...DEFAULTS.stats, ...(c.stats || {}) }, extras: { ...DEFAULTS.extras, ...(c.extras || {}) }, bath: { ...DEFAULTS.bath, ...(c.bath || {}) }, station: { ...DEFAULTS.station, ...(c.station || {}) }, alerts: { ...DEFAULTS.alerts, ...(c.alerts || {}) }, plant: { ...DEFAULTS.plant, ...(c.plant || {}) }, printer: { ...DEFAULTS.printer, ...(c.printer || {}) }, power: { ...DEFAULTS.power, ...(c.power || {}) }, wasteNames: { ...DEFAULTS.wasteNames, ...(c.wasteNames || {}) } });
     this._c.rooms = (this._c.rooms || []).map(r => ({ ...r })); // eigene Kopie: die Heizungserkennung ergänzt Räume
-    try { this._themePref = localStorage.getItem('home-aurora-theme'); this._ambPref = localStorage.getItem('home-aurora-amb'); this._nightPref = localStorage.getItem('home-aurora-ambnight'); this._fuPref = localStorage.getItem('home-aurora-fully'); this._pzvPref = localStorage.getItem('home-aurora-pzview'); } catch (e) { /* kein Speicher */ }
+    try { this._themePref = localStorage.getItem('home-aurora-theme'); this._ambPref = localStorage.getItem('home-aurora-amb'); this._nightPref = localStorage.getItem('home-aurora-ambnight'); this._fuPref = localStorage.getItem('home-aurora-fully'); this._pzvPref = localStorage.getItem('home-aurora-pzview'); this._pzsPref = localStorage.getItem('home-aurora-pzshow'); } catch (e) { /* kein Speicher */ }
     const w = new Set();
     const walk = o => { if (typeof o === 'string') { if (/^[a-z_]+\.[a-z0-9_]+$/.test(o)) w.add(o); } else if (Array.isArray(o)) o.forEach(walk); else if (o && typeof o === 'object') Object.values(o).forEach(walk); };
     walk(this._c);
@@ -2621,7 +2621,7 @@ class HomeAurora extends HTMLElement {
   _sSet() {
     const th = this._themePref || this._c.theme || 'dark', am = String(this._ambMin());
     const seg = (act, cur, items) => `<div class="seg wide">${items.map(x => `<button class="${cur === x[0] ? 'on' : ''}" data-act="${act}" data-m="${x[0]}">${x[1]}</button>`).join('')}</div>`;
-    return `<div class="grab"></div><div class="sh"><div class="ico">${ic('cog', 24)}</div><div><h2>Darstellung &amp; Modi</h2><p>Home Aurora v5.2 · Build pz20</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
+    return `<div class="grab"></div><div class="sh"><div class="ico">${ic('cog', 24)}</div><div><h2>Darstellung &amp; Modi</h2><p>Home Aurora v5.2 · Build pz21</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
       <div class="lab2">DESIGN</div>${seg('theme', th, [['dark', 'Dunkel'], ['light', 'Hell'], ['auto', 'Automatisch']])}
       <div class="card-note">„Automatisch“ folgt dem Dunkel-/Hellmodus deines Home-Assistant-Profils. Die Auswahl gilt nur für dieses Gerät.</div>
       ${WALL_UI ? `      <div class="lab2">WANDTABLET-MODUS</div>
@@ -2630,8 +2630,10 @@ class HomeAurora extends HTMLElement {
       <div class="card-note" style="margin-top:12px">Nachts automatisch${this._nightCfg() ? ` (${this._nightCfg().from}–${this._nightCfg().to} Uhr, nach ${this._nightCfg().after} Min)` : ''}</div>${seg('ambnight', this._nightCfg() ? '1' : '0', [['1', 'An'], ['0', 'Aus']])}
       ` : ''}
       ${this._fullySet()}${this._tabletSet()}
-      ${this._pzSum().T.length ? `<div class="lab2">PUTZPLAN</div>${seg('pzview', this._pzView() ? '1' : '0', [['1', 'Eigene Ansicht'], ['0', 'Fenster']])}
-      <div class="card-note">Wie sich der Putzplan beim Antippen öffnet: als eigene Seite mit „Zurück“ oder als Fenster über der Startseite. Gilt nur für dieses Gerät.</div>` : ''}
+      ${this._pzSum().T.length ? `<div class="lab2">PUTZPLAN</div>${seg('pzshow', this._pzOn() ? '1' : '0', [['1', 'Sichtbar'], ['0', 'Ausgeblendet']])}
+      <div class="card-note">Ausgeblendet verschwinden die Karte „Heute putzen“${WALL_UI ? ' und der Reiter in der Leiste' : ' und der Eintrag im Alltag'}. Die Aufgaben in Home Assistant bleiben unverändert. Gilt nur für dieses Gerät.</div>
+      ${this._pzOn() ? `<div class="card-note" style="margin-top:12px">Beim Antippen öffnen als</div>${seg('pzview', this._pzView() ? '1' : '0', [['1', 'Eigene Ansicht'], ['0', 'Fenster']])}
+      <div class="card-note">Eigene Seite mit „Zurück“ oder Fenster über der Startseite. Gilt nur für dieses Gerät.</div>` : ''}` : ''}
       <div class="lab2">SCHNELLAKTIONEN</div>
       <button class="xr" style="width:100%" data-act="qedit"><div class="ico">${ic('sparkle', 19)}</div><div><div class="t">Schnellaktionen bearbeiten</div><div class="s">Szenen &amp; Skripte hinzufügen, sortieren, neue Szene speichern</div></div></button>
       <div class="lab2">SCHNELLZUGRIFF</div>
@@ -3386,12 +3388,12 @@ class HomeAurora extends HTMLElement {
     this._toast(`Plan gestartet · heute ${t0} ${t0 === 1 ? 'Aufgabe' : 'Aufgaben'}`, 3500); this._pzRefresh();
   }
   _cleanRows() {
-    const S = this._pzSum(); if (!S.T.length || WALL_UI || this._pzCard(0, 5)) return [];
+    const S = this._pzSum(); if (!S.T.length || WALL_UI || !this._pzOn() || this._pzCard(0, 5)) return [];
     return [`<button class="xr kid" data-act="pz"><div class="ico">${ic('broom', 19)}</div><div><div class="t">Putzplan</div><div class="s">Alles sauber</div></div><span class="kdot ok"></span></button>`];
   }
   /* Karte „Heute putzen“ für die Startseite (n = max. Zeilen) */
   _pzCard(i, n, fit = 0) {
-    const S = this._pzSum(); if (!S.T.length) return '';
+    const S = this._pzSum(); if (!S.T.length || !this._pzOn()) return '';
     const sched = S.T.filter(t => t.st !== 'as_needed'), U = S.T.filter(t => t.st === 'unknown');
     if (U.length && U.length === sched.length) return `<button class="c pzc pzfresh tap" style="--i:${i}" data-act="pz"><div class="ico">${ic('broom', 20)}</div><div><div class="t">Putzplan · noch nicht gestartet</div><div class="s">${U.length} Aufgaben – jetzt auf die Wochen verteilen</div></div><span class="pzv">${ic('chevron', 16)}</span></button>`;
     const due = S.T.filter(t => !t.today && (t.st === 'overdue' || (t.st === 'due_soon' && t.until === 0))).sort((a, b) => b.over - a.over || a.room.localeCompare(b.room, 'de') || a.name.localeCompare(b.name, 'de'));
@@ -3410,6 +3412,8 @@ class HomeAurora extends HTMLElement {
     if (foc) { const p2 = this.shadowRoot.getElementById('pzq'); if (p2) { p2.focus(); try { p2.setSelectionRange(pos, pos); } catch (x) { } } }
   }
   /* Putzplan als eigene Ansicht (Standard) oder als Fenster; pro Gerät umschaltbar, Vorgabe per YAML putzplan_view: false */
+  /* Putzplan auf dem Dashboard zeigen oder ganz ausblenden; pro Gerät umschaltbar, Vorgabe per YAML putzplan: false */
+  _pzOn() { return this._pzsPref != null ? this._pzsPref === '1' : this._c?.putzplan !== false; }
   _pzView() { return this._pzvPref != null ? this._pzvPref === '1' : this._c?.putzplan_view !== false; }
   _sClean() {
     const S = this._pzSum(), T = S.T;
@@ -4032,7 +4036,7 @@ class HomeAurora extends HTMLElement {
   _durTxt(ms) { const m = Math.round(ms / 6e4); return m < 60 ? `${m} Min.` : `${Math.floor(m / 60)}:${String(m % 60).padStart(2, '0')} h`; }
   /* ───────────── Rendern ───────────── */
   _navHtml() {
-    return `<div class="logo"></div>${(WALL_UI && this._pzView() ? [...TABS, ['clean', 'Putzplan', 'broom']] : TABS).map(t => `<button class="nb ${this._v === t[0] ? 'on' : ''}" data-act="nav" data-v="${t[0]}">${ic(t[2], 24)}<span class="lab">${t[1]}</span></button>`).join('')}
+    return `<div class="logo"></div>${(WALL_UI && this._pzOn() && this._pzView() ? [...TABS, ['clean', 'Putzplan', 'broom']] : TABS).map(t => `<button class="nb ${this._v === t[0] ? 'on' : ''}" data-act="nav" data-v="${t[0]}">${ic(t[2], 24)}<span class="lab">${t[1]}</span></button>`).join('')}
       <div class="sp"></div>${this._lockBtn()}<button class="nb gear" data-act="settings">${ic('cog', 24)}<span class="lab">Einstellungen</span></button>`;
   }
   /* Suchen über alle Entitäten (Lichter, Batterien, Putzplan) laufen pro Zeichenvorgang nur einmal: _memo merkt sich
@@ -4050,6 +4054,7 @@ class HomeAurora extends HTMLElement {
     const views = { clean: () => this._vClean(), home: () => this._vHome(), rooms: () => this._vRooms(), climate: () => this._vClimate(), bath: () => this._vBath(), weather: () => this._vWeather(), printer: () => this._vPrinter() };
     this._main.className = this._enter ? 'enter' : '';
     this._rc = (this._rc || 0) + 1;
+    if (this._v === 'clean' && !this._pzOn()) this._v = 'home';
     this._morph(this._main, (views[this._v] || views.home)());
     this._morph(this._nav, this._navHtml());
     if (this._sheet) this._renderSheet();
@@ -4279,6 +4284,7 @@ class HomeAurora extends HTMLElement {
       case 'settings': this._sheet = { t: 'set' }; this._renderSheet(); break;
       case 'quick': this._quickRun(e); break;
       case 'theme': this._themePref = el.dataset.m; try { localStorage.setItem('home-aurora-theme', el.dataset.m); } catch (er) { /* ok */ } this._render(); break;
+      case 'pzshow': this._pzsPref = el.dataset.m; try { localStorage.setItem('home-aurora-pzshow', el.dataset.m); } catch (er) { /* ok */ } if (el.dataset.m === '0' && this._v === 'clean') this._v = 'home'; this._sig = ''; this._render(); this._renderSheet(); break;
       case 'pzview': this._pzvPref = el.dataset.m; try { localStorage.setItem('home-aurora-pzview', el.dataset.m); } catch (er) { /* ok */ } if (el.dataset.m === '0' && this._v === 'clean') this._v = 'home'; this._sig = ''; this._render(); this._renderSheet(); break;
       case 'ambnight': this._nightPref = el.dataset.m; try { localStorage.setItem('home-aurora-ambnight', el.dataset.m); } catch (er) { /* ok */ } this._renderSheet(); break;
       case 'ambafter': this._ambPref = el.dataset.m; try { localStorage.setItem('home-aurora-amb', el.dataset.m); } catch (er) { /* ok */ } this._lastAct = Date.now(); this._renderSheet(); break;
@@ -4286,7 +4292,7 @@ class HomeAurora extends HTMLElement {
       case 'radar': this._sheet = { t: 'radar' }; this._renderSheet(); break;
       case 'lock': this._lockToggle(); break;
       case 'kid': this._sheet = { t: 'kid', i: parseInt(el.dataset.i, 10) || 0 }; this._renderSheet(); break;
-      case 'pz': if (!this._pzView()) { this._sheet = { t: 'clean' }; this._renderSheet(); break; } this._v = 'clean'; this._enter = true; this._counted = false; this._closeSheet(); this._render(); this.scrollIntoView?.({ block: 'start' }); break;
+      case 'pz': if (!this._pzOn()) break; if (!this._pzView()) { this._sheet = { t: 'clean' }; this._renderSheet(); break; } this._v = 'clean'; this._enter = true; this._counted = false; this._closeSheet(); this._render(); this.scrollIntoView?.({ block: 'start' }); break;
       case 'pzf': { const st = this._pzSt(); if (st) { st.f = e; st.q = ''; this._pzRefresh(); } break; }
       case 'pzdone': this._pzDone(e); break;
       case 'pzundo': this._pzUndo(e); this._tst.classList.remove('show'); break;
@@ -4400,6 +4406,7 @@ class HomeAurora extends HTMLElement {
 const EDITOR_SCHEMA = [
   { name: 'theme', selector: { select: { mode: 'dropdown', options: [{ value: 'dark', label: 'Dunkel' }, { value: 'light', label: 'Hell' }, { value: 'auto', label: 'Automatisch (wie Home Assistant)' }] } } },
   { name: 'ambient_after', selector: { select: { mode: 'dropdown', options: [{ value: 0, label: 'Aus' }, { value: 2, label: 'Nach 2 Minuten' }, { value: 5, label: 'Nach 5 Minuten' }, { value: 10, label: 'Nach 10 Minuten' }, { value: 30, label: 'Nach 30 Minuten' }] } } },
+  { name: 'putzplan', selector: { boolean: {} } },
   { name: 'putzplan_view', selector: { boolean: {} } },
   { name: 'weather', selector: { entity: { domain: 'weather' } } },
   { name: 'persons', selector: { entity: { domain: 'person', multiple: true } } },
@@ -4408,7 +4415,7 @@ const EDITOR_SCHEMA = [
   { name: 'calendarDays', selector: { number: { min: 3, max: 60, mode: 'box' } } },
   { name: 'batteryLow', selector: { number: { min: 5, max: 50, mode: 'box', unit_of_measurement: '%' } } },
 ];
-const EDITOR_LABELS = { theme: 'Design', ambient_after: 'Wandtablet-Modus automatisch starten', weather: 'Wetter-Entität', persons: 'Personen', radar: 'Regenradar-Kamera', radarUrl: 'Eigene Radar-URL (optional, Live-Karte)', putzplan_view: 'Putzplan als eigene Ansicht öffnen (sonst als Fenster)', calendarDays: 'Termine: Tage voraus', batteryLow: 'Batterie schwach ab' };
+const EDITOR_LABELS = { theme: 'Design', ambient_after: 'Wandtablet-Modus automatisch starten', weather: 'Wetter-Entität', persons: 'Personen', radar: 'Regenradar-Kamera', radarUrl: 'Eigene Radar-URL (optional, Live-Karte)', putzplan: 'Putzplan anzeigen', putzplan_view: 'Putzplan als eigene Ansicht öffnen (sonst als Fenster)', calendarDays: 'Termine: Tage voraus', batteryLow: 'Batterie schwach ab' };
 class HomeAuroraEditor extends HTMLElement {
   setConfig(c) { this._c = c || {}; this._draw(); }
   set hass(h) { this._h = h; if (this._f) this._f.hass = h; }
@@ -4426,7 +4433,7 @@ class HomeAuroraEditor extends HTMLElement {
       note.textContent = 'Räume, Kalender, Drucker, Stromgeräte und Schnellaktionen stellst du im YAML-Editor ein (siehe Kommentare in home-aurora.js).';
       this.appendChild(this._f); this.appendChild(note);
     }
-    this._f.hass = this._h; this._f.schema = WALL_UI ? EDITOR_SCHEMA : EDITOR_SCHEMA.filter(s => s.name !== 'ambient_after'); this._f.data = { theme: 'dark', ambient_after: 0, putzplan_view: true, ...this._c };
+    this._f.hass = this._h; this._f.schema = WALL_UI ? EDITOR_SCHEMA : EDITOR_SCHEMA.filter(s => s.name !== 'ambient_after'); this._f.data = { theme: 'dark', ambient_after: 0, putzplan: true, putzplan_view: true, ...this._c };
   }
 }
 customElements.define('home-aurora-editor', HomeAuroraEditor);

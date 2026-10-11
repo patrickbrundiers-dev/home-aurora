@@ -1,6 +1,6 @@
   /* ───────────── Rendern ───────────── */
   _navHtml() {
-    return `<div class="logo"></div>${(WALL_UI && this._pzView() ? [...TABS, ['clean', 'Putzplan', 'broom']] : TABS).map(t => `<button class="nb ${this._v === t[0] ? 'on' : ''}" data-act="nav" data-v="${t[0]}">${ic(t[2], 24)}<span class="lab">${t[1]}</span></button>`).join('')}
+    return `<div class="logo"></div>${(WALL_UI && this._pzOn() && this._pzView() ? [...TABS, ['clean', 'Putzplan', 'broom']] : TABS).map(t => `<button class="nb ${this._v === t[0] ? 'on' : ''}" data-act="nav" data-v="${t[0]}">${ic(t[2], 24)}<span class="lab">${t[1]}</span></button>`).join('')}
       <div class="sp"></div>${this._lockBtn()}<button class="nb gear" data-act="settings">${ic('cog', 24)}<span class="lab">Einstellungen</span></button>`;
   }
   /* Suchen über alle Entitäten (Lichter, Batterien, Putzplan) laufen pro Zeichenvorgang nur einmal: _memo merkt sich
@@ -18,6 +18,7 @@
     const views = { clean: () => this._vClean(), home: () => this._vHome(), rooms: () => this._vRooms(), climate: () => this._vClimate(), bath: () => this._vBath(), weather: () => this._vWeather(), printer: () => this._vPrinter() };
     this._main.className = this._enter ? 'enter' : '';
     this._rc = (this._rc || 0) + 1;
+    if (this._v === 'clean' && !this._pzOn()) this._v = 'home';
     this._morph(this._main, (views[this._v] || views.home)());
     this._morph(this._nav, this._navHtml());
     if (this._sheet) this._renderSheet();
