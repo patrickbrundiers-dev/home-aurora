@@ -61,7 +61,14 @@
     }
     const p = this._plans?.map[r.id]; if (!p) return null;
     const scs = p.sch.filter(e => this._s(e));
-    const cur = scs.length > 1 && p.sel && this._val(p.sel) === 'on' ? scs[1] : scs[0];
+    // Umschalter: an/aus wählt den 2. Plan; eine Zahl den n-ten (ab 1); ein Text den Plan mit diesem Namen oder dieser ID
+    let cur = scs[0];
+    const sv = p.sel && scs.length > 1 ? this._val(p.sel) : null;
+    if (sv === 'on') cur = scs[1];
+    else if (okv(sv) && sv !== 'off') {
+      const n = parseInt(sv, 10), t = String(sv).trim().toLowerCase();
+      cur = !isNaN(n) && String(n) === String(sv).trim() ? scs[clamp(n - 1, 0, scs.length - 1)] : scs.find(e => e.toLowerCase() === t || e.slice(9).toLowerCase() === t || this._name(e).trim().toLowerCase() === t) || scs[0];
+    }
     const s = cur && this._s(cur), nx = s?.attributes?.next_event ? new Date(s.attributes.next_event) : null, on = s?.state === 'on';
     return { src: 'Heizplan', sched: cur, schedName: s ? this._name(cur) : '', mode: s ? (on ? 'Komfort' : 'Eco') : '', temp: s ? (on ? p.comfort : p.eco) : null, next: nx && !isNaN(nx) ? nx : null, nextMode: s ? (on ? 'Eco' : 'Komfort') : '', on: this._val(p.auto) === 'on' };
   }
