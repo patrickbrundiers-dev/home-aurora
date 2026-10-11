@@ -55,7 +55,13 @@ function setup({ tag, states, hist, autos }) {
     hassUrl: (p) => p, calls: [],
     callService(d, s, data) { this.calls.push([d, s, data]); return Promise.resolve(); },
     // gespeicherte Automations-Konfiguration (config/automation/config/<id>) für die Heizplan-Erkennung
-    callApi: async (method, path) => { const m = /^config\/automation\/config\/(.+)$/.exec(path); if (!m) return []; const e = Object.keys(states).find((k) => k.startsWith('automation.') && states[k].attributes?.id === decodeURIComponent(m[1])); if (e && autos[e]) return autos[e]; throw new Error('not found'); },
+    callApi: async (method, path) => {
+      // Kalender: je Kalender ein Termin heute, einer übermorgen und ein ganztägiger über zwei Tage (erfunden)
+      if (path.startsWith('calendars/')) {
+        const d = (n, h) => { const x = new Date(); x.setHours(h, 0, 0, 0); x.setDate(x.getDate() + n); return x; }, ymd = (x) => x.toLocaleDateString('sv-SE');
+        return [{ summary: 'Termin', start: { dateTime: d(0, 18).toISOString() }, end: { dateTime: d(0, 19).toISOString() } }, { summary: 'Arzt', location: 'Praxis', start: { dateTime: d(2, 9).toISOString() }, end: { dateTime: d(2, 10).toISOString() } }, { summary: 'Urlaub', start: { date: ymd(d(1, 0)) }, end: { date: ymd(d(3, 0)) } }];
+      }
+      const m = /^config\/automation\/config\/(.+)$/.exec(path); if (!m) return []; const e = Object.keys(states).find((k) => k.startsWith('automation.') && states[k].attributes?.id === decodeURIComponent(m[1])); if (e && autos[e]) return autos[e]; throw new Error('not found'); },
     callWS: async (m) => {
       if (m.type === 'call_service' && m.service === 'get_forecasts') { const e = m.target.entity_id; return { response: { [e]: { forecast: fc(m.service_data.type) } } }; }
       // Verlauf: 24 h gleichmäßig verteilte Werte um den aktuellen Zustand (nur im Normaldurchlauf; die Chaos-Läufe testen „kein Verlauf“)
@@ -133,6 +139,12 @@ for (const [vn, states] of VARIANTS) for (const t of TARGETS.filter((x) => !only
     await page.evaluate((s) => { const el = window.__el; el._v = 'home'; el._sheet = { t: s, id: (el._c.rooms.find((r) => r.climate) || el._c.rooms[0])?.id }; el._render(); }, s);
     await check(`fenster ${s}`, () => window.__el.shadowRoot.querySelector('.sheet').textContent.trim().length);
   }
+  // Kalender: Monat und Liste (Woche ist der Standard beim Öffnen)
+  for (const m of ['month', 'list']) {
+    await page.evaluate((m) => { const el = window.__el; el._v = 'home'; el._calMode = m; el._sheet = { t: 'cal' }; el._render(); }, m);
+    await check(`fenster kalender ${m}`, () => window.__el.shadowRoot.querySelector('.sheet').textContent.trim().length);
+  }
+  await page.evaluate(() => { window.__el._calMode = 'week'; });
   // Rezepte: Übersicht und ein geöffnetes Rezept (mit Portionen umgerechnet)
   await page.evaluate(() => { const el = window.__el; el._v = 'home'; el._shopTab = 'rcp'; el._rcpSel = null; el._sheet = { t: 'shop' }; el._render(); });
   await check('fenster rezepte', () => window.__el.shadowRoot.querySelector('.sheet').textContent.trim().length);
