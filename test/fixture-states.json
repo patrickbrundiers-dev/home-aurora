@@ -11159,5 +11159,31 @@
 "last_changed": "2026-01-01T12:00:00+00:00",
 "last_updated": "2026-01-01T12:00:00+00:00",
 "state": "rainy"
+},
+"todo.einkaufsliste": {
+"attributes": {
+"friendly_name": "Einkaufsliste",
+"supported_features": 127
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "todo.einkaufsliste",
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00",
+"state": "4"
+},
+"todo.rezepte": {
+"attributes": {
+"friendly_name": "Rezepte",
+"supported_features": 127
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "todo.rezepte",
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00",
+"state": "2"
 }
 }

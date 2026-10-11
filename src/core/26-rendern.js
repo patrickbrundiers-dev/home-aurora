@@ -64,9 +64,10 @@
     const st = this._sh.scrollTop;
     if (this._sheet.t === 'sched' && this._schedEl && this._sh.contains(this._schedEl)) { this._schedEl.hass = this._h; this._ov.classList.add('show'); return; }
     const r = this._sheet.t === 'room' ? this._c.rooms.find(x => x.id === this._sheet.id) : null;
-    const T = { vroom: () => this._sVRoom(this._sheet.e), persons: () => this._sPersons(), quick: () => this._sQuick(), vent: () => this._sVent(), cal: () => this._sCal(), bat: () => this._sBat(), doors: () => this._sDoors(), sys: () => this._sSys(), waste: () => this._sWaste(), power: () => this._sPower(), sched: () => this._sSched(), set: () => this._sSet(), warn: () => this._sWarn(), radar: () => this._sRadar(), pin: () => this._sPin(), fuel: () => this._sFuel(), plants: () => this._sPlants(), heat: () => this._sHeat(), kid: () => this._sKid(), clean: () => this._sClean(), tv: () => this._sTv(), pzstat: () => this._sPzStat(), music: () => this._sMusic() };
+    const T = { vroom: () => this._sVRoom(this._sheet.e), persons: () => this._sPersons(), quick: () => this._sQuick(), vent: () => this._sVent(), cal: () => this._sCal(), bat: () => this._sBat(), doors: () => this._sDoors(), sys: () => this._sSys(), waste: () => this._sWaste(), power: () => this._sPower(), sched: () => this._sSched(), set: () => this._sSet(), warn: () => this._sWarn(), radar: () => this._sRadar(), pin: () => this._sPin(), fuel: () => this._sFuel(), plants: () => this._sPlants(), heat: () => this._sHeat(), kid: () => this._sKid(), clean: () => this._sClean(), tv: () => this._sTv(), pzstat: () => this._sPzStat(), music: () => this._sMusic(), shop: () => this._sShop() };
     const qn = this.shadowRoot.getElementById('qname'), qv = qn ? qn.value : null, qf = qn && this.shadowRoot.activeElement === qn;
     const an = this.shadowRoot.getElementById('annq'), av = an ? an.value : null, af = an && this.shadowRoot.activeElement === an;
+    const sq = this.shadowRoot.getElementById('shopq'), sv = sq ? sq.value : null, sf = sq && this.shadowRoot.activeElement === sq;
     const pq = this.shadowRoot.getElementById('pzq'), pqf = pq && this.shadowRoot.activeElement === pq, pqs = pq ? pq.selectionStart : 0;
     const html = r ? this._sRoom(r) : (T[this._sheet.t] || (() => this._sLights()))(), key = this._sheet.t + ':' + (this._sheet.id || this._sheet.e || '');
     if (this._shKey === key && this._sh.firstChild) this._morph(this._sh, html); else this._sh.innerHTML = html;
@@ -74,6 +75,7 @@
     if (pqf) { const p2 = this.shadowRoot.getElementById('pzq'); if (p2) { p2.focus(); try { p2.setSelectionRange(pqs, pqs); } catch (x) { } } }
     if (qv != null) { const n2 = this.shadowRoot.getElementById('qname'); if (n2) { n2.value = qv; if (qf) n2.focus(); } }
     if (av != null) { const a2 = this.shadowRoot.getElementById('annq'); if (a2 && a2 !== an) { a2.value = av; if (af) a2.focus(); } }
+    if (sv != null) { const s2 = this.shadowRoot.getElementById('shopq'); if (s2 && s2 !== sq) { s2.value = sv; if (sf) s2.focus(); } }
     if (this._sheet.t === 'sched') this._mountSched();
     this._sh.scrollTop = st;
     this._ov.classList.toggle('rdfull', this._sheet.t === 'radar'); this._ov.classList.add('show');

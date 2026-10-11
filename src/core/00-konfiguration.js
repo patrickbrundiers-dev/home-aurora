@@ -42,6 +42,8 @@ const DEFAULTS = {
   calendarDays: 14,
   theme: 'dark', ambient_after: 0, radarUrl: '',
   quick: [['builtin:goodnight', 'Gute Nacht', 'moon'], ['scene.wohnzimmer_wohnzimmer_tv_schauen', 'TV schauen', 'tv'], ['scene.wohnzimmer_gemutlich', 'Gemütlich', 'sofa'], ['scene.wohnzimmer_normal', 'Normal', 'bulb'], ['scene.wohnzimmer_essenszeit', 'Essenszeit', 'cook'], ['script.essen', 'Essen', 'cook']],
+  // Einkaufsliste & Rezepte (HA-To-do-Listen); quick = Schnellknöpfe zum Eintragen
+  shopping: { list: 'todo.einkaufsliste', recipes: 'todo.rezepte', quick: ['Milch', 'Brot', 'Eier', 'Butter', 'Käse', 'Obst', 'Gemüse', 'Kaffee', 'Toilettenpapier'] },
   music: {
     all: { name: 'Überall', media: 'media_player.uberall', notify: 'notify.uberall_durchsagen' },
     speakers: [
