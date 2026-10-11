@@ -9,7 +9,8 @@
     if (this._s(ex.waste)) { const WL = this._waste(); xr.push(`<button class="xr" data-act="waste"><div class="ico">${ic('trash', 19)}</div><div><div class="t">Müllabfuhr</div><div class="s">${WL && WL.length ? WL.slice(0, 2).map(x => this._dayTxt(x) + ' ' + esc(x.name)).join(' · ') : esc(this._val(ex.waste))}</div></div></button>`); }
     if (this._s(ex.fuel)) xr.push(`<button class="xr" data-act="fuel"><div class="ico">${ic('fuel', 19)}</div><div><div class="t">Tanken · günstigster Preis</div><div class="s">${esc(this._val(ex.fuel))} ${esc(this._unit(ex.fuel))}${this._s(ex.fuelName) && okv(this._val(ex.fuelName)) ? ' · ' + esc(this._val(ex.fuelName)) : ''}</div></div></button>`);
     const tvR = this._tvRows(); if (tvR.length) xr.push(...tvR); else if (this._s(ex.kids)) xr.push(`<button class="xr" data-act="toggle" data-e="${ex.kids}"><div class="ico">${ic('shield', 19)}</div><div><div class="t">Kindersicherung TV</div><div class="s">${this._val(ex.kids) === 'on' ? 'Aktiv' : 'Aus'}</div></div><span class="sw ${this._val(ex.kids) === 'on' ? 'on' : ''}"></span></button>`);
-    xr.splice(Math.min(xr.length, 1), 0, ...this._cleanRows());
+    { const sr = this._shopRow(); if (sr) xr.splice(Math.min(xr.length, 1), 0, sr); }
+    xr.splice(Math.min(xr.length, 2), 0, ...this._cleanRows());
     xr.push(...this._kidRows());
     { const mr = this._musicRow(); if (mr) xr.push(mr); }
     if (this._s(ex.winter)) xr.push(`<button class="xr" data-act="more" data-e="${ex.winter}"><div class="ico">${ic(this._val(ex.winter) === 'on' ? 'thermo' : 'sun', 19)}</div><div><div class="t">Heizmodus</div><div class="s">${this._val(ex.winter) === 'on' ? 'Wintermodus aktiv' : 'Sommerbetrieb'}</div></div></button>`);

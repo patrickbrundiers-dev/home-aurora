@@ -36,7 +36,7 @@ if (shots) mkdirSync(shots, { recursive: true });
 
 const VIEWS = ['home', 'rooms', 'climate', 'bath', 'weather', 'printer', 'clean'];
 // room und heat brauchen einen Raum: es wird der erste Raum mit Thermostat genommen.
-const SHEETS = ['lights', 'persons', 'quick', 'vent', 'cal', 'bat', 'doors', 'sys', 'waste', 'power', 'set', 'fuel', 'plants', 'kid', 'clean', 'tv', 'music', 'pzstat', 'room', 'heat'];
+const SHEETS = ['lights', 'persons', 'quick', 'vent', 'cal', 'bat', 'doors', 'sys', 'waste', 'power', 'set', 'fuel', 'plants', 'kid', 'clean', 'tv', 'music', 'shop', 'pzstat', 'room', 'heat'];
 const TARGETS = [
   { file: 'dist/home-aurora.js', tag: 'home-aurora', vp: { width: 412, height: 915 } },
   { file: 'dist/home-aurora-wide.js', tag: 'home-aurora-wide', vp: { width: 1280, height: 800 } },
@@ -70,6 +70,18 @@ function setup({ tag, states, hist, autos }) {
           o[e] = Array.from({ length: 48 }, (_, i) => ({ s: isNaN(v) ? st.state : String(Math.round((v + 1.5 * Math.sin(i / 7) + (i % 5) * 0.1) * 10) / 10), lu: now - (48 - i) * 1800, ...cl(i) }));
         }
         return o;
+      }
+      // To-do-Listen: erfundene Einkaufsliste und Rezepte (Rezept-JSON wie in der Rezeptbuch-Karte)
+      if (m.type === 'todo/item/list') {
+        if (m.entity_id === 'todo.rezepte') return { items: [
+          { uid: 'r1', summary: 'Pfannkuchen', status: 'needs_action', description: JSON.stringify({ schemaVersion: 2, servings: 4, category: 'Süßes', ingredients: [{ amount: '2', unit: '', name: 'Eier' }, { amount: '250', unit: 'ml', name: 'Milch' }, { amount: '½', unit: 'TL', name: 'Backpulver' }, { amount: '', unit: '', name: 'Salz' }], steps: ['Alles verrühren.', 'In der Pfanne ausbacken.'], image: null }) },
+          { uid: 'r2', summary: 'Nudelauflauf', status: 'needs_action', description: JSON.stringify({ schemaVersion: 2, servings: 2, category: 'Hauptgericht', ingredients: [{ amount: '300', unit: 'g', name: 'Nudeln' }], steps: ['Kochen.'] }) },
+          { uid: 'wp', summary: '__rezeptbuch_wochenplan__', status: 'needs_action', description: JSON.stringify({ schemaVersion: 2, weekStart: '2000-01-03', days: { montag: 'r1' } }) },
+        ] };
+        return { items: [
+          { uid: 'a', summary: '1 l Milch', status: 'needs_action' }, { uid: 'b', summary: 'Brot', status: 'needs_action' }, { uid: 'c', summary: 'Öl', status: 'needs_action' }, { uid: 'd', summary: 'Öl', status: 'needs_action' },
+          { uid: 'e', summary: 'Kaffee', status: 'completed', completed: '2026-01-01T10:00:00+00:00' },
+        ] };
       }
       if (m.type === 'repairs/list_issues') return { issues: [] };
       if (m.type === 'schedule/list') return [];
@@ -121,6 +133,12 @@ for (const [vn, states] of VARIANTS) for (const t of TARGETS.filter((x) => !only
     await page.evaluate((s) => { const el = window.__el; el._v = 'home'; el._sheet = { t: s, id: (el._c.rooms.find((r) => r.climate) || el._c.rooms[0])?.id }; el._render(); }, s);
     await check(`fenster ${s}`, () => window.__el.shadowRoot.querySelector('.sheet').textContent.trim().length);
   }
+  // Rezepte: Übersicht und ein geöffnetes Rezept (mit Portionen umgerechnet)
+  await page.evaluate(() => { const el = window.__el; el._v = 'home'; el._shopTab = 'rcp'; el._rcpSel = null; el._sheet = { t: 'shop' }; el._render(); });
+  await check('fenster rezepte', () => window.__el.shadowRoot.querySelector('.sheet').textContent.trim().length);
+  await page.evaluate(() => { const el = window.__el; el._rcpSel = 'r1'; el._rcpServ = 6; el._renderSheet(); });
+  await check('fenster rezept', () => window.__el.shadowRoot.querySelector('.sheet').textContent.trim().length);
+  await page.evaluate(() => { const el = window.__el; el._shopTab = 'list'; el._rcpSel = null; el._rcpServ = 0; });
   if (t.tag.endsWith('wide')) {
     await check('bildschirmschoner', () => { const el = window.__el; el._closeSheet(); el._v = 'home'; el._render(); el._ambOn(); return el.shadowRoot.querySelector('.amb').textContent.trim().length; });
     await page.evaluate(() => window.__el._ambOff(true));
