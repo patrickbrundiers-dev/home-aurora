@@ -261,9 +261,3 @@
       <div class="tpcs">${chips}</div>${week}</div>`;
   }
 
-  /* ───────────── v5: Regenradar ───────────── */
-  _radarUrl() {
-    if (this._c.radarUrl) return this._c.radarUrl;
-    const lat = this._h?.config?.latitude ?? 51.77, lon = this._h?.config?.longitude ?? 8.57;
-    return `https://embed.windy.com/embed2.html?lat=${lat.toFixed(2)}&lon=${lon.toFixed(2)}&detailLat=${lat.toFixed(2)}&detailLon=${lon.toFixed(2)}&zoom=7&level=surface&overlay=radar&product=radar&menu=&message=&marker=true&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=-1`;
-  }

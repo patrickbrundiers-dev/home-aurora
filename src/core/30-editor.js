@@ -11,7 +11,7 @@ const EDITOR_SCHEMA = [
   { name: 'calendarDays', selector: { number: { min: 3, max: 60, mode: 'box' } } },
   { name: 'batteryLow', selector: { number: { min: 5, max: 50, mode: 'box', unit_of_measurement: '%' } } },
 ];
-const EDITOR_LABELS = { theme: 'Design', ambient_after: 'Wandtablet-Modus automatisch starten', weather: 'Wetter-Entität', persons: 'Personen', radar: 'Regenradar-Kamera', radarUrl: 'Eigene Radar-URL (optional, Live-Karte)', putzplan: 'Putzplan anzeigen', putzplan_view: 'Putzplan als eigene Ansicht öffnen (sonst als Fenster)', calendarDays: 'Termine: Tage voraus', batteryLow: 'Batterie schwach ab' };
+const EDITOR_LABELS = { theme: 'Design', ambient_after: 'Wandtablet-Modus automatisch starten', weather: 'Wetter-Entität', persons: 'Personen', radar: 'Regenradar-Kamera', radarUrl: 'Link für den wetter.com-Knopf im Regenradar (optional, z. B. die Seite deines Orts)', putzplan: 'Putzplan anzeigen', putzplan_view: 'Putzplan als eigene Ansicht öffnen (sonst als Fenster)', calendarDays: 'Termine: Tage voraus', batteryLow: 'Batterie schwach ab' };
 class HomeAuroraEditor extends HTMLElement {
   setConfig(c) { this._c = c || {}; this._draw(); }
   set hass(h) { this._h = h; if (this._f) this._f.hass = h; }

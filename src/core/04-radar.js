@@ -13,11 +13,15 @@ const RD_TYPES = {
   sleet: { n: 'Schneeregen', i: 'snow', f: 'hue-rotate(95deg) saturate(1.15)' },
   freezing: { n: 'Gefrierender Regen', i: 'drop', f: 'hue-rotate(170deg) saturate(1.6)' },
 };
+// Intensität am Standort (mm/h) → Farbe wie die Radarbilder und Balkenhöhe in der Zeitleiste
+const RD_LEG = [[0.1, '#60a5fa', 'leicht'], [1, '#22c55e', 'mäßig'], [2.5, '#facc15', 'kräftig'], [10, '#ef4444', 'stark'], [30, '#d946ef', 'Unwetter']];
+const rdCol = v => { let c = RD_LEG[0][1]; for (const [t, k] of RD_LEG) if (v >= t) c = k; return c; };
+const rdHH = t => new Date(t).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
 const RD_CARD = ['N', 'NO', 'O', 'SO', 'S', 'SW', 'W', 'NW'];
 const RD_HTML = () => `<div class="rd-map"><div class="rd-world"><div class="rd-base"></div><div class="rd-fr"></div><div class="rd-bl"></div><div class="rd-wn"></div><div class="rd-rf"></div><div class="rd-ov"></div></div></div>
 <canvas class="rd-wind"></canvas><div class="rd-fx"></div><div class="rd-vig"></div>
-<div class="rd-top"><div class="rd-l"><div class="rd-k">REGENRADAR</div><div class="rd-live"><i></i><span>live</span></div><div class="rd-warns"></div></div>
-<div class="rd-r"><div class="rd-say"></div><div class="rd-sub"></div><div class="rd-leg"><span>leicht</span><i></i><span>stark</span></div><div class="rd-type"></div></div></div>
+<div class="rd-top"><div class="rd-l"><div class="rd-k">REGENRADAR</div><div class="rd-live"><i></i><span>live</span></div><a class="rd-ext" target="_blank" rel="noopener noreferrer">wetter.com${ic('chevron', 12)}</a><div class="rd-warns"></div></div>
+<div class="rd-r"><div class="rd-say"></div><div class="rd-sub"></div><div class="rd-leg">${RD_LEG.map(([v, c, n]) => `<span><i style="background:${c}"></i>${n}</span>`).join('')}</div><div class="rd-type"></div></div></div>
 <div class="rd-ctl"><button class="rd-cb z" data-rd="in" aria-label="Vergrößern">${ic('plus', 18)}</button><button class="rd-cb z" data-rd="out" aria-label="Verkleinern">${ic('minus', 18)}</button><button class="rd-cb z" data-rd="home" aria-label="Zu meinem Standort">${ic('radar', 18)}</button><button class="rd-cb ex" data-act="radar" aria-label="Vollbild">${ic('expand', 18)}</button></div>
 <button class="rd-cb rdx" data-act="close" aria-label="Schließen">${ic('close', 18)}</button>
 <div class="rd-pills"><div class="rd-wp"></div><div class="rd-bp"></div></div>
@@ -35,6 +39,7 @@ class AuroraRadar {
     const r = this.root = document.createElement('div'); r.className = 'rdm'; r.innerHTML = RD_HTML();
     this.q = s => r.querySelector(s);
     this.world = this.q('.rd-world'); this.baseEl = this.q('.rd-base'); this.frEl = this.q('.rd-fr'); this.blEl = this.q('.rd-bl'); this.wnEl = this.q('.rd-wn'); this.rfEl = this.q('.rd-rf'); this.ovEl = this.q('.rd-ov'); this.map = this.q('.rd-map');
+    this.q('.rd-ext').href = this.cfg.ext;
     this.cv = this.q('.rd-wind'); this.ctx = this.cv.getContext('2d'); this.P = [];
     this.bindEvents();
     this.ro = new ResizeObserver(() => this.resize()); this.ro.observe(r);
@@ -146,8 +151,14 @@ class AuroraRadar {
     const n = this.fr.length, now = Date.now();
     this.q('.rd-dots').innerHTML = this.fr.map((t, i) => `<i class="${t > now ? 'f' : ''}" data-i="${i}"></i>`).join('');
     const at = ms => { let b = 0, bd = 1e18; this.fr.forEach((t, i) => { const d = Math.abs(t - (now + ms)); if (d < bd) { bd = d; b = i; } }); return b / Math.max(1, n - 1) * 100; };
-    this.q('.rd-lb').innerHTML = [['−2 h', -12e5 * 6], ['−1 h', -36e5], ['jetzt', 0], ['+1 h', 36e5]].filter(x => this.fr.length > 10).map(x => { const l = at(x[1]); return `<span style="left:${l.toFixed(1)}%${l > 90 ? ';transform:translateX(-100%)' : ''}">${x[0]}</span>`; }).join('');
-    this.dotsEl = [...this.q('.rd-dots').children];
+    const in_ = ms => n && now + ms >= this.fr[0] - 6e5 && now + ms <= this.fr[n - 1] + 6e5;
+    this.q('.rd-lb').innerHTML = [['−2 h', -72e5], ['−1 h', -36e5], ['jetzt', 0], ['+1 h', 36e5], ['+2 h', 72e5]].filter(x => n > 10 && in_(x[1])).map(x => { const l = at(x[1]); return `<span style="left:${l.toFixed(1)}%${l > 90 ? ';transform:translateX(-100%)' : ''}">${x[0]}</span>`; }).join('');
+    this.dotsEl = [...this.q('.rd-dots').children]; this.bars();
+  }
+  // Zeitleiste als Niederschlagsverlauf am Standort (wie bei wetter.com): Höhe und Farbe nach mm/h
+  bars() {
+    const rc = this.rc; if (!rc || !this.dotsEl) return;
+    this.dotsEl.forEach((d, i) => { const v = rc.get(this.fr[i]), r = v != null && v >= 0.1; d.classList.toggle('r', r); d.style.cssText = r ? `--h:${Math.min(1, Math.log1p(v) / Math.log1p(20)).toFixed(2)};--c:${rdCol(v)}` : ''; });
   }
   /* ── Overlays (Radar-Frames, Blitzdichte, Warnungen) ── */
   box() { const bw = this.W * 1.5, bh = this.H * 1.5, z = this.z, l = this.cx - bw / 2, t = this.cy - bh / 2, s = Math.min(1, 1100 / Math.max(bw, bh)); return { l, t, bw, bh, w: Math.round(bw * s), h: Math.round(bh * s), bbox: [rdMx(l, z), rdMy(t + bh, z), rdMx(l + bw, z), rdMy(t, z)].map(v => v.toFixed(1)).join(',') }; }
@@ -190,7 +201,7 @@ class AuroraRadar {
     this.fi = i; const set = [this.cur, this.old];
     [...this.cur, ...this.old].forEach(im => im && im.classList.remove('on'));
     const pick = (this.cur[i] && this.ok[i]) ? this.cur[i] : this.old[i]; if (pick) pick.classList.add('on');
-    const t = this.fr[i]; if (t) { const c = this.q('.rd-clk'); c.firstChild.textContent = new Date(t).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }); c.lastChild.textContent = t > Date.now() ? 'PROGNOSE' : 'RADAR'; c.classList.toggle('fc', t > Date.now()); }
+    const t = this.fr[i]; if (t) { const c = this.q('.rd-clk'); c.firstChild.textContent = rdHH(t); c.lastChild.textContent = t > Date.now() ? 'PROGNOSE' : 'RADAR'; c.classList.toggle('fc', t > Date.now()); }
     this.dotState();
   }
   dotState() { (this.dotsEl || []).forEach((d, i) => { d.classList.toggle('on', i === this.fi); d.classList.toggle('na', this.ok.length > 0 && this.ok[i] === false); }); }
@@ -204,18 +215,27 @@ class AuroraRadar {
     this.fetchRates(); this.fetchKw();
   }
   async fetchRates() {
-    const cfg = this.cfg, now = Date.now(), n = this.fr.length; if (!n) return;
-    const idx = []; for (let i = this.nowIdx; i < n && this.fr[i] <= now + cfg.future * 6e4 + 3e5; i++) idx.push(i);
-    if (cfg.mock) { const T0 = now + (cfg.mockEta ?? 35) * 6e4; this.rates = idx.map(i => 2.2 * Math.exp(-(((this.fr[i] - T0) / 6e4 / 12) ** 2))); this.rateT = idx.map(i => this.fr[i]); this.upd(true); return; }
-    const m = 3000, mx = this.home.lon / 180 * RD_R, my = Math.log(Math.tan((90 + this.home.lat) * Math.PI / 360)) / Math.PI * RD_R, bb = [mx - m, my - m, mx + m, my + m].map(v => v.toFixed(1)).join(','), L = encodeURIComponent(cfg.radar);
-    const one = async i => {
-      try {
-        const r = await fetch(`${cfg.wms}?service=WMS&version=1.3.0&request=GetFeatureInfo&layers=${L}&query_layers=${L}&styles=&crs=EPSG:3857&bbox=${bb}&width=5&height=5&i=2&j=2&info_format=application/json&feature_count=1&time=${encodeURIComponent(this.iso(this.fr[i]))}`);
-        if (!r.ok) return null; const j = await r.json(), f = j.features?.[0]; if (!f) return 0;
-        const v = Object.values(f.properties || {}).find(x => typeof x === 'number' && isFinite(x)); if (v == null) return 0; const q = v * cfg.factor; return q < 0 || q > 500 ? 0 : q;
-      } catch (e) { return null; }
-    };
-    const res = await Promise.all(idx.map(one)); this.rates = res; this.rateT = idx.map(i => this.fr[i]); this.upd(true);
+    const cfg = this.cfg, now = Date.now(), fr = this.fr, n = fr.length; if (!n) return;
+    // Regen am Standort für jeden Frame: vergangene bleiben gespeichert, ab „jetzt“ wird jede Runde neu gefragt (Prognose ändert sich)
+    const rc = this.rc = this.rc || new Map(), keep = new Set(fr); for (const t of rc.keys()) if (!keep.has(t)) rc.delete(t);
+    const t0 = fr[this.nowIdx], need = fr.filter(t => t >= t0 || !rc.has(t));
+    if (cfg.mock) { const T0 = now + (cfg.mockEta ?? 35) * 6e4; need.forEach(t => rc.set(t, 2.2 * Math.exp(-(((t - T0) / 6e4 / 12) ** 2)))); }
+    else {
+      const m = 3000, mx = this.home.lon / 180 * RD_R, my = Math.log(Math.tan((90 + this.home.lat) * Math.PI / 360)) / Math.PI * RD_R, bb = [mx - m, my - m, mx + m, my + m].map(v => v.toFixed(1)).join(','), L = encodeURIComponent(cfg.radar);
+      const one = async t => {
+        try {
+          const r = await fetch(`${cfg.wms}?service=WMS&version=1.3.0&request=GetFeatureInfo&layers=${L}&query_layers=${L}&styles=&crs=EPSG:3857&bbox=${bb}&width=5&height=5&i=2&j=2&info_format=application/json&feature_count=1&time=${encodeURIComponent(this.iso(t))}`);
+          if (!r.ok) return null; const j = await r.json(), f = j.features?.[0]; if (!f) return 0;
+          const v = Object.values(f.properties || {}).find(x => typeof x === 'number' && isFinite(x)); if (v == null) return 0; const q = v * cfg.factor; return q < 0 || q > 500 ? 0 : q;
+        } catch (e) { return null; }
+      };
+      // höchstens 6 Abfragen gleichzeitig, die nahe Zukunft zuerst
+      const q = [...need].sort((a, b) => Math.abs(a - now) - Math.abs(b - now)); let k = 0;
+      await Promise.all(Array.from({ length: Math.min(6, q.length) }, async () => { while (k < q.length) { const t = q[k++], v = await one(t); if (v != null) rc.set(t, v); else rc.delete(t); } }));
+      if (!this.alive || this.fr !== fr) return;
+    }
+    const idx = []; for (let i = this.nowIdx; i < n && fr[i] <= now + cfg.future * 6e4 + 3e5; i++) idx.push(i);
+    this.rates = idx.map(i => rc.has(fr[i]) ? rc.get(fr[i]) : null); this.rateT = idx.map(i => fr[i]); this.bars(); this.upd(true);
   }
   async fetchKw() {
     const e = this.h._c.stationWeather; if (!e || !this.h._s(e) || (this.kw && Date.now() - this.kw.t < 9e5)) return;
@@ -234,11 +254,13 @@ class AuroraRadar {
     return tw <= 0 && t <= 2 ? 'snow' : tw <= 1.2 && t <= 3.5 ? 'sleet' : 'rain';
   }
   sayInfo() {
-    const h = this.h, now = Date.now(), c = h._c, st = c.station; let cur = null, eta = null, src = '';
+    const h = this.h, now = Date.now(), c = h._c, st = c.station; let cur = null, eta = null, src = '', stop = null, until = null;
     const sr = h._num(st.rainRate); const rt = this.rates || [];
     if (rt.length && rt.some(x => x != null)) {
       src = 'DWD-Radar'; cur = rt[0] != null ? rt[0] : null;
       for (let i = 1; i < rt.length; i++) if (rt[i] != null && rt[i] >= 0.1) { eta = Math.max(5, Math.round((this.rateT[i] - now) / 6e4)); break; }
+      if (cur != null && cur >= 0.1) { for (let i = 1; i < rt.length; i++) if (rt[i] != null && rt[i] < 0.1) { stop = this.rateT[i]; break; } }
+      for (let i = rt.length - 1; i >= 0; i--) if (rt[i] != null) { until = this.rateT[i]; break; }
     } else if (this.kw?.list?.length) {
       src = 'Kachelmann'; const e = this.kw.list.find(x => Date.parse(x.datetime) + 36e5 > now && Date.parse(x.datetime) < now + 36e5 * 3 && (x.precipitation || 0) >= 0.1);
       if (e) { const m = Math.round((Date.parse(e.datetime) - now) / 6e4); if (m <= 0) cur = e.precipitation; else eta = Math.max(5, m); }
@@ -246,9 +268,10 @@ class AuroraRadar {
     if (sr != null && sr >= 0.1) { cur = sr; src = 'Wetterstation'; }
     this.eta = eta; const ty = this.ptype(), T = RD_TYPES[ty], verb = T.n;
     const f5 = m => m < 60 ? Math.max(5, Math.round(m / 5) * 5) : Math.round(m / 5) * 5;
-    if (cur != null && cur >= 0.1) return { tone: 'now', ty, txt: `${de(cur, cur < 10 ? 1 : 0)} mm/h gerade hier`, sub: `${verb}${src ? ' · ' + src : ''}`, rain: true };
-    if (eta != null) return { tone: 'soon', ty, txt: `in ~${f5(eta)} min ${verb} erwartet`, sub: src ? 'nächste Stunde · ' + src : 'nächste Stunde', rain: false };
-    return { tone: 'dry', ty, txt: 'trocken', sub: src === 'Kachelmann' ? 'nächste 3 Stunden' : 'nächste Stunde', rain: false };
+    const fin = t => t != null && isFinite(t) && t > now;
+    if (cur != null && cur >= 0.1) return { tone: 'now', ty, txt: `${de(cur, cur < 10 ? 1 : 0)} mm/h gerade hier`, sub: `${verb}${fin(stop) ? ' bis etwa ' + rdHH(stop) + ' Uhr' : ''}${src ? ' · ' + src : ''}`, rain: true };
+    if (eta != null) { const at = now + eta * 6e4; return { tone: 'soon', ty, txt: `${verb} ab ${rdHH(Math.round(at / 3e5) * 3e5)} Uhr`, sub: `in ~${f5(eta)} min${src ? ' · ' + src : ''}`, rain: false }; }
+    return { tone: 'dry', ty, txt: 'trocken', sub: src === 'Kachelmann' ? 'nächste 3 Stunden' : fin(until) ? `kein Niederschlag bis ${rdHH(until)} Uhr` : 'nächste Stunde', rain: false };
   }
   windInfo() {
     const h = this.h, st = h._c.station, kw = h._s(h._c.stationWeather)?.attributes || {};

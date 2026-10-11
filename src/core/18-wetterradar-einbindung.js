@@ -3,8 +3,8 @@
     const u = this._c.rdr || {};
     return Object.assign({
       wms: 'https://maps.dwd.de/geoserver/dwd/wms', radar: 'dwd:Niederschlagsradar', bolt: 'dwd:Blitzdichte', warn: 'dwd:Warnungen_Landkreise',
-      base: { dark: ['https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}'], light: ['https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}'] }, past: 120, future: 60, zoom: 8, factor: 1, strikeKm: 50, rings: [10, 25],
-      mock: !!this._h?.config?.mock, kw: { storm: 'binary_sensor.kachelmannwetter_gewitter_erwartet' },
+      base: { dark: ['https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}'], light: ['https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}'] }, past: 120, future: 120, zoom: 8, factor: 1, strikeKm: 50, rings: [10, 25],
+      mock: !!this._h?.config?.mock, ext: this._c.radarUrl || 'https://www.wetter.com/wetterkarten/regenradar/', kw: { storm: 'binary_sensor.kachelmannwetter_gewitter_erwartet' },
     }, u);
   }
   _rdrWarns() {
