@@ -139,6 +139,11 @@ for (const [vn, states] of VARIANTS) for (const t of TARGETS.filter((x) => !only
     await page.evaluate((s) => { const el = window.__el; el._v = 'home'; el._sheet = { t: s, id: (el._c.rooms.find((r) => r.climate) || el._c.rooms[0])?.id }; el._render(); }, s);
     await check(`fenster ${s}`, () => window.__el.shadowRoot.querySelector('.sheet').textContent.trim().length);
   }
+  // Heizung: jeder Raum mit Thermostat (gleiches Design für jede Heizungssteuerung)
+  for (const id of await page.evaluate(() => window.__el._c.rooms.filter((r) => r.climate).map((r) => r.id))) {
+    await page.evaluate((id) => { const el = window.__el; el._v = 'home'; el._sheet = { t: 'heat', id }; el._render(); }, id);
+    await check(`fenster heizung ${id}`, () => window.__el.shadowRoot.querySelector('.sheet').textContent.trim().length);
+  }
   // Kalender: Monat und Liste (Woche ist der Standard beim Öffnen)
   for (const m of ['month', 'list']) {
     await page.evaluate((m) => { const el = window.__el; el._v = 'home'; el._calMode = m; el._sheet = { t: 'cal' }; el._render(); }, m);

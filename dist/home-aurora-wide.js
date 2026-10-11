@@ -1530,15 +1530,26 @@ class HomeAurora extends HTMLElement {
     if (!cs.length) return '251,191,36';
     return [0, 1, 2].map(i => Math.round(cs.reduce((a, c) => a + c[i], 0) / cs.length)).join(',');
   }
-  /* Räume mit der Integration „Dynamische Heizungssteuerung“ (dynamic_heating): sie regelt mehrere Thermostate nach
-     Zeitplan, Anwesenheit und Wetter. Die Karte zeigt dann deren Ziel und Status statt des Sollwerts eines Thermostats. */
+  /* Heizungssteuerung eines Raums – für jede Heizung gleich, egal welche Integration dahintersteckt:
+     • „Dynamische Heizungssteuerung“ (dynamic_heating, Schlüssel heat): regelt mehrere Thermostate, Ziel und Status kommen vom Sensor.
+     • Blueprint „Advanced Heating Control“: Automatik = Automation an, Ziel steht direkt am Thermostat.
+     • sonst nur das Thermostat (Manuell/Aus).
+     Ergebnis: auto (Automatik aktiv), mode (heat/off), act (heating/idle), target, label, trv (alle Thermostate),
+     kind ('dh' | 'ahc' | null) und sw (Schalter bzw. Automation der Automatik). */
   _dh(r) {
-    if (!r.heat) return null;
-    const st = this._s(r.heat.status), a = st?.attributes || {}, auto = this._val(r.heat.switch) === 'on' && a.enabled !== false;
+    if (!r.climate) return null;
     const trv = [r.climate, ...(r.climate_more || [])].map(e => this._s(e)).filter(Boolean);
     const heating = trv.some(s => { const x = s.attributes; return x.hvac_action === 'heating' || (x.hvac_action == null && s.state !== 'off' && x.temperature != null && x.current_temperature != null && x.temperature > x.current_temperature + 0.2); });
-    const target = auto ? (a.current_setpoint ?? a.target_temperature ?? trv[0]?.attributes.temperature) : trv[0]?.attributes.temperature;
-    return { st, a, auto, trv, mode: trv.length && trv.every(s => s.state === 'off') ? 'off' : 'heat', act: heating ? 'heating' : 'idle', target, label: st && okv(st.state) ? st.state : '' };
+    const mode = trv.length && trv.every(s => s.state === 'off') ? 'off' : 'heat', act = heating ? 'heating' : 'idle', t0 = trv[0]?.attributes.temperature;
+    if (r.heat) {
+      const st = this._s(r.heat.status), a = st?.attributes || {}, auto = this._val(r.heat.switch) === 'on' && a.enabled !== false;
+      const target = auto ? (a.current_setpoint ?? a.target_temperature ?? t0) : t0;
+      return { kind: 'dh', sw: r.heat.switch, st, a, auto, trv, mode, act, target, label: st && okv(st.state) ? st.state : '' };
+    }
+    const p = this._plans?.map[r.id], auto = !!p && this._val(p.auto) === 'on';
+    let label = '';
+    if (auto) { const P = this._plan(r); if (P?.mode) label = 'Plan ' + P.mode; }
+    return { kind: p ? 'ahc' : null, sw: p?.auto || null, st: null, a: {}, auto, trv, mode, act, target: t0, label };
   }
   _room(r) {
     let cl = r.climate ? this._s(r.climate) : null;
@@ -2709,7 +2720,7 @@ class HomeAurora extends HTMLElement {
   _sSet() {
     const th = this._themePref || this._c.theme || 'dark', am = String(this._ambMin());
     const seg = (act, cur, items) => `<div class="seg wide">${items.map(x => `<button class="${cur === x[0] ? 'on' : ''}" data-act="${act}" data-m="${x[0]}">${x[1]}</button>`).join('')}</div>`;
-    return `<div class="grab"></div><div class="sh"><div class="ico">${ic('cog', 24)}</div><div><h2>Darstellung &amp; Modi</h2><p>Home Aurora v5.2 · Build pz26</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
+    return `<div class="grab"></div><div class="sh"><div class="ico">${ic('cog', 24)}</div><div><h2>Darstellung &amp; Modi</h2><p>Home Aurora v5.2 · Build pz27</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
       <div class="lab2">DESIGN</div>${seg('theme', th, [['dark', 'Dunkel'], ['light', 'Hell'], ['auto', 'Automatisch']])}
       <div class="card-note">„Automatisch“ folgt dem Dunkel-/Hellmodus deines Home-Assistant-Profils. Die Auswahl gilt nur für dieses Gerät.</div>
       ${WALL_UI ? `      <div class="lab2">WANDTABLET-MODUS</div>
@@ -3170,53 +3181,41 @@ class HomeAurora extends HTMLElement {
     const avg = `<div class="tavg">${TS ? `<span style="color:${col}">${ic('thermo', 13)}Ø ${de(TS.av, 1)} °C</span>` : ''}${HS ? `<span style="color:#38bdf8">${ic('drop', 13)}Ø ${de(HS.av, 0)} %</span>` : ''}</div>`;
     return `${opt.bare ? '' : '<div class="lab2">TEMPERATUR &amp; LUFTFEUCHTE · 24 H</div>'}<div class="${opt.bare ? 'trend tb' : 'sctl trend'}" style="display:block"><div class="trow">${side(TS, 1, '°', col, 'thermo', false)}<div class="tmid">${svg}</div>${side(HS, 0, '%', '#38bdf8', 'drop', true)}</div><div class="tax"><span>${hh(t0)}</span><span>${hh((t0 + t1) / 2)}</span><span>${hh(t1)}</span></div>${avg}</div>`;
   }
-  /* Heizung eines Raums mit „Dynamischer Heizungssteuerung“: Ziel kommt von der Regelung, mehrere Thermostate */
-  _sHeatDh(r, I, D, o) {
-    const a = D.a, m = o.off ? 'off' : D.auto ? 'auto' : 'heat';
-    const seg = `<div class="seg hseg">${[['auto', 'Automatik'], ['heat', 'Manuell'], ['off', 'Aus']].map(([k, l]) => `<button class="${m === k ? 'on' : ''}" data-act="dhmode" data-room="${r.id}" data-m="${k}">${l}</button>`).join('')}</div>`;
-    const side = o.auto ? `<div class="hctl"><div class="hset"><b>${de(I.target)}</b><span>Ziel der Automatik °C</span></div></div>` : o.ctl;
-    const nx = a.next_event ? new Date(a.next_event) : null, pm = parseFloat(a.preheat_minutes), ht = this._heatTime(r), P = this._plan(r);
-    const tiles = `<div class="dg">${this._tile(I.open || a.window_open ? 'Offen' : 'Zu', 'Fenster', 'window')}${ht != null ? this._tile(this._durTxt(ht), 'Heute geheizt', 'flame') : ''}${P?.mode ? this._tile(esc(P.mode), 'Betriebsart', 'cal') : ''}${nx && !isNaN(nx) ? this._tile(this._whenTxt(nx), 'Nächster Wechsel', 'clock') : ''}${!isNaN(pm) && pm > 0 ? this._tile(de(pm, 0) + ' Min.', 'Vorheizen', 'flame') : ''}${a.present != null ? this._tile(a.present ? 'Ja' : 'Nein', 'Jemand da', 'home') : ''}</div>`;
-    const short = s => esc((s.attributes.friendly_name || s.entity_id).replace(new RegExp('^' + r.name + '\\s*', 'i'), '').replace(/[\s-]+$/, '') || s.entity_id);
-    const trv = `<div class="lab2">THERMOSTATE · ${D.trv.length}</div><div class="mcol">${D.trv.map(s => { const x = s.attributes, un = !okv(s.state); return `<div class="xr"><div class="ico">${ic('thermo', 19)}</div><div class="grow" data-act="more" data-e="${s.entity_id}"><div class="t">${short(s)}</div><div class="s">${un ? 'nicht erreichbar' : s.state === 'off' ? 'Aus' : `misst ${de(x.current_temperature)} ° · Soll ${de(x.temperature)} °`}</div></div></div>`; }).join('')}</div>`;
-    const note = a.decision_status && okv(a.decision_status) && a.decision_status !== D.label ? `<div class="card-note">${esc(String(a.decision_status))}</div>` : '';
-    [r.temp, r.hum].forEach(x => { if (x && !this._hist[x]) this._need.add(x); });
-    return `<div class="grab"></div><div class="sh"><div class="ico">${ic(r.icon, 24)}</div><div><h2>Heizung · ${esc(r.name)}</h2><p>${esc(o.status)}</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
-      <div class="hhero ${o.heat ? 'heat' : ''}">${o.dial}<div class="hside">${side}${seg}</div></div>
-      ${note}<div class="lab2">STATUS</div>${tiles}${trv}
-      ${this._trend(r, o.col)}
-      <div class="hbtns"><button class="qb" data-act="sched">${ic('clock', 14)}Heizungsplan</button><button class="qb" data-act="room" data-room="${r.id}">${ic(r.icon, 14)}Zurück zum Raum</button></div>`;
-  }
+  /* Heizung eines Raums – ein Design für jede Heizung, egal ob Dynamische Heizungssteuerung, Advanced Heating Control
+     oder nur ein Thermostat: Regler, Automatik/Manuell/Aus, Status-Kacheln, Thermostate, Verlauf. */
   _sHeat() {
     const r = this._c.rooms.find(x => x.id === this._sheet.id); if (!r || !r.climate) return `<div class="grab"></div><div class="empty">Kein Thermostat für diesen Raum.</div>`;
-    const I = this._room(r), cl = I.cl, at = cl?.attributes || {}, e = r.climate, off = I.mode === 'off', heat = I.act === 'heating';
-    if (!cl) return `<div class="grab"></div><div class="sh"><div class="ico">${ic('thermo', 24)}</div><div><h2>Heizung · ${esc(r.name)}</h2><p>Thermostat nicht verfügbar</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>`;
-    const cur = at.current_temperature ?? I.temp, tg = at.temperature, mn = at.min_temp ?? 5, mx = at.max_temp ?? 30, hum = at.current_humidity ?? I.hum;
-    const PL = { none: 'Manuell', eco: 'Eco', comfort: 'Komfort', sleep: 'Schlafen', boost: 'Boost', away: 'Abwesend', home: 'Zuhause', activity: 'Aktiv' };
-    let pt = {}; try { pt = typeof at.bt_preset_heat_temperatures === 'string' ? JSON.parse(at.bt_preset_heat_temperatures) : (at.bt_preset_heat_temperatures || {}); } catch (x) { pt = {}; }
-    const presets = (at.preset_modes || []).filter(m => m !== 'none');
-    const D = I.dh, auto = !off && D?.auto;
-    const status = off ? 'Heizung aus' : I.open || at.window_open || D?.a.window_open ? 'Fenster offen – Heizung pausiert' : auto ? 'Automatik' + (D.label ? ' · ' + D.label : '') : heat ? 'Heizt gerade' : 'Bereit – Wunschtemperatur erreicht';
+    const I = this._room(r), cl = I.cl, D = I.dh;
+    if (!cl || !D) return `<div class="grab"></div><div class="sh"><div class="ico">${ic('thermo', 24)}</div><div><h2>Heizung · ${esc(r.name)}</h2><p>Thermostat nicht verfügbar</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>`;
+    const at = cl.attributes || {}, e = r.climate, off = I.mode === 'off', heat = I.act === 'heating', auto = !off && D.auto, a = D.a;
+    const cur = at.current_temperature ?? I.temp, tg = at.temperature, hum = at.current_humidity ?? I.hum;
+    const status = off ? 'Heizung aus' : I.open || at.window_open || a.window_open ? 'Fenster offen – Heizung pausiert' : auto ? 'Automatik' + (D.label ? ' · ' + D.label : '') : heat ? 'Heizt gerade' : 'Bereit – Wunschtemperatur erreicht';
     const col = cur != null ? tempCol(cur) : '#fb923c', fc = clamp(((cur ?? 10) - 10) / 20, 0, 1), ft = clamp(((tg ?? 10) - 10) / 20, 0, 1), a1 = 135 + 270 * fc, a2 = 135 + 270 * ft;
     const tx = 100 + 84 * Math.cos(a2 * Math.PI / 180), ty = 100 + 84 * Math.sin(a2 * Math.PI / 180);
     const dial = `<div class="hdial"><svg viewBox="0 0 200 170"><path d="${arc(100, 100, 84, 135, 405)}" fill="none" stroke="rgba(${WH},.09)" stroke-width="12" stroke-linecap="round"/>${cur != null ? `<path d="${arc(100, 100, 84, 135, Math.max(135.5, a1))}" fill="none" stroke="${col}" stroke-width="12" stroke-linecap="round" style="filter:drop-shadow(0 0 10px ${col});opacity:${off ? .35 : 1}"/>` : ''}${tg != null && !off ? `<circle cx="${tx.toFixed(1)}" cy="${ty.toFixed(1)}" r="9" fill="${FG}"/><circle cx="${tx.toFixed(1)}" cy="${ty.toFixed(1)}" r="3.500" fill="${col}"/>` : ''}</svg>
       <div class="mid"><div class="l">Aktuell</div><div class="cur big">${de(cur)}<small class="u">°</small></div><div class="tg">${off ? 'Heizung aus' : (auto ? 'Automatik' : 'Ziel') + ' <b>' + de(tg) + '°</b>'}</div>${hum != null ? `<div class="hhum">${ic('drop', 12)}${de(hum, 0)} %</div>` : ''}</div></div>`;
-    const ctl = `<div class="hctl"><button class="rbn" data-act="temp" data-e="${e}" data-d="-0.5" ${off ? 'disabled' : ''}>${ic('minus', 22)}</button><div class="hset"><b>${off ? '–' : de(tg)}</b><span>Wunsch °C</span></div><button class="rbn" data-act="temp" data-e="${e}" data-d="0.5" ${off ? 'disabled' : ''}>${ic('plus', 22)}</button></div>`;
-    const modes = (at.hvac_modes || ['heat', 'off']).filter(m => ['heat', 'off', 'auto', 'heat_cool'].includes(m)), ML = { heat: 'Heizen', off: 'Aus', auto: 'Auto', heat_cool: 'Auto' };
-    const seg = `<div class="seg hseg">${modes.map(m => `<button class="${I.mode === m ? 'on' : ''}" data-act="chvac" data-e="${e}" data-m="${m}">${ML[m]}</button>`).join('')}</div>`;
-    const pre = presets.length ? `<div class="lab2">VOREINSTELLUNGEN</div><div class="hpre">${presets.map(m => `<button class="${at.preset_mode === m ? 'on' : ''}" data-act="cpreset" data-e="${e}" data-m="${m}"><b>${esc(PL[m] || m)}</b>${pt[m] != null ? `<span>${de(pt[m], 1)}°</span>` : ''}</button>`).join('')}</div>` : '';
-    if (D) return this._sHeatDh(r, I, D, { dial, ctl, status, heat, off, auto, col });
+    const side = auto ? `<div class="hctl"><div class="hset"><b>${de(tg)}</b><span>Ziel der Automatik °C</span></div></div>`
+      : `<div class="hctl"><button class="rbn" data-act="temp" data-e="${e}" data-d="-0.5" ${off ? 'disabled' : ''}>${ic('minus', 22)}</button><div class="hset"><b>${off ? '–' : de(tg)}</b><span>Wunsch °C</span></div><button class="rbn" data-act="temp" data-e="${e}" data-d="0.5" ${off ? 'disabled' : ''}>${ic('plus', 22)}</button></div>`;
+    const m = off ? 'off' : auto ? 'auto' : 'heat';
+    const seg = `<div class="seg hseg">${[...(D.kind ? [['auto', 'Automatik']] : []), ['heat', 'Manuell'], ['off', 'Aus']].map(([k, l]) => `<button class="${m === k ? 'on' : ''}" data-act="dhmode" data-room="${r.id}" data-m="${k}">${l}</button>`).join('')}</div>`;
+    // Voreinstellungen (Better Thermostat) nur bei manueller Steuerung – in der Automatik setzt die Regelung die Temperatur
+    const PL = { eco: 'Eco', comfort: 'Komfort', sleep: 'Schlafen', boost: 'Boost', away: 'Abwesend', home: 'Zuhause', activity: 'Aktiv' };
+    let pt = null; try { pt = typeof at.bt_preset_heat_temperatures === 'string' ? JSON.parse(at.bt_preset_heat_temperatures) : at.bt_preset_heat_temperatures; } catch (x) { pt = null; }
+    const presets = pt && !auto && !off ? (at.preset_modes || []).filter(k => k !== 'none') : [];
+    const pre = presets.length ? `<div class="lab2">VOREINSTELLUNGEN</div><div class="hpre">${presets.map(k => `<button class="${at.preset_mode === k ? 'on' : ''}" data-act="cpreset" data-e="${e}" data-m="${k}"><b>${esc(PL[k] || k)}</b>${pt[k] != null ? `<span>${de(pt[k], 1)}°</span>` : ''}</button>`).join('')}</div>` : '';
+    const P = this._plan(r), ht = this._heatTime(r), pm = parseFloat(a.preheat_minutes);
     const lc = at.last_change ? new Date(at.last_change).getTime() : new Date(cl.last_changed).getTime(), vm = at.next_valve_maintenance ? new Date(at.next_valve_maintenance) : null;
-    const P = this._plan(r), ht = this._heatTime(r);
-    const tiles = `<div class="dg">${this._tile(I.open || at.window_open ? 'Offen' : 'Zu', 'Fenster', 'window')}${ht != null ? this._tile(this._durTxt(ht), 'Heute geheizt', 'flame') : ''}${P?.mode ? this._tile(esc(P.mode) + (P.temp != null ? ` <small>${de(P.temp, 1)}°</small>` : ''), P.on === false ? 'Plan (Automation aus)' : 'Plan gerade', 'cal') : ''}${P?.next ? this._tile(this._whenTxt(P.next), P.nextMode ? P.nextMode + ' ab' : 'Nächster Wechsel', 'clock') : ''}${this._tile(this._rel(lc).replace('vor ', ''), 'Letzte Änderung', 'clock')}${vm && !isNaN(vm) ? this._tile(vm.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' }), 'Ventilwartung', 'wrench') : ''}</div>`;
-    const errs = (typeof at.errors === 'string' && at.errors !== '[]' && at.errors.length > 2 ? `<div class="card-note" style="color:#fb7185">Thermostat meldet: ${esc(at.errors)}</div>` : '') + (r.temp ? this._staleNote(r.temp) : '');
+    const tiles = `<div class="dg">${this._tile(I.open || at.window_open || a.window_open ? 'Offen' : 'Zu', 'Fenster', 'window')}${ht != null ? this._tile(this._durTxt(ht), 'Heute geheizt', 'flame') : ''}${P?.mode ? this._tile(esc(P.mode) + (P.temp != null ? ` <small>${de(P.temp, 1)}°</small>` : ''), P.on === false ? 'Plan (Automatik aus)' : 'Plan gerade', 'cal') : ''}${P?.next ? this._tile(this._whenTxt(P.next), P.nextMode ? P.nextMode + ' ab' : 'Nächster Wechsel', 'clock') : ''}${!isNaN(pm) && pm > 0 ? this._tile(de(pm, 0) + ' Min.', 'Vorheizen', 'flame') : ''}${a.present != null ? this._tile(a.present ? 'Ja' : 'Nein', 'Jemand da', 'home') : ''}${!isNaN(lc) ? this._tile(this._rel(lc).replace('vor ', ''), 'Letzte Änderung', 'clock') : ''}${vm && !isNaN(vm) ? this._tile(vm.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' }), 'Ventilwartung', 'wrench') : ''}</div>`;
+    // Name ohne Raumnamen; bleibt nur ein Kürzel übrig (z. B. „BT“), heißt es einfach „Thermostat“
+    const short = s => { const n = (s.attributes.friendly_name || s.entity_id).replace(new RegExp('^' + r.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\s*', 'i'), '').replace(/[\s-]+$/, ''); return esc(n.length > 3 ? n : 'Thermostat'); };
+    const trv = `<div class="lab2">THERMOSTATE · ${D.trv.length}</div><div class="mcol">${D.trv.map(s => { const x = s.attributes, un = !okv(s.state); return `<div class="xr"><div class="ico">${ic('thermo', 19)}</div><div class="grow" data-act="more" data-e="${s.entity_id}"><div class="t">${short(s)}</div><div class="s">${un ? 'nicht erreichbar' : s.state === 'off' ? 'Aus' : `misst ${de(x.current_temperature)} ° · Soll ${de(x.temperature)} °`}</div></div></div>`; }).join('')}</div>`;
+    const notes = (a.decision_status && okv(a.decision_status) && a.decision_status !== D.label ? `<div class="card-note">${esc(String(a.decision_status))}</div>` : '')
+      + (typeof at.errors === 'string' && at.errors !== '[]' && at.errors.length > 2 ? `<div class="card-note" style="color:#fb7185">Thermostat meldet: ${esc(at.errors)}</div>` : '') + (r.temp ? this._staleNote(r.temp) : '');
     [r.temp, r.hum].forEach(x => { if (x && !this._hist[x]) this._need.add(x); });
-    const trend = this._trend(r, col);
     return `<div class="grab"></div><div class="sh"><div class="ico">${ic(r.icon, 24)}</div><div><h2>Heizung · ${esc(r.name)}</h2><p>${esc(status)}</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
-      <div class="hhero ${heat ? 'heat' : ''}">${dial}<div class="hside">${ctl}${seg}</div></div>
-      ${pre}${errs}
-      <div class="lab2">STATUS</div>${tiles}
-      ${trend}
+      <div class="hhero ${heat ? 'heat' : ''}">${dial}<div class="hside">${side}${seg}</div></div>
+      ${pre}${notes}<div class="lab2">STATUS</div>${tiles}${trv}
+      ${this._trend(r, col)}
       <div class="hbtns"><button class="qb" data-act="sched">${ic('clock', 14)}Heizungsplan</button><button class="qb" data-act="room" data-room="${r.id}">${ic(r.icon, 14)}Zurück zum Raum</button></div>`;
   }
 
@@ -4071,7 +4070,7 @@ class HomeAurora extends HTMLElement {
   _planIds(r) { const p = this._plans?.map[r.id]; return p ? [p.auto, ...p.sch, p.sel].filter(Boolean) : []; }
   /* Heizplan eines Raums: welcher Zeitplan gilt gerade, Komfort oder Eco, und wann ist der nächste Wechsel */
   _plan(r) {
-    const D = this._dh(r);
+    const D = r.heat && this._dh(r);
     if (D) {
       const a = D.a, nx = a.next_event ? new Date(a.next_event) : null, M = { comfort: 'Komfort', eco: 'Eco', away: 'Abwesend', off: 'Aus', boost: 'Boost', preheat: 'Vorheizen' };
       return { src: 'Dynamische Heizungssteuerung', mode: M[a.mode] || (a.mode ? String(a.mode) : ''), next: nx && !isNaN(nx) ? nx : null, on: D.auto };
@@ -4654,20 +4653,21 @@ class HomeAurora extends HTMLElement {
       }
       case 'hvac': {
         const R = this._dhRoom(e);
-        if (R) { this._dhSet(R, this._dh(R).mode === 'off' ? 'auto' : 'off'); break; }
+        if (R) { const D = this._dh(R); this._dhSet(R, D.mode === 'off' ? (D.kind ? 'auto' : 'heat') : 'off'); break; }
         h.callService('climate', 'set_hvac_mode', { entity_id: e, hvac_mode: this._val(e) === 'off' ? 'heat' : 'off' }); break;
       }
     }
   }
-  /* Raum mit Heizungssteuerung zum Thermostat e (nur der Hauptthermostat steht in data-e) */
-  _dhRoom(e) { return this._c.rooms.find(r => r.heat && r.climate === e) || null; }
-  /* auto: Regelung übernimmt · heat: Manuell (Regelung aus, Thermostate an) · off: Regelung und alle Thermostate aus */
+  /* Raum zum Thermostat e (nur der Hauptthermostat steht in data-e) */
+  _dhRoom(e) { return this._c.rooms.find(r => r.climate === e && this._s(e)) || null; }
+  /* auto: Regelung übernimmt · heat: Manuell (Regelung aus, Thermostate an) · off: Regelung und alle Thermostate aus.
+     Regelung = Schalter der Dynamischen Heizungssteuerung bzw. die Advanced-Heating-Control-Automation. */
   _dhSet(r, m) {
     const D = r && this._dh(r); if (!D) return;
     const h = this._h, ids = D.trv.map(s => s.entity_id);
-    if (r.heat.switch && this._s(r.heat.switch)) h.callService('switch', m === 'auto' ? 'turn_on' : 'turn_off', { entity_id: r.heat.switch });
+    if (D.sw && this._s(D.sw)) h.callService(D.kind === 'ahc' ? 'automation' : 'switch', m === 'auto' ? 'turn_on' : 'turn_off', { entity_id: D.sw });
     if (ids.length && (m === 'off' || D.mode === 'off')) h.callService('climate', 'set_hvac_mode', { entity_id: ids, hvac_mode: m === 'off' ? 'off' : 'heat' });
-    this._toast(m === 'auto' ? `${r.name}: Automatik an` : m === 'off' ? `${r.name}: Heizung aus` : `${r.name}: manuelle Steuerung`);
+    this._toast(m === 'auto' ? `${r.name}: Automatik an` : m === 'off' ? `${r.name}: Heizung aus` : D.kind ? `${r.name}: manuelle Steuerung` : `${r.name}: Heizung an`);
   }
 
   /* ───────────── Hintergrund-Effekte (Regen, Schnee, Sterne, Glühpunkte) ───────────── */
