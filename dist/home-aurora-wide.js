@@ -3942,14 +3942,16 @@ class HomeAurora extends HTMLElement {
     this._autoRepl = new Set(rooms.filter(r => r._auto && r._orig.climate && !(r._orig.climate in this._h.states)).map(r => r._orig.climate));
     return [...add].filter(e => e && e in this._h.states);
   }
-  /* Automations-Konfigurationen lesen (alle 30 Min.) und Räume mit Advanced-Heating-Control-Plänen verbinden */
+  /* Automations-Konfigurationen lesen (alle 30 Min.) und Räume mit Advanced-Heating-Control-Plänen verbinden.
+     Über die REST-Schnittstelle kommt die gespeicherte Konfiguration mit use_blueprint (klein, braucht Admin-Rechte);
+     das WebSocket-Kommando automation/config liefert dagegen den ausgerollten Blueprint (~80 KB pro Automation). */
   async _loadPlans() {
     if (this._plB || (this._plans && Date.now() - this._plans.t < 18e5)) return;
     this._plB = true;
     const map = {};
     try {
       const ids = Object.keys(this._h.states).filter(k => k.startsWith('automation.') && this._h.states[k].attributes?.id);
-      const cfgs = await Promise.all(ids.map(e => this._h.callWS({ type: 'automation/config', entity_id: e }).then(x => [e, x?.config], () => [e, null])));
+      const cfgs = await Promise.all(ids.map(e => this._h.callApi('GET', `config/automation/config/${encodeURIComponent(this._h.states[e].attributes.id)}`).then(x => [e, x], () => [e, null])));
       for (const [e, cfg] of cfgs) {
         const bp = cfg?.use_blueprint, inp = bp?.input || {};
         if (!bp || !/heating/i.test(bp.path || '') || !inp.input_trvs) continue;

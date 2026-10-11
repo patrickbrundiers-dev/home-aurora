@@ -6,7 +6,7 @@
 //   --shots   speichert je Ansicht einen Screenshot (PNG) in diesen Ordner
 //   --perf    misst zusätzlich die Last im Leerlauf und pro Home-Assistant-Update
 //   --only    nur eine Karte testen (aurora oder wide)
-//   --autos   Automations-Konfigurationen (Objekt entity_id → config) für automation/config; Standard: test/fixture-automations.json
+//   --autos   gespeicherte Automations-Konfigurationen (Objekt entity_id → config); Standard: test/fixture-automations.json
 //   --chaos   zusätzlich mit kaputten Zuständen: jede zweite Entität fehlt / alle „nicht verfügbar“ / gar keine
 // Chromium: Playwright muss installiert sein (npm i playwright); PW_CHROMIUM setzt optional den Browser-Pfad.
 import { readFileSync, mkdirSync, existsSync } from 'node:fs';
@@ -54,7 +54,8 @@ function setup({ tag, states, hist, autos }) {
     themes: { darkMode: true }, config: { latitude: 51.67, longitude: 8.35, time_zone: 'Europe/Berlin', unit_system: { temperature: '°C' } },
     hassUrl: (p) => p, calls: [],
     callService(d, s, data) { this.calls.push([d, s, data]); return Promise.resolve(); },
-    callApi: async () => [],
+    // gespeicherte Automations-Konfiguration (config/automation/config/<id>) für die Heizplan-Erkennung
+    callApi: async (method, path) => { const m = /^config\/automation\/config\/(.+)$/.exec(path); if (!m) return []; const e = Object.keys(states).find((k) => k.startsWith('automation.') && states[k].attributes?.id === decodeURIComponent(m[1])); if (e && autos[e]) return autos[e]; throw new Error('not found'); },
     callWS: async (m) => {
       if (m.type === 'call_service' && m.service === 'get_forecasts') { const e = m.target.entity_id; return { response: { [e]: { forecast: fc(m.service_data.type) } } }; }
       // Verlauf: 24 h gleichmäßig verteilte Werte um den aktuellen Zustand (nur im Normaldurchlauf; die Chaos-Läufe testen „kein Verlauf“)
@@ -70,7 +71,6 @@ function setup({ tag, states, hist, autos }) {
         }
         return o;
       }
-      if (m.type === 'automation/config') return autos[m.entity_id] ? { config: autos[m.entity_id] } : Promise.reject(new Error('not found'));
       if (m.type === 'repairs/list_issues') return { issues: [] };
       if (m.type === 'schedule/list') return [];
       return {};
