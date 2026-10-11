@@ -6,9 +6,10 @@
 //   --shots   speichert je Ansicht einen Screenshot (PNG) in diesen Ordner
 //   --perf    misst zusätzlich die Last im Leerlauf und pro Home-Assistant-Update
 //   --only    nur eine Karte testen (aurora oder wide)
+//   --autos   Automations-Konfigurationen (Objekt entity_id → config) für automation/config; Standard: test/fixture-automations.json
 //   --chaos   zusätzlich mit kaputten Zuständen: jede zweite Entität fehlt / alle „nicht verfügbar“ / gar keine
 // Chromium: Playwright muss installiert sein (npm i playwright); PW_CHROMIUM setzt optional den Browser-Pfad.
-import { readFileSync, mkdirSync } from 'node:fs';
+import { readFileSync, mkdirSync, existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
@@ -19,6 +20,8 @@ const statesFile = arg('--states', join(root, 'test/fixture-states.json'));
 const shots = arg('--shots', '');
 const perf = process.argv.includes('--perf');
 const states0 = JSON.parse(readFileSync(statesFile, 'utf8'));
+const autosFile = arg('--autos', join(root, 'test/fixture-automations.json'));
+const autos = existsSync(autosFile) ? JSON.parse(readFileSync(autosFile, 'utf8')) : {};
 // --chaos: dieselben Prüfungen mit fehlenden bzw. nicht erreichbaren Geräten (z. B. umbenannt, Akku leer, Integration weg)
 const VARIANTS = [['', states0]];
 if (process.argv.includes('--chaos')) {
@@ -40,7 +43,7 @@ const TARGETS = [
 ];
 
 // Läuft im Browser: baut ein hass-Objekt, das für die Karte wie Home Assistant aussieht.
-function setup({ tag, states, hist }) {
+function setup({ tag, states, hist, autos }) {
   const fc = (type) => {
     const out = [], now = Date.now(), step = type === 'daily' ? 864e5 : 36e5;
     for (let i = 0; i < (type === 'daily' ? 14 : 48); i++) out.push({ datetime: new Date(now + i * step).toISOString(), condition: ['sunny', 'partlycloudy', 'cloudy', 'rainy'][i % 4], temperature: 12 + 6 * Math.sin(i / 4), templow: 6, precipitation: i % 4 === 3 ? 1.2 : 0, precipitation_probability: (i * 13) % 100, wind_speed: 10 + (i % 5), wind_bearing: 220, humidity: 70, is_daytime: (i % 24) > 6 && (i % 24) < 20 });
@@ -61,10 +64,13 @@ function setup({ tag, states, hist }) {
         for (const e of m.entity_ids || []) {
           const st = states[e]; if (!st) continue;
           const v = parseFloat(st.state);
-          o[e] = Array.from({ length: 48 }, (_, i) => ({ s: isNaN(v) ? st.state : String(Math.round((v + 1.5 * Math.sin(i / 7) + (i % 5) * 0.1) * 10) / 10), lu: now - (48 - i) * 1800 }));
+          // Thermostate: abwechselnd heizen und warten, damit die Heizdauer etwas zu zählen hat
+          const cl = e.startsWith('climate.') ? (i) => ({ a: { ...st.attributes, hvac_action: i % 6 < 2 ? 'heating' : 'idle' } }) : () => ({});
+          o[e] = Array.from({ length: 48 }, (_, i) => ({ s: isNaN(v) ? st.state : String(Math.round((v + 1.5 * Math.sin(i / 7) + (i % 5) * 0.1) * 10) / 10), lu: now - (48 - i) * 1800, ...cl(i) }));
         }
         return o;
       }
+      if (m.type === 'automation/config') return autos[m.entity_id] ? { config: autos[m.entity_id] } : Promise.reject(new Error('not found'));
       if (m.type === 'repairs/list_issues') return { issues: [] };
       if (m.type === 'schedule/list') return [];
       return {};
@@ -89,7 +95,7 @@ for (const [vn, states] of VARIANTS) for (const t of TARGETS.filter((x) => !only
   await page.route(/^https?:/, (r) => r.abort());
   await page.setContent('<!doctype html><html><head><meta charset="utf-8"></head><body style="margin:0;background:#000"></body></html>');
   await page.addScriptTag({ content: readFileSync(join(root, t.file), 'utf8') });
-  await page.evaluate(setup, { tag: t.tag, states, hist: !vn });
+  await page.evaluate(setup, { tag: t.tag, states, hist: !vn, autos });
   await page.waitForTimeout(800);
 
   const check = async (label, fn, a) => {

@@ -77,7 +77,7 @@ const DEFAULTS = {
   plant: { entity: 'input_datetime.zuletzt_gegossen', name: 'Pflanzen', days: 7 },
   printer: {
     name: 'Bambu Lab P2S', prefix: 'sensor.p2s_22e8bj610701482_',
-    camera: 'camera.p2s_22e8bj610701482_kamera', light: 'light.p2s_22e8bj610701482_druckraumbeleuchtung', power: 'switch.lichterkette_wintergarten_steckdose_1',
+    camera: 'camera.p2s_22e8bj610701482_kamera', light: 'light.p2s_22e8bj610701482_druckraumbeleuchtung', power: 'switch.wintergarten_3d_drucker_steckdose_1',
     online: 'binary_sensor.p2s_22e8bj610701482_online', door: 'binary_sensor.p2s_22e8bj610701482_gehausetur', error: 'binary_sensor.p2s_22e8bj610701482_druckfehler', hms: 'binary_sensor.p2s_22e8bj610701482_hms_fehler',
     energyJob: 'sensor.3d_druck_energie_aktueller_job', energyTotal: 'sensor.3d_druck_energie_gesamt', energyYear: 'sensor.3d_drucker_strom_jahr', cost: 'sensor.3d_druck_kosten_aktueller_druck', filamentCost: 'sensor.3d_druck_filamentkosten_aktueller_job',
     powerW: 'sensor.lichterkette_wintergarten_leistung', volt: 'sensor.lichterkette_wintergarten_spannung',
@@ -92,10 +92,12 @@ const DEFAULTS = {
       ['sensor.bad_dusche_durchschnitt_heute', 'Ø Dauer heute', 'min'], ['sensor.bad_duschen_gesamt', 'Gesamt', ''],
     ],
   },
+  // Wandtablet (Fully Kiosk über die Home-Assistant-Integration): Helligkeit und die Automation „Helligkeit nach Tageszeit“
+  tablet: { name: 'Wandtablet', brightness: 'number.tab_a9_von_patrick_bildschirmhelligkeit', auto: 'automation.wandtablet_helligkeit_nach_tageszeit', battery: 'sensor.tab_a9_von_patrick_batterie', plugged: 'binary_sensor.tab_a9_von_patrick_eingesteckt' },
   rooms: [
     { id: 'wohnzimmer', name: 'Wohnzimmer', icon: 'sofa', temp: 'sensor.0x00158d008b860ecb_temperature', hum: 'sensor.0x00158d008b860ecb_humidity', climate: 'climate.wohnzimmer_esstisch', climate_more: ['climate.wohnzimmer_hinter_sofa', 'climate.wohnzimmer_wintergarten'], heat: { status: 'sensor.wohnzimmer_heizung_status', switch: 'switch.wohnzimmer_heizung_regelung_aktiv' }, window: ['binary_sensor.fenster_wohnzimmer'], lights: ['light.wohnzimmer_sofa', 'light.sofa_indirekt', 'light.bilderleiste', 'light.flur_vorne_1'], media: ['media_player.wohnzimmer_google_tv', ['media_player.wohnzimmer', 'media_player.wohnzimmer_wohnzimmer']] },
     { id: 'kueche', name: 'Küche', icon: 'cook', temp: 'sensor.kuche_temperatur_temperature', hum: 'sensor.kuche_temperatur_humidity', window: ['binary_sensor.balkontur_contact'], lights: ['light.kuche_kochfeld', 'light.lsc_smart_led_strip_rgbcctic_5m'], media: [['media_player.jenny_patrick', 'media_player.kuche_jenny_patrick']] },
-    { id: 'schlafzimmer', name: 'Schlafzimmer', icon: 'bed', temp: 'sensor.schlafzimmer_temperatur_temperature', hum: 'sensor.schlafzimmer_temperatur_humidity', climate: 'climate.schlafzimmer_bt', window: ['binary_sensor.fenster_schlafzimmer'], lights: ['light.bett_patrick', 'light.schlafzimmer_patrick_nachtlicht', 'light.jenny_nachtlicht', 'light.schlafzimmer'], media: ['media_player.fernseher_im_schlafzimmer', 'media_player.fernseher_im_schlafzimmer_2'] },
+    { id: 'schlafzimmer', name: 'Schlafzimmer', icon: 'bed', temp: 'sensor.schlafzimmer_temperatur_temperature', hum: 'sensor.schlafzimmer_temperatur_humidity', climate: 'climate.schlafzimmer_bt', window: ['binary_sensor.fenster_schlafzimmer'], lights: ['light.bett_patrick', 'light.schlafzimmer_patrick_nachtlicht'], media: ['media_player.fernseher_im_schlafzimmer', 'media_player.fernseher_im_schlafzimmer_2'] },
     { id: 'leonie', name: 'Leonie', icon: 'star', temp: 'sensor.leonie_temp_temperature', hum: 'sensor.leonie_temp_humidity', climate: 'climate.leonie_bt', window: ['binary_sensor.leonie_leonie_fenster'], lights: ['light.leonie_bett_licht'], media: ['media_player.leonie_leonie_alexa'] },
     { id: 'nele', name: 'Nele', icon: 'heart', temp: 'sensor.nele_temperatur_temperature', hum: 'sensor.nele_temperatur_humidity', climate: 'climate.kleines_kinderzimmer_2', window: ['binary_sensor.lisa_fenster_contact'], media: [['media_player.kinderzimmer', 'media_player.nele_nele_alexa']] },
     { id: 'lisa', name: 'Lisa', icon: 'sparkle', temp: 'sensor.lisa_temperatur_temperature_2', hum: 'sensor.lisa_temperatur_humidity_2', climate: 'climate.grosse_kinderzimmer_bt', window: ['binary_sensor.fenster_grosses_kinderzimmer'], media: ['media_player.patricks_echo_dot'] },

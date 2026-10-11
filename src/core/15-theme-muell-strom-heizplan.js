@@ -73,6 +73,16 @@
     this._sysB = false;
     this._renderSoon();
   }
+  /* Geräte-Check: eingetragene Entitäten, die es in Home Assistant nicht (mehr) gibt – umbenannt oder gelöscht.
+     Ohne diese Prüfung verschwinden Räume, Lichter oder Thermostate still aus dem Dashboard. */
+  _missing() {
+    const h = this._h; if (!h) return [];
+    const n = Object.keys(h.states).length;
+    if (this._missC && this._missC.n === n && this._missC.w === this._watch.length && Date.now() - this._missC.t < 6e4) return this._missC.v;
+    const v = n ? this._watch.filter(e => /^[a-z_]+\.[a-z0-9_]*[a-z0-9]$/.test(e) && !e.startsWith('builtin') && !(e in h.states) && !this._autoRepl?.has(e)) : [];
+    this._missC = { n, w: this._watch.length, t: Date.now(), v };
+    return v;
+  }
   _sysData() {
     const h = this._h, crit = new Set(this._c.critical), ig = this._c.ignore || [], ups = [], cr = [], other = {}, plat = {};
     for (const k in h.states) {
@@ -87,10 +97,12 @@
     const iss = this._sys?.issues || [], nOther = Object.values(other).reduce((a, b) => a + b, 0);
     const bad = iss.some(i => i.severity === 'critical' || i.severity === 'error');
     const lvl = bad ? 'bad' : (ups.length || iss.length || cr.length) ? 'warn' : 'ok';
-    return { ups, cr, other, nOther, iss, lvl, plat };
+    const miss = this._missing();
+    return { ups, cr, other, nOther, iss, lvl: lvl === 'ok' && miss.length ? 'warn' : lvl, plat, miss };
   }
   _sysRow() {
     const D = this._sysData(), parts = [];
+    if (D.miss.length) parts.push(`${D.miss.length} Gerät${D.miss.length === 1 ? '' : 'e'} fehl${D.miss.length === 1 ? 't' : 'en'}`);
     if (D.cr.length) parts.push(`${D.cr.length} Gerät${D.cr.length === 1 ? '' : 'e'} offline`);
     if (D.iss.length) parts.push(`${D.iss.length} Reparatur${D.iss.length === 1 ? '' : 'en'}`);
     if (D.ups.length) parts.push(`${D.ups.length} Update${D.ups.length === 1 ? '' : 's'}`);
@@ -104,6 +116,7 @@
     const prettyIssue = i => String(i.translation_key || i.issue_id || '').replace(/[_\-]+/g, ' ');
     const oth = Object.entries(D.other).sort((a, b) => b[1] - a[1]);
     return `<div class="grab"></div><div class="sh"><div class="ico">${ic('wrench', 24)}</div><div><h2>Systemstatus</h2><p>${D.lvl === 'ok' ? 'Alles Wichtige in Ordnung' : 'Es gibt Hinweise'}</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
+      ${D.miss.length ? `<div class="lab2">FEHLT IN HOME ASSISTANT · ${D.miss.length}</div>${D.miss.map(e => row('alert', e, 'Im Dashboard eingetragen, in Home Assistant nicht gefunden', '', 'fehlt', '#fbbf24')).join('')}<div class="card-note">Meist umbenannt oder gelöscht. Das Dashboard blendet diese Geräte aus, bis die Entitäts-ID in der Konfiguration angepasst ist.</div>` : `<div class="lab2">GERÄTE-CHECK</div><div class="empty">✨ Alle ${this._watch.filter(e => /^[a-z_]+\.[a-z0-9_]*[a-z0-9]$/.test(e)).length} eingetragenen Geräte gefunden</div>`}
       <div class="lab2">UPDATES · ${D.ups.length}</div>${D.ups.length ? D.ups.map(u => row('refresh', u.n, u.cur && u.lat ? `${u.cur} → ${u.lat}` : '', u.e, 'verfügbar', '#38bdf8')).join('') : '<div class="empty">✨ Alles ist aktuell</div>'}
       <div class="lab2">REPARATUREN · ${D.iss.length}</div>${D.iss.length ? D.iss.map(i => row('alert', (i.domain || 'System') + ' · ' + prettyIssue(i), i.severity ? 'Schwere: ' + i.severity : '', '', '', i.severity === 'warning' ? '#fbbf24' : '#fb7185')).join('') + '<div class="card-note">Details unter Einstellungen › System › Reparaturen</div>' : `<div class="empty">${this._sys ? '✨ Keine offenen Reparaturen' : 'Wird geladen …'}</div>`}
       <div class="lab2">NICHT VERFÜGBAR · WICHTIG · ${D.cr.length}</div>${D.cr.length ? D.cr.map(e => row(dom(e) === 'light' ? 'bulb' : dom(e) === 'climate' ? 'thermo' : 'plug', this._name(e), e, e, 'offline', '#fb7185')).join('') : '<div class="empty">✨ Alle wichtigen Geräte sind erreichbar</div>'}

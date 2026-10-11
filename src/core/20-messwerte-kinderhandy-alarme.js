@@ -25,6 +25,16 @@
     this._fuLast = v;
     try { window.fully.setScreenBrightness(v); } catch (e) { /* optional */ }
   }
+  /* Wandtablet über Home Assistant (Fully-Integration): geht von jedem Gerät aus, auch vom Handy */
+  _tabletSet() {
+    const T = this._c.tablet, b = T && this._s(T.brightness); if (!b) return '';
+    const v = parseFloat(b.state), mx = parseFloat(b.attributes.max) || 255, au = T.auto && this._s(T.auto), bat = this._num(T.battery), pl = this._val(T.plugged) === 'on';
+    const pct = isNaN(v) ? null : Math.round(v / mx * 100), L = [['35', 'Dunkel'], ['120', 'Mittel'], ['200', 'Hell'], [String(mx), 'Max']];
+    return `<div class="lab2">${esc((T.name || 'Wandtablet').toUpperCase())} · HELLIGKEIT</div>
+      <div class="hctl" style="margin-bottom:10px"><button class="rbn" data-act="tbright" data-d="-20" aria-label="Dunkler">${ic('minus', 22)}</button><div class="hset"><b>${pct == null ? '–' : pct + ' %'}</b><span>${bat != null ? `Akku ${de(bat, 0)} %${pl ? ' · lädt' : ''}` : 'Bildschirm'}</span></div><button class="rbn" data-act="tbright" data-d="20" aria-label="Heller">${ic('plus', 22)}</button></div>
+      <div class="seg wide">${L.map(([x, l]) => `<button class="${!isNaN(v) && Math.abs(v - +x) < 3 ? 'on' : ''}" data-act="tbright" data-v="${x}">${l}</button>`).join('')}</div>
+      ${au ? `<div class="card-note" style="margin-top:12px">Automatisch nach Tageszeit (tags hell, Dämmerung mittel, nachts dunkel)</div><div class="seg wide">${[['on', 'An'], ['off', 'Aus']].map(([x, l]) => `<button class="${au.state === x ? 'on' : ''}" data-act="tauto" data-m="${x}">${l}</button>`).join('')}</div>${au.state === 'on' ? '<div class="card-note">Von Hand gestellte Helligkeit gilt bis zum nächsten Wechsel der Tageszeit.</div>' : ''}` : ''}`;
+  }
   _fullySet() {
     if (!this._fullyOk()) return '';
     const on = this._fuPref === '1', seg = `<div class="seg wide">${[['1', 'Automatisch'], ['0', 'Aus']].map(x => `<button class="${(on ? '1' : '0') === x[0] ? 'on' : ''}" data-act="fuauto" data-m="${x[0]}">${x[1]}</button>`).join('')}</div>`;
