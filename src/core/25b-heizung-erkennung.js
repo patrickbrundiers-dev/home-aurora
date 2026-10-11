@@ -54,7 +54,7 @@
   _planIds(r) { const p = this._plans?.map[r.id]; return p ? [p.auto, ...p.sch, p.sel].filter(Boolean) : []; }
   /* Heizplan eines Raums: welcher Zeitplan gilt gerade, Komfort oder Eco, und wann ist der nächste Wechsel */
   _plan(r) {
-    const D = this._dh(r);
+    const D = r.heat && this._dh(r);
     if (D) {
       const a = D.a, nx = a.next_event ? new Date(a.next_event) : null, M = { comfort: 'Komfort', eco: 'Eco', away: 'Abwesend', off: 'Aus', boost: 'Boost', preheat: 'Vorheizen' };
       return { src: 'Dynamische Heizungssteuerung', mode: M[a.mode] || (a.mode ? String(a.mode) : ''), next: nx && !isNaN(nx) ? nx : null, on: D.auto };

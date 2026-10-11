@@ -189,19 +189,20 @@
       }
       case 'hvac': {
         const R = this._dhRoom(e);
-        if (R) { this._dhSet(R, this._dh(R).mode === 'off' ? 'auto' : 'off'); break; }
+        if (R) { const D = this._dh(R); this._dhSet(R, D.mode === 'off' ? (D.kind ? 'auto' : 'heat') : 'off'); break; }
         h.callService('climate', 'set_hvac_mode', { entity_id: e, hvac_mode: this._val(e) === 'off' ? 'heat' : 'off' }); break;
       }
     }
   }
-  /* Raum mit Heizungssteuerung zum Thermostat e (nur der Hauptthermostat steht in data-e) */
-  _dhRoom(e) { return this._c.rooms.find(r => r.heat && r.climate === e) || null; }
-  /* auto: Regelung übernimmt · heat: Manuell (Regelung aus, Thermostate an) · off: Regelung und alle Thermostate aus */
+  /* Raum zum Thermostat e (nur der Hauptthermostat steht in data-e) */
+  _dhRoom(e) { return this._c.rooms.find(r => r.climate === e && this._s(e)) || null; }
+  /* auto: Regelung übernimmt · heat: Manuell (Regelung aus, Thermostate an) · off: Regelung und alle Thermostate aus.
+     Regelung = Schalter der Dynamischen Heizungssteuerung bzw. die Advanced-Heating-Control-Automation. */
   _dhSet(r, m) {
     const D = r && this._dh(r); if (!D) return;
     const h = this._h, ids = D.trv.map(s => s.entity_id);
-    if (r.heat.switch && this._s(r.heat.switch)) h.callService('switch', m === 'auto' ? 'turn_on' : 'turn_off', { entity_id: r.heat.switch });
+    if (D.sw && this._s(D.sw)) h.callService(D.kind === 'ahc' ? 'automation' : 'switch', m === 'auto' ? 'turn_on' : 'turn_off', { entity_id: D.sw });
     if (ids.length && (m === 'off' || D.mode === 'off')) h.callService('climate', 'set_hvac_mode', { entity_id: ids, hvac_mode: m === 'off' ? 'off' : 'heat' });
-    this._toast(m === 'auto' ? `${r.name}: Automatik an` : m === 'off' ? `${r.name}: Heizung aus` : `${r.name}: manuelle Steuerung`);
+    this._toast(m === 'auto' ? `${r.name}: Automatik an` : m === 'off' ? `${r.name}: Heizung aus` : D.kind ? `${r.name}: manuelle Steuerung` : `${r.name}: Heizung an`);
   }
 

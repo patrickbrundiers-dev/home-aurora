@@ -98,15 +98,26 @@ class HomeAurora extends HTMLElement {
     if (!cs.length) return '251,191,36';
     return [0, 1, 2].map(i => Math.round(cs.reduce((a, c) => a + c[i], 0) / cs.length)).join(',');
   }
-  /* Räume mit der Integration „Dynamische Heizungssteuerung“ (dynamic_heating): sie regelt mehrere Thermostate nach
-     Zeitplan, Anwesenheit und Wetter. Die Karte zeigt dann deren Ziel und Status statt des Sollwerts eines Thermostats. */
+  /* Heizungssteuerung eines Raums – für jede Heizung gleich, egal welche Integration dahintersteckt:
+     • „Dynamische Heizungssteuerung“ (dynamic_heating, Schlüssel heat): regelt mehrere Thermostate, Ziel und Status kommen vom Sensor.
+     • Blueprint „Advanced Heating Control“: Automatik = Automation an, Ziel steht direkt am Thermostat.
+     • sonst nur das Thermostat (Manuell/Aus).
+     Ergebnis: auto (Automatik aktiv), mode (heat/off), act (heating/idle), target, label, trv (alle Thermostate),
+     kind ('dh' | 'ahc' | null) und sw (Schalter bzw. Automation der Automatik). */
   _dh(r) {
-    if (!r.heat) return null;
-    const st = this._s(r.heat.status), a = st?.attributes || {}, auto = this._val(r.heat.switch) === 'on' && a.enabled !== false;
+    if (!r.climate) return null;
     const trv = [r.climate, ...(r.climate_more || [])].map(e => this._s(e)).filter(Boolean);
     const heating = trv.some(s => { const x = s.attributes; return x.hvac_action === 'heating' || (x.hvac_action == null && s.state !== 'off' && x.temperature != null && x.current_temperature != null && x.temperature > x.current_temperature + 0.2); });
-    const target = auto ? (a.current_setpoint ?? a.target_temperature ?? trv[0]?.attributes.temperature) : trv[0]?.attributes.temperature;
-    return { st, a, auto, trv, mode: trv.length && trv.every(s => s.state === 'off') ? 'off' : 'heat', act: heating ? 'heating' : 'idle', target, label: st && okv(st.state) ? st.state : '' };
+    const mode = trv.length && trv.every(s => s.state === 'off') ? 'off' : 'heat', act = heating ? 'heating' : 'idle', t0 = trv[0]?.attributes.temperature;
+    if (r.heat) {
+      const st = this._s(r.heat.status), a = st?.attributes || {}, auto = this._val(r.heat.switch) === 'on' && a.enabled !== false;
+      const target = auto ? (a.current_setpoint ?? a.target_temperature ?? t0) : t0;
+      return { kind: 'dh', sw: r.heat.switch, st, a, auto, trv, mode, act, target, label: st && okv(st.state) ? st.state : '' };
+    }
+    const p = this._plans?.map[r.id], auto = !!p && this._val(p.auto) === 'on';
+    let label = '';
+    if (auto) { const P = this._plan(r); if (P?.mode) label = 'Plan ' + P.mode; }
+    return { kind: p ? 'ahc' : null, sw: p?.auto || null, st: null, a: {}, auto, trv, mode, act, target: t0, label };
   }
   _room(r) {
     let cl = r.climate ? this._s(r.climate) : null;
