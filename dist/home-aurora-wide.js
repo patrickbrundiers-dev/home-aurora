@@ -4064,6 +4064,9 @@ class HomeAurora extends HTMLElement {
      die Rezepte (mit Bildern recht groß) erst, wenn der Reiter Rezepte offen ist. */
   _shopC() { return this._c.shopping || {}; }
   _shopOk() { const e = this._shopC().list, s = e && this._s(e); return !!s && okv(s.state); }
+  /* was die Liste kann (supported_features: 1 = anlegen, 2 = löschen, 4 = ändern); ohne Angabe alles */
+  _shopCan(b) { const f = this._attr(this._shopC().list, 'supported_features'); return f == null || !!(f & b); }
+  _rcpOk() { const e = this._shopC().recipes, s = e && this._s(e); return !!s && okv(s.state); }
   async _loadShop(force) {
     const e = this._shopC().list, s = e && this._s(e);
     if (!s || !okv(s.state) || this._shopB) return;
@@ -4121,7 +4124,7 @@ class HomeAurora extends HTMLElement {
   }
   _shopDone() { return (this._shop?.items || []).filter(i => i.status === 'completed').sort((a, b) => String(b.completed || '').localeCompare(String(a.completed || ''))); }
   _shopRow() {
-    if (!this._shopOk()) return '';
+    if (!this._shopOk()) return this._rcpOk() ? `<button class="xr" data-act="shop"><div class="ico">${ic('cook', 19)}</div><div><div class="t">Rezepte</div><div class="s">${parseInt(this._val(this._shopC().recipes), 10) || 0} Rezepte</div></div></button>` : '';
     this._loadShop();
     const n = parseInt(this._val(this._shopC().list), 10) || 0, O = this._shop ? this._shopOpen() : [];
     const sub = n ? `${n} offen${O.length ? ' · ' + O.slice(0, 3).map(o => esc(o.name)).join(', ') + (O.length > 3 ? ' …' : '') : ''}` : 'Nichts auf der Liste';
@@ -4154,7 +4157,7 @@ class HomeAurora extends HTMLElement {
     return out.some(x => x.r) ? out : null;
   }
   _sShop() {
-    const C = this._shopC(), ok = this._shopOk(), rOk = C.recipes && this._s(C.recipes) && okv(this._val(C.recipes));
+    const C = this._shopC(), ok = this._shopOk(), rOk = this._rcpOk(), cA = ok && this._shopCan(1), cD = this._shopCan(2), cU = this._shopCan(4);
     const head = p => `<div class="grab"></div><div class="sh"><div class="ico">${ic('cart', 24)}</div><div><h2>Einkaufsliste${rOk ? ' &amp; Rezepte' : ''}</h2><p>${p}</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>`;
     if (!ok && !rOk) return head('Nicht verfügbar') + `<div class="empty">Keine Einkaufsliste gefunden. In der Karten-Konfiguration unter <b>shopping: list:</b> eine To-do-Liste eintragen.</div>`;
     const tab = rOk && (this._shopTab === 'rcp' || !ok) ? 'rcp' : 'list';
@@ -4163,29 +4166,29 @@ class HomeAurora extends HTMLElement {
     const tabs = ok && rOk ? `<div class="lstab"><button class="${tab === 'list' ? 'on' : ''}" data-act="shoptab" data-m="list">${ic('cart', 15)} Einkaufen${n ? ' · ' + n : ''}</button><button class="${tab === 'rcp' ? 'on' : ''}" data-act="shoptab" data-m="rcp">${ic('cook', 15)} Rezepte${this._rcp ? ' · ' + R.length : ''}</button></div>` : '';
     if (tab === 'rcp') return head(`${R.length || parseInt(this._val(C.recipes), 10) || 0} Rezepte`) + tabs + this._sRcp();
     const O = this._shopOpen(), D = this._shopDone(), qk = (C.quick || []).filter(q => !this._onList(q));
-    const row = o => `<div class="todo"><button class="ck" data-act="shopdone" data-u="${esc(o.uids.join('|'))}" aria-label="${esc(o.name)} abhaken">${ic('check', 16)}</button><div class="t">${esc(o.name)}</div>${o.uids.length > 1 ? `<span class="shx">×${o.uids.length}</span>` : ''}</div>`;
+    const row = o => `<div class="todo${cU ? '' : ' ro'}"><button class="ck" data-act="shopdone" data-u="${esc(o.uids.join('|'))}" aria-label="${esc(o.name)} abhaken">${ic('check', 16)}</button><div class="t">${esc(o.name)}</div>${o.uids.length > 1 ? `<span class="shx">×${o.uids.length}</span>` : ''}</div>`;
     const done = D.slice(0, this._shopAll ? 60 : 6);
     return head(n ? `${n} ${n === 1 ? 'Eintrag' : 'Einträge'} offen` : 'Alles eingekauft') + tabs
-      + `<div class="addrow"><input id="shopq" type="text" maxlength="120" placeholder="Was fehlt? z. B. 2 Liter Milch" autocomplete="off" enterkeyhint="done" aria-label="Neuer Eintrag"><button data-act="shopadd" aria-label="Hinzufügen">${ic('plus', 20)}</button></div>`
-      + (qk.length ? `<div class="annp shq">${qk.map(q => `<button data-act="shopq" data-v="${esc(q)}">${ic('plus', 12)} ${esc(q)}</button>`).join('')}</div>` : '')
+      + (cA ? `<div class="addrow"><input id="shopq" type="text" maxlength="120" placeholder="Was fehlt? z. B. 2 Liter Milch" autocomplete="off" enterkeyhint="done" aria-label="Neuer Eintrag"><button data-act="shopadd" aria-label="Hinzufügen">${ic('plus', 20)}</button></div>` : '')
+      + (cA && qk.length ? `<div class="annp shq">${qk.map(q => `<button data-act="shopq" data-v="${esc(q)}">${ic('plus', 12)} ${esc(q)}</button>`).join('')}</div>` : '')
       + `<div class="lab2">AUF DER LISTE · ${this._shop ? O.length : n}</div>`
       + (!this._shop ? '<div class="empty sm">Liste wird geladen …</div>' : O.length ? O.map(row).join('') : '<div class="empty">🛒 Nichts auf der Liste</div>')
-      + (D.length ? `<div class="lab2 shdl"><span>ERLEDIGT · ${D.length}</span><button class="vbt" data-act="shopclr">${ic('trash', 13)} ${this._shopArm ? 'Wirklich löschen?' : 'Erledigte löschen'}</button></div>
-        ${done.map(i => `<div class="todo dn"><button class="ck on" data-act="shopundo" data-u="${esc(i.uid)}" aria-label="${esc(i.summary)} wieder auf die Liste">${ic('check', 16)}</button><div class="t">${esc(i.summary)}</div></div>`).join('')}
+      + (D.length ? `<div class="lab2 shdl"><span>ERLEDIGT · ${D.length}</span>${cD ? `<button class="vbt" data-act="shopclr">${ic('trash', 13)} ${this._shopArm ? 'Wirklich löschen?' : 'Erledigte löschen'}</button>` : ''}</div>
+        ${done.map(i => `<div class="todo dn${cU ? '' : ' ro'}"><button class="ck on" data-act="shopundo" data-u="${esc(i.uid)}" aria-label="${esc(i.summary)} wieder auf die Liste">${ic('check', 16)}</button><div class="t">${esc(i.summary)}</div></div>`).join('')}
         ${D.length > done.length ? `<button class="vbt shmore" data-act="shopall">Alle ${D.length} erledigten zeigen</button>` : ''}` : '')
       + (this._shop?.err ? '<div class="card-note">Die Liste konnte gerade nicht geladen werden.</div>' : '');
   }
   _sRcp() {
     if (!this._rcp) return '<div class="empty sm">Rezepte werden geladen …</div>';
-    const R = this._rcp.list, r = this._rcpSel && R.find(x => x.uid === this._rcpSel);
+    const R = this._rcp.list, r = this._rcpSel && R.find(x => x.uid === this._rcpSel), cA = this._shopOk() && this._shopCan(1);
     if (r) {
       const sv = this._rcpServ || r.serv || 0, f = r.serv && sv ? sv / r.serv : 1;
-      const ing = r.ing.map((g, i) => { const on = this._onList(g.name); return `<div class="ing${on ? ' on' : ''}"><span class="q">${esc([this._amt(g.amount, f), String(g.unit || '').trim()].filter(Boolean).join(' '))}</span><span class="n">${esc(String(g.name).trim())}</span><button class="mpb" data-act="rcpone" data-i="${i}" aria-label="${esc(String(g.name).trim())} auf die Liste" ${on ? 'disabled' : ''}>${ic(on ? 'check' : 'plus', 16)}</button></div>`; }).join('');
+      const ing = r.ing.map((g, i) => { const on = this._onList(g.name); return `<div class="ing${on ? ' on' : ''}"><span class="q">${esc([this._amt(g.amount, f), String(g.unit || '').trim()].filter(Boolean).join(' '))}</span><span class="n">${esc(String(g.name).trim())}</span>${cA ? `<button class="mpb" data-act="rcpone" data-i="${i}" aria-label="${esc(String(g.name).trim())} auf die Liste" ${on ? 'disabled' : ''}>${ic(on ? 'check' : 'plus', 16)}</button>` : ''}</div>`; }).join('');
       return `<button class="vbt rcback" data-act="rcpsel" data-u="">${ic('chevron', 13)} Alle Rezepte</button>
         <div class="rch"${r.img ? ` style="background-image:url('${esc(r.img)}')"` : ''}>${r.img ? '' : ic('cook', 40)}<div class="rct"><h3>${esc(r.name)}</h3><span>${[r.cat, r.ing.length ? r.ing.length + ' Zutaten' : '', r.steps.length ? r.steps.length + ' Schritte' : ''].filter(Boolean).map(esc).join(' · ')}</span></div></div>
         ${r.ing.length ? `<div class="lab2 shdl"><span>ZUTATEN</span>${r.serv ? `<span class="rsv"><button class="mpb" data-act="rcpserv" data-d="-1" aria-label="Weniger Portionen" ${sv <= 1 ? 'disabled' : ''}>${ic('minus', 15)}</button><b>${sv} ${sv === 1 ? 'Portion' : 'Portionen'}</b><button class="mpb" data-act="rcpserv" data-d="1" aria-label="Mehr Portionen">${ic('plus', 15)}</button></span>` : ''}</div>
           <div class="ings">${ing}</div>
-          ${this._shopOk() ? `<button class="pbtn rcall" data-act="rcpall">${ic('cart', 17)} Fehlende Zutaten auf die Einkaufsliste</button>` : ''}` : ''}
+          ${cA ? `<button class="pbtn rcall" data-act="rcpall">${ic('cart', 17)} Fehlende Zutaten auf die Einkaufsliste</button>` : ''}` : ''}
         ${r.steps.length ? `<div class="lab2">ZUBEREITUNG</div><ol class="stp">${r.steps.map(s => `<li>${esc(String(s).trim())}</li>`).join('')}</ol>` : ''}
         ${r.note ? `<div class="card-note">${esc(r.note)}</div>` : ''}`;
     }
@@ -4217,7 +4220,9 @@ class HomeAurora extends HTMLElement {
     for (const u of U) {
       const it = this._shop?.items.find(i => i.uid === u);
       if (it) { it.status = status; it.completed = status === 'completed' ? new Date().toISOString() : undefined; }
-      if (!/^neu\d/.test(u)) this._h.callService('todo', 'update_item', { entity_id: e, item: u, status });
+      // gerade erst eingetragen: die echte UID kennt die Karte noch nicht, Home Assistant findet den Eintrag auch über den Text
+      const item = /^neu\d/.test(u) ? it?.summary : u;
+      if (item) this._h.callService('todo', 'update_item', { entity_id: e, item, status });
     }
     this._renderSheet();
   }
