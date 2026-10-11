@@ -128,6 +128,7 @@
       case 'ambafter': this._ambPref = el.dataset.m; try { localStorage.setItem('home-aurora-amb', el.dataset.m); } catch (er) { /* ok */ } this._lastAct = Date.now(); this._renderSheet(); break;
       case 'ambient': this._closeSheet(); this._ambOn(); break;
       case 'radar': this._sheet = { t: 'radar' }; this._renderSheet(); break;
+      case 'rdsrc': this._rdSetSrc(el.dataset.s); break;
       case 'lock': this._lockToggle(); break;
       case 'kid': this._sheet = { t: 'kid', i: parseInt(el.dataset.i, 10) || 0 }; this._renderSheet(); break;
       case 'pz': if (!this._pzOn()) break; if (!this._pzView()) { this._sheet = { t: 'clean' }; this._renderSheet(); break; } this._v = 'clean'; this._enter = true; this._counted = false; this._closeSheet(); this._render(); this.scrollIntoView?.({ block: 'start' }); break;
