@@ -111,6 +111,13 @@ class HomeAurora extends HTMLElement {
     const mode = trv.length && trv.every(s => s.state === 'off') ? 'off' : 'heat', act = heating ? 'heating' : 'idle', t0 = trv[0]?.attributes.temperature;
     if (r.heat) {
       const st = this._s(r.heat.status), a = st?.attributes || {}, auto = this._val(r.heat.switch) === 'on' && a.enabled !== false;
+      // neuere Integration: Betriebsart-Auswahl + eigenes Raum-Thermostat (Ziel und „heizt gerade“ kommen von dort)
+      const X = r.heat.status ? this._dhX(r.heat.status) : null, sel = X ? this._val(X.mode) : null;
+      if (X && okv(sel)) {
+        const rx = (X.cl && this._s(X.cl)?.attributes) || {}, aut = auto && sel === 'Automatik', off = auto ? sel === 'Aus' : mode === 'off';
+        const act2 = rx.hvac_action ? (rx.hvac_action === 'heating' ? 'heating' : 'idle') : act;
+        return { kind: 'dh', x: X, sel, on: auto, sw: r.heat.switch, st, a, auto: aut, trv, mode: off ? 'off' : 'heat', act: off ? 'idle' : act2, target: rx.temperature ?? a.current_setpoint ?? a.target_temperature ?? t0, label: st && okv(st.state) ? st.state : '' };
+      }
       const target = auto ? (a.current_setpoint ?? a.target_temperature ?? t0) : t0;
       return { kind: 'dh', sw: r.heat.switch, st, a, auto, trv, mode, act, target, label: st && okv(st.state) ? st.state : '' };
     }
