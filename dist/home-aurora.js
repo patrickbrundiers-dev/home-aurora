@@ -1427,7 +1427,7 @@ class HomeAurora extends HTMLElement {
     const c = cfg || {};
     this._c = Object.assign({}, DEFAULTS, c, { outdoor: { ...DEFAULTS.outdoor, ...(c.outdoor || {}) }, stats: { ...DEFAULTS.stats, ...(c.stats || {}) }, extras: { ...DEFAULTS.extras, ...(c.extras || {}) }, bath: { ...DEFAULTS.bath, ...(c.bath || {}) }, station: { ...DEFAULTS.station, ...(c.station || {}) }, alerts: { ...DEFAULTS.alerts, ...(c.alerts || {}) }, plant: { ...DEFAULTS.plant, ...(c.plant || {}) }, printer: { ...DEFAULTS.printer, ...(c.printer || {}) }, power: { ...DEFAULTS.power, ...(c.power || {}) }, wasteNames: { ...DEFAULTS.wasteNames, ...(c.wasteNames || {}) }, shopping: { ...DEFAULTS.shopping, ...(c.shopping || {}) } });
     this._c.rooms = (this._c.rooms || []).map(r => ({ ...r })); // eigene Kopie: die Heizungserkennung ergänzt Räume
-    try { this._themePref = localStorage.getItem('home-aurora-theme'); this._ambPref = localStorage.getItem('home-aurora-amb'); this._nightPref = localStorage.getItem('home-aurora-ambnight'); this._fuPref = localStorage.getItem('home-aurora-fully'); this._pzvPref = localStorage.getItem('home-aurora-pzview'); this._pzsPref = localStorage.getItem('home-aurora-pzshow'); } catch (e) { /* kein Speicher */ }
+    try { this._themePref = localStorage.getItem('home-aurora-theme'); this._ambPref = localStorage.getItem('home-aurora-amb'); this._nightPref = localStorage.getItem('home-aurora-ambnight'); this._fuPref = localStorage.getItem('home-aurora-fully'); this._pzvPref = localStorage.getItem('home-aurora-pzview'); this._pzsPref = localStorage.getItem('home-aurora-pzshow'); this._shsPref = localStorage.getItem('home-aurora-shopshow'); } catch (e) { /* kein Speicher */ }
     const w = new Set();
     const walk = o => { if (typeof o === 'string') { if (/^[a-z_]+\.[a-z0-9_]+$/.test(o)) w.add(o); } else if (Array.isArray(o)) o.forEach(walk); else if (o && typeof o === 'object') Object.values(o).forEach(walk); };
     walk(this._c);
@@ -2692,7 +2692,7 @@ class HomeAurora extends HTMLElement {
   _sSet() {
     const th = this._themePref || this._c.theme || 'dark', am = String(this._ambMin());
     const seg = (act, cur, items) => `<div class="seg wide">${items.map(x => `<button class="${cur === x[0] ? 'on' : ''}" data-act="${act}" data-m="${x[0]}">${x[1]}</button>`).join('')}</div>`;
-    return `<div class="grab"></div><div class="sh"><div class="ico">${ic('cog', 24)}</div><div><h2>Darstellung &amp; Modi</h2><p>Home Aurora v5.2 · Build pz24</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
+    return `<div class="grab"></div><div class="sh"><div class="ico">${ic('cog', 24)}</div><div><h2>Darstellung &amp; Modi</h2><p>Home Aurora v5.2 · Build pz25</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
       <div class="lab2">DESIGN</div>${seg('theme', th, [['dark', 'Dunkel'], ['light', 'Hell'], ['auto', 'Automatisch']])}
       <div class="card-note">„Automatisch“ folgt dem Dunkel-/Hellmodus deines Home-Assistant-Profils. Die Auswahl gilt nur für dieses Gerät.</div>
       ${WALL_UI ? `      <div class="lab2">WANDTABLET-MODUS</div>
@@ -2705,6 +2705,8 @@ class HomeAurora extends HTMLElement {
       <div class="card-note">Ausgeblendet verschwinden die Karte „Heute putzen“${WALL_UI ? ' und der Reiter in der Leiste' : ' und der Eintrag im Alltag'}. Die Aufgaben in Home Assistant bleiben unverändert. Gilt nur für dieses Gerät.</div>
       ${this._pzOn() ? `<div class="card-note" style="margin-top:12px">Beim Antippen öffnen als</div>${seg('pzview', this._pzView() ? '1' : '0', [['1', 'Eigene Ansicht'], ['0', 'Fenster']])}
       <div class="card-note">Eigene Seite mit „Zurück“ oder Fenster über der Startseite. Gilt nur für dieses Gerät.</div>` : ''}` : ''}
+      ${this._shopOk() || this._rcpOk() ? `<div class="lab2">EINKAUFSLISTE &amp; REZEPTE</div>${seg('shopshow', this._shopOn() ? '1' : '0', [['1', 'Sichtbar'], ['0', 'Ausgeblendet']])}
+      <div class="card-note">Ausgeblendet verschwindet der Eintrag „Einkaufsliste“ im Alltag. Die Listen in Home Assistant bleiben unverändert. Gilt nur für dieses Gerät.</div>` : ''}
       <div class="lab2">SCHNELLAKTIONEN</div>
       <button class="xr" style="width:100%" data-act="qedit"><div class="ico">${ic('sparkle', 19)}</div><div><div class="t">Schnellaktionen bearbeiten</div><div class="s">Szenen &amp; Skripte hinzufügen, sortieren, neue Szene speichern</div></div></button>
       <div class="lab2">SCHNELLZUGRIFF</div>
@@ -4169,7 +4171,10 @@ class HomeAurora extends HTMLElement {
     return [...g.values()];
   }
   _shopDone() { return (this._shop?.items || []).filter(i => i.status === 'completed').sort((a, b) => String(b.completed || '').localeCompare(String(a.completed || ''))); }
+  /* Einkaufsliste & Rezepte zeigen oder ausblenden; pro Gerät umschaltbar, Vorgabe per YAML einkauf: false */
+  _shopOn() { return this._shsPref != null ? this._shsPref === '1' : this._c?.einkauf !== false; }
   _shopRow() {
+    if (!this._shopOn()) return '';
     if (!this._shopOk()) return this._rcpOk() ? `<button class="xr" data-act="shop"><div class="ico">${ic('cook', 19)}</div><div><div class="t">Rezepte</div><div class="s">${parseInt(this._val(this._shopC().recipes), 10) || 0} Rezepte</div></div></button>` : '';
     this._loadShop();
     const n = parseInt(this._val(this._shopC().list), 10) || 0, O = this._shop ? this._shopOpen() : [];
@@ -4556,6 +4561,7 @@ class HomeAurora extends HTMLElement {
       case 'quick': this._quickRun(e); break;
       case 'theme': this._themePref = el.dataset.m; try { localStorage.setItem('home-aurora-theme', el.dataset.m); } catch (er) { /* ok */ } this._render(); break;
       case 'pzshow': this._pzsPref = el.dataset.m; try { localStorage.setItem('home-aurora-pzshow', el.dataset.m); } catch (er) { /* ok */ } if (el.dataset.m === '0' && this._v === 'clean') this._v = 'home'; this._sig = ''; this._render(); this._renderSheet(); break;
+      case 'shopshow': this._shsPref = el.dataset.m; try { localStorage.setItem('home-aurora-shopshow', el.dataset.m); } catch (er) { /* ok */ } this._sig = ''; this._render(); this._renderSheet(); break;
       case 'pzview': this._pzvPref = el.dataset.m; try { localStorage.setItem('home-aurora-pzview', el.dataset.m); } catch (er) { /* ok */ } if (el.dataset.m === '0' && this._v === 'clean') this._v = 'home'; this._sig = ''; this._render(); this._renderSheet(); break;
       case 'ambnight': this._nightPref = el.dataset.m; try { localStorage.setItem('home-aurora-ambnight', el.dataset.m); } catch (er) { /* ok */ } this._renderSheet(); break;
       case 'ambafter': this._ambPref = el.dataset.m; try { localStorage.setItem('home-aurora-amb', el.dataset.m); } catch (er) { /* ok */ } this._lastAct = Date.now(); this._renderSheet(); break;
@@ -4680,6 +4686,7 @@ const EDITOR_SCHEMA = [
   { name: 'ambient_after', selector: { select: { mode: 'dropdown', options: [{ value: 0, label: 'Aus' }, { value: 2, label: 'Nach 2 Minuten' }, { value: 5, label: 'Nach 5 Minuten' }, { value: 10, label: 'Nach 10 Minuten' }, { value: 30, label: 'Nach 30 Minuten' }] } } },
   { name: 'putzplan', selector: { boolean: {} } },
   { name: 'putzplan_view', selector: { boolean: {} } },
+  { name: 'einkauf', selector: { boolean: {} } },
   { name: 'weather', selector: { entity: { domain: 'weather' } } },
   { name: 'persons', selector: { entity: { domain: 'person', multiple: true } } },
   { name: 'radar', selector: { entity: { domain: 'camera' } } },
@@ -4687,7 +4694,7 @@ const EDITOR_SCHEMA = [
   { name: 'calendarDays', selector: { number: { min: 3, max: 60, mode: 'box' } } },
   { name: 'batteryLow', selector: { number: { min: 5, max: 50, mode: 'box', unit_of_measurement: '%' } } },
 ];
-const EDITOR_LABELS = { theme: 'Design', ambient_after: 'Wandtablet-Modus automatisch starten', weather: 'Wetter-Entität', persons: 'Personen', radar: 'Regenradar-Kamera', radarUrl: 'Link für den wetter.com-Knopf im Regenradar (optional, z. B. die Seite deines Orts)', putzplan: 'Putzplan anzeigen', putzplan_view: 'Putzplan als eigene Ansicht öffnen (sonst als Fenster)', calendarDays: 'Termine: Tage voraus', batteryLow: 'Batterie schwach ab' };
+const EDITOR_LABELS = { theme: 'Design', ambient_after: 'Wandtablet-Modus automatisch starten', weather: 'Wetter-Entität', persons: 'Personen', radar: 'Regenradar-Kamera', radarUrl: 'Link für den wetter.com-Knopf im Regenradar (optional, z. B. die Seite deines Orts)', putzplan: 'Putzplan anzeigen', putzplan_view: 'Putzplan als eigene Ansicht öffnen (sonst als Fenster)', einkauf: 'Einkaufsliste & Rezepte anzeigen', calendarDays: 'Termine: Tage voraus', batteryLow: 'Batterie schwach ab' };
 class HomeAuroraEditor extends HTMLElement {
   setConfig(c) { this._c = c || {}; this._draw(); }
   set hass(h) { this._h = h; if (this._f) this._f.hass = h; }
@@ -4705,7 +4712,7 @@ class HomeAuroraEditor extends HTMLElement {
       note.textContent = 'Räume, Kalender, Drucker, Stromgeräte und Schnellaktionen stellst du im YAML-Editor ein (siehe Kommentare in home-aurora.js).';
       this.appendChild(this._f); this.appendChild(note);
     }
-    this._f.hass = this._h; this._f.schema = WALL_UI ? EDITOR_SCHEMA : EDITOR_SCHEMA.filter(s => s.name !== 'ambient_after'); this._f.data = { theme: 'dark', ambient_after: 0, putzplan: true, putzplan_view: true, ...this._c };
+    this._f.hass = this._h; this._f.schema = WALL_UI ? EDITOR_SCHEMA : EDITOR_SCHEMA.filter(s => s.name !== 'ambient_after'); this._f.data = { theme: 'dark', ambient_after: 0, putzplan: true, putzplan_view: true, einkauf: true, ...this._c };
   }
 }
 customElements.define('home-aurora-editor', HomeAuroraEditor);
