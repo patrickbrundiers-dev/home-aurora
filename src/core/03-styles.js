@@ -247,8 +247,9 @@ const CSS3 = `
 .ambr{display:flex;gap:clamp(18px,5vw,56px);flex-wrap:wrap;justify-content:center;margin-top:8px}
 .ambw{display:flex;align-items:center;gap:14px}.ambw .wx{width:64px;height:64px}
 .ambt{font-size:clamp(34px,7vw,64px);font-weight:300;line-height:1}.ambt small{font-size:.45em;opacity:.6;margin-left:2px}.ambs{font-size:14px;color:var(--tx2);text-align:left}
-.ambl{display:flex;flex-direction:column;gap:8px;align-items:center;margin-top:6px}
-.ambn{display:inline-flex;align-items:center;gap:10px;padding:10px 18px;border-radius:999px;background:rgba(255,255,255,.07);font-size:clamp(14px,2vw,18px)}.ambn.warn{color:#fbbf24}
+.ambl{display:flex;flex-wrap:wrap;gap:8px 10px;justify-content:center;max-width:min(92vw,820px);margin-top:6px}
+.ambx{display:flex;align-items:center;gap:12px;font-size:clamp(14px,2vw,18px);color:var(--tx2)}.ambx i{width:4px;height:4px;border-radius:50%;background:var(--tx3)}.ambx b{display:inline-flex;align-items:center;gap:6px;font-weight:500;color:#7dd3fc}
+.ambn{display:inline-flex;align-items:center;gap:10px;padding:10px 18px;border-radius:999px;background:rgba(255,255,255,.07);font-size:clamp(14px,2vw,18px)}.ambn.warn{color:#fbbf24;background:rgba(251,191,36,.12)}.ambn small{color:var(--tx3);font-size:.85em;margin-left:4px}
 .ambp{justify-content:center;margin-top:6px}.ambh{font-size:12px;color:var(--tx3);margin-top:10px}
 /* v5: Heller Modus */
 .app{color:var(--tx)}

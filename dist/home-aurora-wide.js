@@ -536,8 +536,9 @@ const CSS3 = `
 .ambr{display:flex;gap:clamp(18px,5vw,56px);flex-wrap:wrap;justify-content:center;margin-top:8px}
 .ambw{display:flex;align-items:center;gap:14px}.ambw .wx{width:64px;height:64px}
 .ambt{font-size:clamp(34px,7vw,64px);font-weight:300;line-height:1}.ambt small{font-size:.45em;opacity:.6;margin-left:2px}.ambs{font-size:14px;color:var(--tx2);text-align:left}
-.ambl{display:flex;flex-direction:column;gap:8px;align-items:center;margin-top:6px}
-.ambn{display:inline-flex;align-items:center;gap:10px;padding:10px 18px;border-radius:999px;background:rgba(255,255,255,.07);font-size:clamp(14px,2vw,18px)}.ambn.warn{color:#fbbf24}
+.ambl{display:flex;flex-wrap:wrap;gap:8px 10px;justify-content:center;max-width:min(92vw,820px);margin-top:6px}
+.ambx{display:flex;align-items:center;gap:12px;font-size:clamp(14px,2vw,18px);color:var(--tx2)}.ambx i{width:4px;height:4px;border-radius:50%;background:var(--tx3)}.ambx b{display:inline-flex;align-items:center;gap:6px;font-weight:500;color:#7dd3fc}
+.ambn{display:inline-flex;align-items:center;gap:10px;padding:10px 18px;border-radius:999px;background:rgba(255,255,255,.07);font-size:clamp(14px,2vw,18px)}.ambn.warn{color:#fbbf24;background:rgba(251,191,36,.12)}.ambn small{color:var(--tx3);font-size:.85em;margin-left:4px}
 .ambp{justify-content:center;margin-top:6px}.ambh{font-size:12px;color:var(--tx3);margin-top:10px}
 /* v5: Heller Modus */
 .app{color:var(--tx)}
@@ -2720,7 +2721,7 @@ class HomeAurora extends HTMLElement {
   _sSet() {
     const th = this._themePref || this._c.theme || 'dark', am = String(this._ambMin());
     const seg = (act, cur, items) => `<div class="seg wide">${items.map(x => `<button class="${cur === x[0] ? 'on' : ''}" data-act="${act}" data-m="${x[0]}">${x[1]}</button>`).join('')}</div>`;
-    return `<div class="grab"></div><div class="sh"><div class="ico">${ic('cog', 24)}</div><div><h2>Darstellung &amp; Modi</h2><p>Home Aurora v5.2 · Build pz27</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
+    return `<div class="grab"></div><div class="sh"><div class="ico">${ic('cog', 24)}</div><div><h2>Darstellung &amp; Modi</h2><p>Home Aurora v5.2 · Build pz28</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
       <div class="lab2">DESIGN</div>${seg('theme', th, [['dark', 'Dunkel'], ['light', 'Hell'], ['auto', 'Automatisch']])}
       <div class="card-note">„Automatisch“ folgt dem Dunkel-/Hellmodus deines Home-Assistant-Profils. Die Auswahl gilt nur für dieses Gerät.</div>
       ${WALL_UI ? `      <div class="lab2">WANDTABLET-MODUS</div>
@@ -2770,24 +2771,49 @@ class HomeAurora extends HTMLElement {
     if (this._built && this.isConnected) { this._sig = ''; this._render(); }
     try { this._wl?.release(); } catch (e) { /* optional */ } this._wl = null;
   }
+  /* Bildschirmschoner: Tageswerte und Regen der nächsten Stunden aus der stündlichen Vorhersage */
+  _ambWx(w) {
+    const fc = this._fc, d0 = fc?.daily?.[0], P = [];
+    if (d0 && d0.temperature != null && d0.templow != null && isFinite(d0.temperature) && isFinite(d0.templow)) P.push(`Heute ${de(d0.templow, 0)}° bis ${de(d0.temperature, 0)}°`);
+    const now = Date.now(), H = (fc?.hourly || []).filter(x => { const t = Date.parse(x.datetime); return t > now - 36e5 && t < now + 6 * 36e5; });
+    const wet = x => (x.precipitation || 0) >= 0.3 || ((x.precipitation_probability || 0) >= 60 && /rain|pour|snow|hail/.test(x.condition || ''));
+    const snow = x => /snow/.test(x.condition || ''), hh = x => new Date(x.datetime).getHours() + ' Uhr';
+    const nowWet = (w.rain || 0) > 0 || /rain|pour|hail/.test(w.cond || '');
+    let r = '';
+    if (nowWet) { const dry = H.find(x => Date.parse(x.datetime) > now && !wet(x)); r = 'Regnet gerade' + (dry ? ' · trocken ab ' + hh(dry) : ''); }
+    else { const n = H.find(x => Date.parse(x.datetime) + 36e5 > now && wet(x)); if (n) r = (snow(n) ? 'Schnee' : 'Regen') + (Date.parse(n.datetime) <= now ? ' möglich' : ' ab ' + hh(n)); }
+    return P.length || r ? `<div class="ambx">${P.map(esc).join('')}${r ? `${P.length ? '<i></i>' : ''}<b>${ic('drop', 15)}${esc(r)}</b>` : ''}</div>` : '';
+  }
+  /* Bildschirmschoner: Hinweise als ruhige Chips; Warnungen zuerst und in Gelb */
+  _ambChips() {
+    const C = [], chip = (icon, txt, warn) => C.push(`<div class="ambn${warn ? ' warn' : ''}">${ic(icon, 18)}<span>${txt}</span></div>`);
+    let AL = []; try { AL = this._alerts(); } catch (e) { AL = []; }
+    AL.filter(a => (a.crit || a.id === 'warn' || a.cls === 'bad') && a.id !== 'open' && a.id !== 'waste').slice(0, 2).forEach(a => chip(a.icon, esc(a.text) + (a.sub && !a.tmr ? ` <small>${esc(a.sub)}</small>` : ''), true));
+    const open = this._openRooms(); if (open.length) chip('window', `${open.length} Fenster offen`, true);
+    const WL = this._waste(), wasteTx = /tonne|müll|abfall|gelber sack|gelbe sack|restmüll|biomüll|sperrmüll|papier|altpapier/i;
+    if (this._cal) { const { list } = this._calList(), skipW = !!(WL && WL[0] && WL[0].days <= 1), n = list.find(x => x.e > new Date() && !(skipW && wasteTx.test(x.title || ''))); if (n) chip('cal', `${n.allDay ? this._dayName(n.s) : n.s.toLocaleString('de-DE', { weekday: 'short', hour: '2-digit', minute: '2-digit' })} · ${esc(n.title)}`); }
+    if (WL && WL[0] && WL[0].days <= 1) { const nx = WL.filter(x => x.days === WL[0].days); chip('trash', `${this._dayTxt(WL[0])} · ${esc(nx.map(x => x.name).join(' + '))}`); }
+    if (this._pzOn()) { const T = this._pzSum().T, due = T.filter(t => !t.today && (t.st === 'overdue' || (t.st === 'due_soon' && t.until === 0))).length; if (due) chip('broom', `Heute putzen · ${due} ${due === 1 ? 'Aufgabe' : 'Aufgaben'}`); }
+    if (this._shopOn() && this._shopOk()) { const n = parseInt(this._val(this._shopC().list), 10) || 0; if (n) chip('cart', `Einkaufsliste · ${n} ${n === 1 ? 'Sache' : 'Sachen'}`); }
+    let N = null; try { N = this._spkNow(this._spk()); } catch (e) { N = null; }
+    if (N && N.pl) chip('music', `${esc(N.title || 'Musik')}${N.artist ? ' – ' + esc(N.artist) : ''} <small>${esc(N.name)}</small>`);
+    const lights = this._lightsOn().length; if (lights) chip('bulb', `${lights} ${lights === 1 ? 'Licht' : 'Lichter'} an`);
+    return C.join('');
+  }
   _ambRender(first) {
     if (!this._amb || !this._amb_el || !this._h) return;
-    const w = this._wxNow(), lights = this._lightsOn().length, open = this._openRooms();
+    this._loadFc();
+    const w = this._wxNow();
     const temps = this._c.rooms.map(r => this._room(r).temp).filter(t => t != null), avg = temps.length ? temps.reduce((a, b) => a + b, 0) / temps.length : null;
-    let nxt = '';
-    const WL = this._waste(), wasteTx = /tonne|müll|abfall|gelber sack|gelbe sack|restmüll|biomüll|sperrmüll|papier|altpapier/i;
-    if (this._cal) { const { list } = this._calList(), skipW = !!(WL && WL[0] && WL[0].days <= 1), n = list.find(x => x.e > new Date() && !(skipW && wasteTx.test(x.title || ''))); if (n) nxt = `<div class="ambn">${ic('cal', 18)}<span>${n.allDay ? this._dayName(n.s) : n.s.toLocaleString('de-DE', { weekday: 'short', hour: '2-digit', minute: '2-digit' })} · ${esc(n.title)}</span></div>`; }
-    const wn = WL && WL[0] && WL[0].days <= 1 ? `<div class="ambn">${ic('trash', 18)}<span>${this._dayTxt(WL[0])} · ${esc(WL[0].name)}</span></div>` : '';
     const pe = this._persons();
     if (first || !this._ambDrift || Date.now() - this._ambDrift > 6e4) { this._ambDrift = Date.now(); this._ambDx = Math.round((Math.random() - .5) * 60); this._ambDy = Math.round((Math.random() - .5) * 50); }
     this._morph(this._amb_el, `<div class="ambin" style="transform:translate(${this._ambDx}px,${this._ambDy}px)"><div class="ambc big">${this._clockStr()}</div>
       <div class="ambd">${new Date().toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long' })}</div>
       <div class="ambr"><div class="ambw">${wx(w.cond, 64)}<div><div class="ambt big">${de(w.temp)}<small>°C</small></div><div class="ambs">${COND[w.cond] || w.cond}</div></div></div>
       ${avg != null ? `<div class="ambw"><div class="ico">${ic('home', 34)}</div><div><div class="ambt big">${de(avg)}<small>°C</small></div><div class="ambs">innen Ø</div></div></div>` : ''}</div>
-      <div class="ambl">${nxt}${wn}${open.length ? `<div class="ambn warn">${ic('window', 18)}<span>${open.length} Fenster offen</span></div>` : ''}${lights ? `<div class="ambn">${ic('bulb', 18)}<span>${lights} ${lights === 1 ? 'Licht' : 'Lichter'} an</span></div>` : ''}</div>
+      ${this._ambWx(w)}<div class="ambl">${this._ambChips()}</div>
       <div class="pp ambp">${pe}</div><div class="ambh">Tippen zum Beenden</div></div>`);
   }
-
   /* ───────────── v5.2: Lüften – Raumkarte ───────────── */
   _ago(iso) {
     const t = new Date(iso).getTime(); if (isNaN(t)) return '';
