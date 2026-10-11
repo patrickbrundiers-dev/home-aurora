@@ -83,12 +83,12 @@
     this._toast(`Plan gestartet · heute ${t0} ${t0 === 1 ? 'Aufgabe' : 'Aufgaben'}`, 3500); this._pzRefresh();
   }
   _cleanRows() {
-    const S = this._pzSum(); if (!S.T.length || WALL_UI || this._pzCard(0, 5)) return [];
+    const S = this._pzSum(); if (!S.T.length || WALL_UI || !this._pzOn() || this._pzCard(0, 5)) return [];
     return [`<button class="xr kid" data-act="pz"><div class="ico">${ic('broom', 19)}</div><div><div class="t">Putzplan</div><div class="s">Alles sauber</div></div><span class="kdot ok"></span></button>`];
   }
   /* Karte „Heute putzen“ für die Startseite (n = max. Zeilen) */
   _pzCard(i, n, fit = 0) {
-    const S = this._pzSum(); if (!S.T.length) return '';
+    const S = this._pzSum(); if (!S.T.length || !this._pzOn()) return '';
     const sched = S.T.filter(t => t.st !== 'as_needed'), U = S.T.filter(t => t.st === 'unknown');
     if (U.length && U.length === sched.length) return `<button class="c pzc pzfresh tap" style="--i:${i}" data-act="pz"><div class="ico">${ic('broom', 20)}</div><div><div class="t">Putzplan · noch nicht gestartet</div><div class="s">${U.length} Aufgaben – jetzt auf die Wochen verteilen</div></div><span class="pzv">${ic('chevron', 16)}</span></button>`;
     const due = S.T.filter(t => !t.today && (t.st === 'overdue' || (t.st === 'due_soon' && t.until === 0))).sort((a, b) => b.over - a.over || a.room.localeCompare(b.room, 'de') || a.name.localeCompare(b.name, 'de'));
@@ -107,6 +107,8 @@
     if (foc) { const p2 = this.shadowRoot.getElementById('pzq'); if (p2) { p2.focus(); try { p2.setSelectionRange(pos, pos); } catch (x) { } } }
   }
   /* Putzplan als eigene Ansicht (Standard) oder als Fenster; pro Gerät umschaltbar, Vorgabe per YAML putzplan_view: false */
+  /* Putzplan auf dem Dashboard zeigen oder ganz ausblenden; pro Gerät umschaltbar, Vorgabe per YAML putzplan: false */
+  _pzOn() { return this._pzsPref != null ? this._pzsPref === '1' : this._c?.putzplan !== false; }
   _pzView() { return this._pzvPref != null ? this._pzvPref === '1' : this._c?.putzplan_view !== false; }
   _sClean() {
     const S = this._pzSum(), T = S.T;

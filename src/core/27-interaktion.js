@@ -119,6 +119,7 @@
       case 'settings': this._sheet = { t: 'set' }; this._renderSheet(); break;
       case 'quick': this._quickRun(e); break;
       case 'theme': this._themePref = el.dataset.m; try { localStorage.setItem('home-aurora-theme', el.dataset.m); } catch (er) { /* ok */ } this._render(); break;
+      case 'pzshow': this._pzsPref = el.dataset.m; try { localStorage.setItem('home-aurora-pzshow', el.dataset.m); } catch (er) { /* ok */ } if (el.dataset.m === '0' && this._v === 'clean') this._v = 'home'; this._sig = ''; this._render(); this._renderSheet(); break;
       case 'pzview': this._pzvPref = el.dataset.m; try { localStorage.setItem('home-aurora-pzview', el.dataset.m); } catch (er) { /* ok */ } if (el.dataset.m === '0' && this._v === 'clean') this._v = 'home'; this._sig = ''; this._render(); this._renderSheet(); break;
       case 'ambnight': this._nightPref = el.dataset.m; try { localStorage.setItem('home-aurora-ambnight', el.dataset.m); } catch (er) { /* ok */ } this._renderSheet(); break;
       case 'ambafter': this._ambPref = el.dataset.m; try { localStorage.setItem('home-aurora-amb', el.dataset.m); } catch (er) { /* ok */ } this._lastAct = Date.now(); this._renderSheet(); break;
@@ -126,7 +127,7 @@
       case 'radar': this._sheet = { t: 'radar' }; this._renderSheet(); break;
       case 'lock': this._lockToggle(); break;
       case 'kid': this._sheet = { t: 'kid', i: parseInt(el.dataset.i, 10) || 0 }; this._renderSheet(); break;
-      case 'pz': if (!this._pzView()) { this._sheet = { t: 'clean' }; this._renderSheet(); break; } this._v = 'clean'; this._enter = true; this._counted = false; this._closeSheet(); this._render(); this.scrollIntoView?.({ block: 'start' }); break;
+      case 'pz': if (!this._pzOn()) break; if (!this._pzView()) { this._sheet = { t: 'clean' }; this._renderSheet(); break; } this._v = 'clean'; this._enter = true; this._counted = false; this._closeSheet(); this._render(); this.scrollIntoView?.({ block: 'start' }); break;
       case 'pzf': { const st = this._pzSt(); if (st) { st.f = e; st.q = ''; this._pzRefresh(); } break; }
       case 'pzdone': this._pzDone(e); break;
       case 'pzundo': this._pzUndo(e); this._tst.classList.remove('show'); break;
