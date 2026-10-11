@@ -1106,6 +1106,8 @@ const CSS4 = `
 .hq{display:grid;grid-template-columns:repeat(auto-fit,minmax(44px,1fr));gap:6px}.hq button,.hpre button{border:1px solid var(--line);background:rgba(var(--wh),.06);color:var(--tx);font:inherit;border-radius:14px;cursor:pointer;transition:.2s}.hq button{height:44px;padding:0;font-size:15px;font-weight:600;font-variant-numeric:tabular-nums}
 .hq button.on,.hpre button.on{background:rgba(251,146,60,.2);border-color:rgba(251,146,60,.6);color:#fb923c}.hq button:active,.hpre button:active{transform:scale(.95)}
 .hpre{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}.hpre button{display:flex;flex-direction:column;align-items:center;gap:2px;padding:9px 6px}.hpre b{font-size:13.5px;font-weight:600}.hpre span{font-size:12px;color:var(--tx2);font-variant-numeric:tabular-nums}.hpre button.on span{color:#fb923c}
+.hpre.hdur{grid-template-columns:repeat(auto-fit,minmax(104px,1fr))}.hpre.hdur b{font-size:12.5px;font-weight:500}.hpre.hmodes svg{opacity:.8}
+.hoff{display:flex;align-items:center;gap:6px;flex:none}.hoff .rbn{width:34px;height:34px;border-radius:12px}.hoff .rbn:disabled{opacity:.35}.hoff span{min-width:46px;text-align:center;font-size:13.5px;font-weight:600;font-variant-numeric:tabular-nums}
 .trend{padding:14px 14px 12px}.trend.tb{padding:0}.trow{display:flex;align-items:stretch;gap:10px}.tmid{flex:1;min-width:0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}.tsvg{display:block;width:100%;height:120px;overflow:visible}
 .tcol{flex:none;width:58px;display:flex;flex-direction:column;justify-content:space-between;font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;padding:2px 0}.tcol span{display:inline-flex;align-items:center;gap:3px;white-space:nowrap}.tcol.r{text-align:right;align-items:flex-end}.tcol:not(.r) span:nth-child(2){padding-left:17px}.tcol.r span:nth-child(2){padding-right:0}
 .tax{display:flex;justify-content:space-between;font-size:11.5px;color:var(--tx3);padding:6px 68px 0;font-variant-numeric:tabular-nums}.tavg{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 22px;margin-top:10px;font-size:13px;font-weight:600}.tavg span{display:inline-flex;align-items:center;gap:5px}
@@ -1545,6 +1547,13 @@ class HomeAurora extends HTMLElement {
     const mode = trv.length && trv.every(s => s.state === 'off') ? 'off' : 'heat', act = heating ? 'heating' : 'idle', t0 = trv[0]?.attributes.temperature;
     if (r.heat) {
       const st = this._s(r.heat.status), a = st?.attributes || {}, auto = this._val(r.heat.switch) === 'on' && a.enabled !== false;
+      // neuere Integration: Betriebsart-Auswahl + eigenes Raum-Thermostat (Ziel und „heizt gerade“ kommen von dort)
+      const X = r.heat.status ? this._dhX(r.heat.status) : null, sel = X ? this._val(X.mode) : null;
+      if (X && okv(sel)) {
+        const rx = (X.cl && this._s(X.cl)?.attributes) || {}, aut = auto && sel === 'Automatik', off = auto ? sel === 'Aus' : mode === 'off';
+        const act2 = rx.hvac_action ? (rx.hvac_action === 'heating' ? 'heating' : 'idle') : act;
+        return { kind: 'dh', x: X, sel, on: auto, sw: r.heat.switch, st, a, auto: aut, trv, mode: off ? 'off' : 'heat', act: off ? 'idle' : act2, target: rx.temperature ?? a.current_setpoint ?? a.target_temperature ?? t0, label: st && okv(st.state) ? st.state : '' };
+      }
       const target = auto ? (a.current_setpoint ?? a.target_temperature ?? t0) : t0;
       return { kind: 'dh', sw: r.heat.switch, st, a, auto, trv, mode, act, target, label: st && okv(st.state) ? st.state : '' };
     }
@@ -2722,7 +2731,7 @@ class HomeAurora extends HTMLElement {
   _sSet() {
     const th = this._themePref || this._c.theme || 'dark', am = String(this._ambMin());
     const seg = (act, cur, items) => `<div class="seg wide">${items.map(x => `<button class="${cur === x[0] ? 'on' : ''}" data-act="${act}" data-m="${x[0]}">${x[1]}</button>`).join('')}</div>`;
-    return `<div class="grab"></div><div class="sh"><div class="ico">${ic('cog', 24)}</div><div><h2>Darstellung &amp; Modi</h2><p>Home Aurora v5.2 · Build pz29</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
+    return `<div class="grab"></div><div class="sh"><div class="ico">${ic('cog', 24)}</div><div><h2>Darstellung &amp; Modi</h2><p>Home Aurora v5.2 · Build pz30</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
       <div class="lab2">DESIGN</div>${seg('theme', th, [['dark', 'Dunkel'], ['light', 'Hell'], ['auto', 'Automatisch']])}
       <div class="card-note">„Automatisch“ folgt dem Dunkel-/Hellmodus deines Home-Assistant-Profils. Die Auswahl gilt nur für dieses Gerät.</div>
       ${WALL_UI ? `      <div class="lab2">WANDTABLET-MODUS</div>
@@ -3218,19 +3227,79 @@ class HomeAurora extends HTMLElement {
     const avg = `<div class="tavg">${TS ? `<span style="color:${col}">${ic('thermo', 13)}Ø ${de(TS.av, 1)} °C</span>` : ''}${HS ? `<span style="color:#38bdf8">${ic('drop', 13)}Ø ${de(HS.av, 0)} %</span>` : ''}</div>`;
     return `${opt.bare ? '' : '<div class="lab2">TEMPERATUR &amp; LUFTFEUCHTE · 24 H</div>'}<div class="${opt.bare ? 'trend tb' : 'sctl trend'}" style="display:block"><div class="trow">${side(TS, 1, '°', col, 'thermo', false)}<div class="tmid">${svg}</div>${side(HS, 0, '%', '#38bdf8', 'drop', true)}</div><div class="tax"><span>${hh(t0)}</span><span>${hh((t0 + t1) / 2)}</span><span>${hh(t1)}</span></div>${avg}</div>`;
   }
+  /* Rundes Thermometer: Bogen bis zur Ist-Temperatur, Punkt am Ziel (10–30 °C) */
+  _hDial(cur, tg, off, tgTxt, hum, col) {
+    const fc = clamp(((cur ?? 10) - 10) / 20, 0, 1), ft = clamp(((tg ?? 10) - 10) / 20, 0, 1), a1 = 135 + 270 * fc, a2 = 135 + 270 * ft;
+    const tx = 100 + 84 * Math.cos(a2 * Math.PI / 180), ty = 100 + 84 * Math.sin(a2 * Math.PI / 180);
+    return `<div class="hdial"><svg viewBox="0 0 200 170"><path d="${arc(100, 100, 84, 135, 405)}" fill="none" stroke="rgba(${WH},.09)" stroke-width="12" stroke-linecap="round"/>${cur != null ? `<path d="${arc(100, 100, 84, 135, Math.max(135.5, a1))}" fill="none" stroke="${col}" stroke-width="12" stroke-linecap="round" style="filter:drop-shadow(0 0 10px ${col});opacity:${off ? .35 : 1}"/>` : ''}${tg != null && !off ? `<circle cx="${tx.toFixed(1)}" cy="${ty.toFixed(1)}" r="9" fill="${FG}"/><circle cx="${tx.toFixed(1)}" cy="${ty.toFixed(1)}" r="3.500" fill="${col}"/>` : ''}</svg>
+      <div class="mid"><div class="l">Aktuell</div><div class="cur big">${de(cur)}<small class="u">°</small></div><div class="tg">${tgTxt}</div>${hum != null ? `<div class="hhum">${ic('drop', 12)}${de(hum, 0)} %</div>` : ''}</div></div>`;
+  }
+  /* pz30: Heizung mit der neueren „Dynamischen Heizungssteuerung“ (Betriebsart-Auswahl, Raum-Thermostat, Temperaturen, Versatz).
+     Regler stellt am Raum-Thermostat ein (Betriebsart wird „Manuell“), Betriebsarten mit ihren Temperaturen, Dauer,
+     was die Regelung gerade denkt (Wärmebedarf, Planwechsel, Anwesenheit, Lernen), Versatz je Thermostat, Hausmodus. */
+  _sHeatDH(r, I, D) {
+    const X = D.x, a = D.a, at = I.cl.attributes || {}, off = I.mode === 'off', heat = I.act === 'heating', sel = D.sel;
+    const rc = (X.cl && this._s(X.cl)?.attributes) || {}, ms = this._s(X.mode), un = ms?.attributes?.until ? new Date(ms.attributes.until) : null;
+    const cur = I.temp ?? rc.current_temperature ?? at.current_temperature, tg = at.temperature, hum = I.hum ?? rc.current_humidity;
+    const win = I.open || a.window_open, M = D.on ? sel : 'Regelung aus';
+    const status = off ? 'Heizung aus' : win ? 'Fenster offen – Heizung pausiert' : [M, D.label && D.label !== M ? D.label : '', un && !isNaN(un) ? 'bis ' + this._whenTxt(un) : ''].filter(Boolean).join(' · ');
+    const col = cur != null ? tempCol(cur) : '#fb923c', dial = this._hDial(cur, tg, off, off ? 'Heizung aus' : (D.auto ? 'Automatik' : esc(sel)) + ' <b>' + de(tg) + '°</b>', hum, col);
+    const step = d => `data-act="temp" data-e="${r.climate}" data-d="${d}" ${off ? 'disabled' : ''}`;
+    const side = `<div class="hctl"><button class="rbn" ${step(-0.5)}>${ic('minus', 22)}</button><div class="hset"><b>${off ? '–' : de(tg)}</b><span>${heat ? 'heizt · ' : ''}Ziel °C</span></div><button class="rbn" ${step(0.5)}>${ic('plus', 22)}</button></div>`;
+    const m = off ? 'off' : D.auto ? 'auto' : D.on && sel === 'Manuell' ? 'heat' : '';
+    const seg = `<div class="seg hseg">${[['auto', 'Automatik'], ['heat', 'Manuell'], ['off', 'Aus']].map(([k, l]) => `<button class="${m === k ? 'on' : ''}" data-act="dhmode" data-room="${r.id}" data-m="${k}">${l}</button>`).join('')}</div>`;
+    const ds = X.dur && this._s(X.dur), dv = ds?.state;
+    const hint = !off && sel !== 'Manuell' ? `<div class="card-note">Mit − / + wechselt die Heizung auf Manuell${okv(dv) ? ' · ' + esc(dv) : ''}.</div>` : '';
+    // Betriebsarten mit ihrer Temperatur; − / + an der gewählten Betriebsart ändert deren Temperatur dauerhaft
+    const opts = ms?.attributes?.options || [];
+    const pre = X.presets.filter(p => opts.includes(p.n)).map(p => { const t = p.num && this._num(p.num); return `<button class="${D.on && sel === p.n ? 'on' : ''}" data-act="selopt" data-e="${X.mode}" data-v="${esc(p.n)}" data-t="${esc(r.name + ': ' + p.n)}">${ic(p.i, 16)}<b>${esc(p.n)}</b>${t != null ? `<span>${de(t, 1)}°</span>` : ''}</button>`; }).join('');
+    const ap = X.presets.find(p => D.on && p.n === sel && p.num && this._num(p.num) != null);
+    const apRow = ap ? `<div class="xr"><div class="ico">${ic(ap.i, 19)}</div><div class="grow"><div class="t">${esc(ap.n)}-Temperatur</div><div class="s">gilt jedes Mal, wenn ${esc(ap.n)} aktiv ist</div></div>${this._hStep(ap.num, 1, '°')}</div>` : '';
+    const SD = { 'Bis Zeitplanwechsel': 'Bis Planwechsel', '1 Stunde': '1 Std.', '3 Stunden': '3 Std.', 'Bis morgen früh': 'Bis morgen', Dauerhaft: 'Dauerhaft' };
+    const dur = ds ? `<div class="lab2">WIE LANGE GILT EINE ÄNDERUNG</div><div class="hpre hdur">${(ds.attributes.options || []).map(o => `<button class="${dv === o ? 'on' : ''}" data-act="selopt" data-e="${X.dur}" data-v="${esc(o)}"><b>${esc(SD[o] || o)}</b></button>`).join('')}</div>` : '';
+    // Status-Kacheln: was die Regelung gerade weiß
+    const P = this._plan(r), ht = this._heatTime(r), pm = parseFloat(a.preheat_minutes), dm = X.demand ? this._num(X.demand) : parseFloat(a.heat_demand), tr = X.trend && this._num(X.trend), ou = X.out && this._num(X.out), hr = parseFloat(a.heating_rate);
+    const tiles = `<div class="dg">${this._tile(win ? 'Offen' : 'Zu', 'Fenster', 'window')}${ht != null ? this._tile(this._durTxt(ht), 'Heute geheizt', 'flame') : ''}${dm != null && !isNaN(dm) ? this._tile(de(dm, 0) + ' %', 'Wärmebedarf', 'gauge') : ''}${P?.next ? this._tile(this._whenTxt(P.next), 'Nächster Planwechsel', 'clock') : ''}${!isNaN(pm) && pm > 0 ? this._tile(de(pm, 0) + ' Min.', 'Vorheizen', 'flame') : ''}${a.present != null ? this._tile(a.present ? 'Ja' : 'Nein', 'Jemand da', 'home') : ''}${ou != null ? this._tile(de(ou, 1) + '°', 'Außen', 'thermo') : ''}${tr != null ? this._tile((tr > 0 ? '+' : '') + de(tr, 1) + ' °/h', 'Trend', 'arrowup') : ''}${!isNaN(hr) && hr > 0 ? this._tile(de(hr, 1) + ' °/h', 'Heizt auf mit', 'chevron') : ''}</div>`;
+    // Hinweise: Probleme zuerst (rot), dann Entscheidung und Lernstand der Regelung
+    const red = s => `<div class="card-note" style="color:#fb7185">${esc(s)}</div>`;
+    const tw = a.thermostat_warnings && typeof a.thermostat_warnings === 'object' ? Object.entries(a.thermostat_warnings) : [];
+    const ua = Array.isArray(a.unavailable_thermostats) ? a.unavailable_thermostats : [];
+    const notes = X.prob.filter(e => this._val(e) === 'on').map(e => red(this._name(e).replace(/^Heizung\s*/i, '') + ' gemeldet')).join('')
+      + tw.map(([k, v]) => red(`${this._name(k)}: ${typeof v === 'string' ? v : JSON.stringify(v)}`)).join('')
+      + (ua.length ? red('Nicht erreichbar: ' + ua.map(e => this._name(e)).join(', ')) : '')
+      + (okv(a.decision_status) && a.decision_status !== D.label ? `<div class="card-note">${esc(String(a.decision_status))}</div>` : '')
+      + (okv(a.learning_status) ? `<div class="card-note">Lernt: ${esc(String(a.learning_status))}</div>` : '') + (r.temp ? this._staleNote(r.temp) : '');
+    // Thermostate mit Versatz
+    const short = s => { const n = (s.attributes.friendly_name || s.entity_id).replace(new RegExp('^' + r.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\s*', 'i'), '').replace(/[\s-]+$/, ''); return esc(n.length > 3 ? n : 'Thermostat'); };
+    const trv = `<div class="lab2">THERMOSTATE · ${D.trv.length}</div><div class="mcol">${D.trv.map(s => { const x = s.attributes, u = !okv(s.state), o = X.off(s.entity_id); return `<div class="xr"><div class="ico">${ic('radiator', 19)}</div><div class="grow" data-act="more" data-e="${s.entity_id}"><div class="t">${short(s)}</div><div class="s">${u ? 'nicht erreichbar' : s.state === 'off' ? 'Aus' : `misst ${de(x.current_temperature)} ° · Soll ${de(x.temperature)} °`}</div></div>${o ? this._hStep(o, 1, '°', true) : ''}</div>`; }).join('')}</div>`;
+    const lk = X.lock && this._val(X.lock) === 'on';
+    const fine = (X.roff || X.lock) ? `<div class="lab2">FEINEINSTELLUNG</div><div class="mcol">${X.roff ? `<div class="xr"><div class="ico">${ic('thermo', 19)}</div><div class="grow"><div class="t">Raum-Versatz</div><div class="s">verschiebt alle Ziele dieses Raums</div></div>${this._hStep(X.roff, 1, '°', true)}</div>` : ''}${X.lock ? `<button class="xr" data-act="toggle" data-e="${X.lock}"><div class="ico">${ic('lock', 19)}</div><div class="grow"><div class="t">Kindersicherung</div><div class="s">${lk ? 'Tasten an den Thermostaten gesperrt' : 'Aus'}</div></div><span class="sw ${lk ? 'on' : ''}"></span></button>` : ''}</div>` : '';
+    const hs = X.house && this._s(X.house), hv = hs?.state;
+    const house = hs ? `<div class="lab2">HAUS · ALLE RÄUME</div><div class="seg hseg">${(hs.attributes.options || []).map(o => `<button class="${hv === o ? 'on' : ''}" data-act="selopt" data-e="${X.house}" data-v="${esc(o)}" data-t="Haus: ${esc(o)}">${esc(o)}</button>`).join('')}</div>` : '';
+    [r.temp, r.hum].forEach(x => { if (x && !this._hist[x]) this._need.add(x); });
+    return `<div class="grab"></div><div class="sh"><div class="ico">${ic(r.icon, 24)}</div><div><h2>Heizung · ${esc(r.name)}</h2><p>${esc(status)}</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
+      <div class="hhero ${heat ? 'heat' : ''}">${dial}<div class="hside">${side}${seg}</div></div>
+      ${hint}${notes}${pre ? `<div class="lab2">BETRIEBSART</div><div class="hpre hmodes">${pre}</div>` : ''}${apRow ? `<div class="mcol" style="margin-top:8px">${apRow}</div>` : ''}${dur}
+      <div class="lab2">STATUS</div>${tiles}${trv}${fine}${house}
+      ${this._trend(r, col)}
+      <div class="hbtns"><button class="qb" data-act="sched">${ic('clock', 14)}Heizungsplan</button><button class="qb" data-act="room" data-room="${r.id}">${ic(r.icon, 14)}Zurück zum Raum</button></div>`;
+  }
+  /* kleiner − Wert + Regler für eine number-Entität (Temperatur, Versatz) */
+  _hStep(e, d, u, sign) {
+    const v = this._num(e), x = this._s(e)?.attributes || {}, s = parseFloat(x.step) || 0.5;
+    return `<div class="hoff"><button class="rbn" data-act="numstep" data-e="${e}" data-d="${-s}" ${v == null ? 'disabled' : ''}>${ic('minus', 16)}</button><span>${v == null ? '–' : (sign && v > 0 ? '+' : '') + de(v, d) + u}</span><button class="rbn" data-act="numstep" data-e="${e}" data-d="${s}" ${v == null ? 'disabled' : ''}>${ic('plus', 16)}</button></div>`;
+  }
   /* Heizung eines Raums – ein Design für jede Heizung, egal ob Dynamische Heizungssteuerung, Advanced Heating Control
      oder nur ein Thermostat: Regler, Automatik/Manuell/Aus, Status-Kacheln, Thermostate, Verlauf. */
   _sHeat() {
     const r = this._c.rooms.find(x => x.id === this._sheet.id); if (!r || !r.climate) return `<div class="grab"></div><div class="empty">Kein Thermostat für diesen Raum.</div>`;
     const I = this._room(r), cl = I.cl, D = I.dh;
     if (!cl || !D) return `<div class="grab"></div><div class="sh"><div class="ico">${ic('thermo', 24)}</div><div><h2>Heizung · ${esc(r.name)}</h2><p>Thermostat nicht verfügbar</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>`;
+    if (D.x) return this._sHeatDH(r, I, D);
     const at = cl.attributes || {}, e = r.climate, off = I.mode === 'off', heat = I.act === 'heating', auto = !off && D.auto, a = D.a;
     const cur = at.current_temperature ?? I.temp, tg = at.temperature, hum = at.current_humidity ?? I.hum;
     const status = off ? 'Heizung aus' : I.open || at.window_open || a.window_open ? 'Fenster offen – Heizung pausiert' : auto ? 'Automatik' + (D.label ? ' · ' + D.label : '') : heat ? 'Heizt gerade' : 'Bereit – Wunschtemperatur erreicht';
-    const col = cur != null ? tempCol(cur) : '#fb923c', fc = clamp(((cur ?? 10) - 10) / 20, 0, 1), ft = clamp(((tg ?? 10) - 10) / 20, 0, 1), a1 = 135 + 270 * fc, a2 = 135 + 270 * ft;
-    const tx = 100 + 84 * Math.cos(a2 * Math.PI / 180), ty = 100 + 84 * Math.sin(a2 * Math.PI / 180);
-    const dial = `<div class="hdial"><svg viewBox="0 0 200 170"><path d="${arc(100, 100, 84, 135, 405)}" fill="none" stroke="rgba(${WH},.09)" stroke-width="12" stroke-linecap="round"/>${cur != null ? `<path d="${arc(100, 100, 84, 135, Math.max(135.5, a1))}" fill="none" stroke="${col}" stroke-width="12" stroke-linecap="round" style="filter:drop-shadow(0 0 10px ${col});opacity:${off ? .35 : 1}"/>` : ''}${tg != null && !off ? `<circle cx="${tx.toFixed(1)}" cy="${ty.toFixed(1)}" r="9" fill="${FG}"/><circle cx="${tx.toFixed(1)}" cy="${ty.toFixed(1)}" r="3.500" fill="${col}"/>` : ''}</svg>
-      <div class="mid"><div class="l">Aktuell</div><div class="cur big">${de(cur)}<small class="u">°</small></div><div class="tg">${off ? 'Heizung aus' : (auto ? 'Automatik' : 'Ziel') + ' <b>' + de(tg) + '°</b>'}</div>${hum != null ? `<div class="hhum">${ic('drop', 12)}${de(hum, 0)} %</div>` : ''}</div></div>`;
+    const col = cur != null ? tempCol(cur) : '#fb923c', dial = this._hDial(cur, tg, off, off ? 'Heizung aus' : (auto ? 'Automatik' : 'Ziel') + ' <b>' + de(tg) + '°</b>', hum, col);
     const side = auto ? `<div class="hctl"><div class="hset"><b>${de(tg)}</b><span>Ziel der Automatik °C</span></div></div>`
       : `<div class="hctl"><button class="rbn" data-act="temp" data-e="${e}" data-d="-0.5" ${off ? 'disabled' : ''}>${ic('minus', 22)}</button><div class="hset"><b>${off ? '–' : de(tg)}</b><span>Wunsch °C</span></div><button class="rbn" data-act="temp" data-e="${e}" data-d="0.5" ${off ? 'disabled' : ''}>${ic('plus', 22)}</button></div>`;
     const m = off ? 'off' : auto ? 'auto' : 'heat';
@@ -4075,11 +4144,43 @@ class HomeAurora extends HTMLElement {
         r.heat = { status: st.entity_id, switch: this._s(sw) ? sw : null }; r.climate = trv[0]; r.climate_more = trv.slice(1); r._auto = 'dh';
         [st.entity_id, sw, ...trv].forEach(e => add.add(e));
       } else if (r._auto) { r.climate = o.climate; r.climate_more = o.climate_more; r.heat = o.heat; r._auto = null; }
+      if (r.heat?.status) for (const e of this._dhXIds(r.heat.status)) add.add(e);
       for (const e of this._planIds(r)) add.add(e);
     }
     // ersetzte Einträge (z. B. ein gelöschtes Better-Thermostat) nicht als „fehlt“ melden
     this._autoRepl = new Set(rooms.filter(r => r._auto && r._orig.climate && !(r._orig.climate in this._h.states)).map(r => r._orig.climate));
     return [...add].filter(e => e && e in this._h.states);
+  }
+  /* pz30: weitere Bedienelemente der Dynamischen Heizungssteuerung. Die Entitäten eines Raums heißen wie sein
+     Status-Sensor ohne „_status“ (sensor.wohnzimmer_heizung_status → select.wohnzimmer_heizung_betriebsart …).
+     Ohne Betriebsart-Auswahl (ältere Version der Integration) bleibt es bei der einfachen Ansicht. */
+  _dhX(sid) {
+    const S = this._h.states, b = sid.replace(/^sensor\./, '').replace(/_status$/, ''), has = e => (e in S ? e : null);
+    const mode = has(`select.${b}_betriebsart`); if (!mode) return null;
+    // Raum-Thermostat der Integration (z. B. climate.wohnzimmer_heizung_2) und Hausmodus: Suche über alle Entitäten, darum gemerkt
+    const C = this._dhXc || (this._dhXc = {});
+    let c = C[sid];
+    if (!c || Date.now() - c.t > 6e4 || (c.cl && !(c.cl in S))) {
+      let cl = null, house = null;
+      for (const k in S) {
+        if (!cl && k.startsWith(`climate.${b}`) && S[k].attributes?.control_active !== undefined) cl = k;
+        if (!house && k.startsWith('select.') && k.endsWith('_hausmodus') && (S[k].attributes?.options || []).includes('Urlaub')) house = k;
+      }
+      c = C[sid] = { t: Date.now(), cl, house };
+    }
+    const T = [['Komfort', 'komforttemperatur', 'sofa'], ['Zuhause', 'zuhause_temperatur', 'home'], ['Aktivität', 'aktivitat_temperatur', 'bolt'], ['Eco', 'eco_temperatur', 'leaf'], ['Schlafen', 'schlafen_temperatur', 'bed'], ['Boost', 'boost_temperatur', 'flame'], ['Abwesend', null, 'door']];
+    return {
+      b, mode, cl: c.cl, house: c.house, dur: has(`select.${b}_betriebsart_dauer`), lock: has(`switch.${b}_kindersicherung`),
+      roff: has(`number.${b}_raum_versatz`), demand: has(`sensor.${b}_warmebedarf`), trend: has(`sensor.${b}_temperaturtrend`), out: has(`sensor.${b}_aussentemperatur`),
+      prob: [`binary_sensor.${b}_heizproblem`, `binary_sensor.${b}_thermostat_problem`].filter(e => e in S),
+      presets: T.map(([n, k, i]) => ({ n, i, num: k ? has(`number.${b}_${k}`) : null })),
+      off: e => has(`number.${b}_versatz_${e.replace(/^climate\./, '')}`),
+    };
+  }
+  _dhXIds(sid) {
+    const X = this._dhX(sid); if (!X) return [];
+    const S = this._h.states, trv = Object.keys(S[sid]?.attributes?.thermostat_setpoints || {});
+    return [X.mode, X.cl, X.house, X.dur, X.lock, X.roff, X.demand, X.trend, X.out, ...X.prob, ...X.presets.map(p => p.num), ...trv.map(X.off)].filter(Boolean);
   }
   /* Automations-Konfigurationen lesen (alle 30 Min.) und Räume mit Advanced-Heating-Control-Plänen verbinden.
      Über die REST-Schnittstelle kommt die gespeicherte Konfiguration mit use_blueprint (klein, braucht Admin-Rechte);
@@ -4600,6 +4701,12 @@ class HomeAurora extends HTMLElement {
       case 'cpreset': h.callService('climate', 'set_preset_mode', { entity_id: e, preset_mode: el.dataset.m }); break;
       case 'chvac': h.callService('climate', 'set_hvac_mode', { entity_id: e, hvac_mode: el.dataset.m }); break;
       case 'dhmode': this._dhSet(this._c.rooms.find(r => r.id === el.dataset.room), el.dataset.m); break;
+      case 'selopt': h.callService('select', 'select_option', { entity_id: e, option: el.dataset.v }); if (el.dataset.t) this._toast(el.dataset.t); break;
+      case 'numstep': {
+        const n = this._s(e); if (!n) break;
+        const x = n.attributes, st = parseFloat(x.step) || 0.5, v = clamp(Math.round(((parseFloat(n.state) || 0) + parseFloat(el.dataset.d)) / st) * st, x.min ?? -Infinity, x.max ?? Infinity);
+        h.callService('number', 'set_value', { entity_id: e, value: Math.round(v * 100) / 100 }); break;
+      }
       case 'maps': { const u = `https://www.google.com/maps/dir/?api=1&destination=${el.dataset.lat},${el.dataset.lon}`; try { window.open(u, '_blank', 'noopener'); } catch (er) { /* ok */ } break; }
       case 'tbright': {
         const T = this._c.tablet, b = this._s(T.brightness); if (!b) break;
@@ -4681,6 +4788,14 @@ class HomeAurora extends HTMLElement {
         break;
       case 'temp': {
         const R = this._dhRoom(e);
+        // Dynamische Heizungssteuerung mit Raum-Thermostat: dort einstellen, die Regelung verteilt es auf die Thermostate (Betriebsart „Manuell“)
+        const DX = R && this._dh(R), rc = DX?.x?.cl && this._s(DX.x.cl);
+        if (rc && okv(rc.state)) {
+          const x = rc.attributes, nt = clamp(Math.round(((x.temperature ?? DX.target ?? 20) + parseFloat(el.dataset.d)) * 2) / 2, x.min_temp ?? 5, x.max_temp ?? 30);
+          const pre = DX.on && DX.sel === 'Manuell' ? Promise.resolve() : this._dhSet(R, 'heat', true);
+          Promise.resolve(pre).then(() => h.callService('climate', 'set_temperature', { entity_id: rc.entity_id, temperature: nt }));
+          break;
+        }
         // alle Thermostate des Raums gleich verschieben, damit ihr Abstand zueinander bleibt
         if (R) { for (const cl of this._dh(R).trv) { if (!okv(cl.state)) continue; const x = cl.attributes; h.callService('climate', 'set_temperature', { entity_id: cl.entity_id, temperature: clamp(Math.round(((x.temperature ?? 20) + parseFloat(el.dataset.d)) * 2) / 2, x.min_temp ?? 5, x.max_temp ?? 30) }); } break; }
         const cl = this._s(e); if (!cl) break;
@@ -4699,9 +4814,16 @@ class HomeAurora extends HTMLElement {
   _dhRoom(e) { return this._c.rooms.find(r => r.climate === e && this._s(e)) || null; }
   /* auto: Regelung übernimmt · heat: Manuell (Regelung aus, Thermostate an) · off: Regelung und alle Thermostate aus.
      Regelung = Schalter der Dynamischen Heizungssteuerung bzw. die Advanced-Heating-Control-Automation. */
-  _dhSet(r, m) {
+  _dhSet(r, m, quiet) {
     const D = r && this._dh(r); if (!D) return;
     const h = this._h, ids = D.trv.map(s => s.entity_id);
+    // neuere Dynamische Heizungssteuerung: Regelung bleibt an, die Betriebsart sagt Automatik / Manuell / Aus
+    if (D.x) {
+      const sw = D.sw && this._s(D.sw) && !D.on ? h.callService('switch', 'turn_on', { entity_id: D.sw }) : null;
+      const p = Promise.resolve(sw).then(() => h.callService('select', 'select_option', { entity_id: D.x.mode, option: m === 'auto' ? 'Automatik' : m === 'off' ? 'Aus' : 'Manuell' }));
+      if (!quiet) this._toast(m === 'auto' ? `${r.name}: Automatik an` : m === 'off' ? `${r.name}: Heizung aus` : `${r.name}: manuelle Steuerung`);
+      return p;
+    }
     if (D.sw && this._s(D.sw)) h.callService(D.kind === 'ahc' ? 'automation' : 'switch', m === 'auto' ? 'turn_on' : 'turn_off', { entity_id: D.sw });
     if (ids.length && (m === 'off' || D.mode === 'off')) h.callService('climate', 'set_hvac_mode', { entity_id: ids, hvac_mode: m === 'off' ? 'off' : 'heat' });
     this._toast(m === 'auto' ? `${r.name}: Automatik an` : m === 'off' ? `${r.name}: Heizung aus` : D.kind ? `${r.name}: manuelle Steuerung` : `${r.name}: Heizung an`);

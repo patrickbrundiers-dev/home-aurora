@@ -10336,7 +10336,12 @@
 "climate.wohnzimmer_hinter_sofa": 21,
 "climate.wohnzimmer_wintergarten": 21.5
 },
-"window_open": false
+"window_open": false,
+"heat_demand": 64,
+"heating_rate": 0.9,
+"learning_status": "Sammle Aufheizmessung",
+"thermostat_warnings": {},
+"unavailable_thermostats": []
 },
 "context": {
 "id": "fixture"
@@ -11185,5 +11190,329 @@
 "last_changed": "2026-01-01T12:00:00+00:00",
 "last_updated": "2026-01-01T12:00:00+00:00",
 "state": "2"
+},
+"select.wohnzimmer_heizung_betriebsart": {
+"attributes": {
+"friendly_name": "Heizung Betriebsart",
+"options": [
+"Automatik",
+"Komfort",
+"Zuhause",
+"Aktivität",
+"Eco",
+"Schlafen",
+"Abwesend",
+"Boost",
+"Wartung",
+"Aus",
+"Manuell"
+],
+"until": null
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "select.wohnzimmer_heizung_betriebsart",
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00",
+"state": "Automatik"
+},
+"select.wohnzimmer_heizung_betriebsart_dauer": {
+"attributes": {
+"friendly_name": "Heizung Betriebsart-Dauer",
+"options": [
+"Bis Zeitplanwechsel",
+"1 Stunde",
+"3 Stunden",
+"Bis morgen früh",
+"Dauerhaft"
+]
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "select.wohnzimmer_heizung_betriebsart_dauer",
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00",
+"state": "Bis Zeitplanwechsel"
+},
+"climate.wohnzimmer_heizung_2": {
+"attributes": {
+"control_active": true,
+"current_temperature": 20.5,
+"current_humidity": 55,
+"friendly_name": "Heizung",
+"hvac_action": "heating",
+"hvac_modes": [
+"heat",
+"off"
+],
+"manual": false,
+"max_temp": 30,
+"min_temp": 5,
+"temperature": 21,
+"target_temp_step": 0.5
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "climate.wohnzimmer_heizung_2",
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00",
+"state": "heat"
+},
+"number.wohnzimmer_heizung_komforttemperatur": {
+"attributes": {
+"friendly_name": "Heizung Komforttemperatur",
+"min": 5,
+"max": 30,
+"step": 0.5,
+"unit_of_measurement": "°C"
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "number.wohnzimmer_heizung_komforttemperatur",
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00",
+"state": "21.0"
+},
+"number.wohnzimmer_heizung_eco_temperatur": {
+"attributes": {
+"friendly_name": "Heizung Eco-Temperatur",
+"min": 5,
+"max": 30,
+"step": 0.5,
+"unit_of_measurement": "°C"
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "number.wohnzimmer_heizung_eco_temperatur",
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00",
+"state": "18.0"
+},
+"number.wohnzimmer_heizung_zuhause_temperatur": {
+"attributes": {
+"friendly_name": "Heizung Zuhause-Temperatur",
+"min": 5,
+"max": 30,
+"step": 0.5,
+"unit_of_measurement": "°C"
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "number.wohnzimmer_heizung_zuhause_temperatur",
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00",
+"state": "20.0"
+},
+"number.wohnzimmer_heizung_aktivitat_temperatur": {
+"attributes": {
+"friendly_name": "Heizung Aktivität-Temperatur",
+"min": 5,
+"max": 30,
+"step": 0.5,
+"unit_of_measurement": "°C"
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "number.wohnzimmer_heizung_aktivitat_temperatur",
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00",
+"state": "21.0"
+},
+"number.wohnzimmer_heizung_schlafen_temperatur": {
+"attributes": {
+"friendly_name": "Heizung Schlafen-Temperatur",
+"min": 5,
+"max": 30,
+"step": 0.5,
+"unit_of_measurement": "°C"
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "number.wohnzimmer_heizung_schlafen_temperatur",
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00",
+"state": "18.0"
+},
+"number.wohnzimmer_heizung_boost_temperatur": {
+"attributes": {
+"friendly_name": "Heizung Boost-Temperatur",
+"min": 5,
+"max": 30,
+"step": 0.5,
+"unit_of_measurement": "°C"
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "number.wohnzimmer_heizung_boost_temperatur",
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00",
+"state": "24.0"
+},
+"number.wohnzimmer_heizung_raum_versatz": {
+"attributes": {
+"friendly_name": "Heizung Raum-Versatz",
+"min": -3,
+"max": 3,
+"step": 0.5,
+"unit_of_measurement": "°C"
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "number.wohnzimmer_heizung_raum_versatz",
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00",
+"state": "0.0"
+},
+"number.wohnzimmer_heizung_versatz_wohnzimmer_esstisch": {
+"attributes": {
+"friendly_name": "Heizung Versatz Esstisch",
+"min": -3,
+"max": 3,
+"step": 0.5,
+"unit_of_measurement": "°C"
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "number.wohnzimmer_heizung_versatz_wohnzimmer_esstisch",
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00",
+"state": "0.0"
+},
+"number.wohnzimmer_heizung_versatz_wohnzimmer_hinter_sofa": {
+"attributes": {
+"friendly_name": "Heizung Versatz hinter Sofa",
+"min": -3,
+"max": 3,
+"step": 0.5,
+"unit_of_measurement": "°C"
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "number.wohnzimmer_heizung_versatz_wohnzimmer_hinter_sofa",
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00",
+"state": "0.5"
+},
+"number.wohnzimmer_heizung_versatz_wohnzimmer_wintergarten": {
+"attributes": {
+"friendly_name": "Heizung Versatz Wintergarten",
+"min": -3,
+"max": 3,
+"step": 0.5,
+"unit_of_measurement": "°C"
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "number.wohnzimmer_heizung_versatz_wohnzimmer_wintergarten",
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00",
+"state": "-0.5"
+},
+"switch.wohnzimmer_heizung_kindersicherung": {
+"attributes": {
+"friendly_name": "Heizung Kindersicherung"
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "switch.wohnzimmer_heizung_kindersicherung",
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00",
+"state": "off"
+},
+"binary_sensor.wohnzimmer_heizung_heizproblem": {
+"attributes": {
+"friendly_name": "Heizung Heizproblem",
+"device_class": "problem"
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "binary_sensor.wohnzimmer_heizung_heizproblem",
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00",
+"state": "off"
+},
+"binary_sensor.wohnzimmer_heizung_thermostat_problem": {
+"attributes": {
+"friendly_name": "Heizung Thermostat-Problem",
+"device_class": "problem"
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "binary_sensor.wohnzimmer_heizung_thermostat_problem",
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00",
+"state": "off"
+},
+"sensor.wohnzimmer_heizung_warmebedarf": {
+"attributes": {
+"friendly_name": "Heizung Wärmebedarf",
+"unit_of_measurement": "%"
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "sensor.wohnzimmer_heizung_warmebedarf",
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00",
+"state": "64"
+},
+"sensor.wohnzimmer_heizung_temperaturtrend": {
+"attributes": {
+"friendly_name": "Heizung Temperaturtrend",
+"unit_of_measurement": "°C/h"
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "sensor.wohnzimmer_heizung_temperaturtrend",
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00",
+"state": "0.2"
+},
+"sensor.wohnzimmer_heizung_aussentemperatur": {
+"attributes": {
+"friendly_name": "Heizung Außentemperatur",
+"unit_of_measurement": "°C"
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "sensor.wohnzimmer_heizung_aussentemperatur",
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00",
+"state": "9.5"
+},
+"select.dynamische_heizung_haus_hausmodus": {
+"attributes": {
+"friendly_name": "Dynamische Heizung Haus Hausmodus",
+"options": [
+"Zuhause",
+"Abwesend",
+"Urlaub"
+]
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "select.dynamische_heizung_haus_hausmodus",
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00",
+"state": "Zuhause"
 }
 }

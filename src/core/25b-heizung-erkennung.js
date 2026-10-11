@@ -22,11 +22,43 @@
         r.heat = { status: st.entity_id, switch: this._s(sw) ? sw : null }; r.climate = trv[0]; r.climate_more = trv.slice(1); r._auto = 'dh';
         [st.entity_id, sw, ...trv].forEach(e => add.add(e));
       } else if (r._auto) { r.climate = o.climate; r.climate_more = o.climate_more; r.heat = o.heat; r._auto = null; }
+      if (r.heat?.status) for (const e of this._dhXIds(r.heat.status)) add.add(e);
       for (const e of this._planIds(r)) add.add(e);
     }
     // ersetzte Einträge (z. B. ein gelöschtes Better-Thermostat) nicht als „fehlt“ melden
     this._autoRepl = new Set(rooms.filter(r => r._auto && r._orig.climate && !(r._orig.climate in this._h.states)).map(r => r._orig.climate));
     return [...add].filter(e => e && e in this._h.states);
+  }
+  /* pz30: weitere Bedienelemente der Dynamischen Heizungssteuerung. Die Entitäten eines Raums heißen wie sein
+     Status-Sensor ohne „_status“ (sensor.wohnzimmer_heizung_status → select.wohnzimmer_heizung_betriebsart …).
+     Ohne Betriebsart-Auswahl (ältere Version der Integration) bleibt es bei der einfachen Ansicht. */
+  _dhX(sid) {
+    const S = this._h.states, b = sid.replace(/^sensor\./, '').replace(/_status$/, ''), has = e => (e in S ? e : null);
+    const mode = has(`select.${b}_betriebsart`); if (!mode) return null;
+    // Raum-Thermostat der Integration (z. B. climate.wohnzimmer_heizung_2) und Hausmodus: Suche über alle Entitäten, darum gemerkt
+    const C = this._dhXc || (this._dhXc = {});
+    let c = C[sid];
+    if (!c || Date.now() - c.t > 6e4 || (c.cl && !(c.cl in S))) {
+      let cl = null, house = null;
+      for (const k in S) {
+        if (!cl && k.startsWith(`climate.${b}`) && S[k].attributes?.control_active !== undefined) cl = k;
+        if (!house && k.startsWith('select.') && k.endsWith('_hausmodus') && (S[k].attributes?.options || []).includes('Urlaub')) house = k;
+      }
+      c = C[sid] = { t: Date.now(), cl, house };
+    }
+    const T = [['Komfort', 'komforttemperatur', 'sofa'], ['Zuhause', 'zuhause_temperatur', 'home'], ['Aktivität', 'aktivitat_temperatur', 'bolt'], ['Eco', 'eco_temperatur', 'leaf'], ['Schlafen', 'schlafen_temperatur', 'bed'], ['Boost', 'boost_temperatur', 'flame'], ['Abwesend', null, 'door']];
+    return {
+      b, mode, cl: c.cl, house: c.house, dur: has(`select.${b}_betriebsart_dauer`), lock: has(`switch.${b}_kindersicherung`),
+      roff: has(`number.${b}_raum_versatz`), demand: has(`sensor.${b}_warmebedarf`), trend: has(`sensor.${b}_temperaturtrend`), out: has(`sensor.${b}_aussentemperatur`),
+      prob: [`binary_sensor.${b}_heizproblem`, `binary_sensor.${b}_thermostat_problem`].filter(e => e in S),
+      presets: T.map(([n, k, i]) => ({ n, i, num: k ? has(`number.${b}_${k}`) : null })),
+      off: e => has(`number.${b}_versatz_${e.replace(/^climate\./, '')}`),
+    };
+  }
+  _dhXIds(sid) {
+    const X = this._dhX(sid); if (!X) return [];
+    const S = this._h.states, trv = Object.keys(S[sid]?.attributes?.thermostat_setpoints || {});
+    return [X.mode, X.cl, X.house, X.dur, X.lock, X.roff, X.demand, X.trend, X.out, ...X.prob, ...X.presets.map(p => p.num), ...trv.map(X.off)].filter(Boolean);
   }
   /* Automations-Konfigurationen lesen (alle 30 Min.) und Räume mit Advanced-Heating-Control-Plänen verbinden.
      Über die REST-Schnittstelle kommt die gespeicherte Konfiguration mit use_blueprint (klein, braucht Admin-Rechte);

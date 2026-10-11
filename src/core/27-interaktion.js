@@ -99,6 +99,12 @@
       case 'cpreset': h.callService('climate', 'set_preset_mode', { entity_id: e, preset_mode: el.dataset.m }); break;
       case 'chvac': h.callService('climate', 'set_hvac_mode', { entity_id: e, hvac_mode: el.dataset.m }); break;
       case 'dhmode': this._dhSet(this._c.rooms.find(r => r.id === el.dataset.room), el.dataset.m); break;
+      case 'selopt': h.callService('select', 'select_option', { entity_id: e, option: el.dataset.v }); if (el.dataset.t) this._toast(el.dataset.t); break;
+      case 'numstep': {
+        const n = this._s(e); if (!n) break;
+        const x = n.attributes, st = parseFloat(x.step) || 0.5, v = clamp(Math.round(((parseFloat(n.state) || 0) + parseFloat(el.dataset.d)) / st) * st, x.min ?? -Infinity, x.max ?? Infinity);
+        h.callService('number', 'set_value', { entity_id: e, value: Math.round(v * 100) / 100 }); break;
+      }
       case 'maps': { const u = `https://www.google.com/maps/dir/?api=1&destination=${el.dataset.lat},${el.dataset.lon}`; try { window.open(u, '_blank', 'noopener'); } catch (er) { /* ok */ } break; }
       case 'tbright': {
         const T = this._c.tablet, b = this._s(T.brightness); if (!b) break;
@@ -180,6 +186,14 @@
         break;
       case 'temp': {
         const R = this._dhRoom(e);
+        // Dynamische Heizungssteuerung mit Raum-Thermostat: dort einstellen, die Regelung verteilt es auf die Thermostate (Betriebsart „Manuell“)
+        const DX = R && this._dh(R), rc = DX?.x?.cl && this._s(DX.x.cl);
+        if (rc && okv(rc.state)) {
+          const x = rc.attributes, nt = clamp(Math.round(((x.temperature ?? DX.target ?? 20) + parseFloat(el.dataset.d)) * 2) / 2, x.min_temp ?? 5, x.max_temp ?? 30);
+          const pre = DX.on && DX.sel === 'Manuell' ? Promise.resolve() : this._dhSet(R, 'heat', true);
+          Promise.resolve(pre).then(() => h.callService('climate', 'set_temperature', { entity_id: rc.entity_id, temperature: nt }));
+          break;
+        }
         // alle Thermostate des Raums gleich verschieben, damit ihr Abstand zueinander bleibt
         if (R) { for (const cl of this._dh(R).trv) { if (!okv(cl.state)) continue; const x = cl.attributes; h.callService('climate', 'set_temperature', { entity_id: cl.entity_id, temperature: clamp(Math.round(((x.temperature ?? 20) + parseFloat(el.dataset.d)) * 2) / 2, x.min_temp ?? 5, x.max_temp ?? 30) }); } break; }
         const cl = this._s(e); if (!cl) break;
@@ -198,9 +212,16 @@
   _dhRoom(e) { return this._c.rooms.find(r => r.climate === e && this._s(e)) || null; }
   /* auto: Regelung übernimmt · heat: Manuell (Regelung aus, Thermostate an) · off: Regelung und alle Thermostate aus.
      Regelung = Schalter der Dynamischen Heizungssteuerung bzw. die Advanced-Heating-Control-Automation. */
-  _dhSet(r, m) {
+  _dhSet(r, m, quiet) {
     const D = r && this._dh(r); if (!D) return;
     const h = this._h, ids = D.trv.map(s => s.entity_id);
+    // neuere Dynamische Heizungssteuerung: Regelung bleibt an, die Betriebsart sagt Automatik / Manuell / Aus
+    if (D.x) {
+      const sw = D.sw && this._s(D.sw) && !D.on ? h.callService('switch', 'turn_on', { entity_id: D.sw }) : null;
+      const p = Promise.resolve(sw).then(() => h.callService('select', 'select_option', { entity_id: D.x.mode, option: m === 'auto' ? 'Automatik' : m === 'off' ? 'Aus' : 'Manuell' }));
+      if (!quiet) this._toast(m === 'auto' ? `${r.name}: Automatik an` : m === 'off' ? `${r.name}: Heizung aus` : `${r.name}: manuelle Steuerung`);
+      return p;
+    }
     if (D.sw && this._s(D.sw)) h.callService(D.kind === 'ahc' ? 'automation' : 'switch', m === 'auto' ? 'turn_on' : 'turn_off', { entity_id: D.sw });
     if (ids.length && (m === 'off' || D.mode === 'off')) h.callService('climate', 'set_hvac_mode', { entity_id: ids, hvac_mode: m === 'off' ? 'off' : 'heat' });
     this._toast(m === 'auto' ? `${r.name}: Automatik an` : m === 'off' ? `${r.name}: Heizung aus` : D.kind ? `${r.name}: manuelle Steuerung` : `${r.name}: Heizung an`);
