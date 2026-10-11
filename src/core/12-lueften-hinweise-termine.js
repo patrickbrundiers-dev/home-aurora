@@ -196,15 +196,31 @@
     if (!shown.length) body = `<div class="empty">🗓️ Keine Termine in den nächsten ${this._c.calendarDays} Tagen</div>`;
     return `<div class="c calc tap" style="--i:${i}" ${open}><div class="h">${ic('cal', 14)}Termine<span class="r">Kalender${ic('chevron', 13)}</span></div>${body}${more > 0 || fit ? `<div class="ccm fm" data-n="${more}" data-full="1">${more > 0 ? `+ ${more} weitere` : ''}</div>` : ''}</div>`;
   }
+  /* pz23: Woche ab heute (sieben Tage, keine schon vergangenen), Tablet in sieben Spalten, Handy als Tagesliste (auch freie Tage) */
+  _calWeek(t0) {
+    const wo = clamp(this._calWk || 0, 0, 8), mon = new Date(t0.getFullYear(), t0.getMonth(), t0.getDate() + 7 * wo), M = this._calMap();
+    const sun = new Date(mon.getFullYear(), mon.getMonth(), mon.getDate() + 6);
+    const fmt = (d, o) => d.toLocaleDateString('de-DE', o);
+    let n = 0, days = '';
+    for (let k = 0; k < 7; k++) {
+      const d = new Date(mon.getFullYear(), mon.getMonth(), mon.getDate() + k), key = +d, evs = M.get(key) || [];
+      n += evs.length;
+      const rows = evs.map(ev => `<div class="wke${ev.allDay ? ' ad' : ''}" style="--ec:${ev.col}" title="${esc(ev.calName)}"><i></i>${ev.allDay ? '' : `<b>${hhmm(ev.s)}</b>`}<span>${esc(ev.title)}</span></div>`).join('');
+      days += `<div class="wkd${key === +t0 ? ' today' : ''}${key < +t0 ? ' past' : ''}${d.getDay() % 6 === 0 ? ' we' : ''}"><div class="wkh"><b>${key === +t0 ? 'Heute' : fmt(d, { weekday: 'short' }).replace('.', '')}</b><span>${d.getDate()}.</span></div><div class="wkl">${rows || '<div class="wk0">frei</div>'}</div></div>`;
+    }
+    const nav = `<div class="cmh"><button data-act="calwk" data-n="-1" ${wo === 0 ? 'disabled' : ''} aria-label="Vorherige Woche">${ic('chevron', 18).replace('<svg', '<svg style="transform:rotate(180deg)"')}</button><b>${wo === 0 ? 'Nächste 7 Tage' : wo === 1 ? 'Danach' : 'In ' + wo + ' Wochen'}<small class="wkn">${fmt(mon, { day: 'numeric', month: mon.getMonth() === sun.getMonth() ? undefined : 'short' })}–${fmt(sun, { day: 'numeric', month: 'short' })} · ${n ? n + (n === 1 ? ' Termin' : ' Termine') : 'keine Termine'}</small></b><button class="cmt" data-act="calwk" data-n="0" ${wo === 0 ? 'disabled' : ''}>Heute</button><button data-act="calwk" data-n="1" ${wo === 8 ? 'disabled' : ''} aria-label="Nächste Woche">${ic('chevron', 18)}</button></div>`;
+    return nav + `<div class="wk" lang="de">${days}</div>`;
+  }
   _sCal() {
-    const head = `<div class="grab"></div><div class="sh"><div class="ico">${ic('cal', 24)}</div><div><h2>Kalender</h2><p>${this._calMode === 'list' ? `nächste ${this._c.calendarDays} Tage` : 'Monatsansicht'}</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>`;
+    const head = `<div class="grab"></div><div class="sh"><div class="ico">${ic('cal', 24)}</div><div><h2>Kalender</h2><p>${this._calMode === 'list' ? `nächste ${this._c.calendarDays} Tage` : this._calMode === 'month' ? 'Monatsansicht' : 'Wochenansicht'}</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>`;
     if (!this._cal) return head + '<div class="sk" style="height:220px"></div>';
-    const mode = this._calMode === 'list' ? 'list' : 'month';
-    const tabs = `<div class="cal2tabs"><button class="${mode === 'month' ? 'on' : ''}" data-act="calmode" data-m="month">${ic('cal', 14)}Monat</button><button class="${mode === 'list' ? 'on' : ''}" data-act="calmode" data-m="list">${ic('list', 14)}Liste</button></div>`;
+    const mode = ['list', 'month'].includes(this._calMode) ? this._calMode : 'week';
+    const tabs = `<div class="cal2tabs"><button class="${mode === 'week' ? 'on' : ''}" data-act="calmode" data-m="week">${ic('grid', 14)}Woche</button><button class="${mode === 'month' ? 'on' : ''}" data-act="calmode" data-m="month">${ic('cal', 14)}Monat</button><button class="${mode === 'list' ? 'on' : ''}" data-act="calmode" data-m="list">${ic('list', 14)}Liste</button></div>`;
     const { list, cnt, t0 } = this._calList();
     const chips = this._c.calendars.filter(c => cnt[c[0]]).map(c => `<button class="${this._calOff.has(c[0]) ? '' : 'on'}" style="--ec:${c[2]}" data-act="calf" data-e="${c[0]}"><i></i>${esc(c[1])}</button>`).join('');
     const chipsH = chips ? `<div class="calf">${chips}</div>` : '';
     if (mode === 'list') return head + tabs + chipsH + (list.length ? this._calGroups(list, t0) : `<div class="empty">🗓️ Keine Termine</div>`);
+    if (mode === 'week') return head + tabs + this._calWeek(t0) + (chipsH ? `<div style="margin-top:14px">${chipsH}</div>` : '');
     const mo = Math.max(0, Math.min(2, this._calMo || 0)), first = new Date(t0.getFullYear(), t0.getMonth() + mo, 1);
     const lead = (first.getDay() + 6) % 7, nd = new Date(first.getFullYear(), first.getMonth() + 1, 0).getDate(), weeks = Math.ceil((lead + nd) / 7);
     const M = this._calMap(), sel = this._calSel != null ? this._calSel : +t0;

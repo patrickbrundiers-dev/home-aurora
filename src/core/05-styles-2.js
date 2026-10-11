@@ -401,5 +401,18 @@ const CSS2 = `
 .ing .q{flex:none;min-width:68px;font-size:13px;color:var(--tx2);font-variant-numeric:tabular-nums}.ing .n{flex:1;min-width:0;font-size:14px;overflow-wrap:anywhere}
 .ing.on .mpb{color:#6ee7b7}.mpb[disabled]{pointer-events:none;opacity:.55}.rcall{width:100%}
 .stp{margin:0;padding-left:24px;display:flex;flex-direction:column;gap:10px}.stp li{font-size:14px;line-height:1.5;padding-left:4px}.stp li::marker{color:var(--acc);font-weight:600}
+/* pz23: Kalender-Woche */
+.wkn{display:block;font-size:12px;font-weight:500;color:var(--tx3);text-transform:none}
+.wk{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px}
+.wkd{min-width:0;border-radius:16px;background:rgba(var(--wh),.04);border:1px solid var(--line);padding:8px 6px;min-height:150px}
+.wkd.we{background:rgba(var(--wh),.065)}.wkd.past{opacity:.5}.wkd.today{border-color:rgba(94,234,212,.55);background:rgba(94,234,212,.1)}
+.wkh{display:flex;align-items:baseline;justify-content:center;gap:5px;margin-bottom:8px}.wkh b{font-size:12px;letter-spacing:.06em;color:var(--tx3);text-transform:uppercase}.wkh span{font-size:16px;font-weight:650}.wkd.today .wkh b{color:#5eead4}
+.wkl{display:flex;flex-direction:column;gap:5px}
+.wke{position:relative;border-radius:10px;padding:5px 6px 5px 10px;background:rgba(var(--wh),.06);font-size:12px;line-height:1.25;overflow-wrap:break-word;hyphens:auto}
+.wke i{position:absolute;left:3px;top:5px;bottom:5px;width:3px;border-radius:2px;background:var(--ec)}.wke b{display:block;font-size:11px;font-weight:600;color:var(--tx2);font-variant-numeric:tabular-nums}
+.wke.ad{background:color-mix(in srgb,var(--ec) 22%,transparent)}.wk0{font-size:11.5px;color:var(--tx3);text-align:center;padding:6px 0}
+@media (max-width:640px){.wk{grid-template-columns:1fr;gap:6px}.wkd{display:flex;gap:10px;min-height:0;padding:8px 10px;align-items:flex-start}
+  .wkh{flex-direction:column;align-items:center;gap:0;width:38px;flex:none;margin:2px 0 0}.wkl{flex:1;min-width:0}.wk0{text-align:left;padding:4px 0}
+  .wke{display:flex;gap:8px;align-items:baseline;font-size:13.5px;padding:7px 8px 7px 12px}.wke b{display:inline;font-size:12.5px;flex:none}}
 `;
 

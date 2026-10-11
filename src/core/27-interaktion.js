@@ -148,8 +148,9 @@
       case 'warn': this._sheet = { t: 'warn', k: el.dataset.k, i: +el.dataset.i, from: el.dataset.from ?? (this._sheet?.t === 'radar' ? 'radar' : '') }; this._renderSheet(); break;
       case 'mp': h.callService('media_player', el.dataset.s, { entity_id: e }); break;
       case 'calf': this._calOff.has(e) ? this._calOff.delete(e) : this._calOff.add(e); if (this._sheet && this._sheet.t === 'cal') this._renderSheet(); else this._render(); break;
-      case 'cal': this._calMode = 'month'; this._calMo = 0; this._calSel = null; this._sheet = { t: 'cal' }; this._renderSheet(); if (!this._cal) this._loadCal(); break;
-      case 'calmode': this._calMode = el.dataset.m === 'list' ? 'list' : 'month'; this._renderSheet(); break;
+      case 'cal': this._calMode = 'week'; this._calWk = 0; this._calMo = 0; this._calSel = null; this._sheet = { t: 'cal' }; this._renderSheet(); if (!this._cal) this._loadCal(); break;
+      case 'calmode': this._calMode = ['list', 'month'].includes(el.dataset.m) ? el.dataset.m : 'week'; this._renderSheet(); break;
+      case 'calwk': this._calWk = +el.dataset.n === 0 ? 0 : clamp((this._calWk || 0) + +el.dataset.n, 0, 8); this._renderSheet(); break;
       case 'calday': { const k = +el.dataset.d, d = new Date(k), t0 = new Date(); t0.setHours(0, 0, 0, 0); this._calSel = k; this._calMo = Math.max(0, Math.min(2, (d.getFullYear() - t0.getFullYear()) * 12 + d.getMonth() - t0.getMonth())); this._renderSheet(); break; }
       case 'calmo': { const n = +el.dataset.n, t0 = new Date(); t0.setHours(0, 0, 0, 0); this._calMo = n === 0 ? 0 : Math.max(0, Math.min(2, (this._calMo || 0) + n)); this._calSel = n === 0 ? +t0 : null; if (n !== 0) { const f = new Date(t0.getFullYear(), t0.getMonth() + this._calMo, 1); this._calSel = this._calMo === 0 ? +t0 : +f; } this._renderSheet(); break; }
       case 'trsel': this._trI = this._trI === +el.dataset.i ? null : +el.dataset.i; this._render(); break;
