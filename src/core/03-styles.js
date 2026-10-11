@@ -234,7 +234,6 @@ const CSS3 = `
 .dot{width:9px;height:9px;border-radius:50%;margin-left:auto;flex:none;box-shadow:0 0 10px currentColor}
 /* v5: Heizungsplan / Radar */
 .schedhost{display:block;margin-top:6px;border-radius:18px;overflow:hidden}.schedhost climate-scheduler-card{display:block}
-.radarf{width:100%;height:min(62vh,460px);border:0;border-radius:18px;display:block;background:rgba(var(--wh),.05)}
 .seg button{white-space:nowrap}.seg.sm{padding:3px}.seg.sm button{padding:5px 11px;font-size:12px}
 .seg.wide{display:flex;width:100%}.seg.wide button{flex:1;justify-content:center}
 .h .r .seg{margin:-4px -4px -4px 0}

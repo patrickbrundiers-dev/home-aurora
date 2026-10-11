@@ -523,7 +523,6 @@ const CSS3 = `
 .dot{width:9px;height:9px;border-radius:50%;margin-left:auto;flex:none;box-shadow:0 0 10px currentColor}
 /* v5: Heizungsplan / Radar */
 .schedhost{display:block;margin-top:6px;border-radius:18px;overflow:hidden}.schedhost climate-scheduler-card{display:block}
-.radarf{width:100%;height:min(62vh,460px);border:0;border-radius:18px;display:block;background:rgba(var(--wh),.05)}
 .seg button{white-space:nowrap}.seg.sm{padding:3px}.seg.sm button{padding:5px 11px;font-size:12px}
 .seg.wide{display:flex;width:100%}.seg.wide button{flex:1;justify-content:center}
 .h .r .seg{margin:-4px -4px -4px 0}
@@ -657,11 +656,15 @@ const RD_TYPES = {
   sleet: { n: 'Schneeregen', i: 'snow', f: 'hue-rotate(95deg) saturate(1.15)' },
   freezing: { n: 'Gefrierender Regen', i: 'drop', f: 'hue-rotate(170deg) saturate(1.6)' },
 };
+// Intensität am Standort (mm/h) → Farbe wie die Radarbilder und Balkenhöhe in der Zeitleiste
+const RD_LEG = [[0.1, '#60a5fa', 'leicht'], [1, '#22c55e', 'mäßig'], [2.5, '#facc15', 'kräftig'], [10, '#ef4444', 'stark'], [30, '#d946ef', 'Unwetter']];
+const rdCol = v => { let c = RD_LEG[0][1]; for (const [t, k] of RD_LEG) if (v >= t) c = k; return c; };
+const rdHH = t => new Date(t).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
 const RD_CARD = ['N', 'NO', 'O', 'SO', 'S', 'SW', 'W', 'NW'];
 const RD_HTML = () => `<div class="rd-map"><div class="rd-world"><div class="rd-base"></div><div class="rd-fr"></div><div class="rd-bl"></div><div class="rd-wn"></div><div class="rd-rf"></div><div class="rd-ov"></div></div></div>
 <canvas class="rd-wind"></canvas><div class="rd-fx"></div><div class="rd-vig"></div>
-<div class="rd-top"><div class="rd-l"><div class="rd-k">REGENRADAR</div><div class="rd-live"><i></i><span>live</span></div><div class="rd-warns"></div></div>
-<div class="rd-r"><div class="rd-say"></div><div class="rd-sub"></div><div class="rd-leg"><span>leicht</span><i></i><span>stark</span></div><div class="rd-type"></div></div></div>
+<div class="rd-top"><div class="rd-l"><div class="rd-k">REGENRADAR</div><div class="rd-live"><i></i><span>live</span></div><a class="rd-ext" target="_blank" rel="noopener noreferrer">wetter.com${ic('chevron', 12)}</a><div class="rd-warns"></div></div>
+<div class="rd-r"><div class="rd-say"></div><div class="rd-sub"></div><div class="rd-leg">${RD_LEG.map(([v, c, n]) => `<span><i style="background:${c}"></i>${n}</span>`).join('')}</div><div class="rd-type"></div></div></div>
 <div class="rd-ctl"><button class="rd-cb z" data-rd="in" aria-label="Vergrößern">${ic('plus', 18)}</button><button class="rd-cb z" data-rd="out" aria-label="Verkleinern">${ic('minus', 18)}</button><button class="rd-cb z" data-rd="home" aria-label="Zu meinem Standort">${ic('radar', 18)}</button><button class="rd-cb ex" data-act="radar" aria-label="Vollbild">${ic('expand', 18)}</button></div>
 <button class="rd-cb rdx" data-act="close" aria-label="Schließen">${ic('close', 18)}</button>
 <div class="rd-pills"><div class="rd-wp"></div><div class="rd-bp"></div></div>
@@ -679,6 +682,7 @@ class AuroraRadar {
     const r = this.root = document.createElement('div'); r.className = 'rdm'; r.innerHTML = RD_HTML();
     this.q = s => r.querySelector(s);
     this.world = this.q('.rd-world'); this.baseEl = this.q('.rd-base'); this.frEl = this.q('.rd-fr'); this.blEl = this.q('.rd-bl'); this.wnEl = this.q('.rd-wn'); this.rfEl = this.q('.rd-rf'); this.ovEl = this.q('.rd-ov'); this.map = this.q('.rd-map');
+    this.q('.rd-ext').href = this.cfg.ext;
     this.cv = this.q('.rd-wind'); this.ctx = this.cv.getContext('2d'); this.P = [];
     this.bindEvents();
     this.ro = new ResizeObserver(() => this.resize()); this.ro.observe(r);
@@ -790,8 +794,14 @@ class AuroraRadar {
     const n = this.fr.length, now = Date.now();
     this.q('.rd-dots').innerHTML = this.fr.map((t, i) => `<i class="${t > now ? 'f' : ''}" data-i="${i}"></i>`).join('');
     const at = ms => { let b = 0, bd = 1e18; this.fr.forEach((t, i) => { const d = Math.abs(t - (now + ms)); if (d < bd) { bd = d; b = i; } }); return b / Math.max(1, n - 1) * 100; };
-    this.q('.rd-lb').innerHTML = [['−2 h', -12e5 * 6], ['−1 h', -36e5], ['jetzt', 0], ['+1 h', 36e5]].filter(x => this.fr.length > 10).map(x => { const l = at(x[1]); return `<span style="left:${l.toFixed(1)}%${l > 90 ? ';transform:translateX(-100%)' : ''}">${x[0]}</span>`; }).join('');
-    this.dotsEl = [...this.q('.rd-dots').children];
+    const in_ = ms => n && now + ms >= this.fr[0] - 6e5 && now + ms <= this.fr[n - 1] + 6e5;
+    this.q('.rd-lb').innerHTML = [['−2 h', -72e5], ['−1 h', -36e5], ['jetzt', 0], ['+1 h', 36e5], ['+2 h', 72e5]].filter(x => n > 10 && in_(x[1])).map(x => { const l = at(x[1]); return `<span style="left:${l.toFixed(1)}%${l > 90 ? ';transform:translateX(-100%)' : ''}">${x[0]}</span>`; }).join('');
+    this.dotsEl = [...this.q('.rd-dots').children]; this.bars();
+  }
+  // Zeitleiste als Niederschlagsverlauf am Standort (wie bei wetter.com): Höhe und Farbe nach mm/h
+  bars() {
+    const rc = this.rc; if (!rc || !this.dotsEl) return;
+    this.dotsEl.forEach((d, i) => { const v = rc.get(this.fr[i]), r = v != null && v >= 0.1; d.classList.toggle('r', r); d.style.cssText = r ? `--h:${Math.min(1, Math.log1p(v) / Math.log1p(20)).toFixed(2)};--c:${rdCol(v)}` : ''; });
   }
   /* ── Overlays (Radar-Frames, Blitzdichte, Warnungen) ── */
   box() { const bw = this.W * 1.5, bh = this.H * 1.5, z = this.z, l = this.cx - bw / 2, t = this.cy - bh / 2, s = Math.min(1, 1100 / Math.max(bw, bh)); return { l, t, bw, bh, w: Math.round(bw * s), h: Math.round(bh * s), bbox: [rdMx(l, z), rdMy(t + bh, z), rdMx(l + bw, z), rdMy(t, z)].map(v => v.toFixed(1)).join(',') }; }
@@ -834,7 +844,7 @@ class AuroraRadar {
     this.fi = i; const set = [this.cur, this.old];
     [...this.cur, ...this.old].forEach(im => im && im.classList.remove('on'));
     const pick = (this.cur[i] && this.ok[i]) ? this.cur[i] : this.old[i]; if (pick) pick.classList.add('on');
-    const t = this.fr[i]; if (t) { const c = this.q('.rd-clk'); c.firstChild.textContent = new Date(t).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }); c.lastChild.textContent = t > Date.now() ? 'PROGNOSE' : 'RADAR'; c.classList.toggle('fc', t > Date.now()); }
+    const t = this.fr[i]; if (t) { const c = this.q('.rd-clk'); c.firstChild.textContent = rdHH(t); c.lastChild.textContent = t > Date.now() ? 'PROGNOSE' : 'RADAR'; c.classList.toggle('fc', t > Date.now()); }
     this.dotState();
   }
   dotState() { (this.dotsEl || []).forEach((d, i) => { d.classList.toggle('on', i === this.fi); d.classList.toggle('na', this.ok.length > 0 && this.ok[i] === false); }); }
@@ -848,18 +858,27 @@ class AuroraRadar {
     this.fetchRates(); this.fetchKw();
   }
   async fetchRates() {
-    const cfg = this.cfg, now = Date.now(), n = this.fr.length; if (!n) return;
-    const idx = []; for (let i = this.nowIdx; i < n && this.fr[i] <= now + cfg.future * 6e4 + 3e5; i++) idx.push(i);
-    if (cfg.mock) { const T0 = now + (cfg.mockEta ?? 35) * 6e4; this.rates = idx.map(i => 2.2 * Math.exp(-(((this.fr[i] - T0) / 6e4 / 12) ** 2))); this.rateT = idx.map(i => this.fr[i]); this.upd(true); return; }
-    const m = 3000, mx = this.home.lon / 180 * RD_R, my = Math.log(Math.tan((90 + this.home.lat) * Math.PI / 360)) / Math.PI * RD_R, bb = [mx - m, my - m, mx + m, my + m].map(v => v.toFixed(1)).join(','), L = encodeURIComponent(cfg.radar);
-    const one = async i => {
-      try {
-        const r = await fetch(`${cfg.wms}?service=WMS&version=1.3.0&request=GetFeatureInfo&layers=${L}&query_layers=${L}&styles=&crs=EPSG:3857&bbox=${bb}&width=5&height=5&i=2&j=2&info_format=application/json&feature_count=1&time=${encodeURIComponent(this.iso(this.fr[i]))}`);
-        if (!r.ok) return null; const j = await r.json(), f = j.features?.[0]; if (!f) return 0;
-        const v = Object.values(f.properties || {}).find(x => typeof x === 'number' && isFinite(x)); if (v == null) return 0; const q = v * cfg.factor; return q < 0 || q > 500 ? 0 : q;
-      } catch (e) { return null; }
-    };
-    const res = await Promise.all(idx.map(one)); this.rates = res; this.rateT = idx.map(i => this.fr[i]); this.upd(true);
+    const cfg = this.cfg, now = Date.now(), fr = this.fr, n = fr.length; if (!n) return;
+    // Regen am Standort für jeden Frame: vergangene bleiben gespeichert, ab „jetzt“ wird jede Runde neu gefragt (Prognose ändert sich)
+    const rc = this.rc = this.rc || new Map(), keep = new Set(fr); for (const t of rc.keys()) if (!keep.has(t)) rc.delete(t);
+    const t0 = fr[this.nowIdx], need = fr.filter(t => t >= t0 || !rc.has(t));
+    if (cfg.mock) { const T0 = now + (cfg.mockEta ?? 35) * 6e4; need.forEach(t => rc.set(t, 2.2 * Math.exp(-(((t - T0) / 6e4 / 12) ** 2)))); }
+    else {
+      const m = 3000, mx = this.home.lon / 180 * RD_R, my = Math.log(Math.tan((90 + this.home.lat) * Math.PI / 360)) / Math.PI * RD_R, bb = [mx - m, my - m, mx + m, my + m].map(v => v.toFixed(1)).join(','), L = encodeURIComponent(cfg.radar);
+      const one = async t => {
+        try {
+          const r = await fetch(`${cfg.wms}?service=WMS&version=1.3.0&request=GetFeatureInfo&layers=${L}&query_layers=${L}&styles=&crs=EPSG:3857&bbox=${bb}&width=5&height=5&i=2&j=2&info_format=application/json&feature_count=1&time=${encodeURIComponent(this.iso(t))}`);
+          if (!r.ok) return null; const j = await r.json(), f = j.features?.[0]; if (!f) return 0;
+          const v = Object.values(f.properties || {}).find(x => typeof x === 'number' && isFinite(x)); if (v == null) return 0; const q = v * cfg.factor; return q < 0 || q > 500 ? 0 : q;
+        } catch (e) { return null; }
+      };
+      // höchstens 6 Abfragen gleichzeitig, die nahe Zukunft zuerst
+      const q = [...need].sort((a, b) => Math.abs(a - now) - Math.abs(b - now)); let k = 0;
+      await Promise.all(Array.from({ length: Math.min(6, q.length) }, async () => { while (k < q.length) { const t = q[k++], v = await one(t); if (v != null) rc.set(t, v); else rc.delete(t); } }));
+      if (!this.alive || this.fr !== fr) return;
+    }
+    const idx = []; for (let i = this.nowIdx; i < n && fr[i] <= now + cfg.future * 6e4 + 3e5; i++) idx.push(i);
+    this.rates = idx.map(i => rc.has(fr[i]) ? rc.get(fr[i]) : null); this.rateT = idx.map(i => fr[i]); this.bars(); this.upd(true);
   }
   async fetchKw() {
     const e = this.h._c.stationWeather; if (!e || !this.h._s(e) || (this.kw && Date.now() - this.kw.t < 9e5)) return;
@@ -878,11 +897,13 @@ class AuroraRadar {
     return tw <= 0 && t <= 2 ? 'snow' : tw <= 1.2 && t <= 3.5 ? 'sleet' : 'rain';
   }
   sayInfo() {
-    const h = this.h, now = Date.now(), c = h._c, st = c.station; let cur = null, eta = null, src = '';
+    const h = this.h, now = Date.now(), c = h._c, st = c.station; let cur = null, eta = null, src = '', stop = null, until = null;
     const sr = h._num(st.rainRate); const rt = this.rates || [];
     if (rt.length && rt.some(x => x != null)) {
       src = 'DWD-Radar'; cur = rt[0] != null ? rt[0] : null;
       for (let i = 1; i < rt.length; i++) if (rt[i] != null && rt[i] >= 0.1) { eta = Math.max(5, Math.round((this.rateT[i] - now) / 6e4)); break; }
+      if (cur != null && cur >= 0.1) { for (let i = 1; i < rt.length; i++) if (rt[i] != null && rt[i] < 0.1) { stop = this.rateT[i]; break; } }
+      for (let i = rt.length - 1; i >= 0; i--) if (rt[i] != null) { until = this.rateT[i]; break; }
     } else if (this.kw?.list?.length) {
       src = 'Kachelmann'; const e = this.kw.list.find(x => Date.parse(x.datetime) + 36e5 > now && Date.parse(x.datetime) < now + 36e5 * 3 && (x.precipitation || 0) >= 0.1);
       if (e) { const m = Math.round((Date.parse(e.datetime) - now) / 6e4); if (m <= 0) cur = e.precipitation; else eta = Math.max(5, m); }
@@ -890,9 +911,10 @@ class AuroraRadar {
     if (sr != null && sr >= 0.1) { cur = sr; src = 'Wetterstation'; }
     this.eta = eta; const ty = this.ptype(), T = RD_TYPES[ty], verb = T.n;
     const f5 = m => m < 60 ? Math.max(5, Math.round(m / 5) * 5) : Math.round(m / 5) * 5;
-    if (cur != null && cur >= 0.1) return { tone: 'now', ty, txt: `${de(cur, cur < 10 ? 1 : 0)} mm/h gerade hier`, sub: `${verb}${src ? ' · ' + src : ''}`, rain: true };
-    if (eta != null) return { tone: 'soon', ty, txt: `in ~${f5(eta)} min ${verb} erwartet`, sub: src ? 'nächste Stunde · ' + src : 'nächste Stunde', rain: false };
-    return { tone: 'dry', ty, txt: 'trocken', sub: src === 'Kachelmann' ? 'nächste 3 Stunden' : 'nächste Stunde', rain: false };
+    const fin = t => t != null && isFinite(t) && t > now;
+    if (cur != null && cur >= 0.1) return { tone: 'now', ty, txt: `${de(cur, cur < 10 ? 1 : 0)} mm/h gerade hier`, sub: `${verb}${fin(stop) ? ' bis etwa ' + rdHH(stop) + ' Uhr' : ''}${src ? ' · ' + src : ''}`, rain: true };
+    if (eta != null) { const at = now + eta * 6e4; return { tone: 'soon', ty, txt: `${verb} ab ${rdHH(Math.round(at / 3e5) * 3e5)} Uhr`, sub: `in ~${f5(eta)} min${src ? ' · ' + src : ''}`, rain: false }; }
+    return { tone: 'dry', ty, txt: 'trocken', sub: src === 'Kachelmann' ? 'nächste 3 Stunden' : fin(until) ? `kein Niederschlag bis ${rdHH(until)} Uhr` : 'nächste Stunde', rain: false };
   }
   windInfo() {
     const h = this.h, st = h._c.station, kw = h._s(h._c.stationWeather)?.attributes || {};
@@ -1005,7 +1027,8 @@ const CSS4 = `
 .rd-say{font-weight:800;font-size:22px;line-height:1.1;letter-spacing:-.01em;max-width:100%;text-wrap:balance;text-shadow:0 2px 14px rgba(0,0,0,.75)}
 .rd-say.t-dry{color:#7dd3fc}.rd-say.t-soon{color:#fcd34d}.rd-say.t-now{color:#60a5fa}
 .rd-sub{font-size:12px;color:#e2e8f0;text-shadow:0 1px 6px rgba(0,0,0,.7)}
-.rd-leg{display:flex;align-items:center;gap:6px;font-size:9.5px;color:#cbd5e1;text-shadow:0 1px 4px rgba(0,0,0,.7)}.rd-leg i{width:72px;height:6px;border-radius:3px;background:linear-gradient(90deg,#60a5fa,#22c55e,#facc15,#ef4444,#d946ef)}
+.rd-leg{display:flex;align-items:center;gap:2px;font-size:9.5px;color:#cbd5e1;text-shadow:0 1px 4px rgba(0,0,0,.7)}.rd-leg span{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:30px}.rd-leg i{display:block;width:100%;height:6px}.rd-leg span:first-child i{border-radius:3px 0 0 3px}.rd-leg span:last-child i{border-radius:0 3px 3px 0}.rdm:not(.full) .rd-leg span{min-width:22px;font-size:0}.rdm:not(.full) .rd-leg span:first-child,.rdm:not(.full) .rd-leg span:last-child{font-size:9px}.rdm:not(.full) .rd-leg span:first-child{align-items:flex-start}.rdm:not(.full) .rd-leg span:last-child{align-items:flex-end}
+.rd-ext{display:inline-flex;align-items:center;gap:3px;pointer-events:auto;font-size:11px;font-weight:600;color:#e2e8f0;text-decoration:none;padding:4px 8px 4px 10px;border-radius:999px;background:rgba(8,12,28,.66);border:1px solid rgba(255,255,255,.14);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}.rd-ext:hover{background:rgba(30,41,80,.85)}.rd-ext .i{width:12px;height:12px}
 .rd-type:empty{display:none}.rd-type span{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:4px 10px;border-radius:999px;background:rgba(8,12,28,.7);border:1px solid rgba(255,255,255,.12)}
 .rd-warns{display:flex;flex-direction:column;gap:6px;align-items:flex-start;max-width:100%}.rd-warns:empty{display:none}
 .rd-w{display:inline-flex;align-items:center;gap:6px;border:1.5px solid transparent;border-radius:18px;padding:5px 11px;font:inherit;font-size:12px;font-weight:700;box-shadow:0 4px 14px rgba(0,0,0,.35);cursor:pointer;max-width:100%;text-align:left}.rd-w span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.rd-w.more{background:rgba(10,16,32,.78);color:#e2e8f0;border-color:rgba(255,255,255,.18)}
@@ -1023,8 +1046,8 @@ const CSS4 = `
 .rd-bc{padding:7px 12px;font-weight:600;color:#fde047;border-color:rgba(250,204,21,.4)}.rd-bc b{font-size:14px}.rd-bc.soft{color:#fcd34d;font-weight:500;border-style:dashed}.rd-bc .i{fill:currentColor}
 .rd-tl{position:absolute;left:10px;right:10px;bottom:20px;height:48px;display:flex;align-items:center;gap:10px;padding:0 14px 0 6px;border-radius:18px;background:rgba(8,12,28,.74);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.1)}.rdm.full .rd-tl{bottom:calc(22px + env(safe-area-inset-bottom,0px));left:12px;right:12px}
 .rd-play{width:36px;height:36px;border-radius:50%;border:1.5px solid var(--acc,#5eead4);background:rgba(94,234,212,.14);color:var(--acc,#5eead4);display:grid;place-items:center;cursor:pointer;flex:none;padding:0}
-.rd-dw{position:relative;flex:1;min-width:0;height:100%}.rd-dots{display:flex;gap:2px;align-items:center;height:30px;padding-top:2px;touch-action:none;cursor:pointer}
-.rd-dots i{flex:1;min-width:2px;height:8px;border-radius:3px;background:rgba(148,163,184,.45);transition:height .12s,background .12s}.rd-dots i.f{background:rgba(167,139,250,.5)}.rd-dots i.on{height:14px;background:var(--acc,#5eead4);box-shadow:0 0 10px var(--acc,#5eead4)}.rd-dots i.na{opacity:.25}
+.rd-dw{position:relative;flex:1;min-width:0;height:100%}.rd-dots{display:flex;gap:2px;align-items:flex-end;height:30px;padding-bottom:3px;box-sizing:border-box;touch-action:none;cursor:pointer}
+.rd-dots i{flex:1;min-width:2px;height:8px;border-radius:3px;background:rgba(148,163,184,.45);transition:height .12s,background .12s}.rd-dots i.f{background:rgba(167,139,250,.5)}.rd-dots i.r{height:calc(6px + var(--h,0) * 20px);background:var(--c)}.rd-dots i.f.r{opacity:.72}.rd-dots i.on{height:max(14px,calc(6px + var(--h,0) * 20px));background:var(--acc,#5eead4);box-shadow:0 0 10px var(--acc,#5eead4);opacity:1}.rd-dots i.on.r{background:var(--c);box-shadow:0 0 0 1.5px #fff,0 0 10px var(--c)}.rd-dots i.na{opacity:.25}
 .rd-lb{position:absolute;left:0;right:0;bottom:3px;height:11px;font-size:9.5px;color:#94a3b8;pointer-events:none}.rd-lb span{position:absolute;transform:translateX(-50%);white-space:nowrap}
 .rd-clk{display:flex;flex-direction:column;align-items:flex-end;line-height:1.05;flex:none}.rd-clk b{font-size:20px;font-weight:700;font-variant-numeric:tabular-nums}.rd-clk span{font-size:9.5px;letter-spacing:.12em;color:#94a3b8;margin-top:2px}.rd-clk.fc span{color:#fcd34d}
 .rd-att{position:absolute;left:10px;right:10px;bottom:4px;font-size:8px;color:rgba(203,213,225,.7);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none}.rdm.full .rd-att{bottom:calc(6px + env(safe-area-inset-bottom,0px))}
@@ -2663,19 +2686,13 @@ class HomeAurora extends HTMLElement {
       <div class="tpcs">${chips}</div>${week}</div>`;
   }
 
-  /* ───────────── v5: Regenradar ───────────── */
-  _radarUrl() {
-    if (this._c.radarUrl) return this._c.radarUrl;
-    const lat = this._h?.config?.latitude ?? 51.77, lon = this._h?.config?.longitude ?? 8.57;
-    return `https://embed.windy.com/embed2.html?lat=${lat.toFixed(2)}&lon=${lon.toFixed(2)}&detailLat=${lat.toFixed(2)}&detailLon=${lon.toFixed(2)}&zoom=7&level=surface&overlay=radar&product=radar&menu=&message=&marker=true&calendar=now&pressure=&type=map&location=coordinates&detail=&metricWind=km%2Fh&metricTemp=%C2%B0C&radarRange=-1`;
-  }
   /* ───────────── v5: Einstellungen ───────────── */
   _setRow() { return `<button class="xr" data-act="settings"><div class="ico">${ic('cog', 19)}</div><div><div class="t">Darstellung &amp; Modi</div><div class="s">${{ dark: 'Dunkel', light: 'Hell', auto: 'Automatisch' }[this._themePref || this._c.theme] || 'Dunkel'}${WALL_UI && this._ambMin() ? ' · Ambient nach ' + this._ambMin() + ' Min.' : ''}</div></div></button>`; }
   _ambRow() { if (!WALL_UI) return ''; return `<button class="xr" data-act="ambient"><div class="ico">${ic('expand', 19)}</div><div><div class="t">Wandtablet-Modus</div><div class="s">Uhr &amp; Überblick, tippen zum Beenden</div></div></button>`; }
   _sSet() {
     const th = this._themePref || this._c.theme || 'dark', am = String(this._ambMin());
     const seg = (act, cur, items) => `<div class="seg wide">${items.map(x => `<button class="${cur === x[0] ? 'on' : ''}" data-act="${act}" data-m="${x[0]}">${x[1]}</button>`).join('')}</div>`;
-    return `<div class="grab"></div><div class="sh"><div class="ico">${ic('cog', 24)}</div><div><h2>Darstellung &amp; Modi</h2><p>Home Aurora v5.2 · Build pz24</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
+    return `<div class="grab"></div><div class="sh"><div class="ico">${ic('cog', 24)}</div><div><h2>Darstellung &amp; Modi</h2><p>Home Aurora v5.2 · Build pz25</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
       <div class="lab2">DESIGN</div>${seg('theme', th, [['dark', 'Dunkel'], ['light', 'Hell'], ['auto', 'Automatisch']])}
       <div class="card-note">„Automatisch“ folgt dem Dunkel-/Hellmodus deines Home-Assistant-Profils. Die Auswahl gilt nur für dieses Gerät.</div>
       ${WALL_UI ? `      <div class="lab2">WANDTABLET-MODUS</div>
@@ -2970,8 +2987,8 @@ class HomeAurora extends HTMLElement {
     const u = this._c.rdr || {};
     return Object.assign({
       wms: 'https://maps.dwd.de/geoserver/dwd/wms', radar: 'dwd:Niederschlagsradar', bolt: 'dwd:Blitzdichte', warn: 'dwd:Warnungen_Landkreise',
-      base: { dark: ['https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}'], light: ['https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}'] }, past: 120, future: 60, zoom: 8, factor: 1, strikeKm: 50, rings: [10, 25],
-      mock: !!this._h?.config?.mock, kw: { storm: 'binary_sensor.kachelmannwetter_gewitter_erwartet' },
+      base: { dark: ['https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}'], light: ['https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', 'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}'] }, past: 120, future: 120, zoom: 8, factor: 1, strikeKm: 50, rings: [10, 25],
+      mock: !!this._h?.config?.mock, ext: this._c.radarUrl || 'https://www.wetter.com/wetterkarten/regenradar/', kw: { storm: 'binary_sensor.kachelmannwetter_gewitter_erwartet' },
     }, u);
   }
   _rdrWarns() {
@@ -4677,7 +4694,7 @@ const EDITOR_SCHEMA = [
   { name: 'calendarDays', selector: { number: { min: 3, max: 60, mode: 'box' } } },
   { name: 'batteryLow', selector: { number: { min: 5, max: 50, mode: 'box', unit_of_measurement: '%' } } },
 ];
-const EDITOR_LABELS = { theme: 'Design', ambient_after: 'Wandtablet-Modus automatisch starten', weather: 'Wetter-Entität', persons: 'Personen', radar: 'Regenradar-Kamera', radarUrl: 'Eigene Radar-URL (optional, Live-Karte)', putzplan: 'Putzplan anzeigen', putzplan_view: 'Putzplan als eigene Ansicht öffnen (sonst als Fenster)', einkauf: 'Einkaufsliste & Rezepte anzeigen', calendarDays: 'Termine: Tage voraus', batteryLow: 'Batterie schwach ab' };
+const EDITOR_LABELS = { theme: 'Design', ambient_after: 'Wandtablet-Modus automatisch starten', weather: 'Wetter-Entität', persons: 'Personen', radar: 'Regenradar-Kamera', radarUrl: 'Link für den wetter.com-Knopf im Regenradar (optional, z. B. die Seite deines Orts)', putzplan: 'Putzplan anzeigen', putzplan_view: 'Putzplan als eigene Ansicht öffnen (sonst als Fenster)', einkauf: 'Einkaufsliste & Rezepte anzeigen', calendarDays: 'Termine: Tage voraus', batteryLow: 'Batterie schwach ab' };
 class HomeAuroraEditor extends HTMLElement {
   setConfig(c) { this._c = c || {}; this._draw(); }
   set hass(h) { this._h = h; if (this._f) this._f.hass = h; }

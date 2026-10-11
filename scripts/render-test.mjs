@@ -36,7 +36,7 @@ if (shots) mkdirSync(shots, { recursive: true });
 
 const VIEWS = ['home', 'rooms', 'climate', 'bath', 'weather', 'printer', 'clean'];
 // room und heat brauchen einen Raum: es wird der erste Raum mit Thermostat genommen.
-const SHEETS = ['lights', 'persons', 'quick', 'vent', 'cal', 'bat', 'doors', 'sys', 'waste', 'power', 'set', 'fuel', 'plants', 'kid', 'clean', 'tv', 'music', 'shop', 'pzstat', 'room', 'heat'];
+const SHEETS = ['lights', 'persons', 'quick', 'vent', 'cal', 'bat', 'doors', 'sys', 'waste', 'power', 'set', 'fuel', 'plants', 'kid', 'clean', 'tv', 'music', 'shop', 'pzstat', 'radar', 'room', 'heat'];
 const TARGETS = [
   { file: 'dist/home-aurora.js', tag: 'home-aurora', vp: { width: 412, height: 915 } },
   { file: 'dist/home-aurora-wide.js', tag: 'home-aurora-wide', vp: { width: 1280, height: 800 } },
