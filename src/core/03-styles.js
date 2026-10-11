@@ -241,14 +241,15 @@ const CSS3 = `
 .amb{position:fixed;inset:0;z-index:80;display:none;background:radial-gradient(120% 100% at 50% 0%,#101a3a,#03050d 70%);color:#f4f7ff;overflow:hidden;cursor:pointer;--wh:255,255,255;--tx:#f4f7ff;--tx2:rgba(244,247,255,.66);--tx3:rgba(244,247,255,.4);--line:rgba(255,255,255,.12)}
 .amb.show{display:grid;place-items:center;animation:fade .6s both}
 .app.ambon>.bg,.app.ambon>.shell,.app.ambon>.ov{visibility:hidden}.app.ambon>.bg *,.app.ambon>.shell *{animation-play-state:paused!important}
-.ambin{display:flex;flex-direction:column;align-items:center;gap:18px;padding:24px;text-align:center;transition:transform 4s ease-in-out;max-width:100%}
-.ambc{font-size:min(26vw,220px);font-weight:200;line-height:1;letter-spacing:-.03em}.ambc span{opacity:.5;animation:blink 2s steps(2) infinite}@keyframes blink{50%{opacity:.15}}
+.ambin{display:flex;flex-direction:column;align-items:center;gap:clamp(10px,2vh,18px);padding:24px;text-align:center;transition:transform 4s ease-in-out;max-width:100%}
+.ambc{font-size:min(26vw,220px,23vh);font-weight:200;line-height:1;letter-spacing:-.03em}.ambc span{opacity:.5;animation:blink 2s steps(2) infinite}@keyframes blink{50%{opacity:.15}}
 .ambd{font-size:clamp(16px,3vw,26px);color:var(--tx2)}
 .ambr{display:flex;gap:clamp(18px,5vw,56px);flex-wrap:wrap;justify-content:center;margin-top:8px}
 .ambw{display:flex;align-items:center;gap:14px}.ambw .wx{width:64px;height:64px}
 .ambt{font-size:clamp(34px,7vw,64px);font-weight:300;line-height:1}.ambt small{font-size:.45em;opacity:.6;margin-left:2px}.ambs{font-size:14px;color:var(--tx2);text-align:left}
 .ambl{display:flex;flex-wrap:wrap;gap:8px 10px;justify-content:center;max-width:min(92vw,820px);margin-top:6px}
-.ambx{display:flex;align-items:center;gap:12px;font-size:clamp(14px,2vw,18px);color:var(--tx2)}.ambx i{width:4px;height:4px;border-radius:50%;background:var(--tx3)}.ambx b{display:inline-flex;align-items:center;gap:6px;font-weight:500;color:#7dd3fc}
+.ambx{display:flex;align-items:center;gap:12px;font-size:clamp(14px,2vw,18px);color:var(--tx2)}.ambx i{width:4px;height:4px;border-radius:50%;background:var(--tx3)}.ambfx{display:flex;align-items:stretch;gap:clamp(10px,2.4vw,26px);padding:10px 20px;border-radius:22px;background:rgba(255,255,255,.05)}.ambf{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:52px}.ambf .wx{width:34px;height:34px}.ambfl{font-size:13px;color:var(--tx2)}.ambft{font-size:clamp(16px,2.2vw,20px)}.ambfs{font-size:12px;color:#7dd3fc;min-height:15px}.ambfd{width:1px;background:var(--line);margin:4px 0}
+.ambx b{display:inline-flex;align-items:center;gap:6px;font-weight:500;color:#7dd3fc}
 .ambn{display:inline-flex;align-items:center;gap:10px;padding:10px 18px;border-radius:999px;background:rgba(255,255,255,.07);font-size:clamp(14px,2vw,18px)}.ambn.warn{color:#fbbf24;background:rgba(251,191,36,.12)}.ambn small{color:var(--tx3);font-size:.85em;margin-left:4px}
 .ambp{justify-content:center;margin-top:6px}.ambh{font-size:12px;color:var(--tx3);margin-top:10px}
 /* v5: Heller Modus */

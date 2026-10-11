@@ -530,14 +530,15 @@ const CSS3 = `
 .amb{position:fixed;inset:0;z-index:80;display:none;background:radial-gradient(120% 100% at 50% 0%,#101a3a,#03050d 70%);color:#f4f7ff;overflow:hidden;cursor:pointer;--wh:255,255,255;--tx:#f4f7ff;--tx2:rgba(244,247,255,.66);--tx3:rgba(244,247,255,.4);--line:rgba(255,255,255,.12)}
 .amb.show{display:grid;place-items:center;animation:fade .6s both}
 .app.ambon>.bg,.app.ambon>.shell,.app.ambon>.ov{visibility:hidden}.app.ambon>.bg *,.app.ambon>.shell *{animation-play-state:paused!important}
-.ambin{display:flex;flex-direction:column;align-items:center;gap:18px;padding:24px;text-align:center;transition:transform 4s ease-in-out;max-width:100%}
-.ambc{font-size:min(26vw,220px);font-weight:200;line-height:1;letter-spacing:-.03em}.ambc span{opacity:.5;animation:blink 2s steps(2) infinite}@keyframes blink{50%{opacity:.15}}
+.ambin{display:flex;flex-direction:column;align-items:center;gap:clamp(10px,2vh,18px);padding:24px;text-align:center;transition:transform 4s ease-in-out;max-width:100%}
+.ambc{font-size:min(26vw,220px,23vh);font-weight:200;line-height:1;letter-spacing:-.03em}.ambc span{opacity:.5;animation:blink 2s steps(2) infinite}@keyframes blink{50%{opacity:.15}}
 .ambd{font-size:clamp(16px,3vw,26px);color:var(--tx2)}
 .ambr{display:flex;gap:clamp(18px,5vw,56px);flex-wrap:wrap;justify-content:center;margin-top:8px}
 .ambw{display:flex;align-items:center;gap:14px}.ambw .wx{width:64px;height:64px}
 .ambt{font-size:clamp(34px,7vw,64px);font-weight:300;line-height:1}.ambt small{font-size:.45em;opacity:.6;margin-left:2px}.ambs{font-size:14px;color:var(--tx2);text-align:left}
 .ambl{display:flex;flex-wrap:wrap;gap:8px 10px;justify-content:center;max-width:min(92vw,820px);margin-top:6px}
-.ambx{display:flex;align-items:center;gap:12px;font-size:clamp(14px,2vw,18px);color:var(--tx2)}.ambx i{width:4px;height:4px;border-radius:50%;background:var(--tx3)}.ambx b{display:inline-flex;align-items:center;gap:6px;font-weight:500;color:#7dd3fc}
+.ambx{display:flex;align-items:center;gap:12px;font-size:clamp(14px,2vw,18px);color:var(--tx2)}.ambx i{width:4px;height:4px;border-radius:50%;background:var(--tx3)}.ambfx{display:flex;align-items:stretch;gap:clamp(10px,2.4vw,26px);padding:10px 20px;border-radius:22px;background:rgba(255,255,255,.05)}.ambf{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:52px}.ambf .wx{width:34px;height:34px}.ambfl{font-size:13px;color:var(--tx2)}.ambft{font-size:clamp(16px,2.2vw,20px)}.ambfs{font-size:12px;color:#7dd3fc;min-height:15px}.ambfd{width:1px;background:var(--line);margin:4px 0}
+.ambx b{display:inline-flex;align-items:center;gap:6px;font-weight:500;color:#7dd3fc}
 .ambn{display:inline-flex;align-items:center;gap:10px;padding:10px 18px;border-radius:999px;background:rgba(255,255,255,.07);font-size:clamp(14px,2vw,18px)}.ambn.warn{color:#fbbf24;background:rgba(251,191,36,.12)}.ambn small{color:var(--tx3);font-size:.85em;margin-left:4px}
 .ambp{justify-content:center;margin-top:6px}.ambh{font-size:12px;color:var(--tx3);margin-top:10px}
 /* v5: Heller Modus */
@@ -2721,7 +2722,7 @@ class HomeAurora extends HTMLElement {
   _sSet() {
     const th = this._themePref || this._c.theme || 'dark', am = String(this._ambMin());
     const seg = (act, cur, items) => `<div class="seg wide">${items.map(x => `<button class="${cur === x[0] ? 'on' : ''}" data-act="${act}" data-m="${x[0]}">${x[1]}</button>`).join('')}</div>`;
-    return `<div class="grab"></div><div class="sh"><div class="ico">${ic('cog', 24)}</div><div><h2>Darstellung &amp; Modi</h2><p>Home Aurora v5.2 · Build pz28</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
+    return `<div class="grab"></div><div class="sh"><div class="ico">${ic('cog', 24)}</div><div><h2>Darstellung &amp; Modi</h2><p>Home Aurora v5.2 · Build pz29</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
       <div class="lab2">DESIGN</div>${seg('theme', th, [['dark', 'Dunkel'], ['light', 'Hell'], ['auto', 'Automatisch']])}
       <div class="card-note">„Automatisch“ folgt dem Dunkel-/Hellmodus deines Home-Assistant-Profils. Die Auswahl gilt nur für dieses Gerät.</div>
       ${WALL_UI ? `      <div class="lab2">WANDTABLET-MODUS</div>
@@ -2771,18 +2772,30 @@ class HomeAurora extends HTMLElement {
     if (this._built && this.isConnected) { this._sig = ''; this._render(); }
     try { this._wl?.release(); } catch (e) { /* optional */ } this._wl = null;
   }
-  /* Bildschirmschoner: Tageswerte und Regen der nächsten Stunden aus der stündlichen Vorhersage */
+  /* Bildschirmschoner: Tageswerte, Regen, Wind, Sonne und ein Streifen mit den nächsten Stunden und morgen */
   _ambWx(w) {
-    const fc = this._fc, d0 = fc?.daily?.[0], P = [];
-    if (d0 && d0.temperature != null && d0.templow != null && isFinite(d0.temperature) && isFinite(d0.templow)) P.push(`Heute ${de(d0.templow, 0)}° bis ${de(d0.temperature, 0)}°`);
-    const now = Date.now(), H = (fc?.hourly || []).filter(x => { const t = Date.parse(x.datetime); return t > now - 36e5 && t < now + 6 * 36e5; });
+    const fc = this._fc, d0 = fc?.daily?.[0], P = [], ok = v => v != null && isFinite(v);
+    if (d0 && ok(d0.temperature) && ok(d0.templow)) P.push(`Heute ${de(d0.templow, 0)}° bis ${de(d0.temperature, 0)}°`);
+    const now = Date.now(), H = (fc?.hourly || []).filter(x => { const t = Date.parse(x.datetime); return t > now - 36e5 && t < now + 13 * 36e5; });
     const wet = x => (x.precipitation || 0) >= 0.3 || ((x.precipitation_probability || 0) >= 60 && /rain|pour|snow|hail/.test(x.condition || ''));
-    const snow = x => /snow/.test(x.condition || ''), hh = x => new Date(x.datetime).getHours() + ' Uhr';
+    const snow = x => /snow/.test(x.condition || ''), hh = x => new Date(x.datetime).getHours() + ' Uhr', soon = H.filter(x => Date.parse(x.datetime) < now + 6 * 36e5);
     const nowWet = (w.rain || 0) > 0 || /rain|pour|hail/.test(w.cond || '');
     let r = '';
-    if (nowWet) { const dry = H.find(x => Date.parse(x.datetime) > now && !wet(x)); r = 'Regnet gerade' + (dry ? ' · trocken ab ' + hh(dry) : ''); }
-    else { const n = H.find(x => Date.parse(x.datetime) + 36e5 > now && wet(x)); if (n) r = (snow(n) ? 'Schnee' : 'Regen') + (Date.parse(n.datetime) <= now ? ' möglich' : ' ab ' + hh(n)); }
-    return P.length || r ? `<div class="ambx">${P.map(esc).join('')}${r ? `${P.length ? '<i></i>' : ''}<b>${ic('drop', 15)}${esc(r)}</b>` : ''}</div>` : '';
+    if (nowWet) { const dry = soon.find(x => Date.parse(x.datetime) > now && !wet(x)); r = 'Regnet gerade' + (dry ? ' · trocken ab ' + hh(dry) : ''); }
+    else { const n = soon.find(x => Date.parse(x.datetime) + 36e5 > now && wet(x)); if (n) r = (snow(n) ? 'Schnee' : 'Regen') + (Date.parse(n.datetime) <= now ? ' möglich' : ' ab ' + hh(n)); }
+    if (ok(w.wind) && w.wind >= 25) P.push(`Wind ${de(w.wind, 0)} ${esc(w.windU)}`);
+    const sun = this._s(this._c.sun)?.attributes;
+    if (sun && sun.next_rising && sun.next_setting) { const up = this._val(this._c.sun) === 'above_horizon', t = up ? sun.next_setting : sun.next_rising; if (!isNaN(Date.parse(t))) P.push(`${up ? 'Sonnenuntergang' : 'Sonnenaufgang'} ${hhmm(t)}`); }
+    const line = P.length || r ? `<div class="ambx">${P.map(x => `<span>${x}</span>`).join('<i></i>')}${r ? `${P.length ? '<i></i>' : ''}<b>${ic('drop', 15)}${esc(r)}</b>` : ''}</div>` : '';
+    // alle 2 Stunden ab der nächsten vollen Stunde, dazu „Morgen“ aus der Tagesvorhersage
+    const S = H.filter(x => Date.parse(x.datetime) > now).filter((_, i) => i % 2 === 1).slice(0, 5).filter(x => ok(x.temperature));
+    const rain = x => (x.precipitation || 0) >= 0.1 ? `${de(x.precipitation, x.precipitation < 10 ? 1 : 0)} mm` : (x.precipitation_probability || 0) >= 30 ? `${de(x.precipitation_probability, 0)} %` : '';
+    const cell = (lab, cond, t, sub) => `<div class="ambf"><div class="ambfl">${lab}</div>${wx(cond, 34)}<div class="ambft">${t}</div><div class="ambfs">${sub || '&nbsp;'}</div></div>`;
+    let strip = S.map(x => cell(hh(x), x.condition || 'cloudy', de(x.temperature, 0) + '°', rain(x))).join('');
+    const tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1); const tk = tomorrow.toDateString();
+    const d1 = (fc?.daily || []).find(x => new Date(x.datetime).toDateString() === tk);
+    if (d1 && ok(d1.temperature)) strip += `<i class="ambfd"></i>` + cell('Morgen', d1.condition || 'cloudy', `${ok(d1.templow) ? de(d1.templow, 0) + '° / ' : ''}${de(d1.temperature, 0)}°`, rain(d1));
+    return line + (strip ? `<div class="ambfx">${strip}</div>` : '');
   }
   /* Bildschirmschoner: Hinweise als ruhige Chips; Warnungen zuerst und in Gelb */
   _ambChips() {
@@ -2795,8 +2808,6 @@ class HomeAurora extends HTMLElement {
     if (WL && WL[0] && WL[0].days <= 1) { const nx = WL.filter(x => x.days === WL[0].days); chip('trash', `${this._dayTxt(WL[0])} · ${esc(nx.map(x => x.name).join(' + '))}`); }
     if (this._pzOn()) { const T = this._pzSum().T, due = T.filter(t => !t.today && (t.st === 'overdue' || (t.st === 'due_soon' && t.until === 0))).length; if (due) chip('broom', `Heute putzen · ${due} ${due === 1 ? 'Aufgabe' : 'Aufgaben'}`); }
     if (this._shopOn() && this._shopOk()) { const n = parseInt(this._val(this._shopC().list), 10) || 0; if (n) chip('cart', `Einkaufsliste · ${n} ${n === 1 ? 'Sache' : 'Sachen'}`); }
-    let N = null; try { N = this._spkNow(this._spk()); } catch (e) { N = null; }
-    if (N && N.pl) chip('music', `${esc(N.title || 'Musik')}${N.artist ? ' – ' + esc(N.artist) : ''} <small>${esc(N.name)}</small>`);
     const lights = this._lightsOn().length; if (lights) chip('bulb', `${lights} ${lights === 1 ? 'Licht' : 'Lichter'} an`);
     return C.join('');
   }
