@@ -99,6 +99,13 @@
       case 'chvac': h.callService('climate', 'set_hvac_mode', { entity_id: e, hvac_mode: el.dataset.m }); break;
       case 'dhmode': this._dhSet(this._c.rooms.find(r => r.id === el.dataset.room), el.dataset.m); break;
       case 'maps': { const u = `https://www.google.com/maps/dir/?api=1&destination=${el.dataset.lat},${el.dataset.lon}`; try { window.open(u, '_blank', 'noopener'); } catch (er) { /* ok */ } break; }
+      case 'tbright': {
+        const T = this._c.tablet, b = this._s(T.brightness); if (!b) break;
+        const mx = parseFloat(b.attributes.max) || 255, cur = parseFloat(b.state) || 0;
+        const v = el.dataset.v != null ? +el.dataset.v : clamp(Math.round(cur + mx * parseFloat(el.dataset.d) / 100), parseFloat(b.attributes.min) || 1, mx);
+        h.callService('number', 'set_value', { entity_id: T.brightness, value: v }); break;
+      }
+      case 'tauto': h.callService('automation', el.dataset.m === 'on' ? 'turn_on' : 'turn_off', { entity_id: this._c.tablet.auto }); this._toast(el.dataset.m === 'on' ? 'Helligkeit wieder automatisch' : 'Helligkeit bleibt wie eingestellt'); break;
       case 'fuauto': this._fuPref = el.dataset.m; try { localStorage.setItem('home-aurora-fully', el.dataset.m); } catch (er) { /* ok */ } this._fuLast = null; this._fullyApply(true); this._renderSheet(); break;
       case 'fuelk': this._fuelK = el.dataset.k; this._renderSheet(); break;
       case 'sys': this._sheet = { t: 'sys' }; this._renderSheet(); this._loadSys(true); break;

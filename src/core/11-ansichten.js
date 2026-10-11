@@ -62,8 +62,15 @@
         ${cur != null ? `<path d="${arc(100, 100, 84, 135, Math.max(135.5, a1))}" fill="none" stroke="${col}" stroke-width="12" stroke-linecap="round" style="filter:drop-shadow(0 0 10px ${col});opacity:${off ? .35 : 1}"/>` : ''}
         ${tg != null && !off ? `<circle cx="${tx.toFixed(1)}" cy="${ty.toFixed(1)}" r="9" fill="${FG}" style="filter:drop-shadow(0 0 8px rgba(${WH},.8))"/><circle cx="${tx.toFixed(1)}" cy="${ty.toFixed(1)}" r="3.500" fill="${col}"/>` : ''}</svg>
         <div class="mid htap" data-act="heat" data-room="${r.id}"><div class="cur big">${de(cur)}<small class="u">°</small></div><div class="tg">${off ? 'Heizung aus' : (auto ? 'Automatik' : 'Ziel') + ' <b>' + de(tg) + '°</b>'}</div></div></div>
-      <div class="dst ${heat ? 'heat' : ''}">${heat ? ic('flame', 14) + 'Heizt gerade' : (off ? 'Aus' : esc(I.dh?.label || 'Bereit'))}</div>
+      <div class="dst ${heat ? 'heat' : ''}">${heat ? ic('flame', 14) + 'Heizt gerade' : (off ? 'Aus' : esc(I.dh?.label || 'Bereit'))}</div>${this._planLine(r)}
       <div class="dbt">${auto ? `<button class="qb on" data-act="heat" data-room="${r.id}">${ic('clock', 14)}Automatik</button>` : `<button class="rbn" data-act="temp" data-e="${r.climate}" data-d="-0.5">${ic('minus', 22)}</button><button class="rbn" data-act="temp" data-e="${r.climate}" data-d="0.5">${ic('plus', 22)}</button>`}</div></div>`;
+  }
+  /* Klima-Kachel: Heizdauer heute und nächster Wechsel laut Plan */
+  _planLine(r) {
+    const P = this._plan(r), ht = this._heatTime(r), parts = [];
+    if (ht != null) parts.push('heute ' + this._durTxt(ht) + ' geheizt');
+    if (P?.next && P.on !== false) parts.push(P.nextMode ? `${P.nextMode} ab ${this._whenTxt(P.next)}` : `Wechsel ${this._whenTxt(P.next)}`);
+    return parts.length ? `<div class="dpl">${esc(parts.join(' · '))}</div>` : '';
   }
   _tempSeries(out = true) {
     const c = this._c, pal = ['#fb923c', '#a78bfa', '#f472b6', '#34d399', '#38bdf8', '#facc15', '#94a3b8'];

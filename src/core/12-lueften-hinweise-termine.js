@@ -108,6 +108,8 @@
     else if (pr && !pr.offline && pr.st === 'failed') A.push({ id: 'prn', cls: 'bad', icon: 'printer', text: 'Druck fehlgeschlagen', sub: '', act: 'nav', attrs: 'data-v="printer"' });
     else if (pr && !pr.offline && pr.st === 'finish') { const ag = this._age(this._c.printer.prefix + 'druckstatus'); if (ag != null && ag < 3 * 36e5) A.push({ id: 'prn', cls: 'ok', icon: 'check', text: 'Druck fertig', sub: 'vor ' + this._agoTxt(ag), act: 'nav', attrs: 'data-v="printer"' }); }
     if (pr && !pr.offline && !(pr.st === 'failed') && (this._val(c.printer.error) === 'on' || this._val(c.printer.hms) === 'on')) A.push({ id: 'prerr', crit: true, cls: 'bad', icon: 'alert', text: 'Druckerfehler gemeldet', sub: '', act: 'nav', attrs: 'data-v="printer"' });
+    const MS = this._missing();
+    if (MS.length) A.push({ id: 'miss', cls: 'warn', icon: 'alert', text: MS.length === 1 ? 'Gerät fehlt' : `${MS.length} Geräte fehlen`, sub: MS[0], act: 'sys' });
     A.push(...this._alertsHome());
     A.unshift(...this._tmrAlerts());
     return A;

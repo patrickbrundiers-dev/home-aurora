@@ -1,4 +1,30 @@
 {
+"automation.schlafzimmer_heizung": {
+"attributes": {
+"friendly_name": "Schlafzimmer Heizung",
+"id": "fixture_schlafzimmer"
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "automation.schlafzimmer_heizung",
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00",
+"state": "on"
+},
+"automation.wandtablet_helligkeit_nach_tageszeit": {
+"attributes": {
+"friendly_name": "Wandtablet: Helligkeit nach Tageszeit",
+"id": "fixture_tablet"
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "automation.wandtablet_helligkeit_nach_tageszeit",
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00",
+"state": "on"
+},
 "binary_sensor.baderzimmer_tur_gr_contact": {
 "attributes": {
 "device_class": "door",
@@ -450,6 +476,19 @@
 "last_updated": "2026-01-01T12:00:00+00:00",
 "state": "off"
 },
+"binary_sensor.tab_a9_von_patrick_eingesteckt": {
+"attributes": {
+"device_class": "plug",
+"friendly_name": "Tablet eingesteckt"
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "binary_sensor.tab_a9_von_patrick_eingesteckt",
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00",
+"state": "on"
+},
 "binary_sensor.tur_wintergarten_contact": {
 "attributes": {
 "device_class": "door",
@@ -515,6 +554,78 @@
 "last_changed": "2026-01-01T12:00:00+00:00",
 "last_updated": "2026-01-01T12:00:00+00:00",
 "state": "off"
+},
+"button.badezimmer_waschmaschine_als_entladen_markieren": {
+"attributes": {
+"friendly_name": "Badezimmer Waschmaschine Als Entladen Markieren"
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "button.badezimmer_waschmaschine_als_entladen_markieren",
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00",
+"state": "unknown"
+},
+"button.redmi_15min": {
+"attributes": {
+"friendly_name": "Redmi 15Min"
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "button.redmi_15min",
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00",
+"state": "unknown"
+},
+"button.redmi_30min": {
+"attributes": {
+"friendly_name": "Redmi 30Min"
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "button.redmi_30min",
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00",
+"state": "unknown"
+},
+"button.redmi_60min": {
+"attributes": {
+"friendly_name": "Redmi 60Min"
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "button.redmi_60min",
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00",
+"state": "unknown"
+},
+"button.redmi_reset_bonus": {
+"attributes": {
+"friendly_name": "Redmi Reset Bonus"
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "button.redmi_reset_bonus",
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00",
+"state": "unknown"
+},
+"button.redmi_ring": {
+"attributes": {
+"friendly_name": "Redmi Ring"
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "button.redmi_ring",
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00",
+"state": "unknown"
 },
 "calendar.deutschland_nw": {
 "attributes": {
@@ -2415,6 +2526,21 @@
 "last_updated": "2026-01-01T12:00:00+00:00",
 "state": "2026-10-10T18:35:30.673955+00:00"
 },
+"number.tab_a9_von_patrick_bildschirmhelligkeit": {
+"attributes": {
+"friendly_name": "Bildschirmhelligkeit",
+"max": 255,
+"min": 0,
+"step": 1
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "number.tab_a9_von_patrick_bildschirmhelligkeit",
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00",
+"state": "120"
+},
 "person.home_sweet_home": {
 "attributes": {
 "editable": true,
@@ -2591,6 +2717,19 @@
 "last_changed": "2026-01-01T12:00:00+00:00",
 "last_updated": "2026-01-01T12:00:00+00:00",
 "state": "off"
+},
+"schedule.schlafzimmer_plan": {
+"attributes": {
+"friendly_name": "Schlafzimmer",
+"next_event": "2026-01-01T21:30:00+00:00"
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "schedule.schlafzimmer_plan",
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00",
+"state": "on"
 },
 "schedule.sz_19_grad_wochentags": {
 "attributes": {
@@ -10192,6 +10331,11 @@
 "preheat_minutes": 0,
 "present": true,
 "target_temperature": 21,
+"thermostat_setpoints": {
+"climate.wohnzimmer_esstisch": 21,
+"climate.wohnzimmer_hinter_sofa": 21,
+"climate.wohnzimmer_wintergarten": 21.5
+},
 "window_open": false
 },
 "context": {
@@ -10391,6 +10535,18 @@
 "id": "fixture"
 },
 "entity_id": "switch.redmi",
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00",
+"state": "off"
+},
+"switch.wintergarten_3d_drucker_steckdose_1": {
+"attributes": {
+"friendly_name": "Wintergarten 3D Drucker Steckdose 1"
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "switch.wintergarten_3d_drucker_steckdose_1",
 "last_changed": "2026-01-01T12:00:00+00:00",
 "last_updated": "2026-01-01T12:00:00+00:00",
 "state": "off"
