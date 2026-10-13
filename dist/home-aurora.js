@@ -2734,7 +2734,7 @@ class HomeAurora extends HTMLElement {
   _sSet() {
     const th = this._themePref || this._c.theme || 'dark', am = String(this._ambMin());
     const seg = (act, cur, items) => `<div class="seg wide">${items.map(x => `<button class="${cur === x[0] ? 'on' : ''}" data-act="${act}" data-m="${x[0]}">${x[1]}</button>`).join('')}</div>`;
-    return `<div class="grab"></div><div class="sh"><div class="ico">${ic('cog', 24)}</div><div><h2>Darstellung &amp; Modi</h2><p>Home Aurora v5.2 · Build pz32</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
+    return `<div class="grab"></div><div class="sh"><div class="ico">${ic('cog', 24)}</div><div><h2>Darstellung &amp; Modi</h2><p>Home Aurora v5.2 · Build pz33</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
       <div class="lab2">DESIGN</div>${seg('theme', th, [['dark', 'Dunkel'], ['light', 'Hell'], ['auto', 'Automatisch']])}
       <div class="card-note">„Automatisch“ folgt dem Dunkel-/Hellmodus deines Home-Assistant-Profils. Die Auswahl gilt nur für dieses Gerät.</div>
       ${WALL_UI ? `      <div class="lab2">WANDTABLET-MODUS</div>
@@ -4797,7 +4797,12 @@ class HomeAurora extends HTMLElement {
         // Dynamische Heizungssteuerung mit Raum-Thermostat: dort einstellen, die Regelung verteilt es auf die Thermostate (Betriebsart „Manuell“)
         const DX = R && this._dh(R), rc = DX?.x?.cl && this._s(DX.x.cl);
         if (rc && okv(rc.state)) {
-          const x = rc.attributes, nt = clamp(Math.round(((x.temperature ?? DX.target ?? 20) + parseFloat(el.dataset.d)) * 2) / 2, x.min_temp ?? 5, x.max_temp ?? 30);
+          // Schrittweite der Thermostate beachten: die Regelung rundet auf deren Raster (z. B. 1 °C im Bad und bei Leonie),
+          // ein halbes Grad würde dort wieder auf den alten Wert gerundet. Schnelles Tippen zählt vom zuletzt gesendeten Wert weiter.
+          const x = rc.attributes, st = Math.max(0.5, ...DX.trv.map(s => parseFloat(s.attributes.target_temp_step) || 0), parseFloat(x.target_temp_step) || 0);
+          const P = this._dhPend?.[R.id], base = P && Date.now() - P.t < 8e3 ? P.v : (x.temperature ?? DX.target ?? 20);
+          const nt = clamp(Math.round(base / st) * st + Math.sign(parseFloat(el.dataset.d)) * st, x.min_temp ?? 5, x.max_temp ?? 30);
+          (this._dhPend || (this._dhPend = {}))[R.id] = { v: nt, t: Date.now() };
           const pre = DX.on && DX.sel === 'Manuell' ? Promise.resolve() : this._dhSet(R, 'heat', true);
           Promise.resolve(pre).then(() => h.callService('climate', 'set_temperature', { entity_id: rc.entity_id, temperature: nt }));
           break;
