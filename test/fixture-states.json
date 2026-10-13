@@ -10149,6 +10149,36 @@
 "last_updated": "2026-01-01T12:00:00+00:00",
 "state": "90"
 },
+"sensor.treppenhaus_humidity": {
+"attributes": {
+"device_class": "humidity",
+"friendly_name": "Treppenhaus Luftfeuchtigkeit",
+"state_class": "measurement",
+"unit_of_measurement": "%"
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "sensor.treppenhaus_humidity",
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00",
+"state": "58.36"
+},
+"sensor.treppenhaus_temperature": {
+"attributes": {
+"device_class": "temperature",
+"friendly_name": "Treppenhaus Temperatur",
+"state_class": "measurement",
+"unit_of_measurement": "°C"
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "sensor.treppenhaus_temperature",
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00",
+"state": "20.11"
+},
 "sensor.treppenhaus_tur_battery": {
 "attributes": {
 "device_class": "battery",
