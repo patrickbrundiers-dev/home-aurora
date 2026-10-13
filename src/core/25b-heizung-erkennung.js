@@ -48,7 +48,7 @@
     }
     const T = [['Komfort', 'komforttemperatur', 'sofa'], ['Zuhause', 'zuhause_temperatur', 'home'], ['Aktivität', 'aktivitat_temperatur', 'bolt'], ['Eco', 'eco_temperatur', 'leaf'], ['Schlafen', 'schlafen_temperatur', 'bed'], ['Boost', 'boost_temperatur', 'flame'], ['Abwesend', null, 'door']];
     return {
-      b, mode, cl: c.cl, house: c.house, dur: has(`select.${b}_betriebsart_dauer`), lock: has(`switch.${b}_kindersicherung`),
+      b, mode, cl: c.cl, house: c.house, dur: has(`select.${b}_betriebsart_dauer`), sched: has(`select.${b}_zeitplan`), lock: has(`switch.${b}_kindersicherung`),
       roff: has(`number.${b}_raum_versatz`), demand: has(`sensor.${b}_warmebedarf`), trend: has(`sensor.${b}_temperaturtrend`), out: has(`sensor.${b}_aussentemperatur`),
       prob: [`binary_sensor.${b}_heizproblem`, `binary_sensor.${b}_thermostat_problem`].filter(e => e in S),
       presets: T.map(([n, k, i]) => ({ n, i, num: k ? has(`number.${b}_${k}`) : null })),
@@ -58,7 +58,7 @@
   _dhXIds(sid) {
     const X = this._dhX(sid); if (!X) return [];
     const S = this._h.states, trv = Object.keys(S[sid]?.attributes?.thermostat_setpoints || {});
-    return [X.mode, X.cl, X.house, X.dur, X.lock, X.roff, X.demand, X.trend, X.out, ...X.prob, ...X.presets.map(p => p.num), ...trv.map(X.off)].filter(Boolean);
+    return [X.mode, X.cl, X.house, X.dur, X.sched, X.lock, X.roff, X.demand, X.trend, X.out, ...X.prob, ...X.presets.map(p => p.num), ...trv.map(X.off)].filter(Boolean);
   }
   /* Automations-Konfigurationen lesen (alle 30 Min.) und Räume mit Advanced-Heating-Control-Plänen verbinden.
      Über die REST-Schnittstelle kommt die gespeicherte Konfiguration mit use_blueprint (klein, braucht Admin-Rechte);
