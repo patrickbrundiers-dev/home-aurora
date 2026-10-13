@@ -5,7 +5,7 @@
    "path": "panhans/advanced_heating_control.yaml",
    "input": {
     "input_trvs": [
-     "climate.schlafzimmer_bt"
+     "climate.schlafzimmer"
     ],
     "input_schedulers": [
      "schedule.schlafzimmer_plan"

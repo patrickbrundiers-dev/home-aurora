@@ -99,11 +99,11 @@ const DEFAULTS = {
   rooms: [
     { id: 'wohnzimmer', name: 'Wohnzimmer', icon: 'sofa', temp: 'sensor.0x00158d008b860ecb_temperature', hum: 'sensor.0x00158d008b860ecb_humidity', climate: 'climate.wohnzimmer_esstisch', climate_more: ['climate.wohnzimmer_hinter_sofa', 'climate.wohnzimmer_wintergarten'], heat: { status: 'sensor.wohnzimmer_heizung_status', switch: 'switch.wohnzimmer_heizung_regelung_aktiv' }, window: ['binary_sensor.fenster_wohnzimmer'], lights: ['light.wohnzimmer_sofa', 'light.sofa_indirekt', 'light.bilderleiste', 'light.flur_vorne_1'], media: ['media_player.wohnzimmer_google_tv', ['media_player.wohnzimmer', 'media_player.wohnzimmer_wohnzimmer']] },
     { id: 'kueche', name: 'Küche', icon: 'cook', temp: 'sensor.kuche_temperatur_temperature', hum: 'sensor.kuche_temperatur_humidity', window: ['binary_sensor.balkontur_contact'], lights: ['light.kuche_kochfeld', 'light.lsc_smart_led_strip_rgbcctic_5m'], media: [['media_player.jenny_patrick', 'media_player.kuche_jenny_patrick']] },
-    { id: 'schlafzimmer', name: 'Schlafzimmer', icon: 'bed', temp: 'sensor.schlafzimmer_temperatur_temperature', hum: 'sensor.schlafzimmer_temperatur_humidity', climate: 'climate.schlafzimmer_bt', window: ['binary_sensor.fenster_schlafzimmer'], lights: ['light.bett_patrick', 'light.schlafzimmer_patrick_nachtlicht'], media: ['media_player.fernseher_im_schlafzimmer', 'media_player.fernseher_im_schlafzimmer_2'] },
-    { id: 'leonie', name: 'Leonie', icon: 'star', temp: 'sensor.leonie_temp_temperature', hum: 'sensor.leonie_temp_humidity', climate: 'climate.leonie_bt', window: ['binary_sensor.leonie_leonie_fenster'], lights: ['light.leonie_bett_licht'], media: ['media_player.leonie_leonie_alexa'] },
+    { id: 'schlafzimmer', name: 'Schlafzimmer', icon: 'bed', temp: 'sensor.schlafzimmer_temperatur_temperature', hum: 'sensor.schlafzimmer_temperatur_humidity', climate: 'climate.schlafzimmer', window: ['binary_sensor.fenster_schlafzimmer'], lights: ['light.bett_patrick', 'light.schlafzimmer_patrick_nachtlicht'], media: ['media_player.fernseher_im_schlafzimmer', 'media_player.fernseher_im_schlafzimmer_2'] },
+    { id: 'leonie', name: 'Leonie', icon: 'star', temp: 'sensor.leonie_temp_temperature', hum: 'sensor.leonie_temp_humidity', climate: 'climate.leonie_hz', window: ['binary_sensor.leonie_leonie_fenster'], lights: ['light.leonie_bett_licht'], media: ['media_player.leonie_leonie_alexa'] },
     { id: 'nele', name: 'Nele', icon: 'heart', temp: 'sensor.nele_temperatur_temperature', hum: 'sensor.nele_temperatur_humidity', climate: 'climate.kleines_kinderzimmer_2', window: ['binary_sensor.lisa_fenster_contact'], media: [['media_player.kinderzimmer', 'media_player.nele_nele_alexa']] },
     { id: 'lisa', name: 'Lisa', icon: 'sparkle', temp: 'sensor.lisa_temperatur_temperature_2', hum: 'sensor.lisa_temperatur_humidity_2', climate: 'climate.grosse_kinderzimmer_bt', window: ['binary_sensor.fenster_grosses_kinderzimmer'], media: ['media_player.patricks_echo_dot'] },
-    { id: 'bad', name: 'Bad', icon: 'bath', temp: 'sensor.0x00158d008b862b8b_temperature', hum: 'sensor.badezimmer_luftfeuchtigkeit', climate: 'climate.grosses_bat_bt', window: ['binary_sensor.fenster_bad_gr'], lights: ['light.badezimmer_licht_schalter_1', 'light.flur_vorne_2'] },
+    { id: 'bad', name: 'Bad', icon: 'bath', temp: 'sensor.0x00158d008b862b8b_temperature', hum: 'sensor.badezimmer_luftfeuchtigkeit', climate: 'climate.grosses_badezimmer_v', climate_more: ['climate.grosses_badezimmer_h'], window: ['binary_sensor.fenster_bad_gr'], lights: ['light.badezimmer_licht_schalter_1', 'light.flur_vorne_2'] },
     { id: 'flur', name: 'Flur', icon: 'door', lights: ['light.flur_vorne_flur_vorne_kleines_licht', 'light.steckdose_flur_hinten'] },
   ],
 };
@@ -2731,7 +2731,7 @@ class HomeAurora extends HTMLElement {
   _sSet() {
     const th = this._themePref || this._c.theme || 'dark', am = String(this._ambMin());
     const seg = (act, cur, items) => `<div class="seg wide">${items.map(x => `<button class="${cur === x[0] ? 'on' : ''}" data-act="${act}" data-m="${x[0]}">${x[1]}</button>`).join('')}</div>`;
-    return `<div class="grab"></div><div class="sh"><div class="ico">${ic('cog', 24)}</div><div><h2>Darstellung &amp; Modi</h2><p>Home Aurora v5.2 · Build pz30</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
+    return `<div class="grab"></div><div class="sh"><div class="ico">${ic('cog', 24)}</div><div><h2>Darstellung &amp; Modi</h2><p>Home Aurora v5.2 · Build pz31</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
       <div class="lab2">DESIGN</div>${seg('theme', th, [['dark', 'Dunkel'], ['light', 'Hell'], ['auto', 'Automatisch']])}
       <div class="card-note">„Automatisch“ folgt dem Dunkel-/Hellmodus deines Home-Assistant-Profils. Die Auswahl gilt nur für dieses Gerät.</div>
       ${WALL_UI ? `      <div class="lab2">WANDTABLET-MODUS</div>
@@ -3257,6 +3257,9 @@ class HomeAurora extends HTMLElement {
     const apRow = ap ? `<div class="xr"><div class="ico">${ic(ap.i, 19)}</div><div class="grow"><div class="t">${esc(ap.n)}-Temperatur</div><div class="s">gilt jedes Mal, wenn ${esc(ap.n)} aktiv ist</div></div>${this._hStep(ap.num, 1, '°')}</div>` : '';
     const SD = { 'Bis Zeitplanwechsel': 'Bis Planwechsel', '1 Stunde': '1 Std.', '3 Stunden': '3 Std.', 'Bis morgen früh': 'Bis morgen', Dauerhaft: 'Dauerhaft' };
     const dur = ds ? `<div class="lab2">WIE LANGE GILT EINE ÄNDERUNG</div><div class="hpre hdur">${(ds.attributes.options || []).map(o => `<button class="${dv === o ? 'on' : ''}" data-act="selopt" data-e="${X.dur}" data-v="${esc(o)}"><b>${esc(SD[o] || o)}</b></button>`).join('')}</div>` : '';
+    // Zeitplan wählen (z. B. Schultag / schulfrei), nur wenn es mehr als einen gibt
+    const zs = X.sched && this._s(X.sched), zo = zs?.attributes?.options || [];
+    const zp = zo.length > 1 ? `<div class="lab2">ZEITPLAN</div><div class="hpre hdur">${zo.map(o => `<button class="${zs.state === o ? 'on' : ''}" data-act="selopt" data-e="${X.sched}" data-v="${esc(o)}" data-t="${esc(r.name + ': Zeitplan ' + o)}"><b>${esc(o)}</b></button>`).join('')}</div>` : '';
     // Status-Kacheln: was die Regelung gerade weiß
     const P = this._plan(r), ht = this._heatTime(r), pm = parseFloat(a.preheat_minutes), dm = X.demand ? this._num(X.demand) : parseFloat(a.heat_demand), tr = X.trend && this._num(X.trend), ou = X.out && this._num(X.out), hr = parseFloat(a.heating_rate);
     const tiles = `<div class="dg">${this._tile(win ? 'Offen' : 'Zu', 'Fenster', 'window')}${ht != null ? this._tile(this._durTxt(ht), 'Heute geheizt', 'flame') : ''}${dm != null && !isNaN(dm) ? this._tile(de(dm, 0) + ' %', 'Wärmebedarf', 'gauge') : ''}${P?.next ? this._tile(this._whenTxt(P.next), 'Nächster Planwechsel', 'clock') : ''}${!isNaN(pm) && pm > 0 ? this._tile(de(pm, 0) + ' Min.', 'Vorheizen', 'flame') : ''}${a.present != null ? this._tile(a.present ? 'Ja' : 'Nein', 'Jemand da', 'home') : ''}${ou != null ? this._tile(de(ou, 1) + '°', 'Außen', 'thermo') : ''}${tr != null ? this._tile((tr > 0 ? '+' : '') + de(tr, 1) + ' °/h', 'Trend', 'arrowup') : ''}${!isNaN(hr) && hr > 0 ? this._tile(de(hr, 1) + ' °/h', 'Heizt auf mit', 'chevron') : ''}</div>`;
@@ -3279,7 +3282,7 @@ class HomeAurora extends HTMLElement {
     [r.temp, r.hum].forEach(x => { if (x && !this._hist[x]) this._need.add(x); });
     return `<div class="grab"></div><div class="sh"><div class="ico">${ic(r.icon, 24)}</div><div><h2>Heizung · ${esc(r.name)}</h2><p>${esc(status)}</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
       <div class="hhero ${heat ? 'heat' : ''}">${dial}<div class="hside">${side}${seg}</div></div>
-      ${hint}${notes}${pre ? `<div class="lab2">BETRIEBSART</div><div class="hpre hmodes">${pre}</div>` : ''}${apRow ? `<div class="mcol" style="margin-top:8px">${apRow}</div>` : ''}${dur}
+      ${hint}${notes}${pre ? `<div class="lab2">BETRIEBSART</div><div class="hpre hmodes">${pre}</div>` : ''}${apRow ? `<div class="mcol" style="margin-top:8px">${apRow}</div>` : ''}${dur}${zp}
       <div class="lab2">STATUS</div>${tiles}${trv}${fine}${house}
       ${this._trend(r, col)}
       <div class="hbtns"><button class="qb" data-act="sched">${ic('clock', 14)}Heizungsplan</button><button class="qb" data-act="room" data-room="${r.id}">${ic(r.icon, 14)}Zurück zum Raum</button></div>`;
@@ -4170,7 +4173,7 @@ class HomeAurora extends HTMLElement {
     }
     const T = [['Komfort', 'komforttemperatur', 'sofa'], ['Zuhause', 'zuhause_temperatur', 'home'], ['Aktivität', 'aktivitat_temperatur', 'bolt'], ['Eco', 'eco_temperatur', 'leaf'], ['Schlafen', 'schlafen_temperatur', 'bed'], ['Boost', 'boost_temperatur', 'flame'], ['Abwesend', null, 'door']];
     return {
-      b, mode, cl: c.cl, house: c.house, dur: has(`select.${b}_betriebsart_dauer`), lock: has(`switch.${b}_kindersicherung`),
+      b, mode, cl: c.cl, house: c.house, dur: has(`select.${b}_betriebsart_dauer`), sched: has(`select.${b}_zeitplan`), lock: has(`switch.${b}_kindersicherung`),
       roff: has(`number.${b}_raum_versatz`), demand: has(`sensor.${b}_warmebedarf`), trend: has(`sensor.${b}_temperaturtrend`), out: has(`sensor.${b}_aussentemperatur`),
       prob: [`binary_sensor.${b}_heizproblem`, `binary_sensor.${b}_thermostat_problem`].filter(e => e in S),
       presets: T.map(([n, k, i]) => ({ n, i, num: k ? has(`number.${b}_${k}`) : null })),
@@ -4180,7 +4183,7 @@ class HomeAurora extends HTMLElement {
   _dhXIds(sid) {
     const X = this._dhX(sid); if (!X) return [];
     const S = this._h.states, trv = Object.keys(S[sid]?.attributes?.thermostat_setpoints || {});
-    return [X.mode, X.cl, X.house, X.dur, X.lock, X.roff, X.demand, X.trend, X.out, ...X.prob, ...X.presets.map(p => p.num), ...trv.map(X.off)].filter(Boolean);
+    return [X.mode, X.cl, X.house, X.dur, X.sched, X.lock, X.roff, X.demand, X.trend, X.out, ...X.prob, ...X.presets.map(p => p.num), ...trv.map(X.off)].filter(Boolean);
   }
   /* Automations-Konfigurationen lesen (alle 30 Min.) und Räume mit Advanced-Heating-Control-Plänen verbinden.
      Über die REST-Schnittstelle kommt die gespeicherte Konfiguration mit use_blueprint (klein, braucht Admin-Rechte);

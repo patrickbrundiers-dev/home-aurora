@@ -143,6 +143,9 @@
     const apRow = ap ? `<div class="xr"><div class="ico">${ic(ap.i, 19)}</div><div class="grow"><div class="t">${esc(ap.n)}-Temperatur</div><div class="s">gilt jedes Mal, wenn ${esc(ap.n)} aktiv ist</div></div>${this._hStep(ap.num, 1, '°')}</div>` : '';
     const SD = { 'Bis Zeitplanwechsel': 'Bis Planwechsel', '1 Stunde': '1 Std.', '3 Stunden': '3 Std.', 'Bis morgen früh': 'Bis morgen', Dauerhaft: 'Dauerhaft' };
     const dur = ds ? `<div class="lab2">WIE LANGE GILT EINE ÄNDERUNG</div><div class="hpre hdur">${(ds.attributes.options || []).map(o => `<button class="${dv === o ? 'on' : ''}" data-act="selopt" data-e="${X.dur}" data-v="${esc(o)}"><b>${esc(SD[o] || o)}</b></button>`).join('')}</div>` : '';
+    // Zeitplan wählen (z. B. Schultag / schulfrei), nur wenn es mehr als einen gibt
+    const zs = X.sched && this._s(X.sched), zo = zs?.attributes?.options || [];
+    const zp = zo.length > 1 ? `<div class="lab2">ZEITPLAN</div><div class="hpre hdur">${zo.map(o => `<button class="${zs.state === o ? 'on' : ''}" data-act="selopt" data-e="${X.sched}" data-v="${esc(o)}" data-t="${esc(r.name + ': Zeitplan ' + o)}"><b>${esc(o)}</b></button>`).join('')}</div>` : '';
     // Status-Kacheln: was die Regelung gerade weiß
     const P = this._plan(r), ht = this._heatTime(r), pm = parseFloat(a.preheat_minutes), dm = X.demand ? this._num(X.demand) : parseFloat(a.heat_demand), tr = X.trend && this._num(X.trend), ou = X.out && this._num(X.out), hr = parseFloat(a.heating_rate);
     const tiles = `<div class="dg">${this._tile(win ? 'Offen' : 'Zu', 'Fenster', 'window')}${ht != null ? this._tile(this._durTxt(ht), 'Heute geheizt', 'flame') : ''}${dm != null && !isNaN(dm) ? this._tile(de(dm, 0) + ' %', 'Wärmebedarf', 'gauge') : ''}${P?.next ? this._tile(this._whenTxt(P.next), 'Nächster Planwechsel', 'clock') : ''}${!isNaN(pm) && pm > 0 ? this._tile(de(pm, 0) + ' Min.', 'Vorheizen', 'flame') : ''}${a.present != null ? this._tile(a.present ? 'Ja' : 'Nein', 'Jemand da', 'home') : ''}${ou != null ? this._tile(de(ou, 1) + '°', 'Außen', 'thermo') : ''}${tr != null ? this._tile((tr > 0 ? '+' : '') + de(tr, 1) + ' °/h', 'Trend', 'arrowup') : ''}${!isNaN(hr) && hr > 0 ? this._tile(de(hr, 1) + ' °/h', 'Heizt auf mit', 'chevron') : ''}</div>`;
@@ -165,7 +168,7 @@
     [r.temp, r.hum].forEach(x => { if (x && !this._hist[x]) this._need.add(x); });
     return `<div class="grab"></div><div class="sh"><div class="ico">${ic(r.icon, 24)}</div><div><h2>Heizung · ${esc(r.name)}</h2><p>${esc(status)}</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
       <div class="hhero ${heat ? 'heat' : ''}">${dial}<div class="hside">${side}${seg}</div></div>
-      ${hint}${notes}${pre ? `<div class="lab2">BETRIEBSART</div><div class="hpre hmodes">${pre}</div>` : ''}${apRow ? `<div class="mcol" style="margin-top:8px">${apRow}</div>` : ''}${dur}
+      ${hint}${notes}${pre ? `<div class="lab2">BETRIEBSART</div><div class="hpre hmodes">${pre}</div>` : ''}${apRow ? `<div class="mcol" style="margin-top:8px">${apRow}</div>` : ''}${dur}${zp}
       <div class="lab2">STATUS</div>${tiles}${trv}${fine}${house}
       ${this._trend(r, col)}
       <div class="hbtns"><button class="qb" data-act="sched">${ic('clock', 14)}Heizungsplan</button><button class="qb" data-act="room" data-room="${r.id}">${ic(r.icon, 14)}Zurück zum Raum</button></div>`;

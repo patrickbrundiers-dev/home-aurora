@@ -1063,7 +1063,7 @@
 "last_updated": "2026-01-01T12:00:00+00:00",
 "state": "heat"
 },
-"climate.grosses_bat_bt": {
+"climate.grosses_badezimmer_v": {
 "attributes": {
 "batteries": "{\"sensor.0x00158d008b862b8b_temperature\": {\"battery\": \"97\", \"battery_id\": \"sensor.0x00158d008b862b8b_battery\"}, \"sensor.badezimmer_luftfeuchtigkeit\": {\"battery\": \"97\", \"battery_id\": \"sensor.0x00158d008b862b8b_battery\"}, \"sensor.hp2550a_pro_v1_9_3_outdoor_temperature\": {\"battery\": \"off\", \"battery_id\": \"binary_sensor.hp2550a_pro_v1_9_3_wh65_battery\"}}",
 "bt_preset_cool_temperature": null,
@@ -1115,7 +1115,7 @@
 "context": {
 "id": "fixture"
 },
-"entity_id": "climate.grosses_bat_bt",
+"entity_id": "climate.grosses_badezimmer_v",
 "last_changed": "2026-01-01T12:00:00+00:00",
 "last_updated": "2026-01-01T12:00:00+00:00",
 "state": "heat"
@@ -1206,7 +1206,7 @@
 "last_updated": "2026-01-01T12:00:00+00:00",
 "state": "heat"
 },
-"climate.leonie_bt": {
+"climate.leonie_hz": {
 "attributes": {
 "batteries": "{\"sensor.leonie_temp_temperature\": {\"battery\": \"100\", \"battery_id\": \"sensor.leonie_temp_battery\"}, \"sensor.leonie_temp_humidity\": {\"battery\": \"100\", \"battery_id\": \"sensor.leonie_temp_battery\"}, \"climate.leonie_hz\": {\"battery\": \"off\", \"battery_id\": \"binary_sensor.leonie_hz_battery_low\"}, \"sensor.hp2550a_pro_v1_9_3_outdoor_temperature\": {\"battery\": \"off\", \"battery_id\": \"binary_sensor.hp2550a_pro_v1_9_3_wh65_battery\"}}",
 "bt_preset_cool_temperature": null,
@@ -1258,7 +1258,7 @@
 "context": {
 "id": "fixture"
 },
-"entity_id": "climate.leonie_bt",
+"entity_id": "climate.leonie_hz",
 "last_changed": "2026-01-01T12:00:00+00:00",
 "last_updated": "2026-01-01T12:00:00+00:00",
 "state": "heat"
@@ -1316,7 +1316,7 @@
 "last_updated": "2026-01-01T12:00:00+00:00",
 "state": "heat"
 },
-"climate.schlafzimmer_bt": {
+"climate.schlafzimmer": {
 "attributes": {
 "batteries": "{\"sensor.schlafzimmer_temperatur_temperature\": {\"battery\": \"90\", \"battery_id\": \"sensor.schlafzimmer_temperatur_battery\"}, \"sensor.schlafzimmer_temperatur_humidity\": {\"battery\": \"90\", \"battery_id\": \"sensor.schlafzimmer_temperatur_battery\"}, \"climate.schlafzimmer\": {\"battery\": \"100\", \"battery_id\": \"sensor.schlafzimmer_battery\"}, \"sensor.hp2550a_pro_v1_9_3_outdoor_temperature\": {\"battery\": \"off\", \"battery_id\": \"binary_sensor.hp2550a_pro_v1_9_3_wh65_battery\"}}",
 "bt_preset_cool_temperature": null,
@@ -1368,7 +1368,7 @@
 "context": {
 "id": "fixture"
 },
-"entity_id": "climate.schlafzimmer_bt",
+"entity_id": "climate.schlafzimmer",
 "last_changed": "2026-01-01T12:00:00+00:00",
 "last_updated": "2026-01-01T12:00:00+00:00",
 "state": "heat"
