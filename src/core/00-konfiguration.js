@@ -50,6 +50,7 @@ const DEFAULTS = {
       { id: 'ndr2', name: 'NDR 2', genre: 'Pop', phrase: 'NDR 2' },
       { id: 'dlf', name: 'Deutschlandfunk', genre: 'Nachrichten & Kultur', phrase: 'Deutschlandfunk' },
       { id: 'bob', name: 'RADIO BOB!', genre: 'Rock', phrase: 'RADIO BOB' },
+      { id: 'bollerwagen', name: 'Radio Bollerwagen', genre: 'Partyhits & Schlager', phrase: 'Radio Bollerwagen' },
       { id: 'antenne', name: 'ANTENNE BAYERN', genre: 'Pop & Hits', phrase: 'ANTENNE BAYERN' },
     ],
   },
