@@ -40,6 +40,19 @@ const DEFAULTS = {
     ['calendar.patrick_brundiers_gmail_com', 'Patrick privat', '#38bdf8'], ['calendar.geburtstage_2', 'Geburtstage', '#fbbf24'], ['calendar.landkreis_paderborn_mymuell_app', 'Müll', '#a3a3a3'], ['calendar.feiertage_in_deutschland', 'Feiertage', '#fb923c'],
   ],
   calendarDays: 14,
+  radio: {
+    entity: 'media_player.wohnzimmer',
+    stations: [
+      { id: 'wdr2', name: 'WDR 2', genre: 'Pop & Informationen', phrase: 'WDR 2' },
+      { id: '1live', name: '1LIVE', genre: 'Pop · Urban · Neue Musik', phrase: '1LIVE' },
+      { id: 'swr3', name: 'SWR3', genre: 'Pop & Rock', phrase: 'SWR3' },
+      { id: 'wdr4', name: 'WDR 4', genre: 'Kulthits', phrase: 'WDR 4' },
+      { id: 'ndr2', name: 'NDR 2', genre: 'Pop', phrase: 'NDR 2' },
+      { id: 'dlf', name: 'Deutschlandfunk', genre: 'Nachrichten & Kultur', phrase: 'Deutschlandfunk' },
+      { id: 'bob', name: 'RADIO BOB!', genre: 'Rock', phrase: 'RADIO BOB' },
+      { id: 'antenne', name: 'ANTENNE BAYERN', genre: 'Pop & Hits', phrase: 'ANTENNE BAYERN' },
+    ],
+  },
   theme: 'dark', ambient_after: 0, radarUrl: '',
   quick: [['builtin:goodnight', 'Gute Nacht', 'moon'], ['scene.wohnzimmer_wohnzimmer_tv_schauen', 'TV schauen', 'tv'], ['scene.wohnzimmer_gemutlich', 'Gemütlich', 'sofa'], ['scene.wohnzimmer_normal', 'Normal', 'bulb'], ['scene.wohnzimmer_essenszeit', 'Essenszeit', 'cook'], ['script.essen', 'Essen', 'cook']],
   // Einkaufsliste & Rezepte (HA-To-do-Listen); quick = Schnellknöpfe zum Eintragen
@@ -118,5 +131,5 @@ const ENUM = {
   cool: 'Kühl', slightly_cool: 'Leicht kühl', slightly_warm: 'Leicht warm', increased_discomfort: 'Erhöhtes Unbehagen', caution_heat_stress: 'Vorsicht, Hitzestress', danger_heat_stress: 'Gefahr, Hitzestress', extreme_danger: 'Extreme Gefahr',
   no_discomfort: 'Kein Unbehagen', less_than_half: 'Weniger als die Hälfte', more_than_half: 'Mehr als die Hälfte', most: 'Die meisten', everyone: 'Alle', dangerous: 'Gefährlich',
 };
-const TABS = [['home', 'Zuhause', 'home'], ['rooms', 'Räume', 'grid'], ['climate', 'Klima', 'thermo'], ['bath', 'Bad', 'bath'], ['weather', 'Wetter', 'cloudsun'], ['printer', 'Drucker', 'printer']];
+const TABS = [['home', 'Zuhause', 'home'], ['rooms', 'Räume', 'grid'], ['climate', 'Klima', 'thermo'], ['bath', 'Bad', 'bath'], ['weather', 'Wetter', 'cloudsun'], ['printer', 'Drucker', 'printer'], ['radio', 'Radio', 'radio']];
 
