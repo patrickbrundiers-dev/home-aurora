@@ -24,13 +24,14 @@
     });
     root.addEventListener('input', ev => {
       if (ev.target.id === 'pzq') { const st = this._pzSt(); if (st) { st.q = ev.target.value; this._pzRefresh(); } return; }
-      const el = ev.target.closest('input[data-act="bright"],input[data-act="vol"]');
+      const el = ev.target.closest('input[data-act="bright"],input[data-act="vol"],input[data-act="radio-volume"]');
       if (el) { el.style.setProperty('--v', el.value + '%'); if (el.dataset.act === 'vol' && el.nextElementSibling) el.nextElementSibling.textContent = el.value + ' %'; }
     });
     root.addEventListener('change', ev => {
       const el = ev.target.closest('input[data-act="bright"],input[data-act="vol"]');
       if (!el) return;
       if (el.dataset.act === 'vol') this._h.callService('media_player', 'volume_set', { entity_id: el.dataset.e, volume_level: parseInt(el.value, 10) / 100 });
+      else if (el.dataset.act === 'radio-volume') this._h.callService('media_player', 'volume_set', { entity_id: this._c.radio?.entity || 'media_player.wohnzimmer', volume_level: parseInt(el.value, 10) / 100 });
       else this._h.callService('light', 'turn_on', { entity_id: el.dataset.e, brightness_pct: parseInt(el.value, 10) });
       this._busy = false;
       if (this._dirty) { this._dirty = false; this._sig = ''; this._tick(); }
@@ -65,6 +66,22 @@
       else if (ev.key === 'Enter' && ev.target.id === 'shopq') { ev.preventDefault(); this._shopInput(); }
     });
     root.addEventListener('contextmenu', ev => { if (ev.target.closest && ev.target.closest('[data-hold]')) ev.preventDefault(); });
+  }
+  _radioPlay(id) {
+    const st = (this._c.radio?.stations || []).find(x => x.id === id);
+    if (!st) { this._toast('Sender nicht gefunden'); return; }
+    const player = this._c.radio?.entity || 'media_player.wohnzimmer';
+    this._radioPreset = st.id;
+    try {
+      this._h.callService('media_player', 'play_media', {
+        entity_id: player,
+        media_content_type: 'custom',
+        media_content_id: 'Alexa, spiele ' + (st.phrase || st.name),
+      });
+      this._toast(st.name + ' an Wohnzimmer gesendet');
+    } catch (err) { this._toast('Sender konnte nicht gestartet werden'); }
+    this._sig = '';
+    this._render();
   }
   _more(e) { this.dispatchEvent(new CustomEvent('hass-more-info', { detail: { entityId: e }, bubbles: true, composed: true })); }
   _act(el) {
@@ -119,6 +136,10 @@
       case 'power': this._sheet = { t: 'power' }; this._renderSheet(); this._loadPower(true); break;
       case 'sched': this._sheet = { t: 'sched' }; this._renderSheet(); break;
       case 'schedtab': this._schedTab = el.dataset.m; this._renderSheet(); break;
+      case 'radio-station': this._radioPlay(el.dataset.id); break;
+      case 'radio-play': { const id = this._c.radio?.entity || 'media_player.wohnzimmer'; h.callService('media_player', this._val(id) === 'playing' ? 'media_pause' : 'media_play', { entity_id: id }); break; }
+      case 'radio-stop': h.callService('media_player', 'media_stop', { entity_id: this._c.radio?.entity || 'media_player.wohnzimmer' }); break;
+      case 'radio-prev': h.callService('media_player', 'media_previous_track', { entity_id: this._c.radio?.entity || 'media_player.wohnzimmer' }); break;
       case 'music': this._sheet = { t: 'music' }; this._renderSheet(); break;
       case 'shop': case 'shoptab': case 'shopadd': case 'shopq': case 'shopdone': case 'shopundo': case 'shopall': case 'shopclr': case 'rcpsel': case 'rcpserv': case 'rcpone': case 'rcpall': this._shopAct(a, el); break;
       case 'annt': this._annT = el.dataset.i; this._renderSheet(); break;
