@@ -1,6 +1,6 @@
 # Home Aurora
 
-Glas-Dashboard für Home Assistant (Räume, Klima, Bad, Wetter, Lichter, Kinder-Handy mit PIN).
+Glas-Dashboard für Home Assistant (Räume, Klima, Bad, Wetter, Radio, Lichter, Kinder-Handy mit PIN).
 
 - `dist/home-aurora.js` – Karte `custom:home-aurora` (Handy)
 - `dist/home-aurora-wide.js` – Karte `custom:home-aurora-wide` (Tablet/Desktop, Querformat)
