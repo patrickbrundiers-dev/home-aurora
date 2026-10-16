@@ -15,7 +15,7 @@
     if (this._amb) { this._ambRender(); return; }
     this._applyTheme();
     this._need = new Set();
-    const views = { clean: () => this._vClean(), home: () => this._vHome(), rooms: () => this._vRooms(), climate: () => this._vClimate(), bath: () => this._vBath(), weather: () => this._vWeather(), printer: () => this._vPrinter() };
+    const views = { clean: () => this._vClean(), home: () => this._vHome(), rooms: () => this._vRooms(), climate: () => this._vClimate(), bath: () => this._vBath(), weather: () => this._vWeather(), printer: () => this._vPrinter(), radio: () => this._vRadio() };
     this._main.className = this._enter ? 'enter' : '';
     this._rc = (this._rc || 0) + 1;
     if (this._v === 'clean' && !this._pzOn()) this._v = 'home';
