@@ -36,6 +36,7 @@ const ICONS = {
   play: '<path d="M7 4v16l13-8z"/>',
   music: '<path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/>',
   speaker: '<rect x="5" y="2.5" width="14" height="19" rx="3"/><circle cx="12" cy="14" r="3.5"/><path d="M12 7h.01"/>',
+  radio: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 9h18M8 5 6 2M16 5l2-3M7 13h.01M11 13h.01M15 13h.01M7 16h10"/>',
   announce: '<path d="M3 10.5v3a1 1 0 0 0 1 1h3l6 4.5v-14L7 9.5H4a1 1 0 0 0-1 1z"/><path d="M16.5 8.5a5 5 0 0 1 0 7"/><path d="M19.2 5.8a9 9 0 0 1 0 12.4"/>',
   prev: '<path d="M18 6 9 12l9 6z"/><path d="M6 6v12"/>',
   next: '<path d="M6 6l9 6-9 6z"/><path d="M18 6v12"/>',
