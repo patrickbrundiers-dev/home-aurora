@@ -34,7 +34,7 @@ if (process.argv.includes('--chaos')) {
 const BAD = /\b(undefined|NaN|Invalid Date|null)\b|\[object /;
 if (shots) mkdirSync(shots, { recursive: true });
 
-const VIEWS = ['home', 'rooms', 'climate', 'bath', 'weather', 'printer', 'clean'];
+const VIEWS = ['home', 'rooms', 'climate', 'bath', 'weather', 'printer', 'radio', 'clean'];
 // room und heat brauchen einen Raum: es wird der erste Raum mit Thermostat genommen.
 const SHEETS = ['lights', 'persons', 'quick', 'vent', 'cal', 'bat', 'doors', 'sys', 'waste', 'power', 'set', 'fuel', 'plants', 'kid', 'clean', 'tv', 'music', 'shop', 'pzstat', 'radar', 'room', 'heat'];
 const TARGETS = [
