@@ -17,6 +17,7 @@ const ICONS = {
   flame: '<path d="M12 22c4 0 7-2.7 7-7 0-3-2-5-3.5-7-.3 2-1.5 3-2.5 3 0-3-1.5-6-4-8 0 4-4 6-4 12 0 4.3 3 7 7 7z"/>',
   power: '<path d="M12 3v9"/><path d="M6.3 6.3a8 8 0 1 0 11.4 0"/>',
   plus: '<path d="M12 5v14M5 12h14"/>',
+  pen: '<path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16z"/><path d="m13.5 6.5 4 4"/>',
   minus: '<path d="M5 12h14"/>',
   close: '<path d="M6 6l12 12M18 6 6 18"/>',
   trash: '<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/>',

@@ -36,7 +36,7 @@ if (shots) mkdirSync(shots, { recursive: true });
 
 const VIEWS = ['home', 'rooms', 'climate', 'bath', 'weather', 'printer', 'radio', 'clean'];
 // room und heat brauchen einen Raum: es wird der erste Raum mit Thermostat genommen.
-const SHEETS = ['lights', 'persons', 'quick', 'vent', 'cal', 'bat', 'doors', 'sys', 'waste', 'power', 'set', 'fuel', 'plants', 'kid', 'clean', 'tv', 'music', 'shop', 'pzstat', 'radar', 'room', 'heat'];
+const SHEETS = ['lights', 'persons', 'quick', 'vent', 'cal', 'bat', 'doors', 'sys', 'waste', 'power', 'set', 'fuel', 'plants', 'kid', 'clean', 'tv', 'music', 'radio', 'shop', 'pzstat', 'radar', 'room', 'heat'];
 const TARGETS = [
   { file: 'dist/home-aurora.js', tag: 'home-aurora', vp: { width: 412, height: 915 } },
   { file: 'dist/home-aurora-wide.js', tag: 'home-aurora-wide', vp: { width: 1280, height: 800 } },
@@ -79,6 +79,10 @@ function setup({ tag, states, hist, autos }) {
       }
       // To-do-Listen: erfundene Einkaufsliste und Rezepte (Rezept-JSON wie in der Rezeptbuch-Karte)
       if (m.type === 'todo/item/list') {
+        if (m.entity_id === 'todo.radiosender') return { items: [
+          { uid: 's1', summary: 'WDR 2', status: 'needs_action', description: JSON.stringify({ genre: 'Pop' }) }, { uid: 's2', summary: 'Radio Hochstift', status: 'needs_action', description: 'Lokalradio' },
+          { uid: 's3', summary: 'Deutschlandfunk', status: 'needs_action', description: JSON.stringify({ genre: 'Nachrichten', cmd: 'spiele Deutschlandfunk' }) }, { uid: 's4', summary: 'Alt', status: 'completed' },
+        ] };
         if (m.entity_id === 'todo.rezepte') return { items: [
           { uid: 'r1', summary: 'Pfannkuchen', status: 'needs_action', description: JSON.stringify({ schemaVersion: 2, servings: 4, category: 'Süßes', ingredients: [{ amount: '2', unit: '', name: 'Eier' }, { amount: '250', unit: 'ml', name: 'Milch' }, { amount: '½', unit: 'TL', name: 'Backpulver' }, { amount: '', unit: '', name: 'Salz' }], steps: ['Alles verrühren.', 'In der Pfanne ausbacken.'], image: null }) },
           { uid: 'r2', summary: 'Nudelauflauf', status: 'needs_action', description: JSON.stringify({ schemaVersion: 2, servings: 2, category: 'Hauptgericht', ingredients: [{ amount: '300', unit: 'g', name: 'Nudeln' }], steps: ['Kochen.'] }) },
