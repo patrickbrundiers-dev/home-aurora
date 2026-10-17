@@ -40,18 +40,13 @@ const DEFAULTS = {
     ['calendar.patrick_brundiers_gmail_com', 'Patrick privat', '#38bdf8'], ['calendar.geburtstage_2', 'Geburtstage', '#fbbf24'], ['calendar.landkreis_paderborn_mymuell_app', 'Müll', '#a3a3a3'], ['calendar.feiertage_in_deutschland', 'Feiertage', '#fb923c'],
   ],
   calendarDays: 14,
+  // Radio: Sender in der To-do-Liste list (im Dashboard bearbeitbar); stations nur, solange die Liste leer ist. player = Vorauswahl aus music.speakers
   radio: {
-    entity: 'media_player.wohnzimmer',
+    list: 'todo.radiosender', player: 'Wohnzimmer',
     stations: [
-      { id: 'wdr2', name: 'WDR 2', genre: 'Pop & Informationen', phrase: 'WDR 2' },
-      { id: '1live', name: '1LIVE', genre: 'Pop · Urban · Neue Musik', phrase: '1LIVE' },
-      { id: 'swr3', name: 'SWR3', genre: 'Pop & Rock', phrase: 'SWR3' },
-      { id: 'wdr4', name: 'WDR 4', genre: 'Kulthits', phrase: 'WDR 4' },
-      { id: 'ndr2', name: 'NDR 2', genre: 'Pop', phrase: 'NDR 2' },
-      { id: 'dlf', name: 'Deutschlandfunk', genre: 'Nachrichten & Kultur', phrase: 'Deutschlandfunk' },
-      { id: 'bob', name: 'RADIO BOB!', genre: 'Rock', phrase: 'RADIO BOB' },
-      { id: 'bollerwagen', name: 'Radio Bollerwagen', genre: 'Partyhits & Schlager', phrase: 'Radio Bollerwagen' },
-      { id: 'antenne', name: 'ANTENNE BAYERN', genre: 'Pop & Hits', phrase: 'ANTENNE BAYERN' },
+      { name: 'WDR 2', genre: 'Pop & Informationen' }, { name: '1LIVE', genre: 'Pop · Urban · Neue Musik' }, { name: 'SWR3', genre: 'Pop & Rock' },
+      { name: 'WDR 4', genre: 'Kulthits' }, { name: 'NDR 2', genre: 'Pop' }, { name: 'Deutschlandfunk', genre: 'Nachrichten & Kultur' },
+      { name: 'RADIO BOB!', genre: 'Rock', cmd: 'spiele RADIO BOB' }, { name: 'Radio Bollerwagen', genre: 'Partyhits & Schlager' }, { name: 'ANTENNE BAYERN', genre: 'Pop & Hits' },
     ],
   },
   theme: 'dark', ambient_after: 0, radarUrl: '',

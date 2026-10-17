@@ -40,18 +40,13 @@ const DEFAULTS = {
     ['calendar.patrick_brundiers_gmail_com', 'Patrick privat', '#38bdf8'], ['calendar.geburtstage_2', 'Geburtstage', '#fbbf24'], ['calendar.landkreis_paderborn_mymuell_app', 'Müll', '#a3a3a3'], ['calendar.feiertage_in_deutschland', 'Feiertage', '#fb923c'],
   ],
   calendarDays: 14,
+  // Radio: Sender in der To-do-Liste list (im Dashboard bearbeitbar); stations nur, solange die Liste leer ist. player = Vorauswahl aus music.speakers
   radio: {
-    entity: 'media_player.wohnzimmer',
+    list: 'todo.radiosender', player: 'Wohnzimmer',
     stations: [
-      { id: 'wdr2', name: 'WDR 2', genre: 'Pop & Informationen', phrase: 'WDR 2' },
-      { id: '1live', name: '1LIVE', genre: 'Pop · Urban · Neue Musik', phrase: '1LIVE' },
-      { id: 'swr3', name: 'SWR3', genre: 'Pop & Rock', phrase: 'SWR3' },
-      { id: 'wdr4', name: 'WDR 4', genre: 'Kulthits', phrase: 'WDR 4' },
-      { id: 'ndr2', name: 'NDR 2', genre: 'Pop', phrase: 'NDR 2' },
-      { id: 'dlf', name: 'Deutschlandfunk', genre: 'Nachrichten & Kultur', phrase: 'Deutschlandfunk' },
-      { id: 'bob', name: 'RADIO BOB!', genre: 'Rock', phrase: 'RADIO BOB' },
-      { id: 'bollerwagen', name: 'Radio Bollerwagen', genre: 'Partyhits & Schlager', phrase: 'Radio Bollerwagen' },
-      { id: 'antenne', name: 'ANTENNE BAYERN', genre: 'Pop & Hits', phrase: 'ANTENNE BAYERN' },
+      { name: 'WDR 2', genre: 'Pop & Informationen' }, { name: '1LIVE', genre: 'Pop · Urban · Neue Musik' }, { name: 'SWR3', genre: 'Pop & Rock' },
+      { name: 'WDR 4', genre: 'Kulthits' }, { name: 'NDR 2', genre: 'Pop' }, { name: 'Deutschlandfunk', genre: 'Nachrichten & Kultur' },
+      { name: 'RADIO BOB!', genre: 'Rock', cmd: 'spiele RADIO BOB' }, { name: 'Radio Bollerwagen', genre: 'Partyhits & Schlager' }, { name: 'ANTENNE BAYERN', genre: 'Pop & Hits' },
     ],
   },
   theme: 'dark', ambient_after: 0, radarUrl: '',
@@ -153,6 +148,7 @@ const ICONS = {
   flame: '<path d="M12 22c4 0 7-2.7 7-7 0-3-2-5-3.5-7-.3 2-1.5 3-2.5 3 0-3-1.5-6-4-8 0 4-4 6-4 12 0 4.3 3 7 7 7z"/>',
   power: '<path d="M12 3v9"/><path d="M6.3 6.3a8 8 0 1 0 11.4 0"/>',
   plus: '<path d="M12 5v14M5 12h14"/>',
+  pen: '<path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16z"/><path d="m13.5 6.5 4 4"/>',
   minus: '<path d="M5 12h14"/>',
   close: '<path d="M6 6l12 12M18 6 6 18"/>',
   trash: '<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/>',
@@ -1451,42 +1447,64 @@ const CSS2 = `
   .wkh{flex-direction:column;align-items:center;gap:0;width:38px;flex:none;margin:2px 0 0}.wkl{flex:1;min-width:0}.wk0{text-align:left;padding:4px 0}
   .wke{display:flex;gap:8px;align-items:baseline;font-size:13.5px;padding:7px 8px 7px 12px}.wke b{display:inline;font-size:12.5px;flex:none}}
 
-/* Aurora Radio: Glaskarte, ruhige Cyan-/Indigo-LEDs passend zum Dashboard */
-.radio-vh{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
-.radio-live{display:inline-flex;align-items:center;gap:8px;font-size:10px;letter-spacing:.17em;font-weight:800;color:var(--tx3);padding:8px 12px;border-radius:999px;background:rgba(var(--wh),.05);border:1px solid var(--line)}
-.radio-live i,.radio-dot{width:7px;height:7px;border-radius:50%;background:#64748b;display:inline-block}
-.radio-live.on{color:#5eead4;border-color:rgba(94,234,212,.32);background:rgba(94,234,212,.08)}
-.radio-live.on i,.radio-dot.on{background:#5eead4;box-shadow:0 0 10px rgba(94,234,212,.9)}
-.radio-layout{gap:16px}
-.radio-deck{padding:clamp(16px,3vw,30px);border-color:rgba(94,234,212,.23);background:radial-gradient(100% 130% at 5% 0%,rgba(94,234,212,.14),transparent 50%),radial-gradient(80% 100% at 100% 100%,rgba(129,140,248,.15),transparent 48%),linear-gradient(150deg,rgba(var(--wh),.09),rgba(var(--wh),.025))}
-.radio-decktop{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px}
-.radio-brand{display:flex;align-items:center;gap:12px}.radio-brandicon{width:48px;height:48px;border-radius:16px;display:grid;place-items:center;color:#5eead4;background:linear-gradient(145deg,rgba(94,234,212,.2),rgba(129,140,248,.18));border:1px solid rgba(94,234,212,.26);box-shadow:0 0 26px rgba(94,234,212,.1)}
-.radio-eyebrow{font-size:9px;letter-spacing:.18em;color:var(--tx3);font-weight:700}.radio-title{font-size:clamp(22px,4vw,31px);letter-spacing:.12em;font-weight:300;margin-top:3px}.radio-title b{font-weight:800;color:var(--acc)}
-.radio-eq{height:25px;display:flex;align-items:center;gap:3px}.radio-eq i{width:3px;height:6px;border-radius:3px;background:#5eead4;opacity:.65}.radio-eq.playing i{animation:eqb .8s ease-in-out infinite alternate}.radio-eq.playing i:nth-child(2n){animation-delay:-.35s}.radio-eq.playing i:nth-child(3n){animation-delay:-.55s}
-.radio-display{border-radius:22px;padding:14px;background:linear-gradient(145deg,#09111e,#0c1a2b);border:1px solid rgba(94,234,212,.22);box-shadow:inset 0 1px 0 rgba(255,255,255,.06),inset 0 0 28px rgba(94,234,212,.035),0 15px 35px rgba(0,0,0,.2)}
-.radio-freq{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:9px;letter-spacing:.17em;color:#7eeef0;font-weight:700;padding:0 2px 11px;border-bottom:1px solid rgba(94,234,212,.12)}
-.radio-frequency{font-size:clamp(11px,2vw,15px);letter-spacing:.12em;color:#e0ffff}.radio-band{color:#668e9d}
-.radio-screen{display:grid;grid-template-columns:64px minmax(0,1fr) auto;align-items:center;gap:14px;padding:24px 2px 18px}
-.radio-disc{width:60px;height:60px;border-radius:20px;display:grid;place-items:center;color:#5eead4;background:radial-gradient(circle at 30% 25%,rgba(94,234,212,.25),rgba(129,140,248,.1) 60%,rgba(7,14,25,.8));border:1px solid rgba(94,234,212,.25);box-shadow:0 0 22px rgba(94,234,212,.1)}
-.radio-track{min-width:0}.radio-track-kicker{font-size:9px;letter-spacing:.16em;color:#5eead4;font-weight:800}.radio-track-title{font-size:clamp(17px,3vw,28px);font-weight:650;letter-spacing:-.025em;margin-top:7px;overflow-wrap:anywhere}.radio-track-artist{color:#91a8bb;font-size:12px;margin-top:5px}
-.radio-level{height:40px;display:flex;align-items:center;gap:2px;opacity:.8}.radio-level i{display:block;width:3px;height:var(--h);border-radius:2px;background:linear-gradient(0deg,#818cf8,#5eead4);box-shadow:0 0 7px rgba(94,234,212,.3)}
-.radio-wave{display:flex;align-items:center;gap:3px;overflow:hidden;height:22px;opacity:.5}.radio-wave span{flex:1;min-width:2px;height:3px;border-radius:4px;background:linear-gradient(90deg,#818cf8,#5eead4);opacity:calc(.25 + .65 * (var(--i) / 56))}
-.radio-controls{display:grid;grid-template-columns:48px 48px 48px minmax(170px,1fr);gap:10px;align-items:center;margin-top:16px}
-.radio-transport{height:46px;width:46px;border-radius:16px;display:grid;place-items:center;background:rgba(var(--wh),.06);border:1px solid var(--line);color:var(--tx2);transition:.2s}
-.radio-transport:hover{color:var(--tx);border-color:rgba(94,234,212,.35);background:rgba(94,234,212,.09)}
-.radio-transport.main{background:linear-gradient(135deg,rgba(94,234,212,.25),rgba(129,140,248,.22));border-color:rgba(94,234,212,.38);color:#b9fff5;box-shadow:0 0 20px rgba(94,234,212,.12)}
-.radio-volume{min-width:0;border-left:1px solid var(--line);padding-left:16px}.radio-vol-head{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:9px;letter-spacing:.12em;color:var(--tx3);font-weight:700}.radio-vol-head span{display:flex;align-items:center;gap:6px}.radio-vol-head b{font-size:12px;color:var(--tx);letter-spacing:0}.radio-volume input{width:100%;margin:9px 0 3px;accent-color:#5eead4;cursor:pointer}.radio-vol-range{display:flex;justify-content:space-between;font-size:9px;color:var(--tx3)}
-.radio-device-row{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;border-top:1px solid var(--line);margin-top:16px;padding-top:12px;color:var(--tx3);font-size:11px}.radio-device-row>span:first-child{display:flex;align-items:center;gap:7px;color:var(--tx2)}
-.radio-presets{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
-.rst{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:8px;text-align:left;min-width:0;padding:16px;border-radius:21px;background:linear-gradient(145deg,rgba(var(--wh),.075),rgba(var(--wh),.025));border:1px solid var(--line);box-shadow:inset 0 1px 0 rgba(var(--wh),.055);transition:transform .22s,border-color .22s,background .22s,box-shadow .22s}
-.rst:hover{transform:translateY(-2px);border-color:rgba(94,234,212,.3);background:linear-gradient(145deg,rgba(94,234,212,.1),rgba(129,140,248,.06))}
-.rst.on{border-color:rgba(94,234,212,.58);background:linear-gradient(145deg,rgba(94,234,212,.17),rgba(129,140,248,.09));box-shadow:0 0 20px rgba(94,234,212,.09),inset 0 1px 0 rgba(255,255,255,.07)}
-.rsico{display:grid;place-items:center;width:39px;height:39px;border-radius:14px;color:#5eead4;background:rgba(94,234,212,.1);border:1px solid rgba(94,234,212,.18)}
-.rsname{font-size:15px;font-weight:750;overflow-wrap:anywhere}.rsgenre{font-size:11px;color:var(--tx3);min-height:28px;line-height:1.4}.rsplay{display:flex;align-items:center;gap:6px;font-size:10px;letter-spacing:.08em;font-weight:800;color:var(--acc);text-transform:uppercase;margin-top:auto}
-.radio-footer{display:flex;align-items:center;gap:12px}.radio-footer-icon{width:42px;height:42px;display:grid;place-items:center;flex:none;color:var(--acc);border-radius:14px;background:rgba(94,234,212,.1)}.radio-footer>div:nth-child(2){flex:1;min-width:0}.radio-footer b{font-size:13px}.radio-footer p{font-size:12px;color:var(--tx3);margin:4px 0 0;line-height:1.45}
-@media(max-width:900px){.radio-presets{grid-template-columns:repeat(2,minmax(0,1fr))}.radio-controls{grid-template-columns:44px 44px 44px minmax(120px,1fr);gap:7px}.radio-transport{width:42px;height:42px}.radio-screen{grid-template-columns:54px minmax(0,1fr)}.radio-disc{width:52px;height:52px}.radio-level{display:none}}
-@media(max-width:430px){.radio-screen{gap:10px;padding:19px 0 15px}.radio-freq{font-size:8px}.radio-controls{grid-template-columns:40px 40px 40px minmax(0,1fr);gap:5px}.radio-transport{width:38px;height:38px;border-radius:13px}.radio-volume{padding-left:8px}.radio-vol-head{letter-spacing:.04em}.radio-vol-head span{gap:3px}.radio-vol-range{font-size:8px}.radio-presets{gap:8px}.rst{padding:12px}.radio-footer{align-items:flex-start;flex-wrap:wrap}.radio-footer .qb{margin-left:54px}}
-@media(prefers-reduced-motion:reduce){.radio-eq.playing i{animation:none}.rst{transition:none}}
+/* pz34 Radio: Senderskala wie am alten Radio, Glas-Kacheln im Aurora-Stil */
+.rx-vh{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap}.rx-top{display:flex;align-items:center;gap:10px}
+.rx-live{display:inline-flex;align-items:center;gap:8px;font-size:10px;letter-spacing:.17em;font-weight:800;color:var(--tx3);padding:8px 12px;border-radius:999px;background:rgba(var(--wh),.05);border:1px solid var(--line)}
+.rx-live i{width:7px;height:7px;border-radius:50%;background:#64748b}.rx-live.on{color:#5eead4;border-color:rgba(94,234,212,.32);background:rgba(94,234,212,.08)}.rx-live.on i{background:#5eead4;box-shadow:0 0 10px rgba(94,234,212,.9)}
+.rx{display:flex;flex-direction:column;gap:12px}.rx .h{margin:4px 0 -4px}
+.rx-dial{padding:14px 18px}
+.rx-scale{position:relative;height:96px;border-radius:14px;background:linear-gradient(180deg,rgba(94,234,212,.1),rgba(129,140,248,.06));border:1px solid rgba(94,234,212,.2);overflow:hidden}
+.rx-nums{position:absolute;left:16px;right:16px;top:7px;display:flex;justify-content:space-between;font-size:12px;color:var(--tx2);font-variant-numeric:tabular-nums}
+.rx-tk{position:absolute;left:16px;right:16px;top:30px;height:20px;background:repeating-linear-gradient(90deg,rgba(var(--wh),.4) 0 1px,transparent 1px 12px)}
+.rx-tk2{position:absolute;left:16px;right:16px;top:25px;height:26px;background:repeating-linear-gradient(90deg,rgba(var(--wh),.75) 0 2px,transparent 2px 60px)}
+.rx-marks{position:absolute;left:16px;right:16px;top:56px;height:34px}
+.rxm{position:absolute;transform:translateX(-50%);max-width:130px;overflow:hidden;text-overflow:ellipsis;font:inherit;font-size:11px;letter-spacing:.06em;font-weight:700;color:var(--tx3);padding:6px 4px;white-space:nowrap;background:none;border:0;cursor:pointer}.rxm.on{color:#5eead4;text-shadow:0 0 10px rgba(94,234,212,.6)}
+.rx-needle{position:absolute;top:0;bottom:0;width:3px;margin-left:-1px;background:#5eead4;box-shadow:0 0 14px #5eead4,0 0 30px rgba(94,234,212,.55);border-radius:2px;transition:left .7s cubic-bezier(.3,1.3,.5,1);pointer-events:none}
+.rx-scale .rx-needle{left:calc(16px + (100% - 32px) * var(--p, 0))}
+.rx-needle.idle{opacity:.35;box-shadow:none}
+.rx-fm{position:absolute;left:12px;bottom:6px;font-size:10px;color:#5eead4;font-weight:800;letter-spacing:.2em;pointer-events:none}
+.rx-mid{display:grid;grid-template-columns:1.25fr 1fr;gap:12px}
+.rx-now{padding:16px 20px;display:flex;gap:16px;align-items:center;min-width:0}
+.rx-logo{width:84px;height:84px;flex:none;border-radius:20px;display:grid;place-items:center;font-weight:900;font-size:21px;letter-spacing:-.01em;color:#fff;background:linear-gradient(145deg,rgba(94,234,212,.2),rgba(129,140,248,.18));border:1px solid rgba(255,255,255,.14);box-shadow:0 10px 30px rgba(0,0,0,.3);text-align:center;line-height:1.05;padding:4px}
+.rx-tr{min-width:0;flex:1}.rx-k{font-size:10px;letter-spacing:.16em;color:#5eead4;font-weight:800}.rx-t{font-size:clamp(19px,2.6vw,26px);font-weight:700;margin:3px 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.rx-a{color:var(--tx3);font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rx-eq{display:flex;gap:3px;align-items:flex-end;height:36px;flex:none}.rx-eq i{width:5px;height:6px;border-radius:3px;background:linear-gradient(#5eead4,#818cf8);opacity:.5}
+.rx-eq.on i{opacity:1;animation:rxeq .9s ease-in-out infinite alternate}.rx-eq.on i:nth-child(2n){animation-delay:-.4s}.rx-eq.on i:nth-child(3n){animation-delay:-.65s}
+@keyframes rxeq{from{height:6px}to{height:36px}}
+.rx-ctl{padding:14px 18px;display:flex;gap:16px;align-items:center;min-width:0}
+.rx-knob{width:92px;height:92px;flex:none;border-radius:50%;display:grid;place-items:center;color:var(--tx3);background:radial-gradient(circle at 35% 30%,#334155,#0b1220 70%);border:2px solid rgba(var(--wh),.15);box-shadow:inset 0 2px 6px rgba(255,255,255,.12),0 8px 20px rgba(0,0,0,.35);cursor:pointer;transition:.25s}
+.rx-knob.on{color:#5eead4;border-color:rgba(94,234,212,.6);box-shadow:0 0 0 6px rgba(94,234,212,.08),0 0 30px rgba(94,234,212,.35),inset 0 2px 6px rgba(255,255,255,.12)}.rx-knob.on svg{filter:drop-shadow(0 0 6px #5eead4)}.rx-knob:disabled{opacity:.4}
+.rx-vol{flex:1;min-width:0}.rx-vh2{display:flex;justify-content:space-between;align-items:baseline;font-size:10px;letter-spacing:.14em;color:var(--tx3);font-weight:700}.rx-vh2 b{color:var(--tx);font-size:16px;letter-spacing:0}
+input.rx-bar[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:14px;border-radius:99px;margin:12px 0 6px;background:linear-gradient(90deg,#22c55e,#a3e635 35%,#facc15 60%,#f97316 80%,#ef4444);outline:none;cursor:pointer}
+input.rx-bar[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;border-radius:50%;background:#fff;box-shadow:0 0 0 4px rgba(255,255,255,.15),0 4px 10px rgba(0,0,0,.5)}
+input.rx-bar[type=range]::-moz-range-thumb{width:24px;height:24px;border:0;border-radius:50%;background:#fff;box-shadow:0 0 0 4px rgba(255,255,255,.15),0 4px 10px rgba(0,0,0,.5)}input.rx-bar[type=range]:disabled{opacity:.35}
+.rx-vr{display:flex;justify-content:space-between;font-size:11px;color:var(--tx3)}
+.rx-qv{display:flex;gap:6px;margin-top:10px}.rx-qv button{flex:1;min-width:0;font:inherit;font-size:13px;color:var(--tx2);padding:8px 0;border-radius:12px;border:1px solid var(--line);background:rgba(var(--wh),.05);cursor:pointer}.rx-qv button:active{background:rgba(94,234,212,.15)}.rx-qv button:disabled{opacity:.4}
+.rx-pls{display:flex;gap:8px;flex-wrap:wrap}
+.rxp{display:flex;align-items:center;gap:8px;font:inherit;font-size:14px;font-weight:600;color:var(--tx);padding:10px 14px;border-radius:14px;border:1px solid var(--line);background:rgba(var(--wh),.05);cursor:pointer;transition:.2s}
+.rxp i{width:8px;height:8px;border-radius:50%;background:#64748b}.rxp small{font-weight:500;color:var(--tx3);font-size:12px}
+.rxp.pl i{background:#a78bfa;box-shadow:0 0 8px #a78bfa}
+.rxp.on{border-color:rgba(94,234,212,.6);background:rgba(94,234,212,.12);box-shadow:0 0 18px rgba(94,234,212,.2)}.rxp.on i{background:#5eead4;box-shadow:0 0 8px #5eead4}
+.rxp.off{opacity:.42;cursor:default}
+.rx-st{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.rxs{container-type:inline-size;display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px;border-radius:18px;font:inherit;color:var(--tx);cursor:pointer;text-align:center;min-width:0;transition:transform .2s,border-color .2s,box-shadow .2s}
+.rxs:active{transform:scale(.97)}
+.rxb{width:100%;height:58px;border-radius:12px;display:grid;place-items:center;font-weight:900;font-size:18px;letter-spacing:-.01em;color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.35);overflow:hidden;padding:0 4px}
+.rxb.lg{font-size:13px;font-size:min(16px,calc((100cqw - 32px) / (var(--n) * .72)));letter-spacing:0;white-space:nowrap}.rx-logo.lg{font-size:12px}.rxb.sm{width:52px;height:40px;font-size:12px;flex:none;border-radius:10px}
+.rxn{font-size:12px;font-weight:700;letter-spacing:.05em;color:var(--tx2);text-transform:uppercase;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
+.rxs.on{border-color:rgba(94,234,212,.7);box-shadow:0 0 0 1px rgba(94,234,212,.4),0 0 26px rgba(94,234,212,.25)}.rxs.on .rxn{color:#5eead4}
+.rxadd .rxb{background:rgba(var(--wh),.04);border:1.5px dashed rgba(var(--wh),.22);color:var(--tx3);text-shadow:none}
+.rxf{display:flex;flex-direction:column;gap:8px;margin-bottom:12px}
+.rxf input{height:46px;border-radius:15px;border:1px solid var(--line);background:rgba(var(--wh),.06);color:var(--tx);font:inherit;font-size:15px;padding:0 14px;outline:none}
+.rxf input:focus{border-color:rgba(94,234,212,.6);background:rgba(var(--wh),.1)}.rxf input::placeholder{color:var(--tx3)}
+.rxfb{display:flex;gap:8px;justify-content:flex-end}
+.rxe{display:flex;align-items:center;gap:12px;padding:8px 6px;border-bottom:1px solid var(--line)}.rxe.on{background:rgba(94,234,212,.08);border-radius:12px}
+.rxe .t{font-weight:650;font-size:15px}.rxe .s{font-size:12px;color:var(--tx3);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.rxe .grow{min-width:0;flex:1}
+.rxe .mpb.arm{background:rgba(248,113,113,.2);color:#fca5a5;border-color:rgba(248,113,113,.4)}
+@media(max-width:900px){.rx-mid{grid-template-columns:1fr}.rx-st{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}}
+@media(max-width:640px){.rx-dial{padding:10px}.rx-scale{height:84px}.rx-nums span:nth-child(2n){visibility:hidden}.rxm{font-size:9px;letter-spacing:0;max-width:62px}
+  .rx-now{padding:12px 14px;gap:12px}.rx-logo{width:64px;height:64px;font-size:16px;border-radius:16px}.rx-ctl{padding:12px 14px;gap:12px}.rx-knob{width:70px;height:70px}
+  .rx-qv{gap:4px}.rx-qv button{font-size:12px}.rxp{padding:8px 11px;font-size:13px}.rxb{height:48px;font-size:15px}.rxs{padding:9px;gap:6px}.rxn{font-size:10.5px}}
+@media(prefers-reduced-motion:reduce){.rx-eq.on i{animation:none;height:24px}.rx-needle{transition:none}}
 
 `;
 class HomeAurora extends HTMLElement {
@@ -2786,7 +2804,7 @@ class HomeAurora extends HTMLElement {
   _sSet() {
     const th = this._themePref || this._c.theme || 'dark', am = String(this._ambMin());
     const seg = (act, cur, items) => `<div class="seg wide">${items.map(x => `<button class="${cur === x[0] ? 'on' : ''}" data-act="${act}" data-m="${x[0]}">${x[1]}</button>`).join('')}</div>`;
-    return `<div class="grab"></div><div class="sh"><div class="ico">${ic('cog', 24)}</div><div><h2>Darstellung &amp; Modi</h2><p>Home Aurora v5.2 · Build pz33</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
+    return `<div class="grab"></div><div class="sh"><div class="ico">${ic('cog', 24)}</div><div><h2>Darstellung &amp; Modi</h2><p>Home Aurora v5.2 · Build pz34</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
       <div class="lab2">DESIGN</div>${seg('theme', th, [['dark', 'Dunkel'], ['light', 'Hell'], ['auto', 'Automatisch']])}
       <div class="card-note">„Automatisch“ folgt dem Dunkel-/Hellmodus deines Home-Assistant-Profils. Die Auswahl gilt nur für dieses Gerät.</div>
       ${WALL_UI ? `      <div class="lab2">WANDTABLET-MODUS</div>
@@ -3751,70 +3769,197 @@ class HomeAurora extends HTMLElement {
     this._toast('Rückgängig gemacht');
   }
 
-/* ───────────── Ansicht: Radio · Home Aurora ───────────── */
+/* ───────────── pz34: Radio · Senderskala, Player-Auswahl, Sender verwalten ───────────── */
+  /* Sender stehen in einer HA-To-do-Liste (radio.list, je Eintrag ein Sender; Beschreibung = JSON mit genre/cmd/url),
+     damit Handy und Tablet dieselben sehen. Ist die Liste leer oder fehlt sie, gelten radio.stations aus der Konfiguration. */
+  _rdC() { return this._c.radio || {}; }
+  _rdListE() { const e = this._rdC().list, s = e && this._s(e); return s && okv(s.state) ? e : null; }
+  async _loadRd(force) {
+    const e = this._rdListE(); if (!e || this._rdB) return;
+    const s = this._s(e), k = s.last_updated || s.state;
+    if (!force && this._rdIt && this._rdIt.k === k) return;
+    this._rdB = true;
+    try {
+      const r = await this._h.callWS({ type: 'todo/item/list', entity_id: e });
+      const list = (r?.items || []).filter(i => i && i.summary && i.status !== 'completed').map(i => {
+        let d = null; try { d = i.description ? JSON.parse(i.description) : null; } catch (x) { d = null; }
+        if (!d || typeof d !== 'object') d = { genre: i.description || '' };
+        return { uid: i.uid, name: String(i.summary).trim(), genre: String(d.genre || ''), cmd: String(d.cmd || ''), url: String(d.url || '') };
+      });
+      this._rdIt = { k, list };
+    } catch (er) { this._rdIt = { k, list: this._rdIt?.list || [], err: true }; }
+    this._rdB = false;
+    this._renderSoon();
+  }
+  _rdStations() {
+    const L = this._rdListE() && this._rdIt?.list;
+    const src = L && L.length ? L : (this._rdC().stations || []).map(x => ({ name: x.name, genre: x.genre || '', cmd: x.cmd || (x.phrase ? 'spiele ' + x.phrase : ''), url: x.url || '' }));
+    return src.filter(x => x && x.name).map((x, i) => ({ ...x, id: x.uid || 'c' + i, i }));
+  }
+  /* Senderfarbe aus dem Namen, damit jede Kachel ihre eigene behält */
+  _rdCol(n) {
+    const P = [['#1e3a8a', '#2563eb'], ['#86198f', '#db2777'], ['#9a3412', '#f59e0b'], ['#155e75', '#06b6d4'], ['#1e40af', '#60a5fa'], ['#334155', '#64748b'], ['#7f1d1d', '#ef4444'], ['#3f6212', '#84cc16'], ['#4c1d95', '#8b5cf6'], ['#065f46', '#10b981']];
+    let h = 0; for (const c of String(n)) h = (h * 31 + c.charCodeAt(0)) >>> 0;
+    const p = P[h % P.length]; return `linear-gradient(135deg,${p[0]},${p[1]})`;
+  }
+  _rdShort(n) { const t = String(n).replace(/^radio\s+/i, '').trim(); return t.length > 16 ? t.split(/\s+/).map(w => w[0]).join('').slice(0, 4).toUpperCase() : t.toUpperCase(); }
+  /* Player = die Lautsprecher aus music.speakers (+ „Überall“); offline bleiben sie sichtbar, aber grau */
+  _rdPlayers() {
+    return this._memo('rdp', () => {
+      const M = this._c.music || {}, L = this._spk(), out = [];
+      (M.speakers || L).forEach(x => { const live = L.find(s => s.name === (x.name || '')); out.push(live ? { ...live, on: true } : { name: x.name || '?', icon: x.icon || 'speaker', on: false, ents: [] }); });
+      if (M.all && M.all.media) {
+        const ents = [M.all.media].flat().filter(e => { const s = this._s(e); return s && s.state !== 'unavailable'; }), e = ents[0], s = e && this._s(e);
+        out.push(s ? { name: M.all.name || 'Überall', icon: 'speaker', on: true, e, ents, st: s.state, pl: s.state === 'playing', ps: s.state === 'paused', title: s.attributes.media_title || '', artist: s.attributes.media_artist || '', vol: s.attributes.volume_level } : { name: M.all.name || 'Überall', icon: 'speaker', on: false, ents: [] });
+      }
+      return out;
+    });
+  }
+  _rdPlayer() {
+    const P = this._rdPlayers(), C = this._rdC();
+    let want = this._rdSel;
+    if (want == null) { try { want = localStorage.getItem('home-aurora-radiop'); } catch (e) { want = null; } }
+    if (want == null && C.entity) want = P.find(p => (p.ents || []).includes(C.entity))?.name;
+    if (want == null) want = C.player || 'Wohnzimmer';
+    return P.find(p => p.name === want && p.on) || P.find(p => p.on) || null;
+  }
+  /* läuft gerade einer der Sender? Erst am Titel erkennen, sonst der zuletzt hier gestartete */
+  _rdNow(P, S) {
+    if (!P || !(P.pl || P.ps)) return null;
+    const t = `${P.title} ${P.artist}`.toLowerCase(), norm = s => s.toLowerCase().replace(/[^a-z0-9äöü]/g, '');
+    const hit = S.find(x => t.includes(x.name.toLowerCase())) || S.find(x => norm(x.name).length > 2 && norm(t).includes(norm(x.name)));
+    return hit || S.find(x => x.name === this._rdLast?.[P.name]) || null;
+  }
   _vRadio() {
-    const e = this._c.radio?.entity || 'media_player.wohnzimmer';
-    const s = this._s(e), a = s?.attributes || {};
-    const state = s?.state || 'unavailable';
-    const playing = state === 'playing';
-    const title = a.media_title || a.media_title_short || (playing ? 'Live-Wiedergabe' : 'Bereit für deinen Lieblingssender');
-    const artist = a.media_artist || a.media_album_name || '';
-    const stations = this._c.radio?.stations || [];
-    const volume = Math.round((Number(a.volume_level) || 0) * 100);
-    const presets = stations.map((x, i) => {
-      const active = this._radioPreset === x.id;
-      return `<button class="rst ${active ? 'on' : ''}" data-act="radio-station" data-id="${esc(x.id)}" style="--ri:${i}">
-        <span class="rsico">${ic('music', 21)}</span>
-        <span class="rsname">${esc(x.name)}</span>
-        <span class="rsgenre">${esc(x.genre || 'Internetradio')}</span>
-        <span class="rsplay">${ic('play', 13)}${active ? 'Ausgewählt' : 'Abspielen'}</span>
-      </button>`;
-    }).join('');
-    return `<div class="vh radio-vh">
-        <div><h1>Radio</h1><p>Deine Sender · Wohnzimmer Alexa</p></div>
-        <span class="radio-live ${playing ? 'on' : ''}"><i></i>${playing ? 'ON AIR' : (state === 'unavailable' ? 'NICHT VERFÜGBAR' : 'BEREIT')}</span>
-      </div>
-      <div class="bento radio-layout">
-        <section class="c radio-deck s12" style="--i:0">
-          <div class="radio-decktop">
-            <div class="radio-brand"><span class="radio-brandicon">${ic('speaker', 22)}</span><div><div class="radio-eyebrow">HOME AURORA · AUDIO SYSTEM</div><div class="radio-title">SONIC <b>RADIO</b></div></div></div>
-            <span class="radio-eq ${playing ? 'playing' : ''}"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span>
-          </div>
-          <div class="radio-display">
-            <div class="radio-freq"><span>FM</span><span class="radio-frequency">LIVE STREAM</span><span class="radio-band">DIGITAL AUDIO</span></div>
-            <div class="radio-screen">
-              <div class="radio-disc">${ic('music', 30)}</div>
-              <div class="radio-track"><div class="radio-track-kicker">${playing ? 'JETZT LÄUFT' : 'AUSGEWÄHLTER LAUTSPRECHER'}</div>
-                <div class="radio-track-title">${esc(title)}</div>
-                <div class="radio-track-artist">${esc(artist || (playing ? 'Live · Internetradio' : 'Wähle unten einen Sender'))}</div>
-              </div>
-              <div class="radio-level">${Array.from({length:18},(_,i)=>`<i style="--h:${8+((i*7)%23)}px"></i>`).join('')}</div>
-            </div>
-            <div class="radio-wave">${Array.from({length:56},(_,i)=>`<span style="--i:${i}"></span>`).join('')}</div>
-          </div>
-          <div class="radio-controls">
-            <button class="radio-transport" data-act="radio-prev" aria-label="Vorheriger Titel">${ic('prev',20)}</button>
-            <button class="radio-transport main" data-act="radio-play" aria-label="Wiedergabe oder Pause">${ic(playing ? 'pause' : 'play',24)}</button>
-            <button class="radio-transport" data-act="radio-stop" aria-label="Stopp">${ic('power',20)}</button>
-            <div class="radio-volume">
-              <div class="radio-vol-head"><span>${ic('speaker',16)} LAUTSTÄRKE</span><b>${volume}%</b></div>
-              <input type="range" min="0" max="100" value="${volume}" data-act="radio-volume" aria-label="Lautstärke Wohnzimmer">
-              <div class="radio-vol-range"><span>0</span><span>50</span><span>100</span></div>
-            </div>
-          </div>
-          <div class="radio-device-row"><span><i class="radio-dot ${playing ? 'on' : ''}"></i>${esc(a.friendly_name || 'Wohnzimmer')}</span>
-            <span>${esc(state === 'playing' ? 'Wiedergabe aktiv' : state === 'paused' ? 'Pausiert' : state === 'unavailable' ? 'Player nicht verfügbar' : 'Wartet auf Wiedergabe')}</span>
-          </div>
-        </section>
-        <section class="s12">
-          <div class="h">${ic('music',14)} Sender-Favoriten <span class="r">Direkt starten</span></div>
-          <div class="radio-presets">${presets}</div>
-        </section>
-        <section class="c radio-footer s12"><div class="radio-footer-icon">${ic('speaker',22)}</div>
-          <div><b>Wiedergabe auf Alexa</b><p>Sender per Favoritentaste starten. Lautstärke, Pause und Stopp steuern den Wohnzimmer-Player.</p></div>
-          <button class="qb" data-act="music">${ic('speaker',14)}Alle Player</button>
-        </section>
+    if (this._rdListE()) this._loadRd();
+    const S = this._rdStations(), P = this._rdPlayer(), PL = this._rdPlayers(), cur = this._rdNow(P, S);
+    const pl = !!P?.pl, vol = P && P.vol != null ? Math.round(P.vol * 100) : null, n = S.length;
+    const pos = i => n > 1 ? 6 + i * 88 / (n - 1) : 50;
+    const nums = [88, 90, 92, 94, 96, 98, 100, 102, 104, 106, 108].map(f => `<span>${f}</span>`).join('');
+    const marks = S.map(x => `<button class="rxm${cur && cur.id === x.id ? ' on' : ''}" style="left:${pos(x.i)}%" data-act="rdplay" data-id="${esc(x.id)}">${esc(this._rdShort(x.name))}</button>`).join('');
+    const tiles = S.map(x => `<button class="c rxs${cur && cur.id === x.id ? ' on' : ''}" data-act="rdplay" data-id="${esc(x.id)}" style="--i:${x.i}"><span class="rxb${this._rdShort(x.name).length > 10 ? ' lg' : ''}" style="background:${this._rdCol(x.name)};--n:${this._rdShort(x.name).length}">${esc(this._rdShort(x.name))}</span><span class="rxn">${esc(x.name)}</span></button>`).join('');
+    const chip = p => `<button class="rxp${P && p.name === P.name ? ' on' : ''}${p.on ? '' : ' off'}${p.pl ? ' pl' : ''}" ${p.on ? `data-act="rdsel" data-n="${esc(p.name)}"` : 'disabled'}><i></i>${esc(p.name)}${p.on ? (p.pl ? '<small>spielt</small>' : '') : '<small>offline</small>'}</button>`;
+    const title = cur ? cur.name : P?.title || (P ? 'Bereit' : 'Kein Player erreichbar');
+    const sub = cur ? [cur.genre, P.title && P.title !== cur.name ? P.title : ''].filter(Boolean).join(' · ') || 'Internetradio' : P ? (P.title ? P.artist || '' : 'Tippe unten auf einen Sender') : 'Alle Lautsprecher sind offline';
+    const qv = [['−5', -5], ['Leise', 20], ['Normal', 35], ['Laut', 60], ['+5', 5]];
+    return `<div class="vh rx-vh"><div><h1>Radio</h1><p>${P ? (pl ? 'Spielt auf ' : 'Abspielen auf ') + esc(P.name) : 'Kein Player erreichbar'} · ${n} ${n === 1 ? 'Sender' : 'Sender'}</p></div>
+        <div class="rx-top"><button class="qb" data-act="rdedit">${ic('pen', 14)}Sender bearbeiten</button><span class="rx-live${pl ? ' on' : ''}"><i></i>${pl ? 'ON AIR' : P ? (P.ps ? 'PAUSE' : 'BEREIT') : 'OFFLINE'}</span></div></div>
+      <div class="rx">
+        <section class="c rx-dial"><div class="rx-scale"><div class="rx-nums">${nums}</div><div class="rx-tk"></div><div class="rx-tk2"></div><div class="rx-marks">${marks}</div>
+          <div class="rx-needle${cur ? '' : ' idle'}" style="--p:${(cur ? pos(cur.i) : 1) / 100}"></div><span class="rx-fm">FM</span></div></section>
+        <div class="rx-mid">
+          <section class="c rx-now"><div class="rx-logo${cur && this._rdShort(cur.name).length > 7 ? ' lg' : ''}" style="${cur ? `background:${this._rdCol(cur.name)}` : ''}">${cur ? esc(this._rdShort(cur.name)) : ic('radio', 30)}</div>
+            <div class="rx-tr"><div class="rx-k">${pl ? 'JETZT LÄUFT' : P?.ps ? 'PAUSIERT' : 'RADIO'}</div><div class="rx-t">${esc(title)}</div><div class="rx-a">${esc(sub)}</div></div>
+            <span class="rx-eq${pl ? ' on' : ''}"><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span></section>
+          <section class="c rx-ctl"><button class="rx-knob${pl ? ' on' : ''}" data-act="rdpower" aria-label="${pl ? 'Radio aus' : 'Radio an'}" ${P ? '' : 'disabled'}>${ic('power', 34)}</button>
+            <div class="rx-vol"><div class="rx-vh2"><span>LAUTSTÄRKE</span><b>${vol != null ? vol + ' %' : '–'}</b></div>
+              <input class="rx-bar" type="range" min="0" max="100" value="${vol ?? 0}" data-act="rdvol" aria-label="Lautstärke" ${vol != null ? '' : 'disabled'}>
+              <div class="rx-vr"><span>0 %</span><span>50 %</span><span>100 %</span></div>
+              <div class="rx-qv">${qv.map(q => `<button data-act="rdqv" data-v="${q[1]}" data-rel="${typeof q[0] === 'string' && /\d/.test(q[0]) ? 1 : 0}" ${vol != null ? '' : 'disabled'}>${q[0]}</button>`).join('')}</div></div></section>
+        </div>
+        <div class="h">${ic('speaker', 14)} Abspielen auf</div><div class="rx-pls">${PL.map(chip).join('')}</div>
+        <div class="h">${ic('radio', 14)} Schnellauswahl <span class="r">Tippen = sofort spielen</span></div>
+        <div class="rx-st">${tiles}<button class="c rxs rxadd" data-act="rdedit" data-new="1"><span class="rxb">${ic('plus', 26)}</span><span class="rxn">Sender hinzufügen</span></button></div>
       </div>`;
+  }
+  /* Alexa nimmt Sender nur als Sprachbefehl: über Alexa Devices (send_text_command) oder Alexa Media (play_media custom);
+     andere Player bekommen die Stream-Adresse, wenn der Sender eine hat */
+  _rdCall(P, st) {
+    const reg = this._h.entities || {}, text = st.cmd || 'spiele ' + st.name;
+    for (const e of P.ents || []) { const r = reg[e]; if (r?.platform === 'alexa_devices' && r.device_id) return ['alexa_devices', 'send_text_command', { device_id: r.device_id, text_command: text }]; }
+    const am = (P.ents || []).find(e => reg[e]?.platform === 'alexa_media') || (!reg[P.e] ? P.e : null);
+    if (am) return ['media_player', 'play_media', { entity_id: am, media_content_type: 'custom', media_content_id: text }];
+    if (st.url) return ['media_player', 'play_media', { entity_id: P.e, media_content_type: 'music', media_content_id: st.url }];
+    return null;
+  }
+  _rdPlay(id) {
+    const st = this._rdStations().find(x => x.id === id), P = this._rdPlayer();
+    if (!st) { this._toast('Sender nicht gefunden'); return; }
+    if (!P) { this._toast('Kein Lautsprecher erreichbar'); return; }
+    const c = this._rdCall(P, st);
+    if (!c) { this._toast(`${P.name} kann ${st.name} nicht abspielen`, 3600); return; }
+    (this._rdLast = this._rdLast || {})[P.name] = st.name;
+    Promise.resolve(this._h.callService(...c)).then(() => this._toast(`${st.name} auf ${P.name}`), () => this._toast('Sender konnte nicht gestartet werden', 3600));
+    this._sig = ''; this._render();
+  }
+  _rdPower() {
+    const P = this._rdPlayer(); if (!P) return;
+    if (P.pl) { const c = this._mpCaps(P.e); this._h.callService('media_player', c.pause ? 'media_pause' : 'media_stop', { entity_id: P.e }); return; }
+    const S = this._rdStations(), st = this._rdNow({ ...P, pl: true }, S) || S.find(x => x.name === this._rdLast?.[P.name]);
+    if (P.ps && this._mpCaps(P.e).play) { this._h.callService('media_player', 'media_play', { entity_id: P.e }); return; }
+    if (st || S[0]) this._rdPlay((st || S[0]).id);
+  }
+  _rdVol(v) {
+    const P = this._rdPlayer(); if (!P) return;
+    this._h.callService('media_player', 'volume_set', { entity_id: P.e, volume_level: clamp(v, 0, 100) / 100 });
+  }
+  /* ── Fenster „Sender bearbeiten“: hinzufügen, ersetzen, löschen ── */
+  _sRadio() {
+    const e = this._rdListE(), S = this._rdStations(), ed = this._rdEd || {}, x = ed.id && S.find(s => s.id === ed.id);
+    if (e) this._loadRd();
+    const head = `<div class="grab"></div><div class="sh"><div class="ico">${ic('radio', 24)}</div><div><h2>Sender bearbeiten</h2><p>${S.length} Sender · gilt für alle Geräte</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>`;
+    if (!e) return head + `<div class="empty">Zum Bearbeiten braucht das Dashboard eine To-do-Liste für die Sender. In der Karten-Konfiguration unter <b>radio: list:</b> eintragen (Standard <b>todo.radiosender</b>).</div>`;
+    const row = s => `<div class="rxe${x && x.id === s.id ? ' on' : ''}"><span class="rxb sm" style="background:${this._rdCol(s.name)}">${esc(this._rdShort(s.name))}</span><div class="grow"><div class="t">${esc(s.name)}</div><div class="s">${esc([s.genre, s.cmd || 'spiele ' + s.name].filter(Boolean).join(' · '))}</div></div>
+      <button class="mpb" data-act="rdpick" data-id="${esc(s.id)}" aria-label="${esc(s.name)} ersetzen">${ic('pen', 16)}</button><button class="mpb${this._rdArm === s.id ? ' arm' : ''}" data-act="rddel" data-id="${esc(s.id)}" aria-label="${esc(s.name)} löschen">${ic(this._rdArm === s.id ? 'check' : 'trash', 16)}</button></div>`;
+    return head + `<div class="lab2">${x ? 'SENDER ERSETZEN · ' + esc(x.name) : 'NEUER SENDER'}</div>
+      <div class="rxf"><input id="rdn" type="text" maxlength="40" placeholder="Name, z. B. Radio Hochstift" value="${esc(x ? x.name : '')}" autocomplete="off" aria-label="Sendername">
+        <input id="rdc" type="text" maxlength="120" placeholder="Alexa-Befehl (leer = „spiele ‹Name›“)" value="${esc(x ? x.cmd : '')}" autocomplete="off" aria-label="Alexa-Befehl">
+        <input id="rdg" type="text" maxlength="40" placeholder="Genre, z. B. Pop & Hits (optional)" value="${esc(x ? x.genre : '')}" autocomplete="off" aria-label="Genre">
+        <div class="rxfb">${x ? `<button class="vbt" data-act="rdpick" data-id="">Abbrechen</button>` : ''}<button class="vbt big on" data-act="rdsave" ${this._rdBusy ? 'disabled' : ''}>${ic(x ? 'check' : 'plus', 15)}${x ? 'Ersetzen' : 'Hinzufügen'}</button></div></div>
+      <div class="lab2">DEINE SENDER · ${S.length}</div>${S.map(row).join('') || '<div class="empty sm">Noch keine Sender</div>'}
+      ${this._rdIt?.err ? '<div class="card-note">Die Senderliste konnte gerade nicht geladen werden.</div>' : ''}`;
+  }
+  /* Liste noch leer: erst die Sender aus der Konfiguration übernehmen, damit Ersetzen/Löschen an der richtigen Stelle wirkt */
+  async _rdSeed(e) {
+    if (this._rdIt?.list?.length) return;
+    for (const s of this._rdStations()) await this._h.callService('todo', 'add_item', { entity_id: e, item: s.name, description: JSON.stringify({ genre: s.genre, cmd: s.cmd, url: s.url }) });
+    await this._loadRd(true);
+  }
+  async _rdSave() {
+    const e = this._rdListE(), R = this.shadowRoot, v = id => (R.getElementById(id)?.value || '').trim();
+    const name = v('rdn'), cmd = v('rdc'), genre = v('rdg');
+    if (!e) return;
+    if (!name) { this._toast('Bitte einen Namen eingeben'); R.getElementById('rdn')?.focus(); return; }
+    const old = this._rdEd?.id && this._rdStations().find(s => s.id === this._rdEd.id);
+    this._rdBusy = true; this._renderSheet();
+    try {
+      await this._rdSeed(e);
+      const d = JSON.stringify({ genre, cmd, url: old?.url || '' });
+      const tgt = old && (this._rdIt?.list || []).find(s => s.name === old.name);
+      if (tgt) await this._h.callService('todo', 'update_item', { entity_id: e, item: tgt.uid, rename: name, description: d });
+      else await this._h.callService('todo', 'add_item', { entity_id: e, item: name, description: d });
+      this._toast(old ? `${old.name} ersetzt durch ${name}` : `${name} hinzugefügt`);
+      this._rdEd = {};
+    } catch (er) { this._toast('Speichern hat nicht geklappt', 3600); }
+    this._rdBusy = false;
+    await this._loadRd(true);
+    this._sig = ''; this._render(); this._renderSheet();
+  }
+  async _rdDel(id) {
+    const e = this._rdListE(), s = this._rdStations().find(x => x.id === id); if (!e || !s) return;
+    if (this._rdArm !== id) { this._rdArm = id; this._renderSheet(); clearTimeout(this._rdAt); this._rdAt = setTimeout(() => { this._rdArm = null; if (this._sheet?.t === 'radio') this._renderSheet(); }, 3000); return; }
+    this._rdArm = null;
+    try {
+      await this._rdSeed(e);
+      const tgt = (this._rdIt?.list || []).find(x => x.name === s.name);
+      if (tgt) await this._h.callService('todo', 'remove_item', { entity_id: e, item: tgt.uid });
+      this._toast(`${s.name} gelöscht`);
+    } catch (er) { this._toast('Löschen hat nicht geklappt', 3600); }
+    if (this._rdEd?.id === id) this._rdEd = {};
+    await this._loadRd(true);
+    this._sig = ''; this._render(); this._renderSheet();
+  }
+  _rdAct(a, el) {
+    switch (a) {
+      case 'rdplay': this._rdPlay(el.dataset.id); break;
+      case 'rdsel': this._rdSel = el.dataset.n; try { localStorage.setItem('home-aurora-radiop', el.dataset.n); } catch (er) { /* ok */ } this._sig = ''; this._render(); break;
+      case 'rdpower': this._rdPower(); break;
+      case 'rdqv': { const P = this._rdPlayer(), v = parseInt(el.dataset.v, 10); if (P && P.vol != null) this._rdVol(el.dataset.rel === '1' ? Math.round(P.vol * 100) + v : v); break; }
+      case 'rdedit': this._rdEd = {}; this._rdArm = null; this._sheet = { t: 'radio' }; this._renderSheet(); this._loadRd(true); if (el.dataset.new) setTimeout(() => this.shadowRoot.getElementById('rdn')?.focus(), 80); break;
+      case 'rdpick': this._rdEd = { id: el.dataset.id || null }; this._renderSheet(); if (el.dataset.id) { this._sh.scrollTop = 0; setTimeout(() => this.shadowRoot.getElementById('rdn')?.focus(), 60); } break;
+      case 'rdsave': this._rdSave(); break;
+      case 'rddel': this._rdDel(el.dataset.id); break;
+    }
   }
   /* ───────────── v11: Kindersicherung TV (Integration „kindersicherung“) ───────────── */
   /* ───────────── pz16: Musik & Alexa (Lautsprecher steuern, Durchsagen) ───────────── */
@@ -4658,7 +4803,7 @@ class HomeAurora extends HTMLElement {
     const st = this._sh.scrollTop;
     if (this._sheet.t === 'sched' && this._schedEl && this._sh.contains(this._schedEl)) { this._schedEl.hass = this._h; this._ov.classList.add('show'); return; }
     const r = this._sheet.t === 'room' ? this._c.rooms.find(x => x.id === this._sheet.id) : null;
-    const T = { vroom: () => this._sVRoom(this._sheet.e), persons: () => this._sPersons(), quick: () => this._sQuick(), vent: () => this._sVent(), cal: () => this._sCal(), bat: () => this._sBat(), doors: () => this._sDoors(), sys: () => this._sSys(), waste: () => this._sWaste(), power: () => this._sPower(), sched: () => this._sSched(), set: () => this._sSet(), warn: () => this._sWarn(), radar: () => this._sRadar(), pin: () => this._sPin(), fuel: () => this._sFuel(), plants: () => this._sPlants(), heat: () => this._sHeat(), kid: () => this._sKid(), clean: () => this._sClean(), tv: () => this._sTv(), pzstat: () => this._sPzStat(), music: () => this._sMusic(), shop: () => this._sShop() };
+    const T = { vroom: () => this._sVRoom(this._sheet.e), persons: () => this._sPersons(), quick: () => this._sQuick(), vent: () => this._sVent(), cal: () => this._sCal(), bat: () => this._sBat(), doors: () => this._sDoors(), sys: () => this._sSys(), waste: () => this._sWaste(), power: () => this._sPower(), sched: () => this._sSched(), set: () => this._sSet(), warn: () => this._sWarn(), radar: () => this._sRadar(), pin: () => this._sPin(), fuel: () => this._sFuel(), plants: () => this._sPlants(), heat: () => this._sHeat(), kid: () => this._sKid(), clean: () => this._sClean(), tv: () => this._sTv(), pzstat: () => this._sPzStat(), music: () => this._sMusic(), radio: () => this._sRadio(), shop: () => this._sShop() };
     const qn = this.shadowRoot.getElementById('qname'), qv = qn ? qn.value : null, qf = qn && this.shadowRoot.activeElement === qn;
     const an = this.shadowRoot.getElementById('annq'), av = an ? an.value : null, af = an && this.shadowRoot.activeElement === an;
     const sq = this.shadowRoot.getElementById('shopq'), sv = sq ? sq.value : null, sf = sq && this.shadowRoot.activeElement === sq;
@@ -4749,14 +4894,14 @@ class HomeAurora extends HTMLElement {
     });
     root.addEventListener('input', ev => {
       if (ev.target.id === 'pzq') { const st = this._pzSt(); if (st) { st.q = ev.target.value; this._pzRefresh(); } return; }
-      const el = ev.target.closest('input[data-act="bright"],input[data-act="vol"],input[data-act="radio-volume"]');
+      const el = ev.target.closest('input[data-act="bright"],input[data-act="vol"],input[data-act="rdvol"]');
       if (el) { el.style.setProperty('--v', el.value + '%'); if (el.dataset.act === 'vol' && el.nextElementSibling) el.nextElementSibling.textContent = el.value + ' %'; }
     });
     root.addEventListener('change', ev => {
-      const el = ev.target.closest('input[data-act="bright"],input[data-act="vol"]');
+      const el = ev.target.closest('input[data-act="bright"],input[data-act="vol"],input[data-act="rdvol"]');
       if (!el) return;
       if (el.dataset.act === 'vol') this._h.callService('media_player', 'volume_set', { entity_id: el.dataset.e, volume_level: parseInt(el.value, 10) / 100 });
-      else if (el.dataset.act === 'radio-volume') this._h.callService('media_player', 'volume_set', { entity_id: this._c.radio?.entity || 'media_player.wohnzimmer', volume_level: parseInt(el.value, 10) / 100 });
+      else if (el.dataset.act === 'rdvol') this._rdVol(parseInt(el.value, 10));
       else this._h.callService('light', 'turn_on', { entity_id: el.dataset.e, brightness_pct: parseInt(el.value, 10) });
       this._busy = false;
       if (this._dirty) { this._dirty = false; this._sig = ''; this._tick(); }
@@ -4789,24 +4934,9 @@ class HomeAurora extends HTMLElement {
       if (ev.key === 'Escape') this._closeSheet();
       else if (ev.key === 'Enter' && ev.target.id === 'annq') { ev.preventDefault(); this._annSend(); }
       else if (ev.key === 'Enter' && ev.target.id === 'shopq') { ev.preventDefault(); this._shopInput(); }
+      else if (ev.key === 'Enter' && /^rd[ncg]$/.test(ev.target.id)) { ev.preventDefault(); this._rdSave(); }
     });
     root.addEventListener('contextmenu', ev => { if (ev.target.closest && ev.target.closest('[data-hold]')) ev.preventDefault(); });
-  }
-  _radioPlay(id) {
-    const st = (this._c.radio?.stations || []).find(x => x.id === id);
-    if (!st) { this._toast('Sender nicht gefunden'); return; }
-    const player = this._c.radio?.entity || 'media_player.wohnzimmer';
-    this._radioPreset = st.id;
-    try {
-      this._h.callService('media_player', 'play_media', {
-        entity_id: player,
-        media_content_type: 'custom',
-        media_content_id: 'Alexa, spiele ' + (st.phrase || st.name),
-      });
-      this._toast(st.name + ' an Wohnzimmer gesendet');
-    } catch (err) { this._toast('Sender konnte nicht gestartet werden'); }
-    this._sig = '';
-    this._render();
   }
   _more(e) { this.dispatchEvent(new CustomEvent('hass-more-info', { detail: { entityId: e }, bubbles: true, composed: true })); }
   _act(el) {
@@ -4861,10 +4991,7 @@ class HomeAurora extends HTMLElement {
       case 'power': this._sheet = { t: 'power' }; this._renderSheet(); this._loadPower(true); break;
       case 'sched': this._sheet = { t: 'sched' }; this._renderSheet(); break;
       case 'schedtab': this._schedTab = el.dataset.m; this._renderSheet(); break;
-      case 'radio-station': this._radioPlay(el.dataset.id); break;
-      case 'radio-play': { const id = this._c.radio?.entity || 'media_player.wohnzimmer'; h.callService('media_player', this._val(id) === 'playing' ? 'media_pause' : 'media_play', { entity_id: id }); break; }
-      case 'radio-stop': h.callService('media_player', 'media_stop', { entity_id: this._c.radio?.entity || 'media_player.wohnzimmer' }); break;
-      case 'radio-prev': h.callService('media_player', 'media_previous_track', { entity_id: this._c.radio?.entity || 'media_player.wohnzimmer' }); break;
+      case 'rdplay': case 'rdsel': case 'rdpower': case 'rdqv': case 'rdedit': case 'rdpick': case 'rdsave': case 'rddel': this._rdAct(a, el); break;
       case 'music': this._sheet = { t: 'music' }; this._renderSheet(); break;
       case 'shop': case 'shoptab': case 'shopadd': case 'shopq': case 'shopdone': case 'shopundo': case 'shopall': case 'shopclr': case 'rcpsel': case 'rcpserv': case 'rcpone': case 'rcpall': this._shopAct(a, el); break;
       case 'annt': this._annT = el.dataset.i; this._renderSheet(); break;

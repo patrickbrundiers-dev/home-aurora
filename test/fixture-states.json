@@ -11208,6 +11208,19 @@
 "last_updated": "2026-01-01T12:00:00+00:00",
 "state": "4"
 },
+"todo.radiosender": {
+"attributes": {
+"friendly_name": "Radiosender",
+"supported_features": 127
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "todo.radiosender",
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00",
+"state": "3"
+},
 "todo.rezepte": {
 "attributes": {
 "friendly_name": "Rezepte",
