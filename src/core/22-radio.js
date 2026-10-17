@@ -97,8 +97,8 @@
     const reg = this._h.entities || {}, text = st.cmd || 'spiele ' + st.name;
     for (const e of P.ents || []) { const r = reg[e]; if (r?.platform === 'alexa_devices' && r.device_id) return ['alexa_devices', 'send_text_command', { device_id: r.device_id, text_command: text }]; }
     const am = (P.ents || []).find(e => reg[e]?.platform === 'alexa_media') || (!reg[P.e] ? P.e : null);
-    if (am) return ['media_player', 'play_media', { entity_id: am, media_content_type: 'custom', media_content_id: text }];
-    if (st.url) return ['media_player', 'play_media', { entity_id: P.e, media_content_type: 'music', media_content_id: st.url }];
+    if (am) return ['media_player', 'play_media', { entity_id: am, media: { media_content_type: 'custom', media_content_id: text } }];
+    if (st.url) return ['media_player', 'play_media', { entity_id: P.e, media: { media_content_type: 'music', media_content_id: st.url } }];
     return null;
   }
   _rdPlay(id) {
@@ -139,7 +139,11 @@
       ${this._rdIt?.err ? '<div class="card-note">Die Senderliste konnte gerade nicht geladen werden.</div>' : ''}`;
   }
   /* Liste noch leer: erst die Sender aus der Konfiguration übernehmen, damit Ersetzen/Löschen an der richtigen Stelle wirkt */
+  /* UID des Eintrags; Sender aus der Konfiguration stehen nach dem Übernehmen an derselben Stelle in der Liste */
+  _rdUid(s) { return s && (s.uid || this._rdIt?.list?.[s.i]?.uid); }
   async _rdSeed(e) {
+    if (!this._rdIt || this._rdIt.err) await this._loadRd(true);
+    if (!this._rdIt || this._rdIt.err) throw new Error('Senderliste nicht lesbar');
     if (this._rdIt?.list?.length) return;
     for (const s of this._rdStations()) await this._h.callService('todo', 'add_item', { entity_id: e, item: s.name, description: JSON.stringify({ genre: s.genre, cmd: s.cmd, url: s.url }) });
     await this._loadRd(true);
@@ -154,8 +158,8 @@
     try {
       await this._rdSeed(e);
       const d = JSON.stringify({ genre, cmd, url: old?.url || '' });
-      const tgt = old && (this._rdIt?.list || []).find(s => s.name === old.name);
-      if (tgt) await this._h.callService('todo', 'update_item', { entity_id: e, item: tgt.uid, rename: name, description: d });
+      const uid = old && this._rdUid(old);
+      if (uid) await this._h.callService('todo', 'update_item', { entity_id: e, item: uid, rename: name, description: d });
       else await this._h.callService('todo', 'add_item', { entity_id: e, item: name, description: d });
       this._toast(old ? `${old.name} ersetzt durch ${name}` : `${name} hinzugefügt`);
       this._rdEd = {};
@@ -170,8 +174,8 @@
     this._rdArm = null;
     try {
       await this._rdSeed(e);
-      const tgt = (this._rdIt?.list || []).find(x => x.name === s.name);
-      if (tgt) await this._h.callService('todo', 'remove_item', { entity_id: e, item: tgt.uid });
+      const uid = this._rdUid(s);
+      if (uid) await this._h.callService('todo', 'remove_item', { entity_id: e, item: uid });
       this._toast(`${s.name} gelöscht`);
     } catch (er) { this._toast('Löschen hat nicht geklappt', 3600); }
     if (this._rdEd?.id === id) this._rdEd = {};
