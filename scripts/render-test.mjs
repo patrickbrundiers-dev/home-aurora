@@ -161,6 +161,12 @@ for (const [vn, states] of VARIANTS) for (const t of TARGETS.filter((x) => !only
   await check('ansicht radio hoerspiele', () => { const el = window.__el; el._closeSheet(); el._v = 'radio'; el._rdTab = 'hs'; el._sig = ''; el._render(); return el.shadowRoot.querySelector('main').textContent.trim().length; });
   await page.evaluate(() => { const el = window.__el; el._sheet = { t: 'radio' }; el._render(); });
   await check('fenster hoerspiele', () => window.__el.shadowRoot.querySelector('.sheet').textContent.trim().length);
+  // Hörspiele-Kategorien: ohne To-do-Liste gelten die Vorgaben aus der Konfiguration, dort gibt es mehrere Kategorien
+  await page.evaluate(() => { const el = window.__el; el._hsSaved = el._c.radio?.hsp; el._c.radio = { ...(el._c.radio || {}), hsp: { list: '' } }; el._closeSheet(); el._v = 'radio'; el._rdTab = 'hs'; el._hsCat = ''; el._sig = ''; el._render(); });
+  await check('hoerspiele kategorien', () => { const n = window.__el.shadowRoot.querySelectorAll('.rx-cats button').length; if (n < 5) throw new Error('Kategorie-Chips fehlen: ' + n); return window.__el.shadowRoot.querySelector('main').textContent.trim().length; });
+  await page.evaluate(() => { const el = window.__el; el._hsCat = 'Krimi'; el._sig = ''; el._render(); });
+  await check('hoerspiele krimi', () => { const n = window.__el.shadowRoot.querySelectorAll('.rxh[data-act="hsopen"]').length; if (n !== 2) throw new Error('Krimi-Filter zeigt ' + n + ' statt 2'); return window.__el.shadowRoot.querySelector('main').textContent.trim().length; });
+  await page.evaluate(() => { const el = window.__el; el._c.radio = { ...(el._c.radio || {}), hsp: el._hsSaved }; el._hsCat = ''; el._closeSheet(); el._rdTab = 'rd'; el._v = 'home'; });
   // Deezer-Katalog fürs Folgen-Fenster: feste Antworten (das echte JSONP läuft in einem abgeschotteten iframe, das Playwright nicht abfängt)
   await page.evaluate(() => { const el = window.__el; try { localStorage.clear(); } catch (e) { /* ok */ } el._hsF = {};
     el._dzJsonp = async (path) => path.startsWith('search/artist') ? { data: [{ id: 1, name: 'PAW Patrol' }] }

@@ -8,6 +8,7 @@
     return k === 'hs' ? { k, list: H.list === undefined ? 'todo.horspiele' : H.list, items: H.items || [], noun: 'Hörspiel', nouns: 'Hörspiele', cmd: n => `spiele das neueste Album von ${n} auf Deezer` }
       : { k, list: C.list, items: C.stations || [], noun: 'Sender', nouns: 'Sender', cmd: n => 'spiele ' + n };
   }
+  _hsCatGet() { if (this._hsCat === undefined) { try { this._hsCat = localStorage.getItem('home-aurora-hscat') || ''; } catch (e) { this._hsCat = ''; } } return this._hsCat; }
   _rdCache(k = this._rdKind()) { return (this._rdItK = this._rdItK || {})[k]; }
   _rdListE(k) { const e = this._rdK(k).list, s = e && this._s(e); return s && okv(s.state) ? e : null; }
   async _loadRd(force, k = this._rdKind()) {
@@ -20,7 +21,7 @@
       const list = (r?.items || []).filter(i => i && i.summary && i.status !== 'completed').map(i => {
         let d = null; try { d = i.description ? JSON.parse(i.description) : null; } catch (x) { d = null; }
         if (!d || typeof d !== 'object') d = { genre: i.description || '' };
-        return { uid: i.uid, name: String(i.summary).trim(), genre: String(d.genre || ''), cmd: String(d.cmd || ''), url: String(d.url || ''), emoji: String(d.emoji || ''), dz: String(d.dz || '') };
+        return { uid: i.uid, name: String(i.summary).trim(), genre: String(d.genre || ''), cmd: String(d.cmd || ''), url: String(d.url || ''), emoji: String(d.emoji || ''), dz: String(d.dz || ''), cat: String(d.cat || '') };
       });
       this._rdItK[k] = { k: key, list };
     } catch (er) { this._rdItK[k] = { k: key, list: old?.list || [], err: true }; }
@@ -29,7 +30,7 @@
   }
   _rdStations(k = this._rdKind()) {
     const L = this._rdListE(k) && this._rdCache(k)?.list;
-    const src = L && L.length ? L : this._rdK(k).items.map(x => ({ name: x.name, genre: x.genre || '', cmd: x.cmd || (x.phrase ? 'spiele ' + x.phrase : ''), url: x.url || '', emoji: x.emoji || '', dz: x.dz || '' }));
+    const src = L && L.length ? L : this._rdK(k).items.map(x => ({ name: x.name, genre: x.genre || '', cmd: x.cmd || (x.phrase ? 'spiele ' + x.phrase : ''), url: x.url || '', emoji: x.emoji || '', dz: x.dz || '', cat: x.cat || '' }));
     return src.filter(x => x && x.name).map((x, i) => ({ ...x, id: x.uid || 'c' + i, i }));
   }
   /* Senderfarbe aus dem Namen, damit jede Kachel ihre eigene behält */
@@ -106,7 +107,9 @@
     const pl = !!P?.pl, f = P ? this._attr(P.e, 'supported_features') || 0 : 0, c = P ? this._mpCaps(P.e) : {}, on = P && (P.pl || P.ps);
     const b = (act, ico, l, x, main) => `<button class="mpb${main ? ' main' : ''}" data-act="${act}" aria-label="${l}" ${x ? '' : 'disabled'}>${ic(ico, 20)}</button>`;
     const cv = x => `<span class="rxc" style="background:${this._rdCol(x.name)}"><i>${esc(x.emoji || '🎧')}</i><b>${esc(x.name)}</b></span>`;
-    const tiles = S.map(x => `<button class="c rxh${cur && cur.id === x.id ? ' on' : ''}" data-act="hsopen" data-id="${esc(x.id)}" style="--i:${x.i}">${cv(x)}<span class="rxn">${esc(x.name)}</span><span class="rxg">${esc(['Deezer', x.genre].filter(Boolean).join(' · '))}</span></button>`).join('');
+    const cats = [...new Set(S.map(x => x.cat || 'Sonstige'))], cat = cats.includes(this._hsCatGet()) ? this._hsCatGet() : '';
+    const chips = cats.length > 1 ? `<div class="rx-tabs rx-cats"><button class="${cat ? '' : 'on'}" data-act="hscat" data-c="">Alle</button>${cats.map(c => `<button class="${cat === c ? 'on' : ''}" data-act="hscat" data-c="${esc(c)}">${esc(c)}</button>`).join('')}</div>` : '';
+    const tiles = S.filter(x => !cat || (x.cat || 'Sonstige') === cat).map(x => `<button class="c rxh${cur && cur.id === x.id ? ' on' : ''}" data-act="hsopen" data-id="${esc(x.id)}" style="--i:${x.i}">${cv(x)}<span class="rxn">${esc(x.name)}</span><span class="rxg">${esc(['Deezer', x.genre].filter(Boolean).join(' · '))}</span></button>`).join('');
     const title = cur ? cur.name : on ? P.title || 'Wiedergabe' : P ? 'Bereit' : 'Kein Player erreichbar';
     const sub = cur ? [P.title && P.title !== cur.name ? P.title : '', P.artist && P.artist !== cur.name ? P.artist : ''].filter(Boolean).join(' · ') || 'Hörspiel von Deezer' : on ? P.artist || '' : P ? 'Tippe unten auf ein Hörspiel' : 'Alle Lautsprecher sind offline';
     return `<div class="rx">
@@ -116,7 +119,7 @@
           <div class="rx-vol rx-hv"><div class="rx-vh2"><span>LAUTSTÄRKE</span><b>${vol != null ? vol + ' %' : '–'}</b></div>
             <input class="rx-bar" type="range" min="0" max="100" value="${vol ?? 0}" data-act="rdvol" aria-label="Lautstärke" ${vol != null ? '' : 'disabled'}></div></section>
         ${players}
-        <div class="h">${ic('music', 14)} Hörspiele <span class="r">Tippen = Folge auswählen</span></div>
+        <div class="h">${ic('music', 14)} Hörspiele <span class="r">Tippen = Folge auswählen</span></div>${chips}
         <div class="rx-hs">${tiles}<button class="c rxh rxadd" data-act="rdedit" data-new="1"><span class="rxc">${ic('plus', 30)}</span><span class="rxn">Hörspiel hinzufügen</span></button></div>
       </div>`;
   }
@@ -165,7 +168,8 @@
         <input id="rdc" type="text" maxlength="120" placeholder="Alexa-Befehl (leer = „${hs ? 'spiele das neueste Album von ‹Name› auf Deezer' : 'spiele ‹Name›'}“)" value="${esc(x ? x.cmd : '')}" autocomplete="off" aria-label="Alexa-Befehl">
         <input id="rdg" type="text" maxlength="40" placeholder="${hs ? 'Untertitel, z. B. ab 4 (optional)' : 'Genre, z. B. Pop & Hits (optional)'}" value="${esc(x ? x.genre : '')}" autocomplete="off" aria-label="${hs ? 'Untertitel' : 'Genre'}">
         ${hs ? `<input id="rdj" type="text" maxlength="8" placeholder="Emoji fürs Bild, z. B. 🦄 (optional)" value="${esc(x ? x.emoji : '')}" autocomplete="off" aria-label="Emoji">
-        <input id="rdz" type="text" maxlength="60" placeholder="Name bei Deezer für die Folgenliste (leer = Name)" value="${esc(x ? x.dz : '')}" autocomplete="off" aria-label="Name bei Deezer">` : ''}
+        <input id="rdz" type="text" maxlength="60" placeholder="Name bei Deezer für die Folgenliste (leer = Name)" value="${esc(x ? x.dz : '')}" autocomplete="off" aria-label="Name bei Deezer">
+        <input id="rdk" type="text" maxlength="30" placeholder="Kategorie, z. B. Krimi (leer = Sonstige)" value="${esc(x ? x.cat : '')}" autocomplete="off" aria-label="Kategorie">` : ''}
         <div class="rxfb">${x ? `<button class="vbt" data-act="rdpick" data-id="">Abbrechen</button>` : ''}<button class="vbt big on" data-act="rdsave" ${this._rdBusy ? 'disabled' : ''}>${ic(x ? 'check' : 'plus', 15)}${x ? 'Ersetzen' : 'Hinzufügen'}</button></div></div>
       <div class="lab2">DEINE ${hs ? 'HÖRSPIELE' : 'SENDER'} · ${S.length}</div>${S.map(row).join('') || `<div class="empty sm">Noch keine ${K.nouns}</div>`}
       ${this._rdCache()?.err ? '<div class="card-note">Die Liste konnte gerade nicht geladen werden.</div>' : ''}`;
@@ -178,19 +182,19 @@
     const c = this._rdCache();
     if (!c || c.err) throw new Error('Liste nicht lesbar');
     if (c.list?.length) return;
-    for (const s of this._rdStations()) await this._h.callService('todo', 'add_item', { entity_id: e, item: s.name, description: JSON.stringify({ genre: s.genre, cmd: s.cmd, url: s.url, emoji: s.emoji, dz: s.dz }) });
+    for (const s of this._rdStations()) await this._h.callService('todo', 'add_item', { entity_id: e, item: s.name, description: JSON.stringify({ genre: s.genre, cmd: s.cmd, url: s.url, emoji: s.emoji, dz: s.dz, cat: s.cat }) });
     await this._loadRd(true);
   }
   async _rdSave() {
     const e = this._rdListE(), R = this.shadowRoot, v = id => (R.getElementById(id)?.value || '').trim();
-    const name = v('rdn'), cmd = v('rdc'), genre = v('rdg'), emoji = v('rdj'), dz = v('rdz');
+    const name = v('rdn'), cmd = v('rdc'), genre = v('rdg'), emoji = v('rdj'), dz = v('rdz'), cat = v('rdk');
     if (!e) return;
     if (!name) { this._toast('Bitte einen Namen eingeben'); R.getElementById('rdn')?.focus(); return; }
     const old = this._rdEd?.id && this._rdStations().find(s => s.id === this._rdEd.id);
     this._rdBusy = true; this._renderSheet();
     try {
       await this._rdSeed(e);
-      const hs = this._rdKind() === 'hs', d = JSON.stringify({ genre, cmd, url: old?.url || '', emoji: hs ? emoji : '', dz: hs ? dz : '' });
+      const hs = this._rdKind() === 'hs', d = JSON.stringify({ genre, cmd, url: old?.url || '', emoji: hs ? emoji : '', dz: hs ? dz : '', cat: hs ? cat : '' });
       const uid = old && this._rdUid(old);
       if (uid) await this._h.callService('todo', 'update_item', { entity_id: e, item: uid, rename: name, description: d });
       else await this._h.callService('todo', 'add_item', { entity_id: e, item: name, description: d });
@@ -231,6 +235,7 @@
       case 'hsrnd': this._hsRnd(); break;
       case 'hsplay': this._hsPlay(el.dataset.a); break;
       case 'hsold': { const id = el.dataset.id; this._closeSheet(); this._rdPlay(id); break; }
+      case 'hscat': this._hsCat = el.dataset.c || ''; try { localStorage.setItem('home-aurora-hscat', this._hsCat); } catch (e) { /* ok */ } this._sig = ''; this._render(); break;
       case 'hsmore': this._hsLim = (this._hsLim || 40) + 60; this._renderSheet(); break;
       case 'hsre': { const x = this._hsX(); if (x) this._hsLoad(x, true); break; }
     }
