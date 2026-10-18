@@ -47,11 +47,11 @@ sequence:
             - if: "{{ not wait.completed }}"
               then: [{stop: Alexa hat das Kapitel nicht gestartet}]
             - delay: {seconds: 3}
-        - variables:   # Sekunden bis kurz vor Kapitelende
+        - variables:   # Sekunden bis kurz vor Kapitelende (Alexa braucht etwa 5 s für einen Befehl)
             rest: >-
               {% set p = state_attr(watch, 'media_position') | float(0) %}{% set u = state_attr(watch, 'media_position_updated_at') %}
               {% set el = p + ((now() - as_datetime(u | string)).total_seconds() if u and is_state(watch, 'playing') else 0) %}
-              {{ [(state_attr(watch, 'media_duration') | float(0)) - el - 2, 5] | max | round(0) | int }}
+              {{ [(state_attr(watch, 'media_duration') | float(0)) - el - 6, 5] | max | round(0) | int }}
         - wait_template: >-
             {% set s = (state_attr(watch, 'last_called_summary') or '') | lower %}
             {{ (state_attr(watch, 'media_title') or '') | lower | regex_replace('[^a-z0-9äöüß]', '') != want or (s != s0 and s not in cmds) }}
