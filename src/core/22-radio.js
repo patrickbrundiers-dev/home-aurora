@@ -4,7 +4,7 @@
   _rdC() { return this._c.radio || {}; }
   _rdKind() { if (this._rdTab == null) { try { this._rdTab = localStorage.getItem('home-aurora-rdtab') || 'rd'; } catch (e) { this._rdTab = 'rd'; } } return this._rdTab === 'hs' ? 'hs' : 'rd'; }
   _rdK(k = this._rdKind()) {
-    const C = this._rdC(), H = C.hsp || {};
+    const C = this._rdC(), H = { ...DEFAULTS.radio.hsp, ...(C.hsp || {}) };
     return k === 'hs' ? { k, list: H.list === undefined ? 'todo.horspiele' : H.list, items: H.items || [], noun: 'Hörspiel', nouns: 'Hörspiele', cmd: n => `spiele ${n} Hörspiel auf Deezer` }
       : { k, list: C.list, items: C.stations || [], noun: 'Sender', nouns: 'Sender', cmd: n => 'spiele ' + n };
   }
