@@ -121,7 +121,7 @@
       case 'power': this._sheet = { t: 'power' }; this._renderSheet(); this._loadPower(true); break;
       case 'sched': this._sheet = { t: 'sched' }; this._renderSheet(); break;
       case 'schedtab': this._schedTab = el.dataset.m; this._renderSheet(); break;
-      case 'rdplay': case 'rdsel': case 'rdpower': case 'rdqv': case 'rdedit': case 'rdpick': case 'rdsave': case 'rddel': case 'rdtab': case 'rdprev': case 'rdnext': this._rdAct(a, el); break;
+      case 'rdplay': case 'rdsel': case 'rdpower': case 'rdqv': case 'rdedit': case 'rdpick': case 'rdsave': case 'rddel': case 'rdtab': case 'rdprev': case 'rdnext': case 'hsopen': case 'hsrnd': case 'hsplay': case 'hsold': case 'hsmore': case 'hsre': this._rdAct(a, el); break;
       case 'music': this._sheet = { t: 'music' }; this._renderSheet(); break;
       case 'shop': case 'shoptab': case 'shopadd': case 'shopq': case 'shopdone': case 'shopundo': case 'shopall': case 'shopclr': case 'rcpsel': case 'rcpserv': case 'rcpone': case 'rcpall': this._shopAct(a, el); break;
       case 'annt': this._annT = el.dataset.i; this._renderSheet(); break;
