@@ -5,7 +5,7 @@
   _rdKind() { if (this._rdTab == null) { try { this._rdTab = localStorage.getItem('home-aurora-rdtab') || 'rd'; } catch (e) { this._rdTab = 'rd'; } } return this._rdTab === 'hs' ? 'hs' : 'rd'; }
   _rdK(k = this._rdKind()) {
     const C = this._rdC(), H = { ...DEFAULTS.radio.hsp, ...(C.hsp || {}) };
-    return k === 'hs' ? { k, list: H.list === undefined ? 'todo.horspiele' : H.list, items: H.items || [], noun: 'Hörspiel', nouns: 'Hörspiele', cmd: n => `spiele ${n} Hörspiel auf Deezer` }
+    return k === 'hs' ? { k, list: H.list === undefined ? 'todo.horspiele' : H.list, items: H.items || [], noun: 'Hörspiel', nouns: 'Hörspiele', cmd: n => `spiele das neueste Album von ${n} auf Deezer` }
       : { k, list: C.list, items: C.stations || [], noun: 'Sender', nouns: 'Sender', cmd: n => 'spiele ' + n };
   }
   _rdCache(k = this._rdKind()) { return (this._rdItK = this._rdItK || {})[k]; }
@@ -162,7 +162,7 @@
       <button class="mpb" data-act="rdpick" data-id="${esc(s.id)}" aria-label="${esc(s.name)} ersetzen">${ic('pen', 16)}</button><button class="mpb${this._rdArm === s.id ? ' arm' : ''}" data-act="rddel" data-id="${esc(s.id)}" aria-label="${esc(s.name)} löschen">${ic(this._rdArm === s.id ? 'check' : 'trash', 16)}</button></div>`;
     return head + `<div class="lab2">${x ? (hs ? 'HÖRSPIEL' : 'SENDER') + ' ERSETZEN · ' + esc(x.name) : hs ? 'NEUES HÖRSPIEL' : 'NEUER SENDER'}</div>
       <div class="rxf"><input id="rdn" type="text" maxlength="40" placeholder="${hs ? 'Name, z. B. Die Schule der magischen Tiere' : 'Name, z. B. Radio Hochstift'}" value="${esc(x ? x.name : '')}" autocomplete="off" aria-label="Name">
-        <input id="rdc" type="text" maxlength="120" placeholder="Alexa-Befehl (leer = „${hs ? 'spiele ‹Name› Hörspiel auf Deezer' : 'spiele ‹Name›'}“)" value="${esc(x ? x.cmd : '')}" autocomplete="off" aria-label="Alexa-Befehl">
+        <input id="rdc" type="text" maxlength="120" placeholder="Alexa-Befehl (leer = „${hs ? 'spiele das neueste Album von ‹Name› auf Deezer' : 'spiele ‹Name›'}“)" value="${esc(x ? x.cmd : '')}" autocomplete="off" aria-label="Alexa-Befehl">
         <input id="rdg" type="text" maxlength="40" placeholder="${hs ? 'Untertitel, z. B. ab 4 (optional)' : 'Genre, z. B. Pop & Hits (optional)'}" value="${esc(x ? x.genre : '')}" autocomplete="off" aria-label="${hs ? 'Untertitel' : 'Genre'}">
         ${hs ? `<input id="rdj" type="text" maxlength="8" placeholder="Emoji fürs Bild, z. B. 🦄 (optional)" value="${esc(x ? x.emoji : '')}" autocomplete="off" aria-label="Emoji">` : ''}
         <div class="rxfb">${x ? `<button class="vbt" data-act="rdpick" data-id="">Abbrechen</button>` : ''}<button class="vbt big on" data-act="rdsave" ${this._rdBusy ? 'disabled' : ''}>${ic(x ? 'check' : 'plus', 15)}${x ? 'Ersetzen' : 'Hinzufügen'}</button></div></div>
