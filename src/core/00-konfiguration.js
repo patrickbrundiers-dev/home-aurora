@@ -50,7 +50,7 @@ const DEFAULTS = {
     ],
     // Hörspiele (Reiter auf der Radioseite): Alexa spielt sie von Deezer, Befehl ohne cmd = „spiele das neueste Album von ‹Name› auf Deezer“ (nur „‹Name› Hörspiel“ findet bei Deezer oft Film-Lieder); Filme brauchen den Albumnamen. Tippen öffnet die Folgenliste von Deezer (dz = Künstlername dort, leer = name); cmd gilt nur, wenn Deezer nicht erreichbar ist
     hsp: {
-      list: 'todo.horspiele',
+      list: 'todo.horspiele', script: 'script.aurora_hoerspiel', // script: spielt eine Folge Kapitel für Kapitel ab Kapitel 1 (siehe README); fehlt es, startet Alexa das Album wie bisher
       items: [
         { name: 'Peppa Wutz', genre: 'ab 3', emoji: '🐷', cat: 'Kleinkinder', dz: 'Peppa Pig Hörspiele', cmd: 'spiele das Album Peppa Wutz Folge 1 auf Deezer' },
         { name: 'PAW Patrol', genre: 'ab 3', emoji: '🐶', cat: 'Kleinkinder', dz: 'PAW Patrol' },
