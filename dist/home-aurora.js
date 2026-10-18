@@ -4062,7 +4062,7 @@ class HomeAurora extends HTMLElement {
       case 'hsre': { const x = this._hsX(); if (x) this._hsLoad(x, true); break; }
     }
   }
-  /* ── pz37: Folgen-Fenster (pz40: „Kapitel 1 von …“ startet immer am Anfang, ohne Kapitel sucht Alexa einen Treffer im Text)  · Folgen aus dem öffentlichen Deezer-Katalog (JSONP, ohne Anmeldung), Zufall ohne Wiederholung.
+  /* ── pz37: Folgen-Fenster  · Folgen aus dem öffentlichen Deezer-Katalog (JSONP, ohne Anmeldung), Zufall ohne Wiederholung.
      Alexa bekommt den genauen Albumtitel („spiele das Album Folge 449 Das Rätsel um die Kornkreise von PAW Patrol auf Deezer“). ── */
   /* Die JSONP-Antwort läuft nur in einem abgeschotteten iframe (sandbox ohne allow-same-origin): fremdes Skript kommt
      nicht an hass oder das Dashboard heran; zurück kommen nur Daten per postMessage, die unten einzeln geprüft werden. */
@@ -4121,7 +4121,7 @@ class HomeAurora extends HTMLElement {
   }
   _hsCmd(a, art) {
     const t = a.t.replace(/\s*[([][^)\]]*[)\]]/g, '').replace(/[:–—|/]+|\s-\s/g, ' ').replace(/\s+/g, ' ').trim() || a.t;
-    return `spiele Kapitel 1 von ${t}${art && !t.toLowerCase().includes(art.toLowerCase()) ? ' von ' + art : ''} auf Deezer`;
+    return `spiele das Album ${t}${art && !t.toLowerCase().includes(art.toLowerCase()) ? ' von ' + art : ''} auf Deezer`;
   }
   _hsPlay(aid) {
     const x = this._hsX(), c = x && this._hsC(x), a = c?.list?.find(i => i.id === aid); if (!a) return;
