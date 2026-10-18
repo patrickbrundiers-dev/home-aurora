@@ -40,7 +40,7 @@ const DEFAULTS = {
     ['calendar.patrick_brundiers_gmail_com', 'Patrick privat', '#38bdf8'], ['calendar.geburtstage_2', 'Geburtstage', '#fbbf24'], ['calendar.landkreis_paderborn_mymuell_app', 'Müll', '#a3a3a3'], ['calendar.feiertage_in_deutschland', 'Feiertage', '#fb923c'],
   ],
   calendarDays: 14,
-  // Radio: Sender in der To-do-Liste list (im Dashboard bearbeitbar); stations nur, solange die Liste leer ist. player = Vorauswahl aus music.speakers
+  // Radio: Sender in der To-do-Liste list (im Dashboard bearbeitbar); stations nur, solange die Liste leer ist. player = Vorauswahl aus music.speakers; hsp = Reiter Hörspiele
   radio: {
     list: 'todo.radiosender', player: 'Wohnzimmer',
     stations: [
@@ -48,6 +48,15 @@ const DEFAULTS = {
       { name: 'WDR 4', genre: 'Kulthits' }, { name: 'NDR 2', genre: 'Pop' }, { name: 'Deutschlandfunk', genre: 'Nachrichten & Kultur' },
       { name: 'RADIO BOB!', genre: 'Rock', cmd: 'spiele RADIO BOB' }, { name: 'Radio Bollerwagen', genre: 'Partyhits & Schlager' }, { name: 'ANTENNE BAYERN', genre: 'Pop & Hits' },
     ],
+    // Hörspiele (Reiter auf der Radioseite): Alexa spielt sie von Deezer, Befehl ohne cmd = „spiele ‹Name› Hörspiel auf Deezer“
+    hsp: {
+      list: 'todo.horspiele',
+      items: [
+        { name: 'Peppa Wutz', genre: 'ab 3', emoji: '🐷' }, { name: 'PAW Patrol', genre: 'ab 3', emoji: '🐶' }, { name: 'Die Eiskönigin', genre: 'ab 4', emoji: '❄️' },
+        { name: 'Benjamin Blümchen', genre: 'ab 3', emoji: '🐘' }, { name: 'Bibi Blocksberg', genre: 'ab 5', emoji: '🧹' }, { name: 'Conni', genre: 'ab 3', emoji: '👧' },
+        { name: 'Feuerwehrmann Sam', genre: 'ab 3', emoji: '🚒' }, { name: 'Die drei ??? Kids', genre: 'ab 7', emoji: '🔍', cmd: 'spiele Die drei Fragezeichen Kids auf Deezer' }, { name: 'Der König der Löwen', genre: 'ab 4', emoji: '🦁' },
+      ],
+    },
   },
   theme: 'dark', ambient_after: 0, radarUrl: '',
   quick: [['builtin:goodnight', 'Gute Nacht', 'moon'], ['scene.wohnzimmer_wohnzimmer_tv_schauen', 'TV schauen', 'tv'], ['scene.wohnzimmer_gemutlich', 'Gemütlich', 'sofa'], ['scene.wohnzimmer_normal', 'Normal', 'bulb'], ['scene.wohnzimmer_essenszeit', 'Essenszeit', 'cook'], ['script.essen', 'Essen', 'cook']],
