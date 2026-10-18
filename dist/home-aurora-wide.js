@@ -3962,8 +3962,18 @@ class HomeAurora extends HTMLElement {
     const c = this._rdCall(P, st);
     if (!c) { this._toast(`${P.name} kann ${st.name} nicht abspielen`, 3600); return; }
     (this._rdLast = this._rdLast || {})[P.name] = st.name;
-    Promise.resolve(this._h.callService(...c)).then(() => this._toast(`${st.label || st.name} auf ${P.name}`), () => this._toast(this._rdK().noun + ' konnte nicht gestartet werden', 3600));
+    const before = this._h.states[P.e]?.attributes?.media_title;
+    Promise.resolve(this._h.callService(...c)).then(() => { this._toast(`${st.label || st.name} auf ${P.name}`); if (st.spot) setTimeout(() => this._rdFallback(P, st, before), 12000); }, () => this._toast(this._rdK().noun + ' konnte nicht gestartet werden', 3600));
     this._sig = ''; this._render();
+  }
+  /* Startet Deezer nicht (Alexa meldet nichts gefunden), versucht Alexa denselben Titel über Spotify */
+  _rdFallback(P, st, before) {
+    const s = this._h.states[P.e];
+    if (!s || s.state === 'playing' || s.attributes?.media_title !== before) return;
+    const c = this._rdCall(P, { ...st, cmd: st.spot });
+    if (!c) return;
+    this._toast(`Auf Deezer nicht gefunden, versuche Spotify`, 3600);
+    Promise.resolve(this._h.callService(...c)).catch(() => this._toast(this._rdK().noun + ' konnte nicht gestartet werden', 3600));
   }
   _rdPower() {
     const P = this._rdPlayer(); if (!P) return;
@@ -4119,15 +4129,15 @@ class HomeAurora extends HTMLElement {
     if (add) { R[k] = [add, ...(R[k] || []).filter(i => i !== add)].slice(0, 30); try { localStorage.setItem('home-aurora-hsrecent', JSON.stringify(R)); } catch (e) { /* ok */ } }
     return R[k] || [];
   }
-  _hsCmd(a, art) {
+  _hsCmd(a, art, dienst = 'Deezer') {
     const t = a.t.replace(/\s*[([][^)\]]*[)\]]/g, '').replace(/[:–—|/]+|\s-\s/g, ' ').replace(/\s+/g, ' ').trim() || a.t;
-    return `spiele das Album ${t}${art && !t.toLowerCase().includes(art.toLowerCase()) ? ' von ' + art : ''} auf Deezer`;
+    return `spiele das Album ${t}${art && !t.toLowerCase().includes(art.toLowerCase()) ? ' von ' + art : ''} auf ${dienst}`;
   }
   _hsPlay(aid) {
     const x = this._hsX(), c = x && this._hsC(x), a = c?.list?.find(i => i.id === aid); if (!a) return;
     this._hsRecent(this._hsKey(x), a.id);
     this._closeSheet();
-    this._rdPlay(x.id, { cmd: this._hsCmd(a, c.art), label: a.t.replace(/\s*\([^)]*\)/g, '') });
+    this._rdPlay(x.id, { cmd: this._hsCmd(a, c.art), spot: this._hsCmd(a, c.art, 'Spotify'), label: a.t.replace(/\s*\([^)]*\)/g, '') });
   }
   _hsRnd() {
     const x = this._hsX(), c = x && this._hsC(x);
