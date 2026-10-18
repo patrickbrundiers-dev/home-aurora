@@ -118,13 +118,6 @@ for (const [vn, states] of VARIANTS) for (const t of TARGETS.filter((x) => !only
   page.on('console', (m) => { if (m.type() === 'error' && !/Failed to load resource|net::ERR/.test(m.text())) errors.push(m.text()); });
   // Keine echten Netzwerkzugriffe (Radar-Kacheln, Wetterdienste): Tests sollen reproduzierbar sein.
   await page.route(/^https?:/, (r) => r.abort());
-  // Deezer-Katalog fürs Folgen-Fenster: feste JSONP-Antworten
-  await page.route(/^https:\/\/api\.deezer\.com\//, (r) => {
-    const u = new URL(r.request().url()), cb = u.searchParams.get('callback') || 'cb';
-    const body = u.pathname.startsWith('/search/artist') ? { data: [{ id: 1, name: u.searchParams.get('q') }] }
-      : { data: Array.from({ length: 50 }, (_, i) => ({ id: 100 + i, title: i === 3 ? 'PAW Patrol: The Movie (Original Soundtrack)' : `Folge ${455 - i}: Air Rescue - Die Rettung Nr. ${i} (Das Original-Hörspiel zur TV-Serie)`, release_date: `2026-0${1 + (i % 9)}-1${i % 10}`, cover_medium: '' })), next: u.searchParams.get('index') ? undefined : 'https://api.deezer.com/artist/1/albums?limit=100&index=50&output=jsonp&callback=x' };
-    r.fulfill({ status: 200, contentType: 'application/javascript', body: `${cb}(${JSON.stringify(body)})` });
-  });
   await page.setContent('<!doctype html><html><head><meta charset="utf-8"></head><body style="margin:0;background:#000"></body></html>');
   await page.addScriptTag({ content: readFileSync(join(root, t.file), 'utf8') });
   await page.evaluate(setup, { tag: t.tag, states, hist: !vn, autos });
@@ -168,7 +161,10 @@ for (const [vn, states] of VARIANTS) for (const t of TARGETS.filter((x) => !only
   await check('ansicht radio hoerspiele', () => { const el = window.__el; el._closeSheet(); el._v = 'radio'; el._rdTab = 'hs'; el._sig = ''; el._render(); return el.shadowRoot.querySelector('main').textContent.trim().length; });
   await page.evaluate(() => { const el = window.__el; el._sheet = { t: 'radio' }; el._render(); });
   await check('fenster hoerspiele', () => window.__el.shadowRoot.querySelector('.sheet').textContent.trim().length);
-  await page.evaluate(() => { const el = window.__el; try { localStorage.clear(); } catch (e) { /* ok */ } el._hsF = {}; el._sheet = { t: 'hsf', id: el._rdStations('hs')[1].id }; el._hsLim = 40; el._render(); });
+  // Deezer-Katalog fürs Folgen-Fenster: feste Antworten (das echte JSONP läuft in einem abgeschotteten iframe, das Playwright nicht abfängt)
+  await page.evaluate(() => { const el = window.__el; try { localStorage.clear(); } catch (e) { /* ok */ } el._hsF = {};
+    el._dzJsonp = async (path) => path.startsWith('search/artist') ? { data: [{ id: 1, name: 'PAW Patrol' }] }
+      : { data: Array.from({ length: 50 }, (_, i) => ({ id: 100 + i, title: i === 3 ? 'PAW Patrol: The Movie (Original Soundtrack)' : `Folge ${455 - i}: Air Rescue - Die Rettung Nr. ${i} (Das Original-Hörspiel zur TV-Serie)`, release_date: `2026-0${1 + (i % 9)}-1${i % 10}`, cover_medium: '' })) }; el._sheet = { t: 'hsf', id: el._rdStations('hs')[1].id }; el._hsLim = 40; el._render(); });
   await page.waitForTimeout(600);
   await check('fenster folgen', () => { const sh = window.__el.shadowRoot.querySelector('.sheet'); if (sh.querySelectorAll('.hsr').length < 40 || /Soundtrack/.test(sh.textContent)) throw new Error('Folgenliste unvollständig: ' + sh.querySelectorAll('.hsr').length); return sh.textContent.trim().length; });
   await page.evaluate(() => { const el = window.__el, x = el._hsX(); el._hsF[el._hsKey(x)] = { err: 'nicht erreichbar' }; el._renderSheet(); });

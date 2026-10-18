@@ -227,7 +227,7 @@
       case 'rdpick': this._rdEd = { id: el.dataset.id || null }; this._renderSheet(); if (el.dataset.id) { this._sh.scrollTop = 0; setTimeout(() => this.shadowRoot.getElementById('rdn')?.focus(), 60); } break;
       case 'rdsave': this._rdSave(); break;
       case 'rddel': this._rdDel(el.dataset.id); break;
-      case 'hsopen': this._sheet = { t: 'hsf', id: el.dataset.id }; this._hsLim = 40; this._renderSheet(); break;
+      case 'hsopen': this._sheet = { t: 'hsf', id: el.dataset.id, n: this._rdStations('hs').find(s => s.id === el.dataset.id)?.name }; this._hsLim = 40; this._renderSheet(); break;
       case 'hsrnd': this._hsRnd(); break;
       case 'hsplay': this._hsPlay(el.dataset.a); break;
       case 'hsold': { const id = el.dataset.id; this._closeSheet(); this._rdPlay(id); break; }
@@ -237,18 +237,25 @@
   }
   /* ── pz37: Folgen-Fenster · Folgen aus dem öffentlichen Deezer-Katalog (JSONP, ohne Anmeldung), Zufall ohne Wiederholung.
      Alexa bekommt den genauen Albumtitel („spiele das Album Folge 449 Das Rätsel um die Kornkreise von PAW Patrol auf Deezer“). ── */
+  /* Die JSONP-Antwort läuft nur in einem abgeschotteten iframe (sandbox ohne allow-same-origin): fremdes Skript kommt
+     nicht an hass oder das Dashboard heran; zurück kommen nur Daten per postMessage, die unten einzeln geprüft werden. */
   _dzJsonp(path) {
     return new Promise((res, rej) => {
-      const cb = '__haDz' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7), s = document.createElement('script');
-      const done = (v, er) => { clearTimeout(t); window[cb] = () => {}; s.remove(); if (er) rej(er); else res(v); };
+      const f = document.createElement('iframe'), id = 'dz' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+      const url = `https://api.deezer.com/${path}${path.includes('?') ? '&' : '?'}output=jsonp&callback=cb`.replace(/["'<>]/g, c => '%' + c.charCodeAt(0).toString(16)).replace(/&/g, '&amp;');
+      const done = (v, er) => { clearTimeout(t); window.removeEventListener('message', on); f.remove(); if (er) rej(er); else res(v); };
+      const on = ev => {
+        if (ev.source !== f.contentWindow || !ev.data || ev.data.dz !== id) return;
+        if (ev.data.e) done(null, new Error('nicht erreichbar')); else if (ev.data.d && ev.data.d.error) done(null, new Error('Deezer')); else done(ev.data.d);
+      };
       const t = setTimeout(() => done(null, new Error('Zeitüberschreitung')), 9000);
-      window[cb] = d => d && d.error ? done(null, new Error(d.error.message || 'Deezer')) : done(d);
-      s.onerror = () => done(null, new Error('nicht erreichbar'));
-      s.src = `https://api.deezer.com/${path}${path.includes('?') ? '&' : '?'}output=jsonp&callback=${cb}`;
-      document.head.appendChild(s);
+      window.addEventListener('message', on);
+      f.setAttribute('sandbox', 'allow-scripts'); f.setAttribute('aria-hidden', 'true'); f.style.cssText = 'position:absolute;width:0;height:0;border:0;visibility:hidden';
+      f.srcdoc = `<script>function cb(d){try{parent.postMessage({dz:'${id}',d:JSON.parse(JSON.stringify(d))},'*')}catch(e){parent.postMessage({dz:'${id}',e:1},'*')}}<\/script><script src="${url}" onerror="parent.postMessage({dz:'${id}',e:1},'*')"><\/script>`;
+      document.body.appendChild(f);
     });
   }
-  _hsX() { return this._sheet?.t === 'hsf' ? this._rdStations('hs').find(s => s.id === this._sheet.id) : null; }
+  _hsX() { const H = this._sheet; if (H?.t !== 'hsf') return null; const S = this._rdStations('hs'); return S.find(s => s.id === H.id) || S.find(s => s.name === H.n) || null; }
   _hsKey(x) { return String(x.dz || x.name).trim().toLowerCase(); }
   _hsC(x) {
     const C = this._hsF = this._hsF || {}, k = this._hsKey(x);
@@ -263,17 +270,18 @@
       const norm = s => String(s).toLowerCase().replace(/[^a-z0-9äöüß]/g, '');
       const A = await this._dzJsonp('search/artist?q=' + encodeURIComponent(q) + '&limit=10'), arts = A?.data || [];
       const art = arts.find(a => norm(a.name) === norm(q)) || arts.find(a => norm(a.name).includes(norm(q)) || norm(q).includes(norm(a.name))) || arts[0];
-      if (!art) throw new Error('nichts gefunden');
-      const all = [], seen = new Set(); let next = `artist/${art.id}/albums?limit=100`;
+      const aid = parseInt(art?.id, 10); if (!aid) throw new Error('nichts gefunden');
+      const all = [], seen = new Set(); let next = `artist/${aid}/albums?limit=100`;
       for (let p = 0; next && p < 8; p++) {
         const r = await this._dzJsonp(next);
-        (r?.data || []).forEach(a => { const t = String(a.title || '').trim(); if (t && !seen.has(t.toLowerCase())) { seen.add(t.toLowerCase()); all.push({ id: String(a.id), t, d: String(a.release_date || ''), img: a.cover_medium || a.cover || '' }); } });
-        try { const u = r?.next ? new URL(r.next) : null; if (u) { u.searchParams.delete('output'); u.searchParams.delete('callback'); } next = u ? u.pathname.slice(1) + u.search : ''; } catch (e) { next = ''; }
+        if (!Array.isArray(r?.data)) throw new Error('unerwartete Antwort');
+        r.data.forEach(a => { const t = String(a.title || '').trim(); if (t && !seen.has(t.toLowerCase())) { seen.add(t.toLowerCase()); { const img = String(a.cover_medium || a.cover || ''); all.push({ id: String(a.id), t, d: String(a.release_date || ''), img: /^https:\/\/[\w.-]+\.dzcdn\.net\//.test(img) ? img : '' }); } } });
+        try { const u = r?.next ? new URL(r.next) : null; if (u) { u.searchParams.delete('output'); u.searchParams.delete('callback'); } next = u && u.hostname === 'api.deezer.com' ? u.pathname.slice(1) + u.search : ''; } catch (e) { next = ''; }
       }
       // Lieder und Filmmusik aussortieren, solange danach noch Folgen übrig bleiben
       const songs = /soundtrack|titelsong|songs?\b|lieder|karaoke|musik zum|music|remix|hits\b/i, eps = all.filter(a => !songs.test(a.t));
       const list = (eps.length ? eps : all).sort((a, b) => b.d.localeCompare(a.d)).slice(0, 600);
-      C[k] = { t: Date.now(), art: art.name, list };
+      C[k] = { t: Date.now(), art: String(art.name || q).slice(0, 80), list };
       try { localStorage.setItem('home-aurora-dz:' + k, JSON.stringify(C[k])); } catch (e) { /* voll: dann eben nur im Speicher */ }
     } catch (er) { C[k] = { ...(old || {}), busy: false, err: String(er?.message || er || 'Fehler') }; }
     if (this._hsX()) this._renderSheet();
