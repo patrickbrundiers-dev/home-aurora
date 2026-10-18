@@ -50,7 +50,7 @@ const DEFAULTS = {
     ],
     // Hörspiele (Reiter auf der Radioseite): Alexa spielt sie von Deezer, Befehl ohne cmd = „spiele das neueste Album von ‹Name› auf Deezer“ (nur „‹Name› Hörspiel“ findet bei Deezer oft Film-Lieder); Filme brauchen den Albumnamen. Tippen öffnet die Folgenliste von Deezer (dz = Künstlername dort, leer = name); cmd gilt nur, wenn Deezer nicht erreichbar ist
     hsp: {
-      list: 'todo.horspiele',
+      list: 'todo.horspiele', script: 'script.aurora_hoerspiel', // script: spielt eine Folge Kapitel für Kapitel ab Kapitel 1 (siehe README); fehlt es, startet Alexa das Album wie bisher
       items: [
         { name: 'Peppa Wutz', genre: 'ab 3', emoji: '🐷', cat: 'Kleinkinder', dz: 'Peppa Pig Hörspiele', cmd: 'spiele das Album Peppa Wutz Folge 1 auf Deezer' },
         { name: 'PAW Patrol', genre: 'ab 3', emoji: '🐶', cat: 'Kleinkinder', dz: 'PAW Patrol' },
@@ -2855,7 +2855,7 @@ class HomeAurora extends HTMLElement {
   _sSet() {
     const th = this._themePref || this._c.theme || 'dark', am = String(this._ambMin());
     const seg = (act, cur, items) => `<div class="seg wide">${items.map(x => `<button class="${cur === x[0] ? 'on' : ''}" data-act="${act}" data-m="${x[0]}">${x[1]}</button>`).join('')}</div>`;
-    return `<div class="grab"></div><div class="sh"><div class="ico">${ic('cog', 24)}</div><div><h2>Darstellung &amp; Modi</h2><p>Home Aurora v5.2 · Build pz38</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
+    return `<div class="grab"></div><div class="sh"><div class="ico">${ic('cog', 24)}</div><div><h2>Darstellung &amp; Modi</h2><p>Home Aurora v5.2 · Build pz42</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
       <div class="lab2">DESIGN</div>${seg('theme', th, [['dark', 'Dunkel'], ['light', 'Hell'], ['auto', 'Automatisch']])}
       <div class="card-note">„Automatisch“ folgt dem Dunkel-/Hellmodus deines Home-Assistant-Profils. Die Auswahl gilt nur für dieses Gerät.</div>
       ${WALL_UI ? `      <div class="lab2">WANDTABLET-MODUS</div>
@@ -3969,7 +3969,8 @@ class HomeAurora extends HTMLElement {
   /* Startet Deezer nicht (Alexa meldet nichts gefunden), versucht Alexa denselben Titel über Spotify */
   _rdFallback(P, st, before) {
     const s = this._h.states[P.e];
-    if (!s || s.state === 'playing' || s.attributes?.media_title !== before) return;
+    if (!s) return;
+    if (!this._rdMiss(P) && (s.state === 'playing' || s.attributes?.media_title !== before)) return;
     const c = this._rdCall(P, { ...st, cmd: st.spot });
     if (!c) return;
     this._toast(`Auf Deezer nicht gefunden, versuche Spotify`, 3600);
@@ -4129,15 +4130,51 @@ class HomeAurora extends HTMLElement {
     if (add) { R[k] = [add, ...(R[k] || []).filter(i => i !== add)].slice(0, 30); try { localStorage.setItem('home-aurora-hsrecent', JSON.stringify(R)); } catch (e) { /* ok */ } }
     return R[k] || [];
   }
-  _hsCmd(a, art, dienst = 'Deezer') {
-    const t = a.t.replace(/\s*[([][^)\]]*[)\]]/g, '').replace(/[:–—|/]+|\s-\s/g, ' ').replace(/\s+/g, ' ').trim() || a.t;
-    return `spiele das Album ${t}${art && !t.toLowerCase().includes(art.toLowerCase()) ? ' von ' + art : ''} auf ${dienst}`;
+  /* pz42: Titel so, wie Alexa ihn versteht: Klammern weg (nur „Folge 449“ bleibt), keine Satzzeichen, führende Nummer = „Folge 7“.
+     „07 Wo ist Mr. M?“ fand Alexa nicht („Album sieben wo ist mr m.“) */
+  _hsSay(t) {
+    const s = String(t || '').replace(/\s*[([]([^)\]]*)[)\]]/g, (m, i) => { const f = i.match(/\bFolge\s+\d+/i); return f ? ' ' + f[0] : ''; })
+      .replace(/[:–—|/]+|\s-\s/g, ' ').replace(/[?!.,;"„“”'’«»…]+/g, ' ').replace(/^0*(\d+)\s+(?=\D)/, 'Folge $1 ').replace(/\s+/g, ' ').trim();
+    return s || String(t || '').trim();
   }
-  _hsPlay(aid) {
+  _hsVon(t, art) { return art && !t.toLowerCase().includes(art.toLowerCase()) ? ' von ' + art : ''; }
+  _hsCmd(a, art, dienst = 'Deezer') { const t = this._hsSay(a.t); return `spiele das Album ${t}${this._hsVon(t, art)} auf ${dienst}`; }
+  /* Alexa hat geantwortet, dass sie es nicht findet („Ich kann … nicht finden“) */
+  _rdMiss(P) {
+    const reg = this._h.entities || {}, e = (P.ents || []).find(i => reg[i]?.platform === 'alexa_media') || P.e;
+    return /nicht (finden|gefunden)|finde (ich )?(kein|nicht)/i.test(String(this._h.states[e]?.attributes?.last_called_response || ''));
+  }
+  _hsNorm(t) { return String(t || '').toLowerCase().replace(/[^a-z0-9äöüß]/g, ''); }
+  /* Bei Deezer spielt Alexa von einem Album nur ein Kapitel (oft ein mittleres) und danach eine Mischung, „vorheriger Titel“ springt
+     nur an den Anfang des Kapitels. Deshalb holt das Dashboard die Kapitel der Folge von Deezer und das HA-Skript radio.hsp.script
+     startet sie einzeln („spiele den Titel Kapitel 01 … von PAW Patrol auf Deezer“), jedes nächste, sobald das vorige zu Ende ist. */
+  async _hsPlay(aid) {
     const x = this._hsX(), c = x && this._hsC(x), a = c?.list?.find(i => i.id === aid); if (!a) return;
     this._hsRecent(this._hsKey(x), a.id);
     this._closeSheet();
-    this._rdPlay(x.id, { cmd: this._hsCmd(a, c.art), spot: this._hsCmd(a, c.art, 'Spotify'), label: a.t.replace(/\s*\([^)]*\)/g, '') });
+    const label = a.t.replace(/\s*\([^)]*\)/g, ''), alb = { cmd: this._hsCmd(a, c.art), spot: this._hsCmd(a, c.art, 'Spotify'), label };
+    const sc = { ...DEFAULTS.radio.hsp, ...(this._rdC().hsp || {}) }.script, P = this._rdPlayer();
+    if (sc && this._h.states[sc] && P && /^\d+$/.test(a.id)) {
+      let T = [];
+      try { const r = await this._dzJsonp(`album/${a.id}/tracks?limit=100`); T = (r?.data || []).map(i => String(i.title || '').trim()).filter(Boolean).slice(0, 80); } catch (e) { T = []; }
+      if (T.length && this._hsChain(P, x, sc, T, c.art, alb)) return;
+    }
+    this._rdPlay(x.id, alb);
+  }
+  _hsChain(P, x, sc, T, art, alb) {
+    const reg = this._h.entities || {}, ents = P.ents || [];
+    const dv = ents.map(e => reg[e]).find(r => r?.platform === 'alexa_devices' && r.device_id)?.device_id || '';
+    const watch = ents.find(e => reg[e]?.platform === 'alexa_media') || (!reg[P.e] ? P.e : '');
+    if (!watch) return false;
+    const tracks = T.map(t => { const s = this._hsSay(t); return { t, c: `spiele den Titel ${s}${this._hsVon(s, art)} auf Deezer` }; });
+    (this._rdLast = this._rdLast || {})[P.name] = x.name;
+    Promise.resolve(this._h.callService('script', 'turn_on', { entity_id: sc, variables: { watch, device_id: dv, tracks } })).then(() => {
+      this._toast(`${alb.label} ab Kapitel 1 auf ${P.name}`);
+      // läuft Kapitel 1 nach 15 s nicht, startet Alexa die Folge wie bisher als Album
+      setTimeout(() => { if (this._hsNorm(this._h.states[watch]?.attributes?.media_title) !== this._hsNorm(T[0])) this._rdPlay(x.id, alb); }, 15000);
+    }, () => this._rdPlay(x.id, alb));
+    this._sig = ''; this._render();
+    return true;
   }
   _hsRnd() {
     const x = this._hsX(), c = x && this._hsC(x);

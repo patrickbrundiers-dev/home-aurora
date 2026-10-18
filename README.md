@@ -8,6 +8,69 @@ Glas-Dashboard für Home Assistant (Räume, Klima, Bad, Wetter, Radio, Lichter, 
 Installation über HACS (Benutzerdefiniertes Repository, Kategorie *Dashboard*). Die Ressourcen zeigen auf
 `/hacsfiles/home-aurora/home-aurora.js` und `/hacsfiles/home-aurora/home-aurora-wide.js` (Typ *module*).
 
+## Hörspiele ab Kapitel 1
+
+Alexa spielt bei Deezer (und Spotify) von einem Hörspiel-Album nur ein einzelnes Kapitel, oft ein mittleres, und danach eine Mischung; „vorheriger Titel“ springt nur an den Anfang dieses Kapitels. Deshalb holt das Folgen-Fenster die Kapitel der gewählten Folge aus dem öffentlichen Deezer-Katalog und übergibt sie dem HA-Skript `script.aurora_hoerspiel` (Einstellung `radio.hsp.script`). Das Skript startet Kapitel 1 per „spiele den Titel Kapitel 01 … von ‹Hörspiel› auf Deezer“ und kurz vor dem Ende jedes Kapitels das nächste. Es hört auf, sobald vor dem Kapitelende etwas anderes läuft oder am Echo etwas anderes gewünscht wird. Gibt es das Skript nicht, startet Alexa die Folge wie bisher als Album.
+
+Das Skript (Einstellungen → Automationen & Szenen → Skripte → Neu → YAML), Skript-ID `aurora_hoerspiel`:
+
+```yaml
+alias: "Aurora: Hörspiel Kapitel für Kapitel"
+mode: parallel
+max: 10
+max_exceeded: silent
+fields:
+  watch: {required: true, selector: {entity: {domain: media_player}}}   # Echo (Alexa Media)
+  device_id: {selector: {text: {}}}                                      # Alexa Devices, leer = play_media
+  tracks: {required: true, selector: {object: {}}}                       # [{t: Titel, c: Alexa-Befehl}]
+sequence:
+  - variables:
+      cmds: "{{ tracks | map(attribute='c') | map('lower') | list }}"
+      s0: "{{ (state_attr(watch, 'last_called_summary') or '') | lower }}"
+  - repeat:
+      for_each: "{{ tracks }}"
+      sequence:
+        - variables:
+            want: "{{ repeat.item.t | lower | regex_replace('[^a-z0-9äöüß]', '') }}"
+        - if: "{{ (state_attr(watch, 'media_title') or '') | lower | regex_replace('[^a-z0-9äöüß]', '') != want }}"
+          then:
+            - if: "{{ device_id | default('') != '' }}"
+              then:
+                - action: alexa_devices.send_text_command
+                  data: {device_id: "{{ device_id }}", text_command: "{{ repeat.item.c }}"}
+              else:
+                - action: media_player.play_media
+                  target: {entity_id: "{{ watch }}"}
+                  data: {media: {media_content_type: custom, media_content_id: "{{ repeat.item.c }}"}}
+            - wait_template: "{{ (state_attr(watch, 'media_title') or '') | lower | regex_replace('[^a-z0-9äöüß]', '') == want }}"
+              timeout: {seconds: 40}
+            - if: "{{ not wait.completed }}"
+              then: [{stop: Alexa hat das Kapitel nicht gestartet}]
+            - delay: {seconds: 3}
+        - variables:   # Sekunden bis kurz vor Kapitelende
+            rest: >-
+              {% set p = state_attr(watch, 'media_position') | float(0) %}{% set u = state_attr(watch, 'media_position_updated_at') %}
+              {% set el = p + ((now() - as_datetime(u | string)).total_seconds() if u and is_state(watch, 'playing') else 0) %}
+              {{ [(state_attr(watch, 'media_duration') | float(0)) - el - 2, 5] | max | round(0) | int }}
+        - wait_template: >-
+            {% set s = (state_attr(watch, 'last_called_summary') or '') | lower %}
+            {{ (state_attr(watch, 'media_title') or '') | lower | regex_replace('[^a-z0-9äöüß]', '') != want or (s != s0 and s not in cmds) }}
+          timeout: {seconds: "{{ rest }}"}
+        - if: "{% set s = (state_attr(watch, 'last_called_summary') or '') | lower %}{{ s != s0 and s not in cmds }}"
+          then: [{stop: Am Echo wurde etwas anderes gewünscht}]
+        - if: "{{ wait.completed and wait.remaining > 10 }}"
+          then: [{stop: Vor Kapitelende wurde etwas anderes abgespielt}]
+        - if: "{{ not wait.completed and not is_state(watch, 'playing') }}"
+          then:   # pausiert: auf das Kapitelende warten
+            - wait_template: >-
+                {% set s = (state_attr(watch, 'last_called_summary') or '') | lower %}
+                {{ (state_attr(watch, 'media_title') or '') | lower | regex_replace('[^a-z0-9äöüß]', '') != want or (s != s0 and s not in cmds) }}
+              timeout: {hours: 3}
+              continue_on_timeout: false
+            - if: "{% set s = (state_attr(watch, 'last_called_summary') or '') | lower %}{{ s != s0 and s not in cmds }}"
+              then: [{stop: Am Echo wurde etwas anderes gewünscht}]
+```
+
 ## Entwicklung
 
 Beide Dateien in `dist/` werden aus einer Quelle erzeugt, nicht von Hand bearbeitet:
