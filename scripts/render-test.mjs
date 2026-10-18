@@ -79,6 +79,9 @@ function setup({ tag, states, hist, autos }) {
       }
       // To-do-Listen: erfundene Einkaufsliste und Rezepte (Rezept-JSON wie in der Rezeptbuch-Karte)
       if (m.type === 'todo/item/list') {
+        if (m.entity_id === 'todo.horspiele') return { items: [
+          { uid: 'h1', summary: 'Peppa Wutz', status: 'needs_action', description: JSON.stringify({ genre: 'ab 3', emoji: '🐷' }) }, { uid: 'h2', summary: 'Die Schule der magischen Tiere', status: 'needs_action', description: 'ab 6' },
+        ] };
         if (m.entity_id === 'todo.radiosender') return { items: [
           { uid: 's1', summary: 'WDR 2', status: 'needs_action', description: JSON.stringify({ genre: 'Pop' }) }, { uid: 's2', summary: 'Radio Hochstift', status: 'needs_action', description: 'Lokalradio' },
           { uid: 's3', summary: 'Deutschlandfunk', status: 'needs_action', description: JSON.stringify({ genre: 'Nachrichten', cmd: 'spiele Deutschlandfunk' }) }, { uid: 's4', summary: 'Alt', status: 'completed' },
@@ -154,6 +157,11 @@ for (const [vn, states] of VARIANTS) for (const t of TARGETS.filter((x) => !only
     await check(`fenster kalender ${m}`, () => window.__el.shadowRoot.querySelector('.sheet').textContent.trim().length);
   }
   await page.evaluate(() => { window.__el._calMode = 'week'; });
+  // Radio: Reiter Hörspiele und sein Bearbeiten-Fenster
+  await check('ansicht radio hoerspiele', () => { const el = window.__el; el._closeSheet(); el._v = 'radio'; el._rdTab = 'hs'; el._sig = ''; el._render(); return el.shadowRoot.querySelector('main').textContent.trim().length; });
+  await page.evaluate(() => { const el = window.__el; el._sheet = { t: 'radio' }; el._render(); });
+  await check('fenster hoerspiele', () => window.__el.shadowRoot.querySelector('.sheet').textContent.trim().length);
+  await page.evaluate(() => { const el = window.__el; el._closeSheet(); el._rdTab = 'rd'; el._v = 'home'; });
   // Rezepte: Übersicht und ein geöffnetes Rezept (mit Portionen umgerechnet)
   await page.evaluate(() => { const el = window.__el; el._v = 'home'; el._shopTab = 'rcp'; el._rcpSel = null; el._sheet = { t: 'shop' }; el._render(); });
   await check('fenster rezepte', () => window.__el.shadowRoot.querySelector('.sheet').textContent.trim().length);

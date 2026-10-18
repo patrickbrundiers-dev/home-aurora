@@ -64,7 +64,7 @@
       if (ev.key === 'Escape') this._closeSheet();
       else if (ev.key === 'Enter' && ev.target.id === 'annq') { ev.preventDefault(); this._annSend(); }
       else if (ev.key === 'Enter' && ev.target.id === 'shopq') { ev.preventDefault(); this._shopInput(); }
-      else if (ev.key === 'Enter' && /^rd[ncg]$/.test(ev.target.id)) { ev.preventDefault(); this._rdSave(); }
+      else if (ev.key === 'Enter' && /^rd[ncgj]$/.test(ev.target.id)) { ev.preventDefault(); this._rdSave(); }
     });
     root.addEventListener('contextmenu', ev => { if (ev.target.closest && ev.target.closest('[data-hold]')) ev.preventDefault(); });
   }
@@ -121,7 +121,7 @@
       case 'power': this._sheet = { t: 'power' }; this._renderSheet(); this._loadPower(true); break;
       case 'sched': this._sheet = { t: 'sched' }; this._renderSheet(); break;
       case 'schedtab': this._schedTab = el.dataset.m; this._renderSheet(); break;
-      case 'rdplay': case 'rdsel': case 'rdpower': case 'rdqv': case 'rdedit': case 'rdpick': case 'rdsave': case 'rddel': this._rdAct(a, el); break;
+      case 'rdplay': case 'rdsel': case 'rdpower': case 'rdqv': case 'rdedit': case 'rdpick': case 'rdsave': case 'rddel': case 'rdtab': case 'rdprev': case 'rdnext': this._rdAct(a, el); break;
       case 'music': this._sheet = { t: 'music' }; this._renderSheet(); break;
       case 'shop': case 'shoptab': case 'shopadd': case 'shopq': case 'shopdone': case 'shopundo': case 'shopall': case 'shopclr': case 'rcpsel': case 'rcpserv': case 'rcpone': case 'rcpall': this._shopAct(a, el); break;
       case 'annt': this._annT = el.dataset.i; this._renderSheet(); break;
