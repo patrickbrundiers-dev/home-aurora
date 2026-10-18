@@ -4062,7 +4062,7 @@ class HomeAurora extends HTMLElement {
       case 'hsre': { const x = this._hsX(); if (x) this._hsLoad(x, true); break; }
     }
   }
-  /* ── pz37: Folgen-Fenster · Folgen aus dem öffentlichen Deezer-Katalog (JSONP, ohne Anmeldung), Zufall ohne Wiederholung.
+  /* ── pz37: Folgen-Fenster  · Folgen aus dem öffentlichen Deezer-Katalog (JSONP, ohne Anmeldung), Zufall ohne Wiederholung.
      Alexa bekommt den genauen Albumtitel („spiele das Album Folge 449 Das Rätsel um die Kornkreise von PAW Patrol auf Deezer“). ── */
   /* Die JSONP-Antwort läuft nur in einem abgeschotteten iframe (sandbox ohne allow-same-origin): fremdes Skript kommt
      nicht an hass oder das Dashboard heran; zurück kommen nur Daten per postMessage, die unten einzeln geprüft werden. */
