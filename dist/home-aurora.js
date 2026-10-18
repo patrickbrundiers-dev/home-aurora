@@ -48,13 +48,13 @@ const DEFAULTS = {
       { name: 'WDR 4', genre: 'Kulthits' }, { name: 'NDR 2', genre: 'Pop' }, { name: 'Deutschlandfunk', genre: 'Nachrichten & Kultur' },
       { name: 'RADIO BOB!', genre: 'Rock', cmd: 'spiele RADIO BOB' }, { name: 'Radio Bollerwagen', genre: 'Partyhits & Schlager' }, { name: 'ANTENNE BAYERN', genre: 'Pop & Hits' },
     ],
-    // Hörspiele (Reiter auf der Radioseite): Alexa spielt sie von Deezer, Befehl ohne cmd = „spiele das neueste Album von ‹Name› auf Deezer“ (nur „‹Name› Hörspiel“ findet bei Deezer oft Film-Lieder); Filme brauchen den Albumnamen
+    // Hörspiele (Reiter auf der Radioseite): Alexa spielt sie von Deezer, Befehl ohne cmd = „spiele das neueste Album von ‹Name› auf Deezer“ (nur „‹Name› Hörspiel“ findet bei Deezer oft Film-Lieder); Filme brauchen den Albumnamen. Tippen öffnet die Folgenliste von Deezer (dz = Künstlername dort, leer = name); cmd gilt nur, wenn Deezer nicht erreichbar ist
     hsp: {
       list: 'todo.horspiele',
       items: [
-        { name: 'Peppa Wutz', genre: 'ab 3', emoji: '🐷', cmd: 'spiele das Album Peppa Wutz Folge 1 auf Deezer' }, { name: 'PAW Patrol', genre: 'ab 3', emoji: '🐶' }, { name: 'Die Eiskönigin', genre: 'ab 4', emoji: '❄️', cmd: 'spiele das Album Die Eiskönigin Völlig unverfroren Das Original-Hörspiel zum Film auf Deezer' },
+        { name: 'Peppa Wutz', genre: 'ab 3', emoji: '🐷', dz: 'Peppa Pig Hörspiele', cmd: 'spiele das Album Peppa Wutz Folge 1 auf Deezer' }, { name: 'PAW Patrol', genre: 'ab 3', emoji: '🐶' }, { name: 'Die Eiskönigin', genre: 'ab 4', emoji: '❄️', cmd: 'spiele das Album Die Eiskönigin Völlig unverfroren Das Original-Hörspiel zum Film auf Deezer' },
         { name: 'Benjamin Blümchen', genre: 'ab 3', emoji: '🐘' }, { name: 'Bibi Blocksberg', genre: 'ab 5', emoji: '🧹', cmd: 'spiele das Album Bibi Blocksberg Folge 1 auf Deezer' }, { name: 'Conni', genre: 'ab 3', emoji: '👧' },
-        { name: 'Feuerwehrmann Sam', genre: 'ab 3', emoji: '🚒' }, { name: 'Die drei ??? Kids', genre: 'ab 7', emoji: '🔍', cmd: 'spiele Die drei Fragezeichen Kids auf Deezer' }, { name: 'Der König der Löwen', genre: 'ab 4', emoji: '🦁', cmd: 'spiele das Album Der König der Löwen Das Original-Hörspiel zum Film auf Deezer' },
+        { name: 'Feuerwehrmann Sam', genre: 'ab 3', emoji: '🚒' }, { name: 'Die drei ??? Kids', genre: 'ab 7', emoji: '🔍', dz: 'Die drei ??? Kids', cmd: 'spiele Die drei Fragezeichen Kids auf Deezer' }, { name: 'Der König der Löwen', genre: 'ab 4', emoji: '🦁', cmd: 'spiele das Album Der König der Löwen Das Original-Hörspiel zum Film auf Deezer' },
       ],
     },
   },
@@ -1524,6 +1524,14 @@ input.rx-bar[type=range]::-moz-range-thumb{width:24px;height:24px;border:0;borde
 .rxh:active{transform:scale(.97)}.rxh .rxn{text-transform:none;letter-spacing:0;font-size:14px;color:var(--tx)}.rxg{font-size:12px;color:var(--tx3);margin-top:-4px}
 .rxh.on{border-color:rgba(94,234,212,.7);box-shadow:0 0 0 1px rgba(94,234,212,.4),0 0 26px rgba(94,234,212,.25)}.rxh.on .rxn{color:#5eead4}
 .rxh.rxadd .rxc{background:rgba(var(--wh),.04);border:1.5px dashed rgba(var(--wh),.22);color:var(--tx3)}.rxh.rxadd .rxn{color:var(--tx3)}
+.hs-top{display:flex;gap:8px;margin:4px 0 14px}.hs-top .vbt{flex:1;justify-content:center;height:52px;font-size:16px}
+.hs-list{display:flex;flex-direction:column;gap:2px}
+.hsr{display:flex;align-items:center;gap:12px;width:100%;padding:8px 6px;border:0;border-bottom:1px solid var(--line);background:none;color:var(--tx);font:inherit;text-align:left;cursor:pointer;border-radius:10px}
+.hsr:active{background:rgba(var(--wh),.06)}.hsr.on{background:rgba(94,234,212,.08)}.hsr.on b{color:#5eead4}
+.hsr img{width:52px;height:52px;flex:none;border-radius:10px;object-fit:cover;background:rgba(var(--wh),.06)}.hsr .rxc.xs{width:52px;height:52px}
+.hsr .grow{min-width:0;flex:1;display:flex;flex-direction:column}.hsr b{font-weight:650;font-size:14px;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.hsr small{font-size:12px;color:var(--tx3);margin-top:2px}.hsr>svg{flex:none;color:var(--tx3)}
+.hs-more{width:100%;justify-content:center;margin-top:10px}
 @media(max-width:900px){.rx-hbar{flex-wrap:wrap}.rx-hbar .rx-tr{flex:1 1 140px}.rx-hv{flex:1 1 100%}.rx-hs{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}}
 @media(max-width:640px){.rx-hs{grid-template-columns:repeat(2,minmax(0,1fr))}.rxc{height:96px}.rxc i{font-size:38px}.rxc b{font-size:13px}.rx-tabs{display:flex}.rx-tabs button{flex:1;justify-content:center}}
 @media(max-width:900px){.rx-mid{grid-template-columns:1fr}.rx-st{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}}
@@ -2830,7 +2838,7 @@ class HomeAurora extends HTMLElement {
   _sSet() {
     const th = this._themePref || this._c.theme || 'dark', am = String(this._ambMin());
     const seg = (act, cur, items) => `<div class="seg wide">${items.map(x => `<button class="${cur === x[0] ? 'on' : ''}" data-act="${act}" data-m="${x[0]}">${x[1]}</button>`).join('')}</div>`;
-    return `<div class="grab"></div><div class="sh"><div class="ico">${ic('cog', 24)}</div><div><h2>Darstellung &amp; Modi</h2><p>Home Aurora v5.2 · Build pz36</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
+    return `<div class="grab"></div><div class="sh"><div class="ico">${ic('cog', 24)}</div><div><h2>Darstellung &amp; Modi</h2><p>Home Aurora v5.2 · Build pz37</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
       <div class="lab2">DESIGN</div>${seg('theme', th, [['dark', 'Dunkel'], ['light', 'Hell'], ['auto', 'Automatisch']])}
       <div class="card-note">„Automatisch“ folgt dem Dunkel-/Hellmodus deines Home-Assistant-Profils. Die Auswahl gilt nur für dieses Gerät.</div>
       ${WALL_UI ? `      <div class="lab2">WANDTABLET-MODUS</div>
@@ -3795,7 +3803,7 @@ class HomeAurora extends HTMLElement {
     this._toast('Rückgängig gemacht');
   }
 
-/* ───────────── pz34: Radio · Senderskala, Player-Auswahl, Sender verwalten · pz35: Reiter Hörspiele ───────────── */
+/* ───────────── pz34: Radio · Senderskala, Player-Auswahl, Sender verwalten · pz35: Reiter Hörspiele · pz37: Folgen-Fenster ───────────── */
   /* Sender und Hörspiele stehen je in einer HA-To-do-Liste (radio.list bzw. radio.hsp.list, je Eintrag einer; Beschreibung = JSON
      mit genre/cmd/url/emoji), damit Handy und Tablet dieselben sehen. Ist die Liste leer oder fehlt sie, gelten die aus der Konfiguration. */
   _rdC() { return this._c.radio || {}; }
@@ -3817,7 +3825,7 @@ class HomeAurora extends HTMLElement {
       const list = (r?.items || []).filter(i => i && i.summary && i.status !== 'completed').map(i => {
         let d = null; try { d = i.description ? JSON.parse(i.description) : null; } catch (x) { d = null; }
         if (!d || typeof d !== 'object') d = { genre: i.description || '' };
-        return { uid: i.uid, name: String(i.summary).trim(), genre: String(d.genre || ''), cmd: String(d.cmd || ''), url: String(d.url || ''), emoji: String(d.emoji || '') };
+        return { uid: i.uid, name: String(i.summary).trim(), genre: String(d.genre || ''), cmd: String(d.cmd || ''), url: String(d.url || ''), emoji: String(d.emoji || ''), dz: String(d.dz || '') };
       });
       this._rdItK[k] = { k: key, list };
     } catch (er) { this._rdItK[k] = { k: key, list: old?.list || [], err: true }; }
@@ -3826,7 +3834,7 @@ class HomeAurora extends HTMLElement {
   }
   _rdStations(k = this._rdKind()) {
     const L = this._rdListE(k) && this._rdCache(k)?.list;
-    const src = L && L.length ? L : this._rdK(k).items.map(x => ({ name: x.name, genre: x.genre || '', cmd: x.cmd || (x.phrase ? 'spiele ' + x.phrase : ''), url: x.url || '', emoji: x.emoji || '' }));
+    const src = L && L.length ? L : this._rdK(k).items.map(x => ({ name: x.name, genre: x.genre || '', cmd: x.cmd || (x.phrase ? 'spiele ' + x.phrase : ''), url: x.url || '', emoji: x.emoji || '', dz: x.dz || '' }));
     return src.filter(x => x && x.name).map((x, i) => ({ ...x, id: x.uid || 'c' + i, i }));
   }
   /* Senderfarbe aus dem Namen, damit jede Kachel ihre eigene behält */
@@ -3903,7 +3911,7 @@ class HomeAurora extends HTMLElement {
     const pl = !!P?.pl, f = P ? this._attr(P.e, 'supported_features') || 0 : 0, c = P ? this._mpCaps(P.e) : {}, on = P && (P.pl || P.ps);
     const b = (act, ico, l, x, main) => `<button class="mpb${main ? ' main' : ''}" data-act="${act}" aria-label="${l}" ${x ? '' : 'disabled'}>${ic(ico, 20)}</button>`;
     const cv = x => `<span class="rxc" style="background:${this._rdCol(x.name)}"><i>${esc(x.emoji || '🎧')}</i><b>${esc(x.name)}</b></span>`;
-    const tiles = S.map(x => `<button class="c rxh${cur && cur.id === x.id ? ' on' : ''}" data-act="rdplay" data-id="${esc(x.id)}" style="--i:${x.i}">${cv(x)}<span class="rxn">${esc(x.name)}</span><span class="rxg">${esc(['Deezer', x.genre].filter(Boolean).join(' · '))}</span></button>`).join('');
+    const tiles = S.map(x => `<button class="c rxh${cur && cur.id === x.id ? ' on' : ''}" data-act="hsopen" data-id="${esc(x.id)}" style="--i:${x.i}">${cv(x)}<span class="rxn">${esc(x.name)}</span><span class="rxg">${esc(['Deezer', x.genre].filter(Boolean).join(' · '))}</span></button>`).join('');
     const title = cur ? cur.name : on ? P.title || 'Wiedergabe' : P ? 'Bereit' : 'Kein Player erreichbar';
     const sub = cur ? [P.title && P.title !== cur.name ? P.title : '', P.artist && P.artist !== cur.name ? P.artist : ''].filter(Boolean).join(' · ') || 'Hörspiel von Deezer' : on ? P.artist || '' : P ? 'Tippe unten auf ein Hörspiel' : 'Alle Lautsprecher sind offline';
     return `<div class="rx">
@@ -3913,7 +3921,7 @@ class HomeAurora extends HTMLElement {
           <div class="rx-vol rx-hv"><div class="rx-vh2"><span>LAUTSTÄRKE</span><b>${vol != null ? vol + ' %' : '–'}</b></div>
             <input class="rx-bar" type="range" min="0" max="100" value="${vol ?? 0}" data-act="rdvol" aria-label="Lautstärke" ${vol != null ? '' : 'disabled'}></div></section>
         ${players}
-        <div class="h">${ic('music', 14)} Hörspiele <span class="r">Tippen = startet auf Deezer</span></div>
+        <div class="h">${ic('music', 14)} Hörspiele <span class="r">Tippen = Folge auswählen</span></div>
         <div class="rx-hs">${tiles}<button class="c rxh rxadd" data-act="rdedit" data-new="1"><span class="rxc">${ic('plus', 30)}</span><span class="rxn">Hörspiel hinzufügen</span></button></div>
       </div>`;
   }
@@ -3927,14 +3935,14 @@ class HomeAurora extends HTMLElement {
     if (st.url) return ['media_player', 'play_media', { entity_id: P.e, media: { media_content_type: 'music', media_content_id: st.url } }];
     return null;
   }
-  _rdPlay(id) {
-    const st = this._rdStations().find(x => x.id === id), P = this._rdPlayer();
+  _rdPlay(id, over) {
+    const st0 = this._rdStations().find(x => x.id === id), st = st0 && { ...st0, ...(over || {}) }, P = this._rdPlayer();
     if (!st) { this._toast(this._rdK().noun + ' nicht gefunden'); return; }
     if (!P) { this._toast('Kein Lautsprecher erreichbar'); return; }
     const c = this._rdCall(P, st);
     if (!c) { this._toast(`${P.name} kann ${st.name} nicht abspielen`, 3600); return; }
     (this._rdLast = this._rdLast || {})[P.name] = st.name;
-    Promise.resolve(this._h.callService(...c)).then(() => this._toast(`${st.name} auf ${P.name}`), () => this._toast(this._rdK().noun + ' konnte nicht gestartet werden', 3600));
+    Promise.resolve(this._h.callService(...c)).then(() => this._toast(`${st.label || st.name} auf ${P.name}`), () => this._toast(this._rdK().noun + ' konnte nicht gestartet werden', 3600));
     this._sig = ''; this._render();
   }
   _rdPower() {
@@ -3961,7 +3969,8 @@ class HomeAurora extends HTMLElement {
       <div class="rxf"><input id="rdn" type="text" maxlength="40" placeholder="${hs ? 'Name, z. B. Die Schule der magischen Tiere' : 'Name, z. B. Radio Hochstift'}" value="${esc(x ? x.name : '')}" autocomplete="off" aria-label="Name">
         <input id="rdc" type="text" maxlength="120" placeholder="Alexa-Befehl (leer = „${hs ? 'spiele das neueste Album von ‹Name› auf Deezer' : 'spiele ‹Name›'}“)" value="${esc(x ? x.cmd : '')}" autocomplete="off" aria-label="Alexa-Befehl">
         <input id="rdg" type="text" maxlength="40" placeholder="${hs ? 'Untertitel, z. B. ab 4 (optional)' : 'Genre, z. B. Pop & Hits (optional)'}" value="${esc(x ? x.genre : '')}" autocomplete="off" aria-label="${hs ? 'Untertitel' : 'Genre'}">
-        ${hs ? `<input id="rdj" type="text" maxlength="8" placeholder="Emoji fürs Bild, z. B. 🦄 (optional)" value="${esc(x ? x.emoji : '')}" autocomplete="off" aria-label="Emoji">` : ''}
+        ${hs ? `<input id="rdj" type="text" maxlength="8" placeholder="Emoji fürs Bild, z. B. 🦄 (optional)" value="${esc(x ? x.emoji : '')}" autocomplete="off" aria-label="Emoji">
+        <input id="rdz" type="text" maxlength="60" placeholder="Name bei Deezer für die Folgenliste (leer = Name)" value="${esc(x ? x.dz : '')}" autocomplete="off" aria-label="Name bei Deezer">` : ''}
         <div class="rxfb">${x ? `<button class="vbt" data-act="rdpick" data-id="">Abbrechen</button>` : ''}<button class="vbt big on" data-act="rdsave" ${this._rdBusy ? 'disabled' : ''}>${ic(x ? 'check' : 'plus', 15)}${x ? 'Ersetzen' : 'Hinzufügen'}</button></div></div>
       <div class="lab2">DEINE ${hs ? 'HÖRSPIELE' : 'SENDER'} · ${S.length}</div>${S.map(row).join('') || `<div class="empty sm">Noch keine ${K.nouns}</div>`}
       ${this._rdCache()?.err ? '<div class="card-note">Die Liste konnte gerade nicht geladen werden.</div>' : ''}`;
@@ -3974,19 +3983,19 @@ class HomeAurora extends HTMLElement {
     const c = this._rdCache();
     if (!c || c.err) throw new Error('Liste nicht lesbar');
     if (c.list?.length) return;
-    for (const s of this._rdStations()) await this._h.callService('todo', 'add_item', { entity_id: e, item: s.name, description: JSON.stringify({ genre: s.genre, cmd: s.cmd, url: s.url, emoji: s.emoji }) });
+    for (const s of this._rdStations()) await this._h.callService('todo', 'add_item', { entity_id: e, item: s.name, description: JSON.stringify({ genre: s.genre, cmd: s.cmd, url: s.url, emoji: s.emoji, dz: s.dz }) });
     await this._loadRd(true);
   }
   async _rdSave() {
     const e = this._rdListE(), R = this.shadowRoot, v = id => (R.getElementById(id)?.value || '').trim();
-    const name = v('rdn'), cmd = v('rdc'), genre = v('rdg'), emoji = v('rdj');
+    const name = v('rdn'), cmd = v('rdc'), genre = v('rdg'), emoji = v('rdj'), dz = v('rdz');
     if (!e) return;
     if (!name) { this._toast('Bitte einen Namen eingeben'); R.getElementById('rdn')?.focus(); return; }
     const old = this._rdEd?.id && this._rdStations().find(s => s.id === this._rdEd.id);
     this._rdBusy = true; this._renderSheet();
     try {
       await this._rdSeed(e);
-      const d = JSON.stringify({ genre, cmd, url: old?.url || '', emoji: this._rdKind() === 'hs' ? emoji : '' });
+      const hs = this._rdKind() === 'hs', d = JSON.stringify({ genre, cmd, url: old?.url || '', emoji: hs ? emoji : '', dz: hs ? dz : '' });
       const uid = old && this._rdUid(old);
       if (uid) await this._h.callService('todo', 'update_item', { entity_id: e, item: uid, rename: name, description: d });
       else await this._h.callService('todo', 'add_item', { entity_id: e, item: name, description: d });
@@ -4023,7 +4032,105 @@ class HomeAurora extends HTMLElement {
       case 'rdpick': this._rdEd = { id: el.dataset.id || null }; this._renderSheet(); if (el.dataset.id) { this._sh.scrollTop = 0; setTimeout(() => this.shadowRoot.getElementById('rdn')?.focus(), 60); } break;
       case 'rdsave': this._rdSave(); break;
       case 'rddel': this._rdDel(el.dataset.id); break;
+      case 'hsopen': this._sheet = { t: 'hsf', id: el.dataset.id, n: this._rdStations('hs').find(s => s.id === el.dataset.id)?.name }; this._hsLim = 40; this._renderSheet(); break;
+      case 'hsrnd': this._hsRnd(); break;
+      case 'hsplay': this._hsPlay(el.dataset.a); break;
+      case 'hsold': { const id = el.dataset.id; this._closeSheet(); this._rdPlay(id); break; }
+      case 'hsmore': this._hsLim = (this._hsLim || 40) + 60; this._renderSheet(); break;
+      case 'hsre': { const x = this._hsX(); if (x) this._hsLoad(x, true); break; }
     }
+  }
+  /* ── pz37: Folgen-Fenster · Folgen aus dem öffentlichen Deezer-Katalog (JSONP, ohne Anmeldung), Zufall ohne Wiederholung.
+     Alexa bekommt den genauen Albumtitel („spiele das Album Folge 449 Das Rätsel um die Kornkreise von PAW Patrol auf Deezer“). ── */
+  /* Die JSONP-Antwort läuft nur in einem abgeschotteten iframe (sandbox ohne allow-same-origin): fremdes Skript kommt
+     nicht an hass oder das Dashboard heran; zurück kommen nur Daten per postMessage, die unten einzeln geprüft werden. */
+  _dzJsonp(path) {
+    return new Promise((res, rej) => {
+      const f = document.createElement('iframe'), id = 'dz' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+      const url = `https://api.deezer.com/${path}${path.includes('?') ? '&' : '?'}output=jsonp&callback=cb`.replace(/["'<>]/g, c => '%' + c.charCodeAt(0).toString(16)).replace(/&/g, '&amp;');
+      const done = (v, er) => { clearTimeout(t); window.removeEventListener('message', on); f.remove(); if (er) rej(er); else res(v); };
+      const on = ev => {
+        if (ev.source !== f.contentWindow || !ev.data || ev.data.dz !== id) return;
+        if (ev.data.e) done(null, new Error('nicht erreichbar')); else if (ev.data.d && ev.data.d.error) done(null, new Error('Deezer')); else done(ev.data.d);
+      };
+      const t = setTimeout(() => done(null, new Error('Zeitüberschreitung')), 9000);
+      window.addEventListener('message', on);
+      f.setAttribute('sandbox', 'allow-scripts'); f.setAttribute('aria-hidden', 'true'); f.style.cssText = 'position:absolute;width:0;height:0;border:0;visibility:hidden';
+      f.srcdoc = `<script>function cb(d){try{parent.postMessage({dz:'${id}',d:JSON.parse(JSON.stringify(d))},'*')}catch(e){parent.postMessage({dz:'${id}',e:1},'*')}}<\/script><script src="${url}" onerror="parent.postMessage({dz:'${id}',e:1},'*')"><\/script>`;
+      document.body.appendChild(f);
+    });
+  }
+  _hsX() { const H = this._sheet; if (H?.t !== 'hsf') return null; const S = this._rdStations('hs'); return S.find(s => s.id === H.id) || S.find(s => s.name === H.n) || null; }
+  _hsKey(x) { return String(x.dz || x.name).trim().toLowerCase(); }
+  _hsC(x) {
+    const C = this._hsF = this._hsF || {}, k = this._hsKey(x);
+    if (!C[k]) { try { const j = JSON.parse(localStorage.getItem('home-aurora-dz:' + k) || 'null'); if (j && j.list && Date.now() - j.t < 864e5) C[k] = j; } catch (e) { /* ok */ } }
+    return C[k];
+  }
+  async _hsLoad(x, force) {
+    const k = this._hsKey(x), q = String(x.dz || x.name).trim(), C = this._hsF = this._hsF || {}, old = this._hsC(x);
+    if (old && (old.busy || (old.list && !force))) return;
+    C[k] = { ...(old || {}), busy: true, err: '' }; if (this._hsX()) this._renderSheet();
+    try {
+      const norm = s => String(s).toLowerCase().replace(/[^a-z0-9äöüß]/g, '');
+      const A = await this._dzJsonp('search/artist?q=' + encodeURIComponent(q) + '&limit=10'), arts = A?.data || [];
+      const art = arts.find(a => norm(a.name) === norm(q)) || arts.find(a => norm(a.name).includes(norm(q)) || norm(q).includes(norm(a.name))) || arts[0];
+      const aid = parseInt(art?.id, 10); if (!aid) throw new Error('nichts gefunden');
+      const all = [], seen = new Set(); let next = `artist/${aid}/albums?limit=100`;
+      for (let p = 0; next && p < 8; p++) {
+        const r = await this._dzJsonp(next);
+        if (!Array.isArray(r?.data)) throw new Error('unerwartete Antwort');
+        r.data.forEach(a => { const t = String(a.title || '').trim(); if (t && !seen.has(t.toLowerCase())) { seen.add(t.toLowerCase()); { const img = String(a.cover_medium || a.cover || ''); all.push({ id: String(a.id), t, d: String(a.release_date || ''), img: /^https:\/\/[\w.-]+\.dzcdn\.net\//.test(img) ? img : '' }); } } });
+        try { const u = r?.next ? new URL(r.next) : null; if (u) { u.searchParams.delete('output'); u.searchParams.delete('callback'); } next = u && u.hostname === 'api.deezer.com' ? u.pathname.slice(1) + u.search : ''; } catch (e) { next = ''; }
+      }
+      // Lieder und Filmmusik aussortieren, solange danach noch Folgen übrig bleiben
+      const songs = /soundtrack|titelsong|songs?\b|lieder|karaoke|musik zum|music|remix|hits\b/i, eps = all.filter(a => !songs.test(a.t));
+      const list = (eps.length ? eps : all).sort((a, b) => b.d.localeCompare(a.d)).slice(0, 600);
+      C[k] = { t: Date.now(), art: String(art.name || q).slice(0, 80), list };
+      try { localStorage.setItem('home-aurora-dz:' + k, JSON.stringify(C[k])); } catch (e) { /* voll: dann eben nur im Speicher */ }
+    } catch (er) { C[k] = { ...(old || {}), busy: false, err: String(er?.message || er || 'Fehler') }; }
+    if (this._hsX()) this._renderSheet();
+  }
+  /* zuletzt gehörte Folgen je Hörspiel (pro Gerät), damit der Zufall sie nicht gleich wiederholt */
+  _hsRecent(k, add) {
+    let R = {}; try { R = JSON.parse(localStorage.getItem('home-aurora-hsrecent') || '{}') || {}; } catch (e) { R = {}; }
+    if (add) { R[k] = [add, ...(R[k] || []).filter(i => i !== add)].slice(0, 30); try { localStorage.setItem('home-aurora-hsrecent', JSON.stringify(R)); } catch (e) { /* ok */ } }
+    return R[k] || [];
+  }
+  _hsCmd(a, art) {
+    const t = a.t.replace(/\s*[([][^)\]]*[)\]]/g, '').replace(/[:–—|/]+|\s-\s/g, ' ').replace(/\s+/g, ' ').trim() || a.t;
+    return `spiele das Album ${t}${art && !t.toLowerCase().includes(art.toLowerCase()) ? ' von ' + art : ''} auf Deezer`;
+  }
+  _hsPlay(aid) {
+    const x = this._hsX(), c = x && this._hsC(x), a = c?.list?.find(i => i.id === aid); if (!a) return;
+    this._hsRecent(this._hsKey(x), a.id);
+    this._closeSheet();
+    this._rdPlay(x.id, { cmd: this._hsCmd(a, c.art), label: a.t.replace(/\s*\([^)]*\)/g, '') });
+  }
+  _hsRnd() {
+    const x = this._hsX(), c = x && this._hsC(x);
+    if (!c?.list?.length) { this._closeSheet(); this._rdPlay(x?.id || this._sheet?.id); return; }
+    const R = this._hsRecent(this._hsKey(x)), keep = Math.min(R.length, Math.floor(c.list.length / 2));
+    const pool = c.list.filter(a => !R.slice(0, keep).includes(a.id)), P = pool.length ? pool : c.list;
+    this._hsPlay(P[Math.floor(Math.random() * P.length)].id);
+  }
+  _sHsf() {
+    const x = this._hsX(), P = this._rdPlayer();
+    const close = `<button class="x" data-act="close">${ic('close', 20)}</button>`;
+    if (!x) return `<div class="grab"></div><div class="sh"><div class="ico">${ic('music', 24)}</div><div><h2>Hörspiel</h2><p>nicht gefunden</p></div>${close}</div>`;
+    const c = this._hsC(x); if (!c || (!c.list && !c.busy && !c.err)) this._hsLoad(x);
+    const L = c?.list || [], R = this._hsRecent(this._hsKey(x)), lim = this._hsLim || 40, n = L.length;
+    const yr = d => (d || '').slice(0, 4);
+    const row = a => `<button class="hsr${R[0] === a.id ? ' on' : ''}" data-act="hsplay" data-a="${esc(a.id)}">${a.img ? `<img src="${esc(a.img)}" alt="" loading="lazy">` : `<span class="rxc xs" style="background:${this._rdCol(x.name)}"><i>${esc(x.emoji || '🎧')}</i></span>`}
+      <span class="grow"><b>${esc(a.t)}</b><small>${esc([yr(a.d), R[0] === a.id ? 'zuletzt gehört' : R.includes(a.id) ? 'schon gehört' : ''].filter(Boolean).join(' · '))}</small></span>${ic('play', 16)}</button>`;
+    const sub = c?.busy && !n ? 'Folgen werden bei Deezer gesucht …' : n ? `${n} ${n === 1 ? 'Folge' : 'Folgen'} bei Deezer · ${P ? 'spielt auf ' + esc(P.name) : 'kein Lautsprecher erreichbar'}` : 'Deezer';
+    const body = n ? `<div class="hs-top"><button class="vbt big on" data-act="hsrnd" ${P ? '' : 'disabled'}>🎲 Zufällige Folge</button><button class="vbt big" data-act="hsplay" data-a="${esc(L[0].id)}" ${P ? '' : 'disabled'}>${ic('play', 15)}Neueste Folge</button></div>
+        <div class="lab2">ALLE FOLGEN · NEUESTE ZUERST</div><div class="hs-list">${L.slice(0, lim).map(row).join('')}</div>
+        ${n > lim ? `<button class="vbt hs-more" data-act="hsmore">Weitere ${Math.min(60, n - lim)} Folgen zeigen</button>` : ''}`
+      : c?.busy || !c ? `<div class="empty sm">Folgen werden bei Deezer gesucht …</div>`
+      : `<div class="card-note">Die Folgenliste von Deezer ist gerade nicht erreichbar. Du kannst das Hörspiel trotzdem starten, Alexa sucht dann selbst eine Folge aus.</div>
+        <div class="hs-top"><button class="vbt big on" data-act="hsold" data-id="${esc(x.id)}" ${P ? '' : 'disabled'}>${ic('play', 15)}Trotzdem abspielen</button><button class="vbt big" data-act="hsre">Nochmal laden</button></div>`;
+    return `<div class="grab"></div><div class="sh"><span class="rxc sm" style="background:${this._rdCol(x.name)}"><i>${esc(x.emoji || '🎧')}</i></span><div><h2>${esc(x.name)}</h2><p>${sub}</p></div>${close}</div>${body}`;
   }
   /* ───────────── v11: Kindersicherung TV (Integration „kindersicherung“) ───────────── */
   /* ───────────── pz16: Musik & Alexa (Lautsprecher steuern, Durchsagen) ───────────── */
@@ -4867,7 +4974,7 @@ class HomeAurora extends HTMLElement {
     const st = this._sh.scrollTop;
     if (this._sheet.t === 'sched' && this._schedEl && this._sh.contains(this._schedEl)) { this._schedEl.hass = this._h; this._ov.classList.add('show'); return; }
     const r = this._sheet.t === 'room' ? this._c.rooms.find(x => x.id === this._sheet.id) : null;
-    const T = { vroom: () => this._sVRoom(this._sheet.e), persons: () => this._sPersons(), quick: () => this._sQuick(), vent: () => this._sVent(), cal: () => this._sCal(), bat: () => this._sBat(), doors: () => this._sDoors(), sys: () => this._sSys(), waste: () => this._sWaste(), power: () => this._sPower(), sched: () => this._sSched(), set: () => this._sSet(), warn: () => this._sWarn(), radar: () => this._sRadar(), pin: () => this._sPin(), fuel: () => this._sFuel(), plants: () => this._sPlants(), heat: () => this._sHeat(), kid: () => this._sKid(), clean: () => this._sClean(), tv: () => this._sTv(), pzstat: () => this._sPzStat(), music: () => this._sMusic(), radio: () => this._sRadio(), shop: () => this._sShop() };
+    const T = { vroom: () => this._sVRoom(this._sheet.e), persons: () => this._sPersons(), quick: () => this._sQuick(), vent: () => this._sVent(), cal: () => this._sCal(), bat: () => this._sBat(), doors: () => this._sDoors(), sys: () => this._sSys(), waste: () => this._sWaste(), power: () => this._sPower(), sched: () => this._sSched(), set: () => this._sSet(), warn: () => this._sWarn(), radar: () => this._sRadar(), pin: () => this._sPin(), fuel: () => this._sFuel(), plants: () => this._sPlants(), heat: () => this._sHeat(), kid: () => this._sKid(), clean: () => this._sClean(), tv: () => this._sTv(), pzstat: () => this._sPzStat(), music: () => this._sMusic(), radio: () => this._sRadio(), hsf: () => this._sHsf(), shop: () => this._sShop() };
     const qn = this.shadowRoot.getElementById('qname'), qv = qn ? qn.value : null, qf = qn && this.shadowRoot.activeElement === qn;
     const an = this.shadowRoot.getElementById('annq'), av = an ? an.value : null, af = an && this.shadowRoot.activeElement === an;
     const sq = this.shadowRoot.getElementById('shopq'), sv = sq ? sq.value : null, sf = sq && this.shadowRoot.activeElement === sq;
@@ -5055,7 +5162,7 @@ class HomeAurora extends HTMLElement {
       case 'power': this._sheet = { t: 'power' }; this._renderSheet(); this._loadPower(true); break;
       case 'sched': this._sheet = { t: 'sched' }; this._renderSheet(); break;
       case 'schedtab': this._schedTab = el.dataset.m; this._renderSheet(); break;
-      case 'rdplay': case 'rdsel': case 'rdpower': case 'rdqv': case 'rdedit': case 'rdpick': case 'rdsave': case 'rddel': case 'rdtab': case 'rdprev': case 'rdnext': this._rdAct(a, el); break;
+      case 'rdplay': case 'rdsel': case 'rdpower': case 'rdqv': case 'rdedit': case 'rdpick': case 'rdsave': case 'rddel': case 'rdtab': case 'rdprev': case 'rdnext': case 'hsopen': case 'hsrnd': case 'hsplay': case 'hsold': case 'hsmore': case 'hsre': this._rdAct(a, el); break;
       case 'music': this._sheet = { t: 'music' }; this._renderSheet(); break;
       case 'shop': case 'shoptab': case 'shopadd': case 'shopq': case 'shopdone': case 'shopundo': case 'shopall': case 'shopclr': case 'rcpsel': case 'rcpserv': case 'rcpone': case 'rcpall': this._shopAct(a, el); break;
       case 'annt': this._annT = el.dataset.i; this._renderSheet(); break;
