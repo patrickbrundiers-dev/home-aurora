@@ -48,13 +48,13 @@ const DEFAULTS = {
       { name: 'WDR 4', genre: 'Kulthits' }, { name: 'NDR 2', genre: 'Pop' }, { name: 'Deutschlandfunk', genre: 'Nachrichten & Kultur' },
       { name: 'RADIO BOB!', genre: 'Rock', cmd: 'spiele RADIO BOB' }, { name: 'Radio Bollerwagen', genre: 'Partyhits & Schlager' }, { name: 'ANTENNE BAYERN', genre: 'Pop & Hits' },
     ],
-    // Hörspiele (Reiter auf der Radioseite): Alexa spielt sie von Deezer, Befehl ohne cmd = „spiele ‹Name› Hörspiel auf Deezer“
+    // Hörspiele (Reiter auf der Radioseite): Alexa spielt sie von Deezer, Befehl ohne cmd = „spiele das neueste Album von ‹Name› auf Deezer“ (nur „‹Name› Hörspiel“ findet bei Deezer oft Film-Lieder); Filme brauchen den Albumnamen
     hsp: {
       list: 'todo.horspiele',
       items: [
-        { name: 'Peppa Wutz', genre: 'ab 3', emoji: '🐷' }, { name: 'PAW Patrol', genre: 'ab 3', emoji: '🐶' }, { name: 'Die Eiskönigin', genre: 'ab 4', emoji: '❄️' },
-        { name: 'Benjamin Blümchen', genre: 'ab 3', emoji: '🐘' }, { name: 'Bibi Blocksberg', genre: 'ab 5', emoji: '🧹' }, { name: 'Conni', genre: 'ab 3', emoji: '👧' },
-        { name: 'Feuerwehrmann Sam', genre: 'ab 3', emoji: '🚒' }, { name: 'Die drei ??? Kids', genre: 'ab 7', emoji: '🔍', cmd: 'spiele Die drei Fragezeichen Kids auf Deezer' }, { name: 'Der König der Löwen', genre: 'ab 4', emoji: '🦁' },
+        { name: 'Peppa Wutz', genre: 'ab 3', emoji: '🐷', cmd: 'spiele das Album Peppa Wutz Folge 1 auf Deezer' }, { name: 'PAW Patrol', genre: 'ab 3', emoji: '🐶' }, { name: 'Die Eiskönigin', genre: 'ab 4', emoji: '❄️', cmd: 'spiele das Album Die Eiskönigin Völlig unverfroren Das Original-Hörspiel zum Film auf Deezer' },
+        { name: 'Benjamin Blümchen', genre: 'ab 3', emoji: '🐘' }, { name: 'Bibi Blocksberg', genre: 'ab 5', emoji: '🧹', cmd: 'spiele das Album Bibi Blocksberg Folge 1 auf Deezer' }, { name: 'Conni', genre: 'ab 3', emoji: '👧' },
+        { name: 'Feuerwehrmann Sam', genre: 'ab 3', emoji: '🚒' }, { name: 'Die drei ??? Kids', genre: 'ab 7', emoji: '🔍', cmd: 'spiele Die drei Fragezeichen Kids auf Deezer' }, { name: 'Der König der Löwen', genre: 'ab 4', emoji: '🦁', cmd: 'spiele das Album Der König der Löwen Das Original-Hörspiel zum Film auf Deezer' },
       ],
     },
   },
@@ -2830,7 +2830,7 @@ class HomeAurora extends HTMLElement {
   _sSet() {
     const th = this._themePref || this._c.theme || 'dark', am = String(this._ambMin());
     const seg = (act, cur, items) => `<div class="seg wide">${items.map(x => `<button class="${cur === x[0] ? 'on' : ''}" data-act="${act}" data-m="${x[0]}">${x[1]}</button>`).join('')}</div>`;
-    return `<div class="grab"></div><div class="sh"><div class="ico">${ic('cog', 24)}</div><div><h2>Darstellung &amp; Modi</h2><p>Home Aurora v5.2 · Build pz35</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
+    return `<div class="grab"></div><div class="sh"><div class="ico">${ic('cog', 24)}</div><div><h2>Darstellung &amp; Modi</h2><p>Home Aurora v5.2 · Build pz36</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
       <div class="lab2">DESIGN</div>${seg('theme', th, [['dark', 'Dunkel'], ['light', 'Hell'], ['auto', 'Automatisch']])}
       <div class="card-note">„Automatisch“ folgt dem Dunkel-/Hellmodus deines Home-Assistant-Profils. Die Auswahl gilt nur für dieses Gerät.</div>
       ${WALL_UI ? `      <div class="lab2">WANDTABLET-MODUS</div>
@@ -3802,7 +3802,7 @@ class HomeAurora extends HTMLElement {
   _rdKind() { if (this._rdTab == null) { try { this._rdTab = localStorage.getItem('home-aurora-rdtab') || 'rd'; } catch (e) { this._rdTab = 'rd'; } } return this._rdTab === 'hs' ? 'hs' : 'rd'; }
   _rdK(k = this._rdKind()) {
     const C = this._rdC(), H = { ...DEFAULTS.radio.hsp, ...(C.hsp || {}) };
-    return k === 'hs' ? { k, list: H.list === undefined ? 'todo.horspiele' : H.list, items: H.items || [], noun: 'Hörspiel', nouns: 'Hörspiele', cmd: n => `spiele ${n} Hörspiel auf Deezer` }
+    return k === 'hs' ? { k, list: H.list === undefined ? 'todo.horspiele' : H.list, items: H.items || [], noun: 'Hörspiel', nouns: 'Hörspiele', cmd: n => `spiele das neueste Album von ${n} auf Deezer` }
       : { k, list: C.list, items: C.stations || [], noun: 'Sender', nouns: 'Sender', cmd: n => 'spiele ' + n };
   }
   _rdCache(k = this._rdKind()) { return (this._rdItK = this._rdItK || {})[k]; }
@@ -3959,7 +3959,7 @@ class HomeAurora extends HTMLElement {
       <button class="mpb" data-act="rdpick" data-id="${esc(s.id)}" aria-label="${esc(s.name)} ersetzen">${ic('pen', 16)}</button><button class="mpb${this._rdArm === s.id ? ' arm' : ''}" data-act="rddel" data-id="${esc(s.id)}" aria-label="${esc(s.name)} löschen">${ic(this._rdArm === s.id ? 'check' : 'trash', 16)}</button></div>`;
     return head + `<div class="lab2">${x ? (hs ? 'HÖRSPIEL' : 'SENDER') + ' ERSETZEN · ' + esc(x.name) : hs ? 'NEUES HÖRSPIEL' : 'NEUER SENDER'}</div>
       <div class="rxf"><input id="rdn" type="text" maxlength="40" placeholder="${hs ? 'Name, z. B. Die Schule der magischen Tiere' : 'Name, z. B. Radio Hochstift'}" value="${esc(x ? x.name : '')}" autocomplete="off" aria-label="Name">
-        <input id="rdc" type="text" maxlength="120" placeholder="Alexa-Befehl (leer = „${hs ? 'spiele ‹Name› Hörspiel auf Deezer' : 'spiele ‹Name›'}“)" value="${esc(x ? x.cmd : '')}" autocomplete="off" aria-label="Alexa-Befehl">
+        <input id="rdc" type="text" maxlength="120" placeholder="Alexa-Befehl (leer = „${hs ? 'spiele das neueste Album von ‹Name› auf Deezer' : 'spiele ‹Name›'}“)" value="${esc(x ? x.cmd : '')}" autocomplete="off" aria-label="Alexa-Befehl">
         <input id="rdg" type="text" maxlength="40" placeholder="${hs ? 'Untertitel, z. B. ab 4 (optional)' : 'Genre, z. B. Pop & Hits (optional)'}" value="${esc(x ? x.genre : '')}" autocomplete="off" aria-label="${hs ? 'Untertitel' : 'Genre'}">
         ${hs ? `<input id="rdj" type="text" maxlength="8" placeholder="Emoji fürs Bild, z. B. 🦄 (optional)" value="${esc(x ? x.emoji : '')}" autocomplete="off" aria-label="Emoji">` : ''}
         <div class="rxfb">${x ? `<button class="vbt" data-act="rdpick" data-id="">Abbrechen</button>` : ''}<button class="vbt big on" data-act="rdsave" ${this._rdBusy ? 'disabled' : ''}>${ic(x ? 'check' : 'plus', 15)}${x ? 'Ersetzen' : 'Hinzufügen'}</button></div></div>

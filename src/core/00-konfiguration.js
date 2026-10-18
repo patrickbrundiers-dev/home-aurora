@@ -48,13 +48,13 @@ const DEFAULTS = {
       { name: 'WDR 4', genre: 'Kulthits' }, { name: 'NDR 2', genre: 'Pop' }, { name: 'Deutschlandfunk', genre: 'Nachrichten & Kultur' },
       { name: 'RADIO BOB!', genre: 'Rock', cmd: 'spiele RADIO BOB' }, { name: 'Radio Bollerwagen', genre: 'Partyhits & Schlager' }, { name: 'ANTENNE BAYERN', genre: 'Pop & Hits' },
     ],
-    // Hörspiele (Reiter auf der Radioseite): Alexa spielt sie von Deezer, Befehl ohne cmd = „spiele ‹Name› Hörspiel auf Deezer“
+    // Hörspiele (Reiter auf der Radioseite): Alexa spielt sie von Deezer, Befehl ohne cmd = „spiele das neueste Album von ‹Name› auf Deezer“ (nur „‹Name› Hörspiel“ findet bei Deezer oft Film-Lieder); Filme brauchen den Albumnamen
     hsp: {
       list: 'todo.horspiele',
       items: [
-        { name: 'Peppa Wutz', genre: 'ab 3', emoji: '🐷' }, { name: 'PAW Patrol', genre: 'ab 3', emoji: '🐶' }, { name: 'Die Eiskönigin', genre: 'ab 4', emoji: '❄️' },
-        { name: 'Benjamin Blümchen', genre: 'ab 3', emoji: '🐘' }, { name: 'Bibi Blocksberg', genre: 'ab 5', emoji: '🧹' }, { name: 'Conni', genre: 'ab 3', emoji: '👧' },
-        { name: 'Feuerwehrmann Sam', genre: 'ab 3', emoji: '🚒' }, { name: 'Die drei ??? Kids', genre: 'ab 7', emoji: '🔍', cmd: 'spiele Die drei Fragezeichen Kids auf Deezer' }, { name: 'Der König der Löwen', genre: 'ab 4', emoji: '🦁' },
+        { name: 'Peppa Wutz', genre: 'ab 3', emoji: '🐷', cmd: 'spiele das Album Peppa Wutz Folge 1 auf Deezer' }, { name: 'PAW Patrol', genre: 'ab 3', emoji: '🐶' }, { name: 'Die Eiskönigin', genre: 'ab 4', emoji: '❄️', cmd: 'spiele das Album Die Eiskönigin Völlig unverfroren Das Original-Hörspiel zum Film auf Deezer' },
+        { name: 'Benjamin Blümchen', genre: 'ab 3', emoji: '🐘' }, { name: 'Bibi Blocksberg', genre: 'ab 5', emoji: '🧹', cmd: 'spiele das Album Bibi Blocksberg Folge 1 auf Deezer' }, { name: 'Conni', genre: 'ab 3', emoji: '👧' },
+        { name: 'Feuerwehrmann Sam', genre: 'ab 3', emoji: '🚒' }, { name: 'Die drei ??? Kids', genre: 'ab 7', emoji: '🔍', cmd: 'spiele Die drei Fragezeichen Kids auf Deezer' }, { name: 'Der König der Löwen', genre: 'ab 4', emoji: '🦁', cmd: 'spiele das Album Der König der Löwen Das Original-Hörspiel zum Film auf Deezer' },
       ],
     },
   },
