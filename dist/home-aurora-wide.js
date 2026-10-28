@@ -1155,6 +1155,17 @@ const CSS4 = `
 .sht .bd{flex:none;font-size:11.5px;font-weight:700;padding:4px 10px;border-radius:99px;background:rgba(251,146,60,.2);color:#fb923c}.sht .bd.off{background:rgba(var(--wh),.08);color:var(--tx2)}
 .swk{margin-top:12px;display:flex;flex-direction:column;gap:4px}.swr,.swa{display:grid;grid-template-columns:22px 1fr;gap:8px;align-items:center}.swr>span{font-size:11px;color:var(--tx3)}.swr.td>span{color:var(--tx);font-weight:700}
 .swt{position:relative;height:9px;border-radius:5px;background:rgba(var(--wh),.07);overflow:hidden}.swt i{position:absolute;top:0;bottom:0;border-radius:4px;background:#fb923c;opacity:.85}.swr.td .swt{background:rgba(var(--wh),.11)}.swt b{position:absolute;top:-1px;bottom:-1px;width:2px;background:#fff;border-radius:1px;box-shadow:0 0 6px rgba(255,255,255,.8)}
+.hplc{padding:14px 14px 12px;border-radius:24px;background:rgba(var(--wh),.05);border:1px solid var(--line);margin-bottom:6px}.hpl{position:relative}.hplb{position:relative;height:30px;border-radius:9px;background:rgba(var(--wh),.06);overflow:hidden}.hpl.sm .hplb{height:16px;border-radius:6px}
+.hplk{position:absolute;top:0;bottom:0;display:flex;align-items:center;justify-content:center;font-style:normal;border-right:1px solid rgba(0,0,0,.25)}.hplk span{font-size:11.5px;font-weight:600;color:rgba(0,0,0,.72);font-variant-numeric:tabular-nums;white-space:nowrap}
+.hplk.comfort{background:linear-gradient(180deg,#fdba74,#fb923c)}.hplk.preheat{background:repeating-linear-gradient(135deg,#fbbf24 0 6px,#f59e0b 6px 12px)}.hplk.eco{background:rgba(56,189,248,.38)}.hplk.eco span{color:#bae6fd}
+.hplk.so{background-image:repeating-linear-gradient(45deg,rgba(0,0,0,.35) 0 3px,transparent 3px 7px)}.hplb>b{position:absolute;left:0;top:0;bottom:0;width:2px;background:#fff;box-shadow:0 0 6px rgba(255,255,255,.8)}
+.hplx{position:relative;height:16px;margin-top:5px}.hplx em{position:absolute;transform:translateX(-50%);font-style:normal;font-size:11px;color:var(--tx3,var(--tx2));white-space:nowrap}.hplx em:first-child{transform:none}
+.hpl.sm .hplx{height:13px;margin-top:3px}.hpl.sm .hplx em{font-size:10px}
+.hplg{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:8px;font-size:11.5px;color:var(--tx2)}.hplg span{display:inline-flex;align-items:center;gap:6px}.hplg .hplk{position:static;width:14px;height:10px;border-radius:3px;border:0}
+.hpln{margin-top:10px;font-size:12.5px;line-height:1.45;color:var(--tx2)}
+.hwarm{margin-top:10px;width:100%;justify-content:center;color:#fb923c;border-color:rgba(251,146,60,.4);background:rgba(251,146,60,.1);cursor:pointer;font:inherit;font-size:13px}
+.hlv{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-top:10px}.hlvc{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 4px;border-radius:18px;background:rgba(var(--wh),.05)}.hlvc>span{font-size:12px;color:var(--tx2)}@media(max-width:600px){.hlv{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.hdr{display:grid;grid-template-columns:96px 1fr;gap:4px 12px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}.hdr:last-child{border-bottom:0}.hdr .n{font-size:13px;font-weight:600}.hdr .n small{display:block;font-weight:400;font-size:11px;color:var(--tx2)}
 .tpt{position:relative;height:20px;border-radius:6px;background:rgba(var(--wh),.06);overflow:hidden}.tpt i{position:absolute;top:0;bottom:0;border-right:1px solid rgba(0,0,0,.25);display:flex;align-items:center;justify-content:center}.tpt i em{font-style:normal;font-size:10.5px;font-weight:700;color:rgba(10,14,30,.85);white-space:nowrap}
 .tpt b{position:absolute;top:-1px;bottom:-1px;width:2px;background:#fff;border-radius:1px;box-shadow:0 0 6px rgba(255,255,255,.9)}.tpw{gap:5px}.tpd{font-size:12px;color:var(--tx2);margin:2px 0 2px 30px}
 .tpcs{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}.tpc{display:inline-flex;align-items:center;gap:6px;padding:5px 10px;border-radius:999px;background:rgba(var(--wh),.06);border:1px solid var(--line);font-size:12px;color:var(--tx)}.tpc small{font-size:10.5px;color:var(--tx3)}.tpc.on small{color:#fb923c}
@@ -2780,8 +2791,12 @@ class HomeAurora extends HTMLElement {
       const week = m ? `<div class="swk">${DAYS.map(([d, l], di) => `<div class="swr ${di === todayIdx ? 'td' : ''}"><span>${l}</span><div class="swt">${(m[d] || []).map(b => { const f = mins(b.from), t = Math.min(mins(b.to) || 1440, 1440); return `<i style="left:${(f / 14.4).toFixed(2)}%;width:${Math.max((t - f) / 14.4, .6).toFixed(2)}%"></i>`; }).join('')}${di === todayIdx ? `<b style="left:${nowPct.toFixed(2)}%"></b>` : ''}</div></div>`).join('')}<div class="swa"><span></span><div><em>0</em><em>6</em><em>12</em><em>18</em><em>24</em></div></div></div>` : '';
       return `<div class="sch ${act ? 'on' : ''}"><div class="sht" data-act="more" data-e="${k}"><div class="ico">${ic('clock', 19)}</div><div class="tx"><div class="n">${esc(m?.name || a.friendly_name || this._name(k))}</div><div class="s">${ne ? (act ? 'Aktiv bis ' : 'Nächster Start ') + ne : (act ? 'Gerade aktiv' : 'Kein Termin geplant')}</div></div><div class="bd ${act ? '' : 'off'}">${act ? 'Aktiv' : 'Pause'}</div></div>${week}</div>`;
     };
+    // pz43: Zeitleiste aller Räume der Dynamischen Heizungssteuerung (Tagesplan, nächste 24 Stunden)
+    const tl = this._c.rooms.map(r => { const X = r.heat?.status && this._dhX(r.heat.status), d = X?.day && this._s(X.day), bar = d && this._dayBar(d.attributes?.segments, { small: true }); if (!bar) return ''; const sel = this._val(X.mode);
+      return `<div class="hdr" data-act="heat" data-room="${r.id}"><div class="n">${esc(r.name)}<small>${esc(okv(sel) ? sel : '')}</small></div>${bar}</div>`; }).join('');
+    const tlb = tl ? `<div class="lab2">ALLE RÄUME · NÄCHSTE 24 H</div><div class="hplc">${tl}<div class="hplg"><span><i class="hplk comfort"></i>Komfort</span><span><i class="hplk preheat"></i>Vorheizen</span><span><i class="hplk eco"></i>Eco</span></div></div>` : '';
     return `<div class="grab"></div><div class="sh"><div class="ico">${ic('clock', 24)}</div><div><h2>Heizungsplan</h2><p>${ids.length ? ids.length + ' Zeitpläne · ' + on + ' gerade aktiv' : 'Keine Zeitpläne gefunden'}${nTP ? ' · ' + nTP + ' Thermostat-Pläne' : ''}</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
-      ${TP.length && ids.length ? `<div class="seg wide" style="margin:6px 0 14px">${[['ha', 'Home Assistant · ' + ids.length], ['trv', 'Im Thermostat · ' + nTP]].map(x => `<button class="${tab === x[0] ? 'on' : ''}" data-act="schedtab" data-m="${x[0]}">${x[1]}</button>`).join('')}</div>` : ''}
+      ${tlb}${TP.length && ids.length ? `<div class="seg wide" style="margin:6px 0 14px">${[['ha', 'Home Assistant · ' + ids.length], ['trv', 'Im Thermostat · ' + nTP]].map(x => `<button class="${tab === x[0] ? 'on' : ''}" data-act="schedtab" data-m="${x[0]}">${x[1]}</button>`).join('')}</div>` : ''}
       ${tab === 'trv' ? '' : ids.length ? `<div class="sl">${ids.sort((a, b) => (this._val(b) === 'on') - (this._val(a) === 'on') || this._name(a).localeCompare(this._name(b), 'de')).map(card).join('')}</div>` : `<div class="empty">🗓️ Es gibt noch keine Zeitpläne.<br><small>Lege unter Einstellungen → Geräte &amp; Dienste → Helfer einen „Zeitplan“ an.</small></div>`}
       ${TP.length && tab !== 'ha' ? `<div class="sl">${TP.map(g => this._trvCard(g)).join('')}</div>
       <div class="card-note">Diese Wochenpläne liegen direkt in den Heizkörperthermostaten. Sie greifen nur, wenn das Thermostat auf Automatik steht („Plan aktiv“). Steht es auf „manuell“, regelt Home Assistant die Temperatur.</div>` : ''}`;
@@ -2855,7 +2870,7 @@ class HomeAurora extends HTMLElement {
   _sSet() {
     const th = this._themePref || this._c.theme || 'dark', am = String(this._ambMin());
     const seg = (act, cur, items) => `<div class="seg wide">${items.map(x => `<button class="${cur === x[0] ? 'on' : ''}" data-act="${act}" data-m="${x[0]}">${x[1]}</button>`).join('')}</div>`;
-    return `<div class="grab"></div><div class="sh"><div class="ico">${ic('cog', 24)}</div><div><h2>Darstellung &amp; Modi</h2><p>Home Aurora v5.2 · Build pz42</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
+    return `<div class="grab"></div><div class="sh"><div class="ico">${ic('cog', 24)}</div><div><h2>Darstellung &amp; Modi</h2><p>Home Aurora v5.2 · Build pz43</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
       <div class="lab2">DESIGN</div>${seg('theme', th, [['dark', 'Dunkel'], ['light', 'Hell'], ['auto', 'Automatisch']])}
       <div class="card-note">„Automatisch“ folgt dem Dunkel-/Hellmodus deines Home-Assistant-Profils. Die Auswahl gilt nur für dieses Gerät.</div>
       ${WALL_UI ? `      <div class="lab2">WANDTABLET-MODUS</div>
@@ -3366,12 +3381,13 @@ class HomeAurora extends HTMLElement {
     const rc = (X.cl && this._s(X.cl)?.attributes) || {}, ms = this._s(X.mode), un = ms?.attributes?.until ? new Date(ms.attributes.until) : null;
     const cur = I.temp ?? rc.current_temperature ?? at.current_temperature, tg = at.temperature, hum = I.hum ?? rc.current_humidity;
     const win = I.open || a.window_open, M = D.on ? sel : 'Regelung aus';
-    const status = off ? 'Heizung aus' : win ? 'Fenster offen – Heizung pausiert' : [M, D.label && D.label !== M ? D.label : '', un && !isNaN(un) ? 'bis ' + this._whenTxt(un) : ''].filter(Boolean).join(' · ');
+    const status = off ? 'Heizung aus' : win ? 'Fenster offen – Heizung pausiert' : [M, D.label && D.label !== M ? D.label : '', un && !isNaN(un) && !/\sbis\s/.test(D.label || '') ? 'bis ' + this._whenTxt(un) : ''].filter(Boolean).join(' · ');
     const col = cur != null ? tempCol(cur) : '#fb923c', dial = this._hDial(cur, tg, off, off ? 'Heizung aus' : (D.auto ? 'Automatik' : esc(sel)) + ' <b>' + de(tg) + '°</b>', hum, col);
     const step = d => `data-act="temp" data-e="${r.climate}" data-d="${d}" ${off ? 'disabled' : ''}`;
     const side = `<div class="hctl"><button class="rbn" ${step(-0.5)}>${ic('minus', 22)}</button><div class="hset"><b>${off ? '–' : de(tg)}</b><span>${heat ? 'heizt · ' : ''}Ziel °C</span></div><button class="rbn" ${step(0.5)}>${ic('plus', 22)}</button></div>`;
     const m = off ? 'off' : D.auto ? 'auto' : D.on && sel === 'Manuell' ? 'heat' : '';
-    const seg = `<div class="seg hseg">${[['auto', 'Automatik'], ['heat', 'Manuell'], ['off', 'Aus']].map(([k, l]) => `<button class="${m === k ? 'on' : ''}" data-act="dhmode" data-room="${r.id}" data-m="${k}">${l}</button>`).join('')}</div>`;
+    // „Kurz wärmer“ der Integration: hebt das Ziel für eine Weile an, danach geht es mit dem Plan weiter
+    const seg = `<div class="seg hseg">${[['auto', 'Automatik'], ['heat', 'Manuell'], ['off', 'Aus']].map(([k, l]) => `<button class="${m === k ? 'on' : ''}" data-act="dhmode" data-room="${r.id}" data-m="${k}">${l}</button>`).join('')}</div>${X.warm && !off ? `<button class="qb hwarm" data-act="press" data-e="${X.warm}" data-msg="${esc(r.name)}: kurz wärmer">${ic('flame', 14)}Kurz wärmer</button>` : ''}`;
     const ds = X.dur && this._s(X.dur), dv = ds?.state;
     const hint = !off && sel !== 'Manuell' ? `<div class="card-note">Mit − / + wechselt die Heizung auf Manuell${okv(dv) ? ' · ' + esc(dv) : ''}.</div>` : '';
     // Betriebsarten mit ihrer Temperatur; − / + an der gewählten Betriebsart ändert deren Temperatur dauerhaft
@@ -3386,7 +3402,8 @@ class HomeAurora extends HTMLElement {
     const zp = zo.length > 1 ? `<div class="lab2">ZEITPLAN</div><div class="hpre hdur">${zo.map(o => `<button class="${zs.state === o ? 'on' : ''}" data-act="selopt" data-e="${X.sched}" data-v="${esc(o)}" data-t="${esc(r.name + ': Zeitplan ' + o)}"><b>${esc(o)}</b></button>`).join('')}</div>` : '';
     // Status-Kacheln: was die Regelung gerade weiß
     const P = this._plan(r), ht = this._heatTime(r), pm = parseFloat(a.preheat_minutes), dm = X.demand ? this._num(X.demand) : parseFloat(a.heat_demand), tr = X.trend && this._num(X.trend), ou = X.out && this._num(X.out), hr = parseFloat(a.heating_rate);
-    const tiles = `<div class="dg">${this._tile(win ? 'Offen' : 'Zu', 'Fenster', 'window')}${ht != null ? this._tile(this._durTxt(ht), 'Heute geheizt', 'flame') : ''}${dm != null && !isNaN(dm) ? this._tile(de(dm, 0) + ' %', 'Wärmebedarf', 'gauge') : ''}${P?.next ? this._tile(this._whenTxt(P.next), 'Nächster Planwechsel', 'clock') : ''}${!isNaN(pm) && pm > 0 ? this._tile(de(pm, 0) + ' Min.', 'Vorheizen', 'flame') : ''}${a.present != null ? this._tile(a.present ? 'Ja' : 'Nein', 'Jemand da', 'home') : ''}${ou != null ? this._tile(de(ou, 1) + '°', 'Außen', 'thermo') : ''}${tr != null ? this._tile((tr > 0 ? '+' : '') + de(tr, 1) + ' °/h', 'Trend', 'arrowup') : ''}${!isNaN(hr) && hr > 0 ? this._tile(de(hr, 1) + ' °/h', 'Heizt auf mit', 'chevron') : ''}</div>`;
+    const kw = X.kwh && parseFloat(this._s(X.kwh)?.attributes?.today_kwh), rad = X.rad && this._val(X.rad), bd = X.bat ? this._num(X.bat) : null;
+    const tiles = `<div class="dg">${this._tile(win ? 'Offen' : 'Zu', 'Fenster', 'window')}${ht != null ? this._tile(this._durTxt(ht), 'Heute geheizt', 'flame') : ''}${kw != null && !isNaN(kw) ? this._tile(de(kw, 1) + '<small class="u">kWh</small>', 'Wärme heute', 'bolt') : ''}${okv(rad) ? this._tile(esc(rad), 'Heizkörper', 'radiator') : ''}${bd != null && bd <= 60 ? this._tile(bd <= 0 ? 'jetzt' : 'in ' + de(bd, 0) + ' T.', 'Batterie fällig', 'battery') : ''}${dm != null && !isNaN(dm) ? this._tile(de(dm, 0) + ' %', 'Wärmebedarf', 'gauge') : ''}${P?.next ? this._tile(this._whenTxt(P.next), 'Nächster Planwechsel', 'clock') : ''}${!isNaN(pm) && pm > 0 ? this._tile(de(pm, 0) + ' Min.', 'Vorheizen', 'flame') : ''}${a.present != null ? this._tile(a.present ? 'Ja' : 'Nein', 'Jemand da', 'home') : ''}${ou != null ? this._tile(de(ou, 1) + '°', 'Außen', 'thermo') : ''}${tr != null ? this._tile((tr > 0 ? '+' : '') + de(tr, 1) + ' °/h', 'Trend', 'arrowup') : ''}${!isNaN(hr) && hr > 0 ? this._tile(de(hr, 1) + ' °/h', 'Heizt auf mit', 'chevron') : ''}</div>`;
     // Hinweise: Probleme zuerst (rot), dann Entscheidung und Lernstand der Regelung
     const red = s => `<div class="card-note" style="color:#fb7185">${esc(s)}</div>`;
     const tw = a.thermostat_warnings && typeof a.thermostat_warnings === 'object' ? Object.entries(a.thermostat_warnings) : [];
@@ -3395,18 +3412,26 @@ class HomeAurora extends HTMLElement {
       + tw.map(([k, v]) => red(`${this._name(k)}: ${typeof v === 'string' ? v : JSON.stringify(v)}`)).join('')
       + (ua.length ? red('Nicht erreichbar: ' + ua.map(e => this._name(e)).join(', ')) : '')
       + (okv(a.decision_status) && a.decision_status !== D.label ? `<div class="card-note">${esc(String(a.decision_status))}</div>` : '')
-      + (okv(a.learning_status) ? `<div class="card-note">Lernt: ${esc(String(a.learning_status))}</div>` : '') + (r.temp ? this._staleNote(r.temp) : '');
+      + (okv(a.learning_status) ? `<div class="card-note">Lernt: ${esc(String(a.learning_status))}</div>` : '') + (r.temp ? this._staleNote(r.temp) : '')
+      + (X.air && !['not_needed', 'unknown', 'unavailable', undefined].includes(this._s(X.air)?.attributes?.state) && okv(this._val(X.air)) ? `<div class="card-note" style="color:#38bdf8">Lüften: ${esc(this._val(X.air))}</div>` : '')
+      + (X.tip && okv(this._val(X.tip)) && !/^Keine/i.test(this._val(X.tip)) ? `<div class="card-note" style="color:#fbbf24">Vorschlag: ${esc(this._val(X.tip))}</div>` : '');
+    // Tagesplan: was die Regelung die nächsten 24 Stunden vorhat
+    const dps = X.day && this._s(X.day), dtx = dps && okv(dps.state) ? String(dps.state).replace(/\s*\(Abweichung[^)]*\)\s*$/, '') : '';
+    const hpl = dps ? this._dayBar(dps.attributes?.segments) : '';
+    const day = hpl || dtx ? `<div class="lab2">TAGESPLAN · NÄCHSTE 24 H</div><div class="hplc">${hpl}${dtx ? `<div class="hpln">${esc(dtx)}</div>` : ''}</div>` : '';
     // Thermostate mit Versatz
     const short = s => { const n = (s.attributes.friendly_name || s.entity_id).replace(new RegExp('^' + r.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\s*', 'i'), '').replace(/[\s-]+$/, ''); return esc(n.length > 3 ? n : 'Thermostat'); };
     const trv = `<div class="lab2">THERMOSTATE · ${D.trv.length}</div><div class="mcol">${D.trv.map(s => { const x = s.attributes, u = !okv(s.state), o = X.off(s.entity_id); return `<div class="xr"><div class="ico">${ic('radiator', 19)}</div><div class="grow" data-act="more" data-e="${s.entity_id}"><div class="t">${short(s)}</div><div class="s">${u ? 'nicht erreichbar' : s.state === 'off' ? 'Aus' : `misst ${de(x.current_temperature)} ° · Soll ${de(x.temperature)} °`}</div></div>${o ? this._hStep(o, 1, '°', true) : ''}</div>`; }).join('')}</div>`;
     const lk = X.lock && this._val(X.lock) === 'on';
     const fine = (X.roff || X.lock) ? `<div class="lab2">FEINEINSTELLUNG</div><div class="mcol">${X.roff ? `<div class="xr"><div class="ico">${ic('thermo', 19)}</div><div class="grow"><div class="t">Raum-Versatz</div><div class="s">verschiebt alle Ziele dieses Raums</div></div>${this._hStep(X.roff, 1, '°', true)}</div>` : ''}${X.lock ? `<button class="xr" data-act="toggle" data-e="${X.lock}"><div class="ico">${ic('lock', 19)}</div><div class="grow"><div class="t">Kindersicherung</div><div class="s">${lk ? 'Tasten an den Thermostaten gesperrt' : 'Aus'}</div></div><span class="sw ${lk ? 'on' : ''}"></span></button>` : ''}</div>` : '';
     const hs = X.house && this._s(X.house), hv = hs?.state;
-    const house = hs ? `<div class="lab2">HAUS · ALLE RÄUME</div><div class="seg hseg">${(hs.attributes.options || []).map(o => `<button class="${hv === o ? 'on' : ''}" data-act="selopt" data-e="${X.house}" data-v="${esc(o)}" data-t="Haus: ${esc(o)}">${esc(o)}</button>`).join('')}</div>` : '';
+    // Temperaturstufen am Haus (Zeitplanblöcke mit „stufe: abend“): eine Änderung gilt in allen Zeitplänen
+    const lv = X.lv.length ? `<div class="hlv">${X.lv.map(l => `<div class="hlvc"><span>Stufe ${esc(l.n)}</span>${this._hStep(l.e, 1, '°')}</div>`).join('')}</div>` : '';
+    const house = hs ? `<div class="lab2">HAUS · ALLE RÄUME</div><div class="seg hseg">${(hs.attributes.options || []).map(o => `<button class="${hv === o ? 'on' : ''}" data-act="selopt" data-e="${X.house}" data-v="${esc(o)}" data-t="Haus: ${esc(o)}">${esc(o)}</button>`).join('')}</div>${lv}` : '';
     [r.temp, r.hum].forEach(x => { if (x && !this._hist[x]) this._need.add(x); });
     return `<div class="grab"></div><div class="sh"><div class="ico">${ic(r.icon, 24)}</div><div><h2>Heizung · ${esc(r.name)}</h2><p>${esc(status)}</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
       <div class="hhero ${heat ? 'heat' : ''}">${dial}<div class="hside">${side}${seg}</div></div>
-      ${hint}${notes}${pre ? `<div class="lab2">BETRIEBSART</div><div class="hpre hmodes">${pre}</div>` : ''}${apRow ? `<div class="mcol" style="margin-top:8px">${apRow}</div>` : ''}${dur}${zp}
+      ${hint}${notes}${day}${pre ? `<div class="lab2">BETRIEBSART</div><div class="hpre hmodes">${pre}</div>` : ''}${apRow ? `<div class="mcol" style="margin-top:8px">${apRow}</div>` : ''}${dur}${zp}
       <div class="lab2">STATUS</div>${tiles}${trv}${fine}${house}
       ${this._trend(r, col)}
       <div class="hbtns"><button class="qb" data-act="sched">${ic('clock', 14)}Heizungsplan</button><button class="qb" data-act="room" data-room="${r.id}">${ic(r.icon, 14)}Zurück zum Raum</button></div>`;
@@ -4683,12 +4708,16 @@ class HomeAurora extends HTMLElement {
       prob: [`binary_sensor.${b}_heizproblem`, `binary_sensor.${b}_thermostat_problem`].filter(e => e in S),
       presets: T.map(([n, k, i]) => ({ n, i, num: k ? has(`number.${b}_${k}`) : null })),
       off: e => has(`number.${b}_versatz_${e.replace(/^climate\./, '')}`),
+      // pz43 (Integration 0.13–0.15): Tagesplan, Lüften, Wärmemenge, Batterie, Heizkörper, Zeitplan-Vorschlag, „kurz wärmer“, Temperaturstufen am Haus
+      day: has(`sensor.${b}_tagesplan`), air: has(`sensor.${b}_luften`), kwh: has(`sensor.${b}_warmemenge`), bat: has(`sensor.${b}_batterie_fallig_in`),
+      rad: has(`sensor.${b}_heizkorper`), tip: has(`sensor.${b}_zeitplan_vorschlag`), warm: has(`button.${b}_kurz_warmer`),
+      lv: c.house ? [['morgen', 'Morgen'], ['tag', 'Tag'], ['abend', 'Abend'], ['nacht', 'Nacht']].map(([k, n]) => ({ n, e: has(c.house.replace(/^select\./, 'number.').replace(/_hausmodus$/, '_stufe_' + k)) })).filter(x => x.e) : [],
     };
   }
   _dhXIds(sid) {
     const X = this._dhX(sid); if (!X) return [];
     const S = this._h.states, trv = Object.keys(S[sid]?.attributes?.thermostat_setpoints || {});
-    return [X.mode, X.cl, X.house, X.dur, X.sched, X.lock, X.roff, X.demand, X.trend, X.out, ...X.prob, ...X.presets.map(p => p.num), ...trv.map(X.off)].filter(Boolean);
+    return [X.mode, X.cl, X.house, X.dur, X.sched, X.lock, X.roff, X.demand, X.trend, X.out, X.day, X.air, X.kwh, X.bat, X.rad, X.tip, X.warm, ...X.lv.map(l => l.e), ...X.prob, ...X.presets.map(p => p.num), ...trv.map(X.off)].filter(Boolean);
   }
   /* Automations-Konfigurationen lesen (alle 30 Min.) und Räume mit Advanced-Heating-Control-Plänen verbinden.
      Über die REST-Schnittstelle kommt die gespeicherte Konfiguration mit use_blueprint (klein, braucht Admin-Rechte);
@@ -4718,7 +4747,7 @@ class HomeAurora extends HTMLElement {
   _plan(r) {
     const D = r.heat && this._dh(r);
     if (D) {
-      const a = D.a, nx = a.next_event ? new Date(a.next_event) : null, M = { comfort: 'Komfort', eco: 'Eco', away: 'Abwesend', off: 'Aus', boost: 'Boost', preheat: 'Vorheizen' };
+      const a = D.a, nx = a.next_event ? new Date(a.next_event) : null, M = { comfort: 'Komfort', eco: 'Eco', away: 'Abwesend', off: 'Aus', boost: 'Boost', preheat: 'Vorheizen', manual: 'Manuell', quick_manual: 'Von Hand', early_stop: 'Früher Schluss', solar: 'Sonne heizt mit' };
       return { src: 'Dynamische Heizungssteuerung', mode: M[a.mode] || (a.mode ? String(a.mode) : ''), next: nx && !isNaN(nx) ? nx : null, on: D.auto };
     }
     const p = this._plans?.map[r.id]; if (!p) return null;
@@ -4733,6 +4762,21 @@ class HomeAurora extends HTMLElement {
     }
     const s = cur && this._s(cur), nx = s?.attributes?.next_event ? new Date(s.attributes.next_event) : null, on = s?.state === 'on';
     return { src: 'Heizplan', sched: cur, schedName: s ? this._name(cur) : '', mode: s ? (on ? 'Komfort' : 'Eco') : '', temp: s ? (on ? p.comfort : p.eco) : null, next: nx && !isNaN(nx) ? nx : null, nextMode: s ? (on ? 'Eco' : 'Komfort') : '', on: this._val(p.auto) === 'on' };
+  }
+  /* pz43: Tagesplan der Integration als Balken für die nächsten 24 Stunden (Attribut segments: eco/preheat/comfort,
+     supply_off = Zentralheizung liefert meist nichts). Mit Zielwerten im Balken, „jetzt“ links, Stunden darunter. */
+  _dayBar(segs, opt = {}) {
+    const t0 = Date.now(), t1 = t0 + 864e5, W = t1 - t0, K = { comfort: 'Komfort', preheat: 'Vorheizen', eco: 'Eco' };
+    const L = (Array.isArray(segs) ? segs : []).map(x => ({ ...x, s: Math.max(new Date(x.start).getTime(), t0), e: Math.min(new Date(x.end).getTime(), t1) })).filter(x => !isNaN(x.s) && !isNaN(x.e) && x.e > x.s);
+    if (!L.length) return '';
+    const pc = v => ((v - t0) / W * 100).toFixed(2);
+    const bars = L.map(x => { const w = (x.e - x.s) / W * 100, k = K[x.kind] ? x.kind : 'eco', tg = parseFloat(x.target);
+      return `<i class="hplk ${k} ${x.supply_off ? 'so' : ''}" style="left:${pc(x.s)}%;width:${w.toFixed(2)}%" title="${hhmm(new Date(x.s))}–${hhmm(new Date(x.e))} ${K[k]}${isNaN(tg) ? '' : ' ' + de(tg, 1) + ' °C'}">${w > (opt.small ? 9 : 7) && !isNaN(tg) ? `<span>${de(tg, tg % 1 ? 1 : 0)}°</span>` : ''}</i>`; }).join('');
+    // volle Stunden 6-stündlich als Achse
+    const ax = [], h0 = new Date(t0); h0.setMinutes(0, 0, 0);
+    for (let t = h0.getTime() + 36e5; t < t1; t += 36e5) { const d = new Date(t); if (d.getHours() % 6 === 0 && t - t0 > W * .09) ax.push(`<em style="left:${pc(t)}%">${d.getHours() === 0 ? 'morgen' : String(d.getHours()).padStart(2, '0') + ':00'}</em>`); }
+    const leg = opt.small ? '' : `<div class="hplg">${[['comfort', 'Komfort'], ['preheat', 'Vorheizen'], ['eco', 'Eco']].filter(([k]) => L.some(x => x.kind === k)).map(([k, n]) => `<span><i class="hplk ${k}"></i>${n}</span>`).join('')}${L.some(x => x.supply_off) ? '<span><i class="hplk eco so"></i>Therme meist aus</span>' : ''}</div>`;
+    return `<div class="hpl ${opt.small ? 'sm' : ''}"><div class="hplb">${bars}<b></b></div><div class="hplx"><em style="left:0">jetzt</em>${ax.join('')}</div>${leg}</div>`;
   }
   _whenTxt(d) {
     if (!d) return '';
