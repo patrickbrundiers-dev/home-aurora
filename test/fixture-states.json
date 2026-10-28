@@ -11570,5 +11570,173 @@
 "last_changed": "2026-01-01T12:00:00+00:00",
 "last_updated": "2026-01-01T12:00:00+00:00",
 "state": "Zuhause"
+},
+"button.wohnzimmer_heizung_kurz_warmer": {
+"attributes": {
+"friendly_name": "Wohnzimmer kurz wärmer"
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "button.wohnzimmer_heizung_kurz_warmer",
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00",
+"state": "unknown"
+},
+"number.dynamische_heizung_haus_stufe_abend": {
+"attributes": {
+"friendly_name": "Haus Stufe abend",
+"max": 30,
+"min": 5,
+"step": 0.5,
+"unit_of_measurement": "°C"
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "number.dynamische_heizung_haus_stufe_abend",
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00",
+"state": "21.5"
+},
+"number.dynamische_heizung_haus_stufe_morgen": {
+"attributes": {
+"friendly_name": "Haus Stufe morgen",
+"max": 30,
+"min": 5,
+"step": 0.5,
+"unit_of_measurement": "°C"
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "number.dynamische_heizung_haus_stufe_morgen",
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00",
+"state": "21.0"
+},
+"number.dynamische_heizung_haus_stufe_nacht": {
+"attributes": {
+"friendly_name": "Haus Stufe nacht",
+"max": 30,
+"min": 5,
+"step": 0.5,
+"unit_of_measurement": "°C"
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "number.dynamische_heizung_haus_stufe_nacht",
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00",
+"state": "18.0"
+},
+"number.dynamische_heizung_haus_stufe_tag": {
+"attributes": {
+"friendly_name": "Haus Stufe tag",
+"max": 30,
+"min": 5,
+"step": 0.5,
+"unit_of_measurement": "°C"
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "number.dynamische_heizung_haus_stufe_tag",
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00",
+"state": "21.0"
+},
+"sensor.wohnzimmer_heizung_batterie_fallig_in": {
+"attributes": {
+"friendly_name": "Heizung Batterie fällig in",
+"unit_of_measurement": "d"
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "sensor.wohnzimmer_heizung_batterie_fallig_in",
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00",
+"state": "30"
+},
+"sensor.wohnzimmer_heizung_heizkorper": {
+"attributes": {
+"friendly_name": "Heizung Heizkörper"
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "sensor.wohnzimmer_heizung_heizkorper",
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00",
+"state": "Warm"
+},
+"sensor.wohnzimmer_heizung_luften": {
+"attributes": {
+"friendly_name": "Heizung Lüften",
+"state": "helps"
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "sensor.wohnzimmer_heizung_luften",
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00",
+"state": "Lüften hilft – 5 Minuten stoßlüften"
+},
+"sensor.wohnzimmer_heizung_tagesplan": {
+"attributes": {
+"friendly_name": "Heizung Tagesplan",
+"segments": [
+{
+"end": "2099-01-01T06:00:00+00:00",
+"kind": "comfort",
+"start": "2026-01-01T00:00:00+00:00",
+"supply_off": false,
+"target": 21
+},
+{
+"end": "2099-01-02T00:00:00+00:00",
+"kind": "eco",
+"start": "2099-01-01T06:00:00+00:00",
+"supply_off": true,
+"target": 17.5
+}
+]
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "sensor.wohnzimmer_heizung_tagesplan",
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00",
+"state": "Komfort bis 22:00 Uhr, dann 17,5 °C (Abweichung bisher ±0,2 °C)"
+},
+"sensor.wohnzimmer_heizung_warmemenge": {
+"attributes": {
+"friendly_name": "Heizung Wärmemenge",
+"today_kwh": 2.3,
+"unit_of_measurement": "kWh"
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "sensor.wohnzimmer_heizung_warmemenge",
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00",
+"state": "12.5"
+},
+"sensor.wohnzimmer_heizung_zeitplan_vorschlag": {
+"attributes": {
+"friendly_name": "Heizung Zeitplan-Vorschlag"
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "sensor.wohnzimmer_heizung_zeitplan_vorschlag",
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00",
+"state": "Keine Vorschläge"
 }
 }

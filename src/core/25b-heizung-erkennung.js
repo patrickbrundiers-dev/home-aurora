@@ -53,12 +53,16 @@
       prob: [`binary_sensor.${b}_heizproblem`, `binary_sensor.${b}_thermostat_problem`].filter(e => e in S),
       presets: T.map(([n, k, i]) => ({ n, i, num: k ? has(`number.${b}_${k}`) : null })),
       off: e => has(`number.${b}_versatz_${e.replace(/^climate\./, '')}`),
+      // pz43 (Integration 0.13–0.15): Tagesplan, Lüften, Wärmemenge, Batterie, Heizkörper, Zeitplan-Vorschlag, „kurz wärmer“, Temperaturstufen am Haus
+      day: has(`sensor.${b}_tagesplan`), air: has(`sensor.${b}_luften`), kwh: has(`sensor.${b}_warmemenge`), bat: has(`sensor.${b}_batterie_fallig_in`),
+      rad: has(`sensor.${b}_heizkorper`), tip: has(`sensor.${b}_zeitplan_vorschlag`), warm: has(`button.${b}_kurz_warmer`),
+      lv: c.house ? [['morgen', 'Morgen'], ['tag', 'Tag'], ['abend', 'Abend'], ['nacht', 'Nacht']].map(([k, n]) => ({ n, e: has(c.house.replace(/^select\./, 'number.').replace(/_hausmodus$/, '_stufe_' + k)) })).filter(x => x.e) : [],
     };
   }
   _dhXIds(sid) {
     const X = this._dhX(sid); if (!X) return [];
     const S = this._h.states, trv = Object.keys(S[sid]?.attributes?.thermostat_setpoints || {});
-    return [X.mode, X.cl, X.house, X.dur, X.sched, X.lock, X.roff, X.demand, X.trend, X.out, ...X.prob, ...X.presets.map(p => p.num), ...trv.map(X.off)].filter(Boolean);
+    return [X.mode, X.cl, X.house, X.dur, X.sched, X.lock, X.roff, X.demand, X.trend, X.out, X.day, X.air, X.kwh, X.bat, X.rad, X.tip, X.warm, ...X.lv.map(l => l.e), ...X.prob, ...X.presets.map(p => p.num), ...trv.map(X.off)].filter(Boolean);
   }
   /* Automations-Konfigurationen lesen (alle 30 Min.) und Räume mit Advanced-Heating-Control-Plänen verbinden.
      Über die REST-Schnittstelle kommt die gespeicherte Konfiguration mit use_blueprint (klein, braucht Admin-Rechte);
@@ -88,7 +92,7 @@
   _plan(r) {
     const D = r.heat && this._dh(r);
     if (D) {
-      const a = D.a, nx = a.next_event ? new Date(a.next_event) : null, M = { comfort: 'Komfort', eco: 'Eco', away: 'Abwesend', off: 'Aus', boost: 'Boost', preheat: 'Vorheizen' };
+      const a = D.a, nx = a.next_event ? new Date(a.next_event) : null, M = { comfort: 'Komfort', eco: 'Eco', away: 'Abwesend', off: 'Aus', boost: 'Boost', preheat: 'Vorheizen', manual: 'Manuell', quick_manual: 'Von Hand', early_stop: 'Früher Schluss', solar: 'Sonne heizt mit' };
       return { src: 'Dynamische Heizungssteuerung', mode: M[a.mode] || (a.mode ? String(a.mode) : ''), next: nx && !isNaN(nx) ? nx : null, on: D.auto };
     }
     const p = this._plans?.map[r.id]; if (!p) return null;
@@ -103,6 +107,21 @@
     }
     const s = cur && this._s(cur), nx = s?.attributes?.next_event ? new Date(s.attributes.next_event) : null, on = s?.state === 'on';
     return { src: 'Heizplan', sched: cur, schedName: s ? this._name(cur) : '', mode: s ? (on ? 'Komfort' : 'Eco') : '', temp: s ? (on ? p.comfort : p.eco) : null, next: nx && !isNaN(nx) ? nx : null, nextMode: s ? (on ? 'Eco' : 'Komfort') : '', on: this._val(p.auto) === 'on' };
+  }
+  /* pz43: Tagesplan der Integration als Balken für die nächsten 24 Stunden (Attribut segments: eco/preheat/comfort,
+     supply_off = Zentralheizung liefert meist nichts). Mit Zielwerten im Balken, „jetzt“ links, Stunden darunter. */
+  _dayBar(segs, opt = {}) {
+    const t0 = Date.now(), t1 = t0 + 864e5, W = t1 - t0, K = { comfort: 'Komfort', preheat: 'Vorheizen', eco: 'Eco' };
+    const L = (Array.isArray(segs) ? segs : []).map(x => ({ ...x, s: Math.max(new Date(x.start).getTime(), t0), e: Math.min(new Date(x.end).getTime(), t1) })).filter(x => !isNaN(x.s) && !isNaN(x.e) && x.e > x.s);
+    if (!L.length) return '';
+    const pc = v => ((v - t0) / W * 100).toFixed(2);
+    const bars = L.map(x => { const w = (x.e - x.s) / W * 100, k = K[x.kind] ? x.kind : 'eco', tg = parseFloat(x.target);
+      return `<i class="hplk ${k} ${x.supply_off ? 'so' : ''}" style="left:${pc(x.s)}%;width:${w.toFixed(2)}%" title="${hhmm(new Date(x.s))}–${hhmm(new Date(x.e))} ${K[k]}${isNaN(tg) ? '' : ' ' + de(tg, 1) + ' °C'}">${w > (opt.small ? 9 : 7) && !isNaN(tg) ? `<span>${de(tg, tg % 1 ? 1 : 0)}°</span>` : ''}</i>`; }).join('');
+    // volle Stunden 6-stündlich als Achse
+    const ax = [], h0 = new Date(t0); h0.setMinutes(0, 0, 0);
+    for (let t = h0.getTime() + 36e5; t < t1; t += 36e5) { const d = new Date(t); if (d.getHours() % 6 === 0 && t - t0 > W * .09) ax.push(`<em style="left:${pc(t)}%">${d.getHours() === 0 ? 'morgen' : String(d.getHours()).padStart(2, '0') + ':00'}</em>`); }
+    const leg = opt.small ? '' : `<div class="hplg">${[['comfort', 'Komfort'], ['preheat', 'Vorheizen'], ['eco', 'Eco']].filter(([k]) => L.some(x => x.kind === k)).map(([k, n]) => `<span><i class="hplk ${k}"></i>${n}</span>`).join('')}${L.some(x => x.supply_off) ? '<span><i class="hplk eco so"></i>Therme meist aus</span>' : ''}</div>`;
+    return `<div class="hpl ${opt.small ? 'sm' : ''}"><div class="hplb">${bars}<b></b></div><div class="hplx"><em style="left:0">jetzt</em>${ax.join('')}</div>${leg}</div>`;
   }
   _whenTxt(d) {
     if (!d) return '';

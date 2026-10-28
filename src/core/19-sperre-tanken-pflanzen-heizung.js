@@ -128,12 +128,13 @@
     const rc = (X.cl && this._s(X.cl)?.attributes) || {}, ms = this._s(X.mode), un = ms?.attributes?.until ? new Date(ms.attributes.until) : null;
     const cur = I.temp ?? rc.current_temperature ?? at.current_temperature, tg = at.temperature, hum = I.hum ?? rc.current_humidity;
     const win = I.open || a.window_open, M = D.on ? sel : 'Regelung aus';
-    const status = off ? 'Heizung aus' : win ? 'Fenster offen – Heizung pausiert' : [M, D.label && D.label !== M ? D.label : '', un && !isNaN(un) ? 'bis ' + this._whenTxt(un) : ''].filter(Boolean).join(' · ');
+    const status = off ? 'Heizung aus' : win ? 'Fenster offen – Heizung pausiert' : [M, D.label && D.label !== M ? D.label : '', un && !isNaN(un) && !/\sbis\s/.test(D.label || '') ? 'bis ' + this._whenTxt(un) : ''].filter(Boolean).join(' · ');
     const col = cur != null ? tempCol(cur) : '#fb923c', dial = this._hDial(cur, tg, off, off ? 'Heizung aus' : (D.auto ? 'Automatik' : esc(sel)) + ' <b>' + de(tg) + '°</b>', hum, col);
     const step = d => `data-act="temp" data-e="${r.climate}" data-d="${d}" ${off ? 'disabled' : ''}`;
     const side = `<div class="hctl"><button class="rbn" ${step(-0.5)}>${ic('minus', 22)}</button><div class="hset"><b>${off ? '–' : de(tg)}</b><span>${heat ? 'heizt · ' : ''}Ziel °C</span></div><button class="rbn" ${step(0.5)}>${ic('plus', 22)}</button></div>`;
     const m = off ? 'off' : D.auto ? 'auto' : D.on && sel === 'Manuell' ? 'heat' : '';
-    const seg = `<div class="seg hseg">${[['auto', 'Automatik'], ['heat', 'Manuell'], ['off', 'Aus']].map(([k, l]) => `<button class="${m === k ? 'on' : ''}" data-act="dhmode" data-room="${r.id}" data-m="${k}">${l}</button>`).join('')}</div>`;
+    // „Kurz wärmer“ der Integration: hebt das Ziel für eine Weile an, danach geht es mit dem Plan weiter
+    const seg = `<div class="seg hseg">${[['auto', 'Automatik'], ['heat', 'Manuell'], ['off', 'Aus']].map(([k, l]) => `<button class="${m === k ? 'on' : ''}" data-act="dhmode" data-room="${r.id}" data-m="${k}">${l}</button>`).join('')}</div>${X.warm && !off ? `<button class="qb hwarm" data-act="press" data-e="${X.warm}" data-msg="${esc(r.name)}: kurz wärmer">${ic('flame', 14)}Kurz wärmer</button>` : ''}`;
     const ds = X.dur && this._s(X.dur), dv = ds?.state;
     const hint = !off && sel !== 'Manuell' ? `<div class="card-note">Mit − / + wechselt die Heizung auf Manuell${okv(dv) ? ' · ' + esc(dv) : ''}.</div>` : '';
     // Betriebsarten mit ihrer Temperatur; − / + an der gewählten Betriebsart ändert deren Temperatur dauerhaft
@@ -148,7 +149,8 @@
     const zp = zo.length > 1 ? `<div class="lab2">ZEITPLAN</div><div class="hpre hdur">${zo.map(o => `<button class="${zs.state === o ? 'on' : ''}" data-act="selopt" data-e="${X.sched}" data-v="${esc(o)}" data-t="${esc(r.name + ': Zeitplan ' + o)}"><b>${esc(o)}</b></button>`).join('')}</div>` : '';
     // Status-Kacheln: was die Regelung gerade weiß
     const P = this._plan(r), ht = this._heatTime(r), pm = parseFloat(a.preheat_minutes), dm = X.demand ? this._num(X.demand) : parseFloat(a.heat_demand), tr = X.trend && this._num(X.trend), ou = X.out && this._num(X.out), hr = parseFloat(a.heating_rate);
-    const tiles = `<div class="dg">${this._tile(win ? 'Offen' : 'Zu', 'Fenster', 'window')}${ht != null ? this._tile(this._durTxt(ht), 'Heute geheizt', 'flame') : ''}${dm != null && !isNaN(dm) ? this._tile(de(dm, 0) + ' %', 'Wärmebedarf', 'gauge') : ''}${P?.next ? this._tile(this._whenTxt(P.next), 'Nächster Planwechsel', 'clock') : ''}${!isNaN(pm) && pm > 0 ? this._tile(de(pm, 0) + ' Min.', 'Vorheizen', 'flame') : ''}${a.present != null ? this._tile(a.present ? 'Ja' : 'Nein', 'Jemand da', 'home') : ''}${ou != null ? this._tile(de(ou, 1) + '°', 'Außen', 'thermo') : ''}${tr != null ? this._tile((tr > 0 ? '+' : '') + de(tr, 1) + ' °/h', 'Trend', 'arrowup') : ''}${!isNaN(hr) && hr > 0 ? this._tile(de(hr, 1) + ' °/h', 'Heizt auf mit', 'chevron') : ''}</div>`;
+    const kw = X.kwh && parseFloat(this._s(X.kwh)?.attributes?.today_kwh), rad = X.rad && this._val(X.rad), bd = X.bat ? this._num(X.bat) : null;
+    const tiles = `<div class="dg">${this._tile(win ? 'Offen' : 'Zu', 'Fenster', 'window')}${ht != null ? this._tile(this._durTxt(ht), 'Heute geheizt', 'flame') : ''}${kw != null && !isNaN(kw) ? this._tile(de(kw, 1) + '<small class="u">kWh</small>', 'Wärme heute', 'bolt') : ''}${okv(rad) ? this._tile(esc(rad), 'Heizkörper', 'radiator') : ''}${bd != null && bd <= 60 ? this._tile(bd <= 0 ? 'jetzt' : 'in ' + de(bd, 0) + ' T.', 'Batterie fällig', 'battery') : ''}${dm != null && !isNaN(dm) ? this._tile(de(dm, 0) + ' %', 'Wärmebedarf', 'gauge') : ''}${P?.next ? this._tile(this._whenTxt(P.next), 'Nächster Planwechsel', 'clock') : ''}${!isNaN(pm) && pm > 0 ? this._tile(de(pm, 0) + ' Min.', 'Vorheizen', 'flame') : ''}${a.present != null ? this._tile(a.present ? 'Ja' : 'Nein', 'Jemand da', 'home') : ''}${ou != null ? this._tile(de(ou, 1) + '°', 'Außen', 'thermo') : ''}${tr != null ? this._tile((tr > 0 ? '+' : '') + de(tr, 1) + ' °/h', 'Trend', 'arrowup') : ''}${!isNaN(hr) && hr > 0 ? this._tile(de(hr, 1) + ' °/h', 'Heizt auf mit', 'chevron') : ''}</div>`;
     // Hinweise: Probleme zuerst (rot), dann Entscheidung und Lernstand der Regelung
     const red = s => `<div class="card-note" style="color:#fb7185">${esc(s)}</div>`;
     const tw = a.thermostat_warnings && typeof a.thermostat_warnings === 'object' ? Object.entries(a.thermostat_warnings) : [];
@@ -157,18 +159,26 @@
       + tw.map(([k, v]) => red(`${this._name(k)}: ${typeof v === 'string' ? v : JSON.stringify(v)}`)).join('')
       + (ua.length ? red('Nicht erreichbar: ' + ua.map(e => this._name(e)).join(', ')) : '')
       + (okv(a.decision_status) && a.decision_status !== D.label ? `<div class="card-note">${esc(String(a.decision_status))}</div>` : '')
-      + (okv(a.learning_status) ? `<div class="card-note">Lernt: ${esc(String(a.learning_status))}</div>` : '') + (r.temp ? this._staleNote(r.temp) : '');
+      + (okv(a.learning_status) ? `<div class="card-note">Lernt: ${esc(String(a.learning_status))}</div>` : '') + (r.temp ? this._staleNote(r.temp) : '')
+      + (X.air && !['not_needed', 'unknown', 'unavailable', undefined].includes(this._s(X.air)?.attributes?.state) && okv(this._val(X.air)) ? `<div class="card-note" style="color:#38bdf8">Lüften: ${esc(this._val(X.air))}</div>` : '')
+      + (X.tip && okv(this._val(X.tip)) && !/^Keine/i.test(this._val(X.tip)) ? `<div class="card-note" style="color:#fbbf24">Vorschlag: ${esc(this._val(X.tip))}</div>` : '');
+    // Tagesplan: was die Regelung die nächsten 24 Stunden vorhat
+    const dps = X.day && this._s(X.day), dtx = dps && okv(dps.state) ? String(dps.state).replace(/\s*\(Abweichung[^)]*\)\s*$/, '') : '';
+    const hpl = dps ? this._dayBar(dps.attributes?.segments) : '';
+    const day = hpl || dtx ? `<div class="lab2">TAGESPLAN · NÄCHSTE 24 H</div><div class="hplc">${hpl}${dtx ? `<div class="hpln">${esc(dtx)}</div>` : ''}</div>` : '';
     // Thermostate mit Versatz
     const short = s => { const n = (s.attributes.friendly_name || s.entity_id).replace(new RegExp('^' + r.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\s*', 'i'), '').replace(/[\s-]+$/, ''); return esc(n.length > 3 ? n : 'Thermostat'); };
     const trv = `<div class="lab2">THERMOSTATE · ${D.trv.length}</div><div class="mcol">${D.trv.map(s => { const x = s.attributes, u = !okv(s.state), o = X.off(s.entity_id); return `<div class="xr"><div class="ico">${ic('radiator', 19)}</div><div class="grow" data-act="more" data-e="${s.entity_id}"><div class="t">${short(s)}</div><div class="s">${u ? 'nicht erreichbar' : s.state === 'off' ? 'Aus' : `misst ${de(x.current_temperature)} ° · Soll ${de(x.temperature)} °`}</div></div>${o ? this._hStep(o, 1, '°', true) : ''}</div>`; }).join('')}</div>`;
     const lk = X.lock && this._val(X.lock) === 'on';
     const fine = (X.roff || X.lock) ? `<div class="lab2">FEINEINSTELLUNG</div><div class="mcol">${X.roff ? `<div class="xr"><div class="ico">${ic('thermo', 19)}</div><div class="grow"><div class="t">Raum-Versatz</div><div class="s">verschiebt alle Ziele dieses Raums</div></div>${this._hStep(X.roff, 1, '°', true)}</div>` : ''}${X.lock ? `<button class="xr" data-act="toggle" data-e="${X.lock}"><div class="ico">${ic('lock', 19)}</div><div class="grow"><div class="t">Kindersicherung</div><div class="s">${lk ? 'Tasten an den Thermostaten gesperrt' : 'Aus'}</div></div><span class="sw ${lk ? 'on' : ''}"></span></button>` : ''}</div>` : '';
     const hs = X.house && this._s(X.house), hv = hs?.state;
-    const house = hs ? `<div class="lab2">HAUS · ALLE RÄUME</div><div class="seg hseg">${(hs.attributes.options || []).map(o => `<button class="${hv === o ? 'on' : ''}" data-act="selopt" data-e="${X.house}" data-v="${esc(o)}" data-t="Haus: ${esc(o)}">${esc(o)}</button>`).join('')}</div>` : '';
+    // Temperaturstufen am Haus (Zeitplanblöcke mit „stufe: abend“): eine Änderung gilt in allen Zeitplänen
+    const lv = X.lv.length ? `<div class="hlv">${X.lv.map(l => `<div class="hlvc"><span>Stufe ${esc(l.n)}</span>${this._hStep(l.e, 1, '°')}</div>`).join('')}</div>` : '';
+    const house = hs ? `<div class="lab2">HAUS · ALLE RÄUME</div><div class="seg hseg">${(hs.attributes.options || []).map(o => `<button class="${hv === o ? 'on' : ''}" data-act="selopt" data-e="${X.house}" data-v="${esc(o)}" data-t="Haus: ${esc(o)}">${esc(o)}</button>`).join('')}</div>${lv}` : '';
     [r.temp, r.hum].forEach(x => { if (x && !this._hist[x]) this._need.add(x); });
     return `<div class="grab"></div><div class="sh"><div class="ico">${ic(r.icon, 24)}</div><div><h2>Heizung · ${esc(r.name)}</h2><p>${esc(status)}</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
       <div class="hhero ${heat ? 'heat' : ''}">${dial}<div class="hside">${side}${seg}</div></div>
-      ${hint}${notes}${pre ? `<div class="lab2">BETRIEBSART</div><div class="hpre hmodes">${pre}</div>` : ''}${apRow ? `<div class="mcol" style="margin-top:8px">${apRow}</div>` : ''}${dur}${zp}
+      ${hint}${notes}${day}${pre ? `<div class="lab2">BETRIEBSART</div><div class="hpre hmodes">${pre}</div>` : ''}${apRow ? `<div class="mcol" style="margin-top:8px">${apRow}</div>` : ''}${dur}${zp}
       <div class="lab2">STATUS</div>${tiles}${trv}${fine}${house}
       ${this._trend(r, col)}
       <div class="hbtns"><button class="qb" data-act="sched">${ic('clock', 14)}Heizungsplan</button><button class="qb" data-act="room" data-room="${r.id}">${ic(r.icon, 14)}Zurück zum Raum</button></div>`;
