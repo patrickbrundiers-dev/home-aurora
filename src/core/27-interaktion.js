@@ -23,6 +23,7 @@
       if (this._ht && Math.abs(ev.movementX) + Math.abs(ev.movementY) > 6) cancel();
     });
     root.addEventListener('input', ev => {
+      if (ev.target.id === 'dzq') { this._dzQ = ev.target.value; return; }
       if (ev.target.id === 'pzq') { const st = this._pzSt(); if (st) { st.q = ev.target.value; this._pzRefresh(); } return; }
       const el = ev.target.closest('input[data-act="bright"],input[data-act="vol"],input[data-act="rdvol"]');
       if (el) { el.style.setProperty('--v', el.value + '%'); if (el.dataset.act === 'vol' && el.nextElementSibling) el.nextElementSibling.textContent = el.value + ' %'; }
@@ -64,6 +65,7 @@
       if (ev.key === 'Escape') this._closeSheet();
       else if (ev.key === 'Enter' && ev.target.id === 'annq') { ev.preventDefault(); this._annSend(); }
       else if (ev.key === 'Enter' && ev.target.id === 'shopq') { ev.preventDefault(); this._shopInput(); }
+      else if (ev.key === 'Enter' && ev.target.id === 'dzq') { ev.preventDefault(); ev.target.blur(); this._dzSearch(); }
       else if (ev.key === 'Enter' && /^rd[ncgjzk]$/.test(ev.target.id)) { ev.preventDefault(); this._rdSave(); }
     });
     root.addEventListener('contextmenu', ev => { if (ev.target.closest && ev.target.closest('[data-hold]')) ev.preventDefault(); });
@@ -122,6 +124,7 @@
       case 'sched': this._sheet = { t: 'sched' }; this._renderSheet(); break;
       case 'schedtab': this._schedTab = el.dataset.m; this._renderSheet(); break;
       case 'rdplay': case 'rdsel': case 'rdpower': case 'rdqv': case 'rdedit': case 'rdpick': case 'rdsave': case 'rddel': case 'rdtab': case 'rdprev': case 'rdnext': case 'hscat': case 'hsopen': case 'hsrnd': case 'hsplay': case 'hsold': case 'hsmore': case 'hsre': this._rdAct(a, el); break;
+      case 'dzplay': case 'dzsearch': case 'dztype': this._dzAct(a, el); break;
       case 'music': this._sheet = { t: 'music' }; this._renderSheet(); break;
       case 'shop': case 'shoptab': case 'shopadd': case 'shopq': case 'shopdone': case 'shopundo': case 'shopall': case 'shopclr': case 'rcpsel': case 'rcpserv': case 'rcpone': case 'rcpall': this._shopAct(a, el); break;
       case 'annt': this._annT = el.dataset.i; this._renderSheet(); break;

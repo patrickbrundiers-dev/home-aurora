@@ -49,6 +49,13 @@ const DEFAULTS = {
       { name: 'RADIO BOB!', genre: 'Rock', cmd: 'spiele RADIO BOB' }, { name: 'Radio Bollerwagen', genre: 'Partyhits & Schlager' }, { name: 'ANTENNE BAYERN', genre: 'Pop & Hits' },
     ],
     // Hörspiele (Reiter auf der Radioseite): Alexa spielt sie von Deezer, Befehl ohne cmd = „spiele das neueste Album von ‹Name› auf Deezer“ (nur „‹Name› Hörspiel“ findet bei Deezer oft Film-Lieder); Filme brauchen den Albumnamen. Tippen öffnet die Folgenliste von Deezer (dz = Künstlername dort, leer = name); cmd gilt nur, wenn Deezer nicht erreichbar ist
+    // Reiter Deezer: Suche im Deezer-Katalog, Alexa spielt den Treffer (Deezer in der Alexa-App verknüpfen); favorites = feste Kacheln mit Alexa-Befehl
+    dz: {
+      favorites: [
+        { name: 'Mein Flow', genre: 'Deezer Flow', emoji: '🌊', cmd: 'spiele meinen Flow auf Deezer' },
+        { name: 'Lieblingssongs', genre: 'Deine Favoriten', emoji: '💜', cmd: 'spiele meine Lieblingssongs auf Deezer' },
+      ],
+    },
     hsp: {
       list: 'todo.horspiele', script: 'script.aurora_hoerspiel', // script: spielt eine Folge Kapitel für Kapitel ab Kapitel 1 (siehe README); fehlt es, startet Alexa das Album wie bisher
       items: [
