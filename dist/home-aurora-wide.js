@@ -49,6 +49,13 @@ const DEFAULTS = {
       { name: 'RADIO BOB!', genre: 'Rock', cmd: 'spiele RADIO BOB' }, { name: 'Radio Bollerwagen', genre: 'Partyhits & Schlager' }, { name: 'ANTENNE BAYERN', genre: 'Pop & Hits' },
     ],
     // Hörspiele (Reiter auf der Radioseite): Alexa spielt sie von Deezer, Befehl ohne cmd = „spiele das neueste Album von ‹Name› auf Deezer“ (nur „‹Name› Hörspiel“ findet bei Deezer oft Film-Lieder); Filme brauchen den Albumnamen. Tippen öffnet die Folgenliste von Deezer (dz = Künstlername dort, leer = name); cmd gilt nur, wenn Deezer nicht erreichbar ist
+    // Reiter Deezer: Suche im Deezer-Katalog, Alexa spielt den Treffer (Deezer in der Alexa-App verknüpfen); favorites = feste Kacheln mit Alexa-Befehl
+    dz: {
+      favorites: [
+        { name: 'Mein Flow', genre: 'Deezer Flow', emoji: '🌊', cmd: 'spiele meinen Flow auf Deezer' },
+        { name: 'Lieblingssongs', genre: 'Deine Favoriten', emoji: '💜', cmd: 'spiele meine Lieblingssongs auf Deezer' },
+      ],
+    },
     hsp: {
       list: 'todo.horspiele', script: 'script.aurora_hoerspiel', // script: spielt eine Folge Kapitel für Kapitel ab Kapitel 1 (siehe README); fehlt es, startet Alexa das Album wie bisher
       items: [
@@ -191,6 +198,7 @@ const ICONS = {
   heart: '<path d="M12 20s-8-4.7-8-10.5A4.5 4.5 0 0 1 12 7a4.5 4.5 0 0 1 8 2.5C20 15.300 12 20 12 20z"/>',
   sparkle: '<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.200-1.800z"/><path d="M19 16l.7 2 2 .7-2 .7-.7 2-.7-2-2-.7 2-.7z"/>',
   play: '<path d="M7 4v16l13-8z"/>',
+  search: '<circle cx="11" cy="11" r="7"/><path d="m20 20-3.6-3.6"/>',
   music: '<path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/>',
   speaker: '<rect x="5" y="2.5" width="14" height="19" rx="3"/><circle cx="12" cy="14" r="3.5"/><path d="M12 7h.01"/>',
   radio: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 9h18M8 5 6 2M16 5l2-3M7 13h.01M11 13h.01M15 13h.01M7 16h10"/>',
@@ -1550,6 +1558,7 @@ input.rx-bar[type=range]::-moz-range-thumb{width:24px;height:24px;border:0;borde
 .rxh{display:flex;flex-direction:column;align-items:stretch;gap:7px;padding:12px;border-radius:20px;font:inherit;color:var(--tx);cursor:pointer;text-align:left;min-width:0;transition:transform .2s,border-color .2s,box-shadow .2s}
 .rxh:active{transform:scale(.97)}.rxh .rxn{text-transform:none;letter-spacing:0;font-size:14px;color:var(--tx)}.rxg{font-size:12px;color:var(--tx3);margin-top:-4px}
 .rxh.on{border-color:rgba(94,234,212,.7);box-shadow:0 0 0 1px rgba(94,234,212,.4),0 0 26px rgba(94,234,212,.25)}.rxh.on .rxn{color:#5eead4}
+.rxc.dzc img{width:100%;height:100%;object-fit:cover;display:block}
 .rxh.rxadd .rxc{background:rgba(var(--wh),.04);border:1.5px dashed rgba(var(--wh),.22);color:var(--tx3)}.rxh.rxadd .rxn{color:var(--tx3)}
 .hs-top{display:flex;gap:8px;margin:4px 0 14px}.hs-top .vbt{flex:1;justify-content:center;height:52px;font-size:16px}
 .hs-list{display:flex;flex-direction:column;gap:2px}
@@ -3845,6 +3854,95 @@ class HomeAurora extends HTMLElement {
     this._toast('Rückgängig gemacht');
   }
 
+/* ───────────── pz44: Reiter Deezer auf der Radioseite · Deezer-Katalog durchsuchen, Alexa spielt den Treffer ───────────── */
+  /* Gesucht wird im öffentlichen Deezer-Katalog über _dzJsonp (abgeschottetes iframe, ohne Anmeldung). Abgespielt wird wie bei
+     Sendern und Hörspielen per Sprachbefehl über _rdCall („spiele die Playlist … auf Deezer“); Deezer muss dafür in der Alexa-App
+     verknüpft sein. Favoriten stehen in radio.dz.favorites (name, cmd, genre, emoji). */
+  _dzTypes() { return [['playlist', 'Playlists'], ['artist', 'Künstler'], ['album', 'Alben'], ['track', 'Titel']]; }
+  _dzType() {
+    if (this._dzT == null) { try { this._dzT = localStorage.getItem('home-aurora-dztype') || 'playlist'; } catch (e) { this._dzT = 'playlist'; } }
+    return this._dzTypes().some(t => t[0] === this._dzT) ? this._dzT : 'playlist';
+  }
+  _dzFavs() {
+    const D = { ...DEFAULTS.radio.dz, ...(this._rdC().dz || {}) };
+    return (D.favorites || []).filter(f => f && f.name).map((f, i) => ({ id: 'f' + i, name: String(f.name), sub: String(f.genre || 'Favorit'), emoji: String(f.emoji || ''), img: '', cmd: String(f.cmd || `spiele ${f.name} auf Deezer`) }));
+  }
+  _dzImg(u) { u = String(u || ''); return /^https:\/\/[\w.-]+\.dzcdn\.net\//.test(u) ? u : ''; }
+  /* ein Treffer als Kachel, mit dem Satz, den Alexa versteht (Titel wie bei Hörspielen ohne Klammern und Satzzeichen) */
+  _dzItem(type, a) {
+    const t = String((type === 'artist' ? a?.name : a?.title) || '').trim(); if (!t) return null;
+    const s = this._hsSay(t), art = String(a.artist?.name || '').trim();
+    const cmd = type === 'playlist' ? `spiele die Playlist ${s} auf Deezer` : type === 'artist' ? `spiele ${s} auf Deezer`
+      : `spiele ${type === 'album' ? 'das Album' : 'den Titel'} ${s}${this._hsVon(s, art)} auf Deezer`;
+    const fans = parseInt(a.nb_fan, 10), tr = parseInt(a.nb_tracks, 10);
+    const sub = type === 'playlist' ? [a.user?.name ? 'von ' + a.user.name : '', tr > 0 ? tr + ' Titel' : '']
+      : type === 'artist' ? [fans > 0 ? fans.toLocaleString('de-DE') + ' Fans' : 'Künstler'] : [art];
+    return { id: type + ':' + String(a.id || t), name: t.slice(0, 120), sub: sub.filter(Boolean).join(' · ').slice(0, 80), emoji: '', img: this._dzImg(a.picture_medium || a.cover_medium || a.album?.cover_medium), cmd };
+  }
+  async _dzSearch(q0) {
+    const inp = this.shadowRoot.getElementById('dzq'), q = String(q0 ?? inp?.value ?? this._dzQ ?? '').trim().slice(0, 100);
+    if (!q) { inp?.focus(); return; }
+    const type = this._dzType(), n = this._dzN = (this._dzN || 0) + 1, old = this._dzR;
+    this._dzQ = q;
+    this._dzR = { q, type, busy: true, list: old && old.q === q && old.type === type ? old.list : [] };
+    this._sig = ''; this._render();
+    let R;
+    try {
+      const r = await this._dzJsonp(`search/${type}?q=${encodeURIComponent(q)}&limit=30`);
+      if (!Array.isArray(r?.data)) throw new Error('unerwartete Antwort');
+      R = { q, type, list: r.data.map(a => this._dzItem(type, a)).filter(Boolean) };
+    } catch (er) { R = { q, type, list: [], err: String(er?.message || er || 'Fehler') }; }
+    if (n !== this._dzN) return;
+    this._dzR = R; this._sig = ''; this._render();
+  }
+  _dzPlay(id) {
+    const x = [...this._dzFavs(), ...(this._dzR?.list || [])].find(i => i.id === id), P = this._rdPlayer();
+    if (!x) return;
+    if (!P) { this._toast('Kein Lautsprecher erreichbar'); return; }
+    const c = this._rdCall(P, { name: x.name, cmd: x.cmd });
+    if (!c) { this._toast(`${P.name} kann Deezer nicht abspielen`, 3600); return; }
+    this._dzLast = x.id;
+    Promise.resolve(this._h.callService(...c)).then(() => this._toast(`${x.name} auf ${P.name}`), () => this._toast('Deezer konnte nicht gestartet werden', 3600));
+    this._sig = ''; this._render();
+  }
+  _dzAct(a, el) {
+    switch (a) {
+      case 'dzplay': this._dzPlay(el.dataset.id); break;
+      case 'dzsearch': this._dzSearch(); break;
+      case 'dztype':
+        this._dzT = el.dataset.m; try { localStorage.setItem('home-aurora-dztype', el.dataset.m); } catch (er) { /* ok */ }
+        if (this._dzQ) this._dzSearch(this._dzQ); else { this._sig = ''; this._render(); }
+        break;
+    }
+  }
+  _vDz(P, players, vol) {
+    const pl = !!P?.pl, f = P ? this._attr(P.e, 'supported_features') || 0 : 0, c = P ? this._mpCaps(P.e) : {}, on = P && (P.pl || P.ps);
+    const b = (act, ico, l, x, main) => `<button class="mpb${main ? ' main' : ''}" data-act="${act}" aria-label="${l}" ${x ? '' : 'disabled'}>${ic(ico, 20)}</button>`;
+    const R = this._dzR, type = this._dzType(), F = this._dzFavs();
+    const cover = x => x.img ? `<span class="rxc dzc"><img src="${esc(x.img)}" alt="" loading="lazy"></span>` : `<span class="rxc" style="background:${this._rdCol(x.name)}"><i>${esc(x.emoji || '🎵')}</i><b>${esc(x.name)}</b></span>`;
+    const tile = x => `<button class="c rxh${this._dzLast === x.id ? ' on' : ''}" data-act="dzplay" data-id="${esc(x.id)}">${cover(x)}<span class="rxn">${esc(x.name)}</span><span class="rxg">${esc(x.sub || 'Deezer')}</span></button>`;
+    const title = on ? P.title || 'Wiedergabe' : P ? 'Bereit' : 'Kein Player erreichbar';
+    const sub = on ? P.artist || '' : P ? 'Suche unten oder tippe auf einen Favoriten' : 'Alle Lautsprecher sind offline';
+    const types = `<div class="rx-tabs rx-cats">${this._dzTypes().map(t => `<button class="${type === t[0] ? 'on' : ''}" data-act="dztype" data-m="${t[0]}">${t[1]}</button>`).join('')}</div>`;
+    const res = !R ? `<div class="empty sm">Suche nach Künstlern, Alben, Playlists oder Titeln. Tippen = auf ${P ? esc(P.name) : 'dem Lautsprecher'} abspielen.</div>`
+      : R.busy && !R.list.length ? `<div class="empty sm">Suche bei Deezer …</div>`
+      : R.err ? `<div class="card-note">Die Deezer-Suche ist gerade nicht erreichbar. Versuch es gleich noch einmal.</div>`
+      : !R.list.length ? `<div class="empty sm">Bei Deezer nichts zu „${esc(R.q)}“ gefunden</div>`
+      : `<div class="rx-hs">${R.list.map(tile).join('')}</div>`;
+    const hits = R && !R.err && R.list.length ? `<span class="r">${R.list.length} Treffer für „${esc(R.q)}“</span>` : '';
+    return `<div class="rx">
+        <section class="c rx-hbar"><span class="rxc sm" style="background:linear-gradient(135deg,#a238ff,#ef5466)"><i>🎵</i></span>
+          <div class="rx-tr"><div class="rx-k">${pl ? 'JETZT LÄUFT' : P?.ps ? 'PAUSIERT' : 'DEEZER'}</div><div class="rx-t">${esc(title)}</div><div class="rx-a">${esc(sub)}</div></div>
+          <div class="rx-tp">${b('rdprev', 'prev', 'Zurück', on && f & 16)}${b('rdpower', pl ? 'pause' : 'play', pl ? 'Pause' : 'Abspielen', P && (pl ? c.pause || c.stop : P.ps && c.play), 1)}${b('rdnext', 'next', 'Weiter', on && f & 32)}</div>
+          <div class="rx-vol rx-hv"><div class="rx-vh2"><span>LAUTSTÄRKE</span><b>${vol != null ? vol + ' %' : '–'}</b></div>
+            <input class="rx-bar" type="range" min="0" max="100" value="${vol ?? 0}" data-act="rdvol" aria-label="Lautstärke" ${vol != null ? '' : 'disabled'}></div></section>
+        ${players}
+        ${F.length ? `<div class="h">${ic('heart', 14)} Favoriten <span class="r">Tippen = sofort spielen</span></div><div class="rx-hs">${F.map(tile).join('')}</div>` : ''}
+        <div class="h">${ic('search', 14)} Deezer durchsuchen ${hits}</div>
+        <div class="addrow"><input id="dzq" type="search" maxlength="100" placeholder="Künstler, Album, Playlist oder Titel" value="${esc(this._dzQ || '')}" autocomplete="off" enterkeyhint="search" aria-label="Deezer durchsuchen"><button data-act="dzsearch" aria-label="Suchen">${ic('search', 20)}</button></div>
+        ${types}${res}
+      </div>`;
+  }
 /* ───────────── pz34: Radio · Senderskala, Player-Auswahl, Sender verwalten · pz35: Reiter Hörspiele · pz37: Folgen-Fenster ───────────── */
   /* Sender und Hörspiele stehen je in einer HA-To-do-Liste (radio.list bzw. radio.hsp.list, je Eintrag einer; Beschreibung = JSON
      mit genre/cmd/url/emoji), damit Handy und Tablet dieselben sehen. Ist die Liste leer oder fehlt sie, gelten die aus der Konfiguration. */
@@ -3915,7 +4013,7 @@ class HomeAurora extends HTMLElement {
     return hit || S.find(x => x.name === this._rdLast?.[P.name]) || null;
   }
   _vRadio() {
-    const K = this._rdK(); if (this._rdListE()) this._loadRd();
+    const K = this._rdK(), dz = this._rdTab === 'dz'; if (this._rdListE()) this._loadRd();
     const S = this._rdStations(), P = this._rdPlayer(), PL = this._rdPlayers(), cur = this._rdNow(P, S);
     const pl = !!P?.pl, vol = P && P.vol != null ? Math.round(P.vol * 100) : null, n = S.length;
     const pos = i => n > 1 ? 6 + i * 88 / (n - 1) : 50;
@@ -3927,9 +4025,10 @@ class HomeAurora extends HTMLElement {
     const sub = cur ? [cur.genre, P.title && P.title !== cur.name ? P.title : ''].filter(Boolean).join(' · ') || 'Internetradio' : P ? (P.title ? P.artist || '' : 'Tippe unten auf einen Sender') : 'Alle Lautsprecher sind offline';
     const qv = [['−5', -5], ['Leise', 20], ['Normal', 35], ['Laut', 60], ['+5', 5]];
     const players = `<div class="h">${ic('speaker', 14)} Abspielen auf</div><div class="rx-pls">${PL.map(chip).join('')}</div>`;
-    const head = `<div class="vh rx-vh"><div><h1>Radio</h1><p>${P ? (pl ? 'Spielt auf ' : 'Abspielen auf ') + esc(P.name) : 'Kein Player erreichbar'} · ${n} ${K.k === 'hs' ? (n === 1 ? 'Hörspiel' : 'Hörspiele') : 'Sender'}</p></div>
-        <div class="rx-top"><button class="qb" data-act="rdedit">${ic('pen', 14)}${K.nouns} bearbeiten</button><span class="rx-live${pl ? ' on' : ''}"><i></i>${pl ? 'ON AIR' : P ? (P.ps ? 'PAUSE' : 'BEREIT') : 'OFFLINE'}</span></div></div>
-      <div class="rx-tabs"><button class="${K.k === 'rd' ? 'on' : ''}" data-act="rdtab" data-m="rd">${ic('radio', 16)}Radio</button><button class="${K.k === 'hs' ? 'on' : ''}" data-act="rdtab" data-m="hs">${ic('music', 16)}Hörspiele</button></div>`;
+    const head = `<div class="vh rx-vh"><div><h1>Radio</h1><p>${P ? (pl ? 'Spielt auf ' : 'Abspielen auf ') + esc(P.name) : 'Kein Player erreichbar'} · ${dz ? 'Deezer' : `${n} ${K.k === 'hs' ? (n === 1 ? 'Hörspiel' : 'Hörspiele') : 'Sender'}`}</p></div>
+        <div class="rx-top">${dz ? '' : `<button class="qb" data-act="rdedit">${ic('pen', 14)}${K.nouns} bearbeiten</button>`}<span class="rx-live${pl ? ' on' : ''}"><i></i>${pl ? 'ON AIR' : P ? (P.ps ? 'PAUSE' : 'BEREIT') : 'OFFLINE'}</span></div></div>
+      <div class="rx-tabs"><button class="${K.k === 'rd' && !dz ? 'on' : ''}" data-act="rdtab" data-m="rd">${ic('radio', 16)}Radio</button><button class="${K.k === 'hs' ? 'on' : ''}" data-act="rdtab" data-m="hs">${ic('music', 16)}Hörspiele</button><button class="${dz ? 'on' : ''}" data-act="rdtab" data-m="dz">${ic('search', 16)}Deezer</button></div>`;
+    if (dz) return head + this._vDz(P, players, vol);
     if (K.k === 'hs') return head + this._vHsp(S, P, cur, players, vol);
     return head + `<div class="rx">
         <section class="c rx-dial"><div class="rx-scale"><div class="rx-nums">${nums}</div><div class="rx-tk"></div><div class="rx-tk2"></div><div class="rx-marks">${marks}</div>
@@ -5177,6 +5276,7 @@ class HomeAurora extends HTMLElement {
       if (this._ht && Math.abs(ev.movementX) + Math.abs(ev.movementY) > 6) cancel();
     });
     root.addEventListener('input', ev => {
+      if (ev.target.id === 'dzq') { this._dzQ = ev.target.value; return; }
       if (ev.target.id === 'pzq') { const st = this._pzSt(); if (st) { st.q = ev.target.value; this._pzRefresh(); } return; }
       const el = ev.target.closest('input[data-act="bright"],input[data-act="vol"],input[data-act="rdvol"]');
       if (el) { el.style.setProperty('--v', el.value + '%'); if (el.dataset.act === 'vol' && el.nextElementSibling) el.nextElementSibling.textContent = el.value + ' %'; }
@@ -5218,6 +5318,7 @@ class HomeAurora extends HTMLElement {
       if (ev.key === 'Escape') this._closeSheet();
       else if (ev.key === 'Enter' && ev.target.id === 'annq') { ev.preventDefault(); this._annSend(); }
       else if (ev.key === 'Enter' && ev.target.id === 'shopq') { ev.preventDefault(); this._shopInput(); }
+      else if (ev.key === 'Enter' && ev.target.id === 'dzq') { ev.preventDefault(); ev.target.blur(); this._dzSearch(); }
       else if (ev.key === 'Enter' && /^rd[ncgjzk]$/.test(ev.target.id)) { ev.preventDefault(); this._rdSave(); }
     });
     root.addEventListener('contextmenu', ev => { if (ev.target.closest && ev.target.closest('[data-hold]')) ev.preventDefault(); });
@@ -5276,6 +5377,7 @@ class HomeAurora extends HTMLElement {
       case 'sched': this._sheet = { t: 'sched' }; this._renderSheet(); break;
       case 'schedtab': this._schedTab = el.dataset.m; this._renderSheet(); break;
       case 'rdplay': case 'rdsel': case 'rdpower': case 'rdqv': case 'rdedit': case 'rdpick': case 'rdsave': case 'rddel': case 'rdtab': case 'rdprev': case 'rdnext': case 'hscat': case 'hsopen': case 'hsrnd': case 'hsplay': case 'hsold': case 'hsmore': case 'hsre': this._rdAct(a, el); break;
+      case 'dzplay': case 'dzsearch': case 'dztype': this._dzAct(a, el); break;
       case 'music': this._sheet = { t: 'music' }; this._renderSheet(); break;
       case 'shop': case 'shoptab': case 'shopadd': case 'shopq': case 'shopdone': case 'shopundo': case 'shopall': case 'shopclr': case 'rcpsel': case 'rcpserv': case 'rcpone': case 'rcpall': this._shopAct(a, el); break;
       case 'annt': this._annT = el.dataset.i; this._renderSheet(); break;

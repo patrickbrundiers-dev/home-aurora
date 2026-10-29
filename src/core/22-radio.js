@@ -68,7 +68,7 @@
     return hit || S.find(x => x.name === this._rdLast?.[P.name]) || null;
   }
   _vRadio() {
-    const K = this._rdK(); if (this._rdListE()) this._loadRd();
+    const K = this._rdK(), dz = this._rdTab === 'dz'; if (this._rdListE()) this._loadRd();
     const S = this._rdStations(), P = this._rdPlayer(), PL = this._rdPlayers(), cur = this._rdNow(P, S);
     const pl = !!P?.pl, vol = P && P.vol != null ? Math.round(P.vol * 100) : null, n = S.length;
     const pos = i => n > 1 ? 6 + i * 88 / (n - 1) : 50;
@@ -80,9 +80,10 @@
     const sub = cur ? [cur.genre, P.title && P.title !== cur.name ? P.title : ''].filter(Boolean).join(' · ') || 'Internetradio' : P ? (P.title ? P.artist || '' : 'Tippe unten auf einen Sender') : 'Alle Lautsprecher sind offline';
     const qv = [['−5', -5], ['Leise', 20], ['Normal', 35], ['Laut', 60], ['+5', 5]];
     const players = `<div class="h">${ic('speaker', 14)} Abspielen auf</div><div class="rx-pls">${PL.map(chip).join('')}</div>`;
-    const head = `<div class="vh rx-vh"><div><h1>Radio</h1><p>${P ? (pl ? 'Spielt auf ' : 'Abspielen auf ') + esc(P.name) : 'Kein Player erreichbar'} · ${n} ${K.k === 'hs' ? (n === 1 ? 'Hörspiel' : 'Hörspiele') : 'Sender'}</p></div>
-        <div class="rx-top"><button class="qb" data-act="rdedit">${ic('pen', 14)}${K.nouns} bearbeiten</button><span class="rx-live${pl ? ' on' : ''}"><i></i>${pl ? 'ON AIR' : P ? (P.ps ? 'PAUSE' : 'BEREIT') : 'OFFLINE'}</span></div></div>
-      <div class="rx-tabs"><button class="${K.k === 'rd' ? 'on' : ''}" data-act="rdtab" data-m="rd">${ic('radio', 16)}Radio</button><button class="${K.k === 'hs' ? 'on' : ''}" data-act="rdtab" data-m="hs">${ic('music', 16)}Hörspiele</button></div>`;
+    const head = `<div class="vh rx-vh"><div><h1>Radio</h1><p>${P ? (pl ? 'Spielt auf ' : 'Abspielen auf ') + esc(P.name) : 'Kein Player erreichbar'} · ${dz ? 'Deezer' : `${n} ${K.k === 'hs' ? (n === 1 ? 'Hörspiel' : 'Hörspiele') : 'Sender'}`}</p></div>
+        <div class="rx-top">${dz ? '' : `<button class="qb" data-act="rdedit">${ic('pen', 14)}${K.nouns} bearbeiten</button>`}<span class="rx-live${pl ? ' on' : ''}"><i></i>${pl ? 'ON AIR' : P ? (P.ps ? 'PAUSE' : 'BEREIT') : 'OFFLINE'}</span></div></div>
+      <div class="rx-tabs"><button class="${K.k === 'rd' && !dz ? 'on' : ''}" data-act="rdtab" data-m="rd">${ic('radio', 16)}Radio</button><button class="${K.k === 'hs' ? 'on' : ''}" data-act="rdtab" data-m="hs">${ic('music', 16)}Hörspiele</button><button class="${dz ? 'on' : ''}" data-act="rdtab" data-m="dz">${ic('search', 16)}Deezer</button></div>`;
+    if (dz) return head + this._vDz(P, players, vol);
     if (K.k === 'hs') return head + this._vHsp(S, P, cur, players, vol);
     return head + `<div class="rx">
         <section class="c rx-dial"><div class="rx-scale"><div class="rx-nums">${nums}</div><div class="rx-tk"></div><div class="rx-tk2"></div><div class="rx-marks">${marks}</div>

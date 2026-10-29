@@ -176,6 +176,17 @@ for (const [vn, states] of VARIANTS) for (const t of TARGETS.filter((x) => !only
   await page.evaluate(() => { const el = window.__el, x = el._hsX(); el._hsF[el._hsKey(x)] = { err: 'nicht erreichbar' }; el._renderSheet(); });
   await check('fenster folgen offline', () => window.__el.shadowRoot.querySelector('.sheet').textContent.trim().length);
   await page.evaluate(() => { const el = window.__el; el._closeSheet(); el._rdTab = 'rd'; el._v = 'home'; });
+  // Reiter Deezer: Favoriten, dann eine Suche mit festen Antworten
+  await page.evaluate(() => { const el = window.__el; el._dzR = null; el._dzQ = ''; el._dzT = 'playlist'; el._v = 'radio'; el._rdTab = 'dz'; el._sig = ''; el._render();
+    el._dzJsonp = async (path) => path.startsWith('search/playlist') ? { data: [{ id: 7, title: 'Chillout Lounge (Deluxe)', nb_tracks: 80, user: { name: 'Deezer Chill' }, picture_medium: 'https://e-cdns-images.dzcdn.net/images/cover/x/250x250.jpg' }, { id: 8, title: 'Sommerhits 2026', user: {} }, { id: 9 }] } : { data: [] }; });
+  await check('ansicht radio deezer', () => window.__el.shadowRoot.querySelector('main').textContent.trim().length);
+  await page.evaluate(() => window.__el._dzSearch('chill'));
+  await check('deezer suche', () => { const n = window.__el.shadowRoot.querySelectorAll('.rxh[data-act="dzplay"]').length; if (n !== 4) throw new Error('Deezer zeigt ' + n + ' statt 4 Kacheln'); return window.__el.shadowRoot.querySelector('main').textContent.trim().length; });
+  await page.evaluate(() => { const el = window.__el; el._dzT = 'artist'; return el._dzSearch('niemand'); });
+  await check('deezer nichts gefunden', () => window.__el.shadowRoot.querySelector('main').textContent.trim().length);
+  await page.evaluate(() => { const el = window.__el; el._dzJsonp = async () => { throw new Error('nicht erreichbar'); }; return el._dzSearch('chill'); });
+  await check('deezer offline', () => window.__el.shadowRoot.querySelector('main').textContent.trim().length);
+  await page.evaluate(() => { const el = window.__el; el._dzR = null; el._dzQ = ''; el._dzT = 'playlist'; el._rdTab = 'rd'; el._v = 'home'; });
   // Rezepte: Übersicht und ein geöffnetes Rezept (mit Portionen umgerechnet)
   await page.evaluate(() => { const el = window.__el; el._v = 'home'; el._shopTab = 'rcp'; el._rcpSel = null; el._sheet = { t: 'shop' }; el._render(); });
   await check('fenster rezepte', () => window.__el.shadowRoot.querySelector('.sheet').textContent.trim().length);
