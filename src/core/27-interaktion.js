@@ -127,7 +127,7 @@
       case 'dzplay': case 'dzsearch': case 'dztype': this._dzAct(a, el); break;
       case 'music': this._sheet = { t: 'music' }; this._renderSheet(); break;
       case 'shop': case 'shoptab': case 'shopadd': case 'shopq': case 'shopdone': case 'shopundo': case 'shopall': case 'shopclr': case 'rcpsel': case 'rcpserv': case 'rcpone': case 'rcpall': this._shopAct(a, el); break;
-      case 'cho': case 'chou': case 'choclaim': case 'chook': case 'chono': case 'chopt': case 'chopen': this._choAct(a, el); break;
+      case 'cho': case 'chou': case 'choclaim': case 'chook': case 'chono': case 'chopt': case 'chopen': case 'rwok': case 'rwclaim': this._choAct(a, el); break;
       case 'annt': this._annT = el.dataset.i; this._renderSheet(); break;
       case 'annph': { const p = (this._c.music?.phrases || [])[+el.dataset.i], inp = this.shadowRoot.getElementById('annq'); if (p && inp) { inp.value = p; inp.focus(); } break; }
       case 'annsend': this._annSend(); break;

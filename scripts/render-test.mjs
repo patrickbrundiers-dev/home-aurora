@@ -151,6 +151,10 @@ for (const [vn, states] of VARIANTS) for (const t of TARGETS.filter((x) => !only
     await page.evaluate((id) => { const el = window.__el; el._v = 'home'; el._sheet = { t: 'heat', id }; el._render(); }, id);
     await check(`fenster heizung ${id}`, () => window.__el.shadowRoot.querySelector('.sheet').textContent.trim().length);
   }
+  // Aufgaben & Punkte: zweites Kind, nach unten zu den Belohnungen gerollt
+  await page.evaluate(() => { const el = window.__el; el._v = 'home'; el._choSel = 'Nele'; el._sheet = { t: 'cho' }; el._render(); const r = el.shadowRoot.querySelector('.rwdg'); if (r) el._sh.scrollTop = r.offsetTop - 120; });
+  await check('fenster aufgaben belohnungen', () => window.__el.shadowRoot.querySelector('.sheet').textContent.trim().length);
+  await page.evaluate(() => { window.__el._choSel = ''; });
   // Kalender: Monat und Liste (Woche ist der Standard beim Öffnen)
   for (const m of ['month', 'list']) {
     await page.evaluate((m) => { const el = window.__el; el._v = 'home'; el._calMode = m; el._sheet = { t: 'cal' }; el._render(); }, m);

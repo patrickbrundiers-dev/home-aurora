@@ -4,7 +4,7 @@
   _sSet() {
     const th = this._themePref || this._c.theme || 'dark', am = String(this._ambMin());
     const seg = (act, cur, items) => `<div class="seg wide">${items.map(x => `<button class="${cur === x[0] ? 'on' : ''}" data-act="${act}" data-m="${x[0]}">${x[1]}</button>`).join('')}</div>`;
-    return `<div class="grab"></div><div class="sh"><div class="ico">${ic('cog', 24)}</div><div><h2>Darstellung &amp; Modi</h2><p>Home Aurora v5.2 · Build pz45</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
+    return `<div class="grab"></div><div class="sh"><div class="ico">${ic('cog', 24)}</div><div><h2>Darstellung &amp; Modi</h2><p>Home Aurora v5.2 · Build pz46</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
       <div class="lab2">DESIGN</div>${seg('theme', th, [['dark', 'Dunkel'], ['light', 'Hell'], ['auto', 'Automatisch']])}
       <div class="card-note">„Automatisch“ folgt dem Dunkel-/Hellmodus deines Home-Assistant-Profils. Die Auswahl gilt nur für dieses Gerät.</div>
       ${WALL_UI ? `      <div class="lab2">WANDTABLET-MODUS</div>
@@ -134,7 +134,7 @@
     if (this._pzOn()) { const T = this._pzSum().T, due = T.filter(t => !t.today && (t.st === 'overdue' || (t.st === 'due_soon' && t.until === 0))).length; if (due) chip('broom', `Heute putzen · ${due} ${due === 1 ? 'Aufgabe' : 'Aufgaben'}`); }
     if (this._shopOn() && this._shopOk()) { const n = parseInt(this._val(this._shopC().list), 10) || 0; if (n) chip('cart', `Einkaufsliste · ${n} ${n === 1 ? 'Sache' : 'Sachen'}`); }
     { const b = this._bathNow(); if (b) chip('bath', `Bad besetzt · ${esc(b.st)} ${esc(this._sinceMin(b.t))}`); }
-    if (this._choOn() && this._choOk()) { const S = this._choSum(); if (S.wait) chip('star', `${S.wait} ${S.wait === 1 ? 'Aufgabe wartet' : 'Aufgaben warten'} auf OK`); else if (S.open) chip('star', `Kinder-Aufgaben · ${S.open} offen`); }
+    if (this._choOn() && this._choOk()) { const S = this._choSum(); if (S.wait) chip('star', `${S.wait} ${S.wait === 1 ? 'wartet' : 'warten'} auf OK`); else if (S.open) chip('star', `Kinder-Aufgaben · ${S.open} offen`); }
     const lights = this._lightsOn().length; if (lights) chip('bulb', `${lights} ${lights === 1 ? 'Licht' : 'Lichter'} an`);
     return C.join('');
   }

@@ -11955,6 +11955,35 @@
 }
 ],
 "purpose": "purpose_dashboard_helper",
+"rewards": [
+{
+"approvals": 0,
+"claims": 0,
+"cost": 5.0,
+"eid": "sensor.leonie_choreops_belohnungsstatus_eis_oder_sussigkeit",
+"labels": [],
+"name": "Eis oder Süßigkeit",
+"status": "locked"
+},
+{
+"approvals": 0,
+"claims": 0,
+"cost": 25.0,
+"eid": "sensor.leonie_choreops_belohnungsstatus_film_aussuchen",
+"labels": [],
+"name": "Film aussuchen",
+"status": "locked"
+},
+{
+"approvals": 0,
+"claims": 0,
+"cost": 100.0,
+"eid": "sensor.leonie_choreops_belohnungsstatus_ausflug",
+"labels": [],
+"name": "Ausflug (Kino, Schwimmbad …)",
+"status": "locked"
+}
+],
 "user_name": "Leonie"
 },
 "context": {
@@ -12181,6 +12210,35 @@
 }
 ],
 "purpose": "purpose_dashboard_helper",
+"rewards": [
+{
+"approvals": 0,
+"claims": 0,
+"cost": 5.0,
+"eid": "sensor.nele_choreops_belohnungsstatus_eis_oder_sussigkeit",
+"labels": [],
+"name": "Eis oder Süßigkeit",
+"status": "claimed"
+},
+{
+"approvals": 0,
+"claims": 0,
+"cost": 25.0,
+"eid": "sensor.nele_choreops_belohnungsstatus_film_aussuchen",
+"labels": [],
+"name": "Film aussuchen",
+"status": "locked"
+},
+{
+"approvals": 0,
+"claims": 0,
+"cost": 100.0,
+"eid": "sensor.nele_choreops_belohnungsstatus_ausflug",
+"labels": [],
+"name": "Ausflug (Kino, Schwimmbad …)",
+"status": "locked"
+}
+],
 "user_name": "Nele"
 },
 "context": {
@@ -12341,6 +12399,35 @@
 }
 ],
 "purpose": "purpose_dashboard_helper",
+"rewards": [
+{
+"approvals": 0,
+"claims": 0,
+"cost": 5.0,
+"eid": "sensor.lisa_choreops_belohnungsstatus_eis_oder_sussigkeit",
+"labels": [],
+"name": "Eis oder Süßigkeit",
+"status": "locked"
+},
+{
+"approvals": 0,
+"claims": 0,
+"cost": 25.0,
+"eid": "sensor.lisa_choreops_belohnungsstatus_film_aussuchen",
+"labels": [],
+"name": "Film aussuchen",
+"status": "locked"
+},
+{
+"approvals": 0,
+"claims": 0,
+"cost": 100.0,
+"eid": "sensor.lisa_choreops_belohnungsstatus_ausflug",
+"labels": [],
+"name": "Ausflug (Kino, Schwimmbad …)",
+"status": "locked"
+}
+],
 "user_name": "Lisa"
 },
 "context": {
@@ -12350,5 +12437,194 @@
 "last_changed": "2026-11-01T08:00:00+00:00",
 "last_updated": "2026-11-01T08:00:00+00:00",
 "state": "available"
+},
+"sensor.leonie_choreops_belohnungsstatus_eis_oder_sussigkeit": {
+"attributes": {
+"approve_button_eid": "button.leonie_choreops_belohnung_genehmigen_eis_oder_sussigkeit",
+"claim_button_eid": "button.leonie_choreops_belohnung_beanspruchen_eis_oder_sussigkeit",
+"cost": 5.0,
+"disapprove_button_eid": "button.leonie_choreops_belohnung_ablehnen_eis_oder_sussigkeit",
+"friendly_name": "Leonie (ChoreOps) Belohnungsstatus - Eis oder Süßigkeit",
+"icon": "mdi:ice-cream",
+"pending_claims": 0,
+"purpose": "purpose_reward_status",
+"reward_name": "Eis oder Süßigkeit",
+"user_name": "Leonie"
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "sensor.leonie_choreops_belohnungsstatus_eis_oder_sussigkeit",
+"last_changed": "2026-11-01T08:00:00+00:00",
+"last_updated": "2026-11-01T08:00:00+00:00",
+"state": "locked"
+},
+"sensor.leonie_choreops_belohnungsstatus_film_aussuchen": {
+"attributes": {
+"approve_button_eid": "button.leonie_choreops_belohnung_genehmigen_film_aussuchen",
+"claim_button_eid": "button.leonie_choreops_belohnung_beanspruchen_film_aussuchen",
+"cost": 25.0,
+"disapprove_button_eid": "button.leonie_choreops_belohnung_ablehnen_film_aussuchen",
+"friendly_name": "Leonie (ChoreOps) Belohnungsstatus - Film aussuchen",
+"icon": "mdi:movie-open",
+"pending_claims": 0,
+"purpose": "purpose_reward_status",
+"reward_name": "Film aussuchen",
+"user_name": "Leonie"
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "sensor.leonie_choreops_belohnungsstatus_film_aussuchen",
+"last_changed": "2026-11-01T08:00:00+00:00",
+"last_updated": "2026-11-01T08:00:00+00:00",
+"state": "locked"
+},
+"sensor.leonie_choreops_belohnungsstatus_ausflug": {
+"attributes": {
+"approve_button_eid": "button.leonie_choreops_belohnung_genehmigen_ausflug",
+"claim_button_eid": "button.leonie_choreops_belohnung_beanspruchen_ausflug",
+"cost": 100.0,
+"disapprove_button_eid": "button.leonie_choreops_belohnung_ablehnen_ausflug",
+"friendly_name": "Leonie (ChoreOps) Belohnungsstatus - Ausflug (Kino, Schwimmbad …)",
+"icon": "mdi:ticket",
+"pending_claims": 0,
+"purpose": "purpose_reward_status",
+"reward_name": "Ausflug (Kino, Schwimmbad …)",
+"user_name": "Leonie"
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "sensor.leonie_choreops_belohnungsstatus_ausflug",
+"last_changed": "2026-11-01T08:00:00+00:00",
+"last_updated": "2026-11-01T08:00:00+00:00",
+"state": "locked"
+},
+"sensor.nele_choreops_belohnungsstatus_eis_oder_sussigkeit": {
+"attributes": {
+"approve_button_eid": "button.nele_choreops_belohnung_genehmigen_eis_oder_sussigkeit",
+"claim_button_eid": "button.nele_choreops_belohnung_beanspruchen_eis_oder_sussigkeit",
+"cost": 5.0,
+"disapprove_button_eid": "button.nele_choreops_belohnung_ablehnen_eis_oder_sussigkeit",
+"friendly_name": "Nele (ChoreOps) Belohnungsstatus - Eis oder Süßigkeit",
+"icon": "mdi:ice-cream",
+"pending_claims": 1,
+"purpose": "purpose_reward_status",
+"reward_name": "Eis oder Süßigkeit",
+"user_name": "Nele"
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "sensor.nele_choreops_belohnungsstatus_eis_oder_sussigkeit",
+"last_changed": "2026-11-01T08:00:00+00:00",
+"last_updated": "2026-11-01T08:00:00+00:00",
+"state": "claimed"
+},
+"sensor.nele_choreops_belohnungsstatus_film_aussuchen": {
+"attributes": {
+"approve_button_eid": "button.nele_choreops_belohnung_genehmigen_film_aussuchen",
+"claim_button_eid": "button.nele_choreops_belohnung_beanspruchen_film_aussuchen",
+"cost": 25.0,
+"disapprove_button_eid": "button.nele_choreops_belohnung_ablehnen_film_aussuchen",
+"friendly_name": "Nele (ChoreOps) Belohnungsstatus - Film aussuchen",
+"icon": "mdi:movie-open",
+"pending_claims": 0,
+"purpose": "purpose_reward_status",
+"reward_name": "Film aussuchen",
+"user_name": "Nele"
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "sensor.nele_choreops_belohnungsstatus_film_aussuchen",
+"last_changed": "2026-11-01T08:00:00+00:00",
+"last_updated": "2026-11-01T08:00:00+00:00",
+"state": "locked"
+},
+"sensor.nele_choreops_belohnungsstatus_ausflug": {
+"attributes": {
+"approve_button_eid": "button.nele_choreops_belohnung_genehmigen_ausflug",
+"claim_button_eid": "button.nele_choreops_belohnung_beanspruchen_ausflug",
+"cost": 100.0,
+"disapprove_button_eid": "button.nele_choreops_belohnung_ablehnen_ausflug",
+"friendly_name": "Nele (ChoreOps) Belohnungsstatus - Ausflug (Kino, Schwimmbad …)",
+"icon": "mdi:ticket",
+"pending_claims": 0,
+"purpose": "purpose_reward_status",
+"reward_name": "Ausflug (Kino, Schwimmbad …)",
+"user_name": "Nele"
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "sensor.nele_choreops_belohnungsstatus_ausflug",
+"last_changed": "2026-11-01T08:00:00+00:00",
+"last_updated": "2026-11-01T08:00:00+00:00",
+"state": "locked"
+},
+"sensor.lisa_choreops_belohnungsstatus_eis_oder_sussigkeit": {
+"attributes": {
+"approve_button_eid": "button.lisa_choreops_belohnung_genehmigen_eis_oder_sussigkeit",
+"claim_button_eid": "button.lisa_choreops_belohnung_beanspruchen_eis_oder_sussigkeit",
+"cost": 5.0,
+"disapprove_button_eid": "button.lisa_choreops_belohnung_ablehnen_eis_oder_sussigkeit",
+"friendly_name": "Lisa (ChoreOps) Belohnungsstatus - Eis oder Süßigkeit",
+"icon": "mdi:ice-cream",
+"pending_claims": 0,
+"purpose": "purpose_reward_status",
+"reward_name": "Eis oder Süßigkeit",
+"user_name": "Lisa"
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "sensor.lisa_choreops_belohnungsstatus_eis_oder_sussigkeit",
+"last_changed": "2026-11-01T08:00:00+00:00",
+"last_updated": "2026-11-01T08:00:00+00:00",
+"state": "locked"
+},
+"sensor.lisa_choreops_belohnungsstatus_film_aussuchen": {
+"attributes": {
+"approve_button_eid": "button.lisa_choreops_belohnung_genehmigen_film_aussuchen",
+"claim_button_eid": "button.lisa_choreops_belohnung_beanspruchen_film_aussuchen",
+"cost": 25.0,
+"disapprove_button_eid": "button.lisa_choreops_belohnung_ablehnen_film_aussuchen",
+"friendly_name": "Lisa (ChoreOps) Belohnungsstatus - Film aussuchen",
+"icon": "mdi:movie-open",
+"pending_claims": 0,
+"purpose": "purpose_reward_status",
+"reward_name": "Film aussuchen",
+"user_name": "Lisa"
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "sensor.lisa_choreops_belohnungsstatus_film_aussuchen",
+"last_changed": "2026-11-01T08:00:00+00:00",
+"last_updated": "2026-11-01T08:00:00+00:00",
+"state": "locked"
+},
+"sensor.lisa_choreops_belohnungsstatus_ausflug": {
+"attributes": {
+"approve_button_eid": "button.lisa_choreops_belohnung_genehmigen_ausflug",
+"claim_button_eid": "button.lisa_choreops_belohnung_beanspruchen_ausflug",
+"cost": 100.0,
+"disapprove_button_eid": "button.lisa_choreops_belohnung_ablehnen_ausflug",
+"friendly_name": "Lisa (ChoreOps) Belohnungsstatus - Ausflug (Kino, Schwimmbad …)",
+"icon": "mdi:ticket",
+"pending_claims": 0,
+"purpose": "purpose_reward_status",
+"reward_name": "Ausflug (Kino, Schwimmbad …)",
+"user_name": "Lisa"
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "sensor.lisa_choreops_belohnungsstatus_ausflug",
+"last_changed": "2026-11-01T08:00:00+00:00",
+"last_updated": "2026-11-01T08:00:00+00:00",
+"state": "locked"
 }
 }
