@@ -4,7 +4,7 @@
   _sSet() {
     const th = this._themePref || this._c.theme || 'dark', am = String(this._ambMin());
     const seg = (act, cur, items) => `<div class="seg wide">${items.map(x => `<button class="${cur === x[0] ? 'on' : ''}" data-act="${act}" data-m="${x[0]}">${x[1]}</button>`).join('')}</div>`;
-    return `<div class="grab"></div><div class="sh"><div class="ico">${ic('cog', 24)}</div><div><h2>Darstellung &amp; Modi</h2><p>Home Aurora v5.2 · Build pz47</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
+    return `<div class="grab"></div><div class="sh"><div class="ico">${ic('cog', 24)}</div><div><h2>Darstellung &amp; Modi</h2><p>Home Aurora v5.2 · Build pz48</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
       <div class="lab2">DESIGN</div>${seg('theme', th, [['dark', 'Dunkel'], ['light', 'Hell'], ['auto', 'Automatisch']])}
       <div class="card-note">„Automatisch“ folgt dem Dunkel-/Hellmodus deines Home-Assistant-Profils. Die Auswahl gilt nur für dieses Gerät.</div>
       ${WALL_UI ? `      <div class="lab2">WANDTABLET-MODUS</div>
@@ -85,6 +85,12 @@
      Status-Sensor der Integration Badezimmer Presence liefert Schlüssel (free, toilet, shower …), angezeigt wird die
      übersetzte Form; der alte Template-Sensor mit deutschem Text („Frei“) funktioniert weiter. */
   _bathState() { const e = this._c.stats.bath, s = e && this._s(e); if (!s || !okv(s.state)) return null; let txt = s.state; try { if (this._h && this._h.formatEntityState) txt = this._h.formatEntityState(s) || s.state; } catch (_) {} const t = Date.parse(s.last_changed); return { txt, free: s.state === 'free' || s.state === 'Frei', t: isNaN(t) ? null : t }; }
+  _bathP() {
+    const p = this._c.bath?.presence; if (!p) return null;
+    const x = id => (this._s(id) ? id : null);
+    const G = [['dusche', 'Dusche', 'drop'], ['wc', 'WC', 'toilet'], ['nutzung', 'Alle Besuche', 'door']].filter(g => this._s(`sensor.${p}_${g[0]}_anzahl_heute`)).map(([k, n, i]) => ({ k, n, i }));
+    return { p, G, lid: x(`binary_sensor.${p}_klodeckel_zu_lange_offen`), man: x(`switch.${p}_belegt_manuell`), rel: x(`button.${p}_freigeben`) };
+  }
   _bathNow() { const b = this._bathState(); return b && !b.free ? { st: b.txt, t: b.t } : null; }
   _bathT() { return this._bathNow()?.t || 0; }
   _sinceMin(t) { if (!t) return ''; const m = Math.max(0, Math.floor((Date.now() - t) / 6e4)); return m < 1 ? 'gerade eben' : m < 60 ? `seit ${m} Min.` : `seit ${Math.floor(m / 60)} Std. ${m % 60} Min.`; }

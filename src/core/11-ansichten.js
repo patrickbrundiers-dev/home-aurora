@@ -98,15 +98,25 @@
     const c = this._c, b = c.bath, room = c.rooms.find(r => r.id === b.room) || c.rooms[0], I = this._room(room);
     const bB = this._bathState(), st = bB ? bB.txt : '–', busy = !!bB && !bB.free;
     const hum = I.hum, hf = clamp((hum ?? 0) / 100, 0, 1), hcol = hum > 65 ? '#fb7185' : hum > 55 ? '#fbbf24' : '#38bdf8';
-    const tiles = b.stats.filter(s => this._s(s[0])).map(s => `<div class="bs"><div class="v big">${de(this._num(s[0]), s[0].includes('durchschnitt') ? 1 : 0)}<small class="u">${s[2]}</small></div><div class="l">${s[1]}</div></div>`).join('');
+    const P = this._bathP(), G = P ? P.G : [], tab = G.find(g => g.k === this._bathTab) || G[0];
+    const tile = (e, l, u, d) => `<div class="bs"><div class="v big">${de(this._num(e), d)}<small class="u">${u}</small></div><div class="l">${l}</div></div>`;
+    const tiles = tab
+      ? [['anzahl_heute', 'Heute', ''], ['minuten_heute', 'Minuten heute', 'min'], ['anzahl_woche', 'Diese Woche', ''], ['minuten_woche', 'Minuten Woche', 'min'],
+        ['letzte_dauer', 'Letzte Dauer', 'min'], ['durchschnittsdauer', 'Ø Dauer', 'min'], ['anzahl_monat', 'Dieser Monat', ''], ['anzahl', 'Insgesamt', '']]
+        .map(f => [`sensor.${P.p}_${tab.k}_${f[0]}`, f[1], f[2]]).filter(f => this._num(f[0]) != null)
+        .map(f => tile(f[0], f[1], f[2], f[2] && this._num(f[0]) < 10 ? 1 : 0)).join('')
+      : b.stats.filter(s => this._s(s[0])).map(s => tile(s[0], s[1], s[2], s[0].includes('durchschnitt') ? 1 : 0)).join('');
+    const seg = G.length > 1 ? `<div class="seg wide" style="margin-bottom:12px">${G.map(g => `<button class="${g === tab ? 'on' : ''}" data-act="bathtab" data-m="${g.k}">${ic(g.i, 15)}${g.n}</button>`).join('')}</div>` : '';
+    const lid = P && P.lid && this._val(P.lid) === 'on', man = P && P.man && this._val(P.man) === 'on';
+    const btns = P && (P.man || P.rel) ? `<div class="vbs">${P.man ? `<button class="vbt${man ? ' on' : ''}" data-act="toggle" data-e="${P.man}">${ic(man ? 'lock' : 'unlock', 15)}${man ? 'Von Hand belegt' : 'Als belegt markieren'}</button>` : ''}${P.rel && (busy || man) ? `<button class="vbt" data-act="press" data-e="${P.rel}" data-msg="Bad freigegeben">${ic('check', 15)}Freigeben</button>` : ''}</div>` : '';
     return `<div class="vh"><div><h1>Badezimmer</h1><p>${busy ? 'Gerade in Benutzung' : 'Frei'} · ${I.open ? 'Fenster offen' : 'Fenster zu'}</p></div></div>
       <div class="bento">
         <div class="c bstatus s5" style="--i:0"><div class="h">${ic('bath', 14)}Status</div><div><div style="display:flex;align-items:center;gap:12px;margin-bottom:12px"><span class="pulse ${busy ? 'busy' : ''}"></span><span style="color:var(--tx2);font-size:13px">${busy ? 'Belegt' + (this._bathT() ? ` · <span class="bsn" data-t="${this._bathT()}">${this._sinceMin(this._bathT())}</span>` : '') : 'Verfügbar'}</span></div><div class="v">${esc(st)}</div></div>
-          <div class="chips"><span class="chip">${ic('window', 14)}Fenster <b>${I.open ? 'offen' : 'zu'}</b></span>${I.lights.length ? `<span class="chip">${ic('bulb', 14)}Licht <b>${I.on.length ? 'an' : 'aus'}</b></span>` : ''}${I.act === 'heating' ? `<span class="chip">${ic('flame', 14)}<b>heizt</b></span>` : ''}</div></div>
+          <div class="chips"><span class="chip">${ic('window', 14)}Fenster <b>${I.open ? 'offen' : 'zu'}</b></span>${I.lights.length ? `<span class="chip">${ic('bulb', 14)}Licht <b>${I.on.length ? 'an' : 'aus'}</b></span>` : ''}${I.act === 'heating' ? `<span class="chip">${ic('flame', 14)}<b>heizt</b></span>` : ''}${lid ? `<span class="chip bwarn">${ic('toilet', 14)}Klodeckel <b>zu lange offen</b></span>` : ''}</div>${btns}</div>
         <div class="c s7" style="--i:1"><div class="h">${ic('drop', 14)}Raumklima</div><div class="twocol">
           <div class="gwrap"><svg viewBox="0 0 200 110" style="width:100%;overflow:visible"><path d="${arc(100, 100, 84, 180, 360)}" fill="none" stroke="rgba(${WH},.09)" stroke-width="14" stroke-linecap="round"/><path d="${arc(100, 100, 84, 180, Math.max(180.5, 180 + 180 * hf))}" fill="none" stroke="${hcol}" stroke-width="14" stroke-linecap="round" style="filter:drop-shadow(0 0 10px ${hcol})"/></svg><div class="gv"><div class="big" data-count="${hum ?? 0}" data-d="0">${de(hum, 0)}</div><div style="font-size:12px;color:var(--tx2)">Luftfeuchte %</div></div></div>
           <div style="text-align:center"><div class="big" style="font-size:64px;color:${I.temp != null ? tempCol(I.temp) : 'inherit'}" data-count="${I.temp ?? 0}" data-d="1">${de(I.temp)}</div><div style="font-size:12px;color:var(--tx2);margin-top:6px">Temperatur °C</div></div></div></div>
-        <div class="c s12" style="--i:2"><div class="h">${ic('drop', 14)}Duschstatistik</div><div class="bstat">${tiles}</div></div>
+        <div class="c s12" style="--i:2"><div class="h">${ic('drop', 14)}${tab && G.length > 1 ? 'Statistik' : 'Duschstatistik'}</div>${seg}<div class="bstat">${tiles}</div></div>
         <div class="c s12" style="--i:3"><div class="h">${ic('thermo', 14)}Temperatur &amp; Luftfeuchte<span class="r">24 h</span></div>${this._trend({ id: 'bath', temp: room.temp, hum: room.hum }, '#fb923c', { bare: true })}</div>
         ${I.lights.length ? `<div class="c s12" style="--i:5"><div class="h">${ic('bulb', 14)}Licht</div><div class="lg">${I.lights.map(e => this._lightTile(e)).join('')}</div>${this._ls(room) ? `<div style="margin-top:14px">${this._lsCard(room, 1)}</div>` : ''}</div>` : ''}
       </div>`;

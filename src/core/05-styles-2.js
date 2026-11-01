@@ -240,6 +240,7 @@ const CSS2 = `
 .tag.ok{color:#6ee7b7;background:rgba(52,211,153,.15)}.tag.warn{color:#fcd34d;background:rgba(251,191,36,.16)}.tag.bad{color:#fda4af;background:rgba(251,113,133,.17)}.tag.live{color:#7dd3fc;background:rgba(56,189,248,.17)}
 .tag.live::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor;animation:pulse 1.4s ease-in-out infinite}
 .vbs{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.vbs .vbt{display:inline-flex;align-items:center;gap:7px}.vbt.on{background:rgba(251,113,133,.16);border-color:rgba(251,113,133,.4)}.chip.bwarn{color:#fbbf24;border-color:rgba(251,191,36,.4);background:rgba(251,191,36,.1)}
 .vbt{padding:8px 12px;border-radius:14px;background:rgba(var(--wh),.09);border:1px solid rgba(var(--wh),.12);font-size:12px;color:var(--tx);transition:.2s}.vbt:hover{background:rgba(var(--wh),.17)}
 .vbar{height:5px;border-radius:3px;background:rgba(var(--wh),.14);overflow:hidden;margin-top:10px}.vbar i{display:block;height:100%;border-radius:3px;background:rgb(var(--rc))}
 .vr{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:20px;background:rgba(var(--wh),.045);border:1px solid rgba(var(--wh),.07);margin-bottom:8px}

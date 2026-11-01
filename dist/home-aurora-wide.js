@@ -131,6 +131,9 @@ const DEFAULTS = {
   batteryLow: 20,
   bath: {
     room: 'bad',
+    // Integration „Badezimmer Presence“: Präfix ihrer Entitäten. Daraus kommen Statistik (Dusche | WC | Gesamt),
+    // Warnung „Klodeckel zu lange offen“, Schalter „belegt (manuell)“ und Knopf „Freigeben“. Ohne Präfix gilt `stats`.
+    presence: 'badezimmer_presence',
     stats: [
       ['sensor.badezimmer_presence_dusche_anzahl_heute', 'Duschen heute', ''], ['sensor.badezimmer_presence_dusche_minuten_heute', 'Minuten heute', 'min'],
       ['sensor.badezimmer_presence_dusche_anzahl_woche', 'Diese Woche', ''], ['sensor.badezimmer_presence_dusche_minuten_woche', 'Minuten Woche', 'min'],
@@ -1302,6 +1305,7 @@ const CSS2 = `
 .tag.ok{color:#6ee7b7;background:rgba(52,211,153,.15)}.tag.warn{color:#fcd34d;background:rgba(251,191,36,.16)}.tag.bad{color:#fda4af;background:rgba(251,113,133,.17)}.tag.live{color:#7dd3fc;background:rgba(56,189,248,.17)}
 .tag.live::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor;animation:pulse 1.4s ease-in-out infinite}
 .vbs{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.vbs .vbt{display:inline-flex;align-items:center;gap:7px}.vbt.on{background:rgba(251,113,133,.16);border-color:rgba(251,113,133,.4)}.chip.bwarn{color:#fbbf24;border-color:rgba(251,191,36,.4);background:rgba(251,191,36,.1)}
 .vbt{padding:8px 12px;border-radius:14px;background:rgba(var(--wh),.09);border:1px solid rgba(var(--wh),.12);font-size:12px;color:var(--tx);transition:.2s}.vbt:hover{background:rgba(var(--wh),.17)}
 .vbar{height:5px;border-radius:3px;background:rgba(var(--wh),.14);overflow:hidden;margin-top:10px}.vbar i{display:block;height:100%;border-radius:3px;background:rgb(var(--rc))}
 .vr{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:20px;background:rgba(var(--wh),.045);border:1px solid rgba(var(--wh),.07);margin-bottom:8px}
@@ -2049,15 +2053,25 @@ class HomeAurora extends HTMLElement {
     const c = this._c, b = c.bath, room = c.rooms.find(r => r.id === b.room) || c.rooms[0], I = this._room(room);
     const bB = this._bathState(), st = bB ? bB.txt : '–', busy = !!bB && !bB.free;
     const hum = I.hum, hf = clamp((hum ?? 0) / 100, 0, 1), hcol = hum > 65 ? '#fb7185' : hum > 55 ? '#fbbf24' : '#38bdf8';
-    const tiles = b.stats.filter(s => this._s(s[0])).map(s => `<div class="bs"><div class="v big">${de(this._num(s[0]), s[0].includes('durchschnitt') ? 1 : 0)}<small class="u">${s[2]}</small></div><div class="l">${s[1]}</div></div>`).join('');
+    const P = this._bathP(), G = P ? P.G : [], tab = G.find(g => g.k === this._bathTab) || G[0];
+    const tile = (e, l, u, d) => `<div class="bs"><div class="v big">${de(this._num(e), d)}<small class="u">${u}</small></div><div class="l">${l}</div></div>`;
+    const tiles = tab
+      ? [['anzahl_heute', 'Heute', ''], ['minuten_heute', 'Minuten heute', 'min'], ['anzahl_woche', 'Diese Woche', ''], ['minuten_woche', 'Minuten Woche', 'min'],
+        ['letzte_dauer', 'Letzte Dauer', 'min'], ['durchschnittsdauer', 'Ø Dauer', 'min'], ['anzahl_monat', 'Dieser Monat', ''], ['anzahl', 'Insgesamt', '']]
+        .map(f => [`sensor.${P.p}_${tab.k}_${f[0]}`, f[1], f[2]]).filter(f => this._num(f[0]) != null)
+        .map(f => tile(f[0], f[1], f[2], f[2] && this._num(f[0]) < 10 ? 1 : 0)).join('')
+      : b.stats.filter(s => this._s(s[0])).map(s => tile(s[0], s[1], s[2], s[0].includes('durchschnitt') ? 1 : 0)).join('');
+    const seg = G.length > 1 ? `<div class="seg wide" style="margin-bottom:12px">${G.map(g => `<button class="${g === tab ? 'on' : ''}" data-act="bathtab" data-m="${g.k}">${ic(g.i, 15)}${g.n}</button>`).join('')}</div>` : '';
+    const lid = P && P.lid && this._val(P.lid) === 'on', man = P && P.man && this._val(P.man) === 'on';
+    const btns = P && (P.man || P.rel) ? `<div class="vbs">${P.man ? `<button class="vbt${man ? ' on' : ''}" data-act="toggle" data-e="${P.man}">${ic(man ? 'lock' : 'unlock', 15)}${man ? 'Von Hand belegt' : 'Als belegt markieren'}</button>` : ''}${P.rel && (busy || man) ? `<button class="vbt" data-act="press" data-e="${P.rel}" data-msg="Bad freigegeben">${ic('check', 15)}Freigeben</button>` : ''}</div>` : '';
     return `<div class="vh"><div><h1>Badezimmer</h1><p>${busy ? 'Gerade in Benutzung' : 'Frei'} · ${I.open ? 'Fenster offen' : 'Fenster zu'}</p></div></div>
       <div class="bento">
         <div class="c bstatus s5" style="--i:0"><div class="h">${ic('bath', 14)}Status</div><div><div style="display:flex;align-items:center;gap:12px;margin-bottom:12px"><span class="pulse ${busy ? 'busy' : ''}"></span><span style="color:var(--tx2);font-size:13px">${busy ? 'Belegt' + (this._bathT() ? ` · <span class="bsn" data-t="${this._bathT()}">${this._sinceMin(this._bathT())}</span>` : '') : 'Verfügbar'}</span></div><div class="v">${esc(st)}</div></div>
-          <div class="chips"><span class="chip">${ic('window', 14)}Fenster <b>${I.open ? 'offen' : 'zu'}</b></span>${I.lights.length ? `<span class="chip">${ic('bulb', 14)}Licht <b>${I.on.length ? 'an' : 'aus'}</b></span>` : ''}${I.act === 'heating' ? `<span class="chip">${ic('flame', 14)}<b>heizt</b></span>` : ''}</div></div>
+          <div class="chips"><span class="chip">${ic('window', 14)}Fenster <b>${I.open ? 'offen' : 'zu'}</b></span>${I.lights.length ? `<span class="chip">${ic('bulb', 14)}Licht <b>${I.on.length ? 'an' : 'aus'}</b></span>` : ''}${I.act === 'heating' ? `<span class="chip">${ic('flame', 14)}<b>heizt</b></span>` : ''}${lid ? `<span class="chip bwarn">${ic('toilet', 14)}Klodeckel <b>zu lange offen</b></span>` : ''}</div>${btns}</div>
         <div class="c s7" style="--i:1"><div class="h">${ic('drop', 14)}Raumklima</div><div class="twocol">
           <div class="gwrap"><svg viewBox="0 0 200 110" style="width:100%;overflow:visible"><path d="${arc(100, 100, 84, 180, 360)}" fill="none" stroke="rgba(${WH},.09)" stroke-width="14" stroke-linecap="round"/><path d="${arc(100, 100, 84, 180, Math.max(180.5, 180 + 180 * hf))}" fill="none" stroke="${hcol}" stroke-width="14" stroke-linecap="round" style="filter:drop-shadow(0 0 10px ${hcol})"/></svg><div class="gv"><div class="big" data-count="${hum ?? 0}" data-d="0">${de(hum, 0)}</div><div style="font-size:12px;color:var(--tx2)">Luftfeuchte %</div></div></div>
           <div style="text-align:center"><div class="big" style="font-size:64px;color:${I.temp != null ? tempCol(I.temp) : 'inherit'}" data-count="${I.temp ?? 0}" data-d="1">${de(I.temp)}</div><div style="font-size:12px;color:var(--tx2);margin-top:6px">Temperatur °C</div></div></div></div>
-        <div class="c s12" style="--i:2"><div class="h">${ic('drop', 14)}Duschstatistik</div><div class="bstat">${tiles}</div></div>
+        <div class="c s12" style="--i:2"><div class="h">${ic('drop', 14)}${tab && G.length > 1 ? 'Statistik' : 'Duschstatistik'}</div>${seg}<div class="bstat">${tiles}</div></div>
         <div class="c s12" style="--i:3"><div class="h">${ic('thermo', 14)}Temperatur &amp; Luftfeuchte<span class="r">24 h</span></div>${this._trend({ id: 'bath', temp: room.temp, hum: room.hum }, '#fb923c', { bare: true })}</div>
         ${I.lights.length ? `<div class="c s12" style="--i:5"><div class="h">${ic('bulb', 14)}Licht</div><div class="lg">${I.lights.map(e => this._lightTile(e)).join('')}</div>${this._ls(room) ? `<div style="margin-top:14px">${this._lsCard(room, 1)}</div>` : ''}</div>` : ''}
       </div>`;
@@ -2260,6 +2274,8 @@ class HomeAurora extends HTMLElement {
     else if (pr && !pr.offline && pr.st === 'failed') A.push({ id: 'prn', cls: 'bad', icon: 'printer', text: 'Druck fehlgeschlagen', sub: '', act: 'nav', attrs: 'data-v="printer"' });
     else if (pr && !pr.offline && pr.st === 'finish') { const ag = this._age(this._c.printer.prefix + 'druckstatus'); if (ag != null && ag < 3 * 36e5) A.push({ id: 'prn', cls: 'ok', icon: 'check', text: 'Druck fertig', sub: 'vor ' + this._agoTxt(ag), act: 'nav', attrs: 'data-v="printer"' }); }
     if (pr && !pr.offline && !(pr.st === 'failed') && (this._val(c.printer.error) === 'on' || this._val(c.printer.hms) === 'on')) A.push({ id: 'prerr', crit: true, cls: 'bad', icon: 'alert', text: 'Druckerfehler gemeldet', sub: '', act: 'nav', attrs: 'data-v="printer"' });
+    const BP = this._bathP();
+    if (BP && BP.lid && this._val(BP.lid) === 'on') A.push({ id: 'lid', cls: 'warn', icon: 'toilet', text: 'Klodeckel zu lange offen', sub: 'Badezimmer', act: 'nav', attrs: 'data-v="bath"' });
     const MS = this._missing();
     if (MS.length) A.push({ id: 'miss', cls: 'warn', icon: 'alert', text: MS.length === 1 ? 'Gerät fehlt' : `${MS.length} Geräte fehlen`, sub: MS[0], act: 'sys' });
     A.push(...this._alertsHome());
@@ -2924,7 +2940,7 @@ class HomeAurora extends HTMLElement {
   _sSet() {
     const th = this._themePref || this._c.theme || 'dark', am = String(this._ambMin());
     const seg = (act, cur, items) => `<div class="seg wide">${items.map(x => `<button class="${cur === x[0] ? 'on' : ''}" data-act="${act}" data-m="${x[0]}">${x[1]}</button>`).join('')}</div>`;
-    return `<div class="grab"></div><div class="sh"><div class="ico">${ic('cog', 24)}</div><div><h2>Darstellung &amp; Modi</h2><p>Home Aurora v5.2 · Build pz47</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
+    return `<div class="grab"></div><div class="sh"><div class="ico">${ic('cog', 24)}</div><div><h2>Darstellung &amp; Modi</h2><p>Home Aurora v5.2 · Build pz48</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
       <div class="lab2">DESIGN</div>${seg('theme', th, [['dark', 'Dunkel'], ['light', 'Hell'], ['auto', 'Automatisch']])}
       <div class="card-note">„Automatisch“ folgt dem Dunkel-/Hellmodus deines Home-Assistant-Profils. Die Auswahl gilt nur für dieses Gerät.</div>
       ${WALL_UI ? `      <div class="lab2">WANDTABLET-MODUS</div>
@@ -3005,6 +3021,12 @@ class HomeAurora extends HTMLElement {
      Status-Sensor der Integration Badezimmer Presence liefert Schlüssel (free, toilet, shower …), angezeigt wird die
      übersetzte Form; der alte Template-Sensor mit deutschem Text („Frei“) funktioniert weiter. */
   _bathState() { const e = this._c.stats.bath, s = e && this._s(e); if (!s || !okv(s.state)) return null; let txt = s.state; try { if (this._h && this._h.formatEntityState) txt = this._h.formatEntityState(s) || s.state; } catch (_) {} const t = Date.parse(s.last_changed); return { txt, free: s.state === 'free' || s.state === 'Frei', t: isNaN(t) ? null : t }; }
+  _bathP() {
+    const p = this._c.bath?.presence; if (!p) return null;
+    const x = id => (this._s(id) ? id : null);
+    const G = [['dusche', 'Dusche', 'drop'], ['wc', 'WC', 'toilet'], ['nutzung', 'Alle Besuche', 'door']].filter(g => this._s(`sensor.${p}_${g[0]}_anzahl_heute`)).map(([k, n, i]) => ({ k, n, i }));
+    return { p, G, lid: x(`binary_sensor.${p}_klodeckel_zu_lange_offen`), man: x(`switch.${p}_belegt_manuell`), rel: x(`button.${p}_freigeben`) };
+  }
   _bathNow() { const b = this._bathState(); return b && !b.free ? { st: b.txt, t: b.t } : null; }
   _bathT() { return this._bathNow()?.t || 0; }
   _sinceMin(t) { if (!t) return ''; const m = Math.max(0, Math.floor((Date.now() - t) / 6e4)); return m < 1 ? 'gerade eben' : m < 60 ? `seit ${m} Min.` : `seit ${Math.floor(m / 60)} Std. ${m % 60} Min.`; }
@@ -5740,6 +5762,7 @@ class HomeAurora extends HTMLElement {
       case 'trsel': this._trI = this._trI === +el.dataset.i ? null : +el.dataset.i; this._render(); break;
       case 'trspan': this._trSpan = +el.dataset.n; this._trI = null; this._render(); break;
       case 'wxspan': this._wxSpan = +el.dataset.n; this._wxSelT = null; this._render(); break;
+      case 'bathtab': this._bathTab = el.dataset.m; this._render(); break;
       case 'wxmode': this._wxMode = el.dataset.m; this._enter = true; this._counted = false; this._render(); break;
       case 'pcmd': h.callService(el.dataset.d, el.dataset.s, { entity_id: e }); this._toast(el.dataset.msg || 'Gesendet'); break;
       case 'plant': {

@@ -131,6 +131,9 @@ const DEFAULTS = {
   batteryLow: 20,
   bath: {
     room: 'bad',
+    // Integration „Badezimmer Presence“: Präfix ihrer Entitäten. Daraus kommen Statistik (Dusche | WC | Gesamt),
+    // Warnung „Klodeckel zu lange offen“, Schalter „belegt (manuell)“ und Knopf „Freigeben“. Ohne Präfix gilt `stats`.
+    presence: 'badezimmer_presence',
     stats: [
       ['sensor.badezimmer_presence_dusche_anzahl_heute', 'Duschen heute', ''], ['sensor.badezimmer_presence_dusche_minuten_heute', 'Minuten heute', 'min'],
       ['sensor.badezimmer_presence_dusche_anzahl_woche', 'Diese Woche', ''], ['sensor.badezimmer_presence_dusche_minuten_woche', 'Minuten Woche', 'min'],
