@@ -71,6 +71,15 @@ sequence:
               then: [{stop: Am Echo wurde etwas anderes gewünscht}]
 ```
 
+## Lichtsteuerung
+
+Ist die Integration [Lichtsteuerung](https://github.com/patrickbrundiers-dev/Lichtsteuerung) installiert, zeigt Aurora sie ohne
+Einstellung an: im Lichter-Fenster Hausmodus (`input_select.hausmodus`, abweichend `lightCtl: { house: … }`), Gute Nacht,
+Guten Morgen, Automatik an/aus, Manuell überall beenden und den Status jedes Raums; im Raumfenster (und auf der Bad-Seite)
+Status, was die Automatik sieht (Modus, anwesend, dunkel, TV), Leuchtdauer heute, Automatik, Schlafmodus und Manuell beenden.
+Ein Aurora-Raum passt zu `sensor.lichtsteuerung_<raum>_status`, wenn `<raum>` seiner id/seinem Namen entspricht oder damit
+beginnt (Bad → badezimmer); sonst im Raum `ls: '<raum>'` eintragen (`ls: false` blendet es aus).
+
 ## Entwicklung
 
 Beide Dateien in `dist/` werden aus einer Quelle erzeugt, nicht von Hand bearbeitet:

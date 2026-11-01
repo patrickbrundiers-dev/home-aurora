@@ -12627,4 +12627,198 @@
 "last_updated": "2026-11-01T08:00:00+00:00",
 "state": "locked"
 }
+,
+"sensor.lichtsteuerung_wohnzimmer_status": {
+"attributes": {
+"ausschalt_timer_aktiv": false,
+"device_class": "enum",
+"friendly_name": "Lichtsteuerung Wohnzimmer Status",
+"gelernter_zuschlag_s": 0,
+"laenger_anwesend": false,
+"nachtpfad_aktiv": false,
+"options": [
+"deaktiviert",
+"aus",
+"an",
+"gedimmt",
+"manuell",
+"abwesend",
+"simulation"
+],
+"schlafenszeit_aktiv": false,
+"schlafmodus": false,
+"anwesend": true,
+"dunkel": true,
+"modus": "abend",
+"tagesphase": "abend",
+"tv": true,
+"letzte_aktion": "Anwesenheit erkannt: Abend 50 %",
+"manuell": false
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "sensor.lichtsteuerung_wohnzimmer_status",
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00",
+"state": "an"
+},
+"switch.lichtsteuerung_wohnzimmer_automatik": {
+"attributes": {
+"friendly_name": "Lichtsteuerung Wohnzimmer Automatik"
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "switch.lichtsteuerung_wohnzimmer_automatik",
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00",
+"state": "on"
+},
+"switch.lichtsteuerung_wohnzimmer_schlafmodus": {
+"attributes": {
+"friendly_name": "Lichtsteuerung Wohnzimmer Schlafmodus",
+"icon": "mdi:sleep"
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "switch.lichtsteuerung_wohnzimmer_schlafmodus",
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00",
+"state": "off"
+},
+"button.lichtsteuerung_wohnzimmer_automatik_zurucksetzen": {
+"attributes": {
+"friendly_name": "Lichtsteuerung Wohnzimmer Automatik zurücksetzen",
+"icon": "mdi:restore"
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "button.lichtsteuerung_wohnzimmer_automatik_zurucksetzen",
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00",
+"state": "unknown"
+},
+"sensor.lichtsteuerung_wohnzimmer_leuchtdauer_heute": {
+"attributes": {
+"device_class": "duration",
+"friendly_name": "Lichtsteuerung Wohnzimmer Leuchtdauer heute",
+"state_class": "total_increasing",
+"unit_of_measurement": "h"
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "sensor.lichtsteuerung_wohnzimmer_leuchtdauer_heute",
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00",
+"state": "1.75"
+},
+"sensor.lichtsteuerung_badezimmer_status": {
+"attributes": {
+"ausschalt_timer_aktiv": true,
+"device_class": "enum",
+"friendly_name": "Lichtsteuerung Badezimmer Status",
+"gelernter_zuschlag_s": 0,
+"laenger_anwesend": false,
+"nachtpfad_aktiv": false,
+"options": [
+"deaktiviert",
+"aus",
+"an",
+"gedimmt",
+"manuell",
+"abwesend",
+"simulation"
+],
+"schlafenszeit_aktiv": false,
+"schlafmodus": false,
+"anwesend": false,
+"dunkel": false,
+"modus": "tag",
+"tagesphase": "tag",
+"tv": false,
+"letzte_aktion": null,
+"manuell": true
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "sensor.lichtsteuerung_badezimmer_status",
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00",
+"state": "manuell"
+},
+"switch.lichtsteuerung_badezimmer_automatik": {
+"attributes": {
+"friendly_name": "Lichtsteuerung Badezimmer Automatik"
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "switch.lichtsteuerung_badezimmer_automatik",
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00",
+"state": "on"
+},
+"switch.lichtsteuerung_badezimmer_schlafmodus": {
+"attributes": {
+"friendly_name": "Lichtsteuerung Badezimmer Schlafmodus",
+"icon": "mdi:sleep"
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "switch.lichtsteuerung_badezimmer_schlafmodus",
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00",
+"state": "off"
+},
+"button.lichtsteuerung_badezimmer_automatik_zurucksetzen": {
+"attributes": {
+"friendly_name": "Lichtsteuerung Badezimmer Automatik zurücksetzen",
+"icon": "mdi:restore"
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "button.lichtsteuerung_badezimmer_automatik_zurucksetzen",
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00",
+"state": "unknown"
+},
+"sensor.lichtsteuerung_badezimmer_leuchtdauer_heute": {
+"attributes": {
+"device_class": "duration",
+"friendly_name": "Lichtsteuerung Badezimmer Leuchtdauer heute",
+"state_class": "total_increasing",
+"unit_of_measurement": "h"
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "sensor.lichtsteuerung_badezimmer_leuchtdauer_heute",
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00",
+"state": "0.4"
+},
+"input_select.hausmodus": {
+"attributes": {
+"friendly_name": "Hausmodus",
+"options": [
+"Zuhause ",
+"Urlaub ",
+"Abwesend "
+]
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "input_select.hausmodus",
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00",
+"state": "Zuhause "
+}
 }

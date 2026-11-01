@@ -19,6 +19,7 @@
     const ls = this._lights(), on = ls.filter(e => this._val(e) === 'on'), off = ls.filter(e => this._val(e) !== 'on');
     return `<div class="grab"></div><div class="sh"><div class="ico">${ic('bulb', 24)}</div><div><h2>Lichter</h2><p>${on.length} von ${ls.length} eingeschaltet</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
       <div class="sum2"><div class="sbig"><div class="big">${on.length}</div><span>von ${ls.length} Lichtern an</span></div><button class="alloff" data-act="alloff">${ic('power', 22)}${this._armed ? 'Sicher?' : 'Alle aus'}</button></div>
+      ${this._lsHouse()}
       <div class="lab2">EINGESCHALTET · ${on.length}</div>${on.length ? `<div class="lg">${on.map(e => this._lightTile(e)).join('')}</div>` : '<div class="empty">✨ Alle Lichter sind aus</div>'}
       <div class="lab2">AUSGESCHALTET · ${off.length}</div>${off.length ? `<div class="lg">${off.map(e => this._lightTile(e)).join('')}</div>` : '<div class="empty">💡 Alle Lichter sind an</div>'}`;
   }
@@ -64,6 +65,7 @@
         <div style="display:flex;gap:10px;align-items:center">${off ? `<button class="qb on" data-act="hvac" data-e="${r.climate}">${ic('power', 16)}Einschalten</button>` : auto ? `<button class="rbn" style="color:#fb923c;background:rgba(251,146,60,.2)" data-act="hvac" data-e="${r.climate}">${ic('power', 20)}</button>` : `<button class="rbn" data-act="temp" data-e="${r.climate}" data-d="-0.5">${ic('minus', 22)}</button><button class="rbn" data-act="temp" data-e="${r.climate}" data-d="0.5">${ic('plus', 22)}</button><button class="rbn" style="color:#fb923c;background:rgba(251,146,60,.2)" data-act="hvac" data-e="${r.climate}">${ic('power', 20)}</button>`}</div></div>` : ''}
       ${this._humHint(r, I)}${this._trend(r, I.temp != null ? tempCol(I.temp) : '#fb923c')}
       ${this._roomVent(r)}
+      ${this._lsCard(r)}
       ${I.lights.length ? `<div class="lab2">LICHTER · ${I.on.length}/${I.lights.length}</div><div class="lg">${I.lights.map(e => this._lightTile(e)).join('')}</div>` : ''}
       ${media ? `<div class="lab2">MEDIEN</div><div class="mcol">${media}</div>` : ''}`;
   }

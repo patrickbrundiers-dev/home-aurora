@@ -184,6 +184,8 @@
       case 'close': this._closeSheet(); break;
       case 'toggle': h.callService(dom(e), 'toggle', { entity_id: e }); break;
       case 'more': this._more(e); break;
+      case 'ls': this._lsAct(el.dataset.m); break;
+      case 'lsmode': h.callService('input_select', 'select_option', { entity_id: e, option: el.dataset.m }); this._toast('Hausmodus: ' + String(el.dataset.m).trim()); break;
       case 'room-lights': {
         const I = this._room(this._c.rooms.find(r => r.id === el.dataset.room));
         h.callService('light', I.on.length ? 'turn_off' : 'turn_on', { entity_id: I.lights }); break;
