@@ -172,6 +172,7 @@
       case 'trsel': this._trI = this._trI === +el.dataset.i ? null : +el.dataset.i; this._render(); break;
       case 'trspan': this._trSpan = +el.dataset.n; this._trI = null; this._render(); break;
       case 'wxspan': this._wxSpan = +el.dataset.n; this._wxSelT = null; this._render(); break;
+      case 'bathtab': this._bathTab = el.dataset.m; this._render(); break;
       case 'wxmode': this._wxMode = el.dataset.m; this._enter = true; this._counted = false; this._render(); break;
       case 'pcmd': h.callService(el.dataset.d, el.dataset.s, { entity_id: e }); this._toast(el.dataset.msg || 'Gesendet'); break;
       case 'plant': {

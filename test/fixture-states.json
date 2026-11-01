@@ -12820,5 +12820,326 @@
 "last_changed": "2026-01-01T12:00:00+00:00",
 "last_updated": "2026-01-01T12:00:00+00:00",
 "state": "Zuhause "
+},
+"sensor.badezimmer_presence_dusche_letzte_dauer": {
+"entity_id": "sensor.badezimmer_presence_dusche_letzte_dauer",
+"state": "8",
+"attributes": {
+"friendly_name": "Bad dusche letzte dauer",
+"device_class": "duration",
+"unit_of_measurement": "min",
+"state_class": "measurement"
+},
+"context": {
+"id": "fixture"
+},
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00"
+},
+"sensor.badezimmer_presence_dusche_durchschnittsdauer": {
+"entity_id": "sensor.badezimmer_presence_dusche_durchschnittsdauer",
+"state": "11",
+"attributes": {
+"friendly_name": "Bad dusche durchschnittsdauer",
+"device_class": "duration",
+"unit_of_measurement": "min",
+"state_class": "measurement"
+},
+"context": {
+"id": "fixture"
+},
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00"
+},
+"sensor.badezimmer_presence_wc_anzahl_heute": {
+"entity_id": "sensor.badezimmer_presence_wc_anzahl_heute",
+"state": "4",
+"attributes": {
+"friendly_name": "Bad wc anzahl heute",
+"state_class": "total_increasing"
+},
+"context": {
+"id": "fixture"
+},
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00"
+},
+"sensor.badezimmer_presence_wc_minuten_heute": {
+"entity_id": "sensor.badezimmer_presence_wc_minuten_heute",
+"state": "12",
+"attributes": {
+"friendly_name": "Bad wc minuten heute",
+"device_class": "duration",
+"unit_of_measurement": "min",
+"state_class": "measurement"
+},
+"context": {
+"id": "fixture"
+},
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00"
+},
+"sensor.badezimmer_presence_wc_anzahl_woche": {
+"entity_id": "sensor.badezimmer_presence_wc_anzahl_woche",
+"state": "31",
+"attributes": {
+"friendly_name": "Bad wc anzahl woche",
+"state_class": "total_increasing"
+},
+"context": {
+"id": "fixture"
+},
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00"
+},
+"sensor.badezimmer_presence_wc_minuten_woche": {
+"entity_id": "sensor.badezimmer_presence_wc_minuten_woche",
+"state": "101",
+"attributes": {
+"friendly_name": "Bad wc minuten woche",
+"device_class": "duration",
+"unit_of_measurement": "min",
+"state_class": "measurement"
+},
+"context": {
+"id": "fixture"
+},
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00"
+},
+"sensor.badezimmer_presence_wc_anzahl_monat": {
+"entity_id": "sensor.badezimmer_presence_wc_anzahl_monat",
+"state": "120",
+"attributes": {
+"friendly_name": "Bad wc anzahl monat",
+"state_class": "total_increasing"
+},
+"context": {
+"id": "fixture"
+},
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00"
+},
+"sensor.badezimmer_presence_wc_minuten_monat": {
+"entity_id": "sensor.badezimmer_presence_wc_minuten_monat",
+"state": "410",
+"attributes": {
+"friendly_name": "Bad wc minuten monat",
+"device_class": "duration",
+"unit_of_measurement": "min",
+"state_class": "measurement"
+},
+"context": {
+"id": "fixture"
+},
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00"
+},
+"sensor.badezimmer_presence_wc_letzte_dauer": {
+"entity_id": "sensor.badezimmer_presence_wc_letzte_dauer",
+"state": "3",
+"attributes": {
+"friendly_name": "Bad wc letzte dauer",
+"device_class": "duration",
+"unit_of_measurement": "min",
+"state_class": "measurement"
+},
+"context": {
+"id": "fixture"
+},
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00"
+},
+"sensor.badezimmer_presence_wc_durchschnittsdauer": {
+"entity_id": "sensor.badezimmer_presence_wc_durchschnittsdauer",
+"state": "4",
+"attributes": {
+"friendly_name": "Bad wc durchschnittsdauer",
+"device_class": "duration",
+"unit_of_measurement": "min",
+"state_class": "measurement"
+},
+"context": {
+"id": "fixture"
+},
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00"
+},
+"sensor.badezimmer_presence_wc_anzahl": {
+"entity_id": "sensor.badezimmer_presence_wc_anzahl",
+"state": "512",
+"attributes": {
+"friendly_name": "Bad wc anzahl",
+"state_class": "total_increasing"
+},
+"context": {
+"id": "fixture"
+},
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00"
+},
+"sensor.badezimmer_presence_nutzung_anzahl_heute": {
+"entity_id": "sensor.badezimmer_presence_nutzung_anzahl_heute",
+"state": "12",
+"attributes": {
+"friendly_name": "Bad nutzung anzahl heute",
+"state_class": "total_increasing"
+},
+"context": {
+"id": "fixture"
+},
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00"
+},
+"sensor.badezimmer_presence_nutzung_minuten_heute": {
+"entity_id": "sensor.badezimmer_presence_nutzung_minuten_heute",
+"state": "61",
+"attributes": {
+"friendly_name": "Bad nutzung minuten heute",
+"device_class": "duration",
+"unit_of_measurement": "min",
+"state_class": "measurement"
+},
+"context": {
+"id": "fixture"
+},
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00"
+},
+"sensor.badezimmer_presence_nutzung_anzahl_woche": {
+"entity_id": "sensor.badezimmer_presence_nutzung_anzahl_woche",
+"state": "88",
+"attributes": {
+"friendly_name": "Bad nutzung anzahl woche",
+"state_class": "total_increasing"
+},
+"context": {
+"id": "fixture"
+},
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00"
+},
+"sensor.badezimmer_presence_nutzung_minuten_woche": {
+"entity_id": "sensor.badezimmer_presence_nutzung_minuten_woche",
+"state": "640",
+"attributes": {
+"friendly_name": "Bad nutzung minuten woche",
+"device_class": "duration",
+"unit_of_measurement": "min",
+"state_class": "measurement"
+},
+"context": {
+"id": "fixture"
+},
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00"
+},
+"sensor.badezimmer_presence_nutzung_anzahl_monat": {
+"entity_id": "sensor.badezimmer_presence_nutzung_anzahl_monat",
+"state": "300",
+"attributes": {
+"friendly_name": "Bad nutzung anzahl monat",
+"state_class": "total_increasing"
+},
+"context": {
+"id": "fixture"
+},
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00"
+},
+"sensor.badezimmer_presence_nutzung_minuten_monat": {
+"entity_id": "sensor.badezimmer_presence_nutzung_minuten_monat",
+"state": "2100",
+"attributes": {
+"friendly_name": "Bad nutzung minuten monat",
+"device_class": "duration",
+"unit_of_measurement": "min",
+"state_class": "measurement"
+},
+"context": {
+"id": "fixture"
+},
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00"
+},
+"sensor.badezimmer_presence_nutzung_letzte_dauer": {
+"entity_id": "sensor.badezimmer_presence_nutzung_letzte_dauer",
+"state": "6",
+"attributes": {
+"friendly_name": "Bad nutzung letzte dauer",
+"device_class": "duration",
+"unit_of_measurement": "min",
+"state_class": "measurement"
+},
+"context": {
+"id": "fixture"
+},
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00"
+},
+"sensor.badezimmer_presence_nutzung_durchschnittsdauer": {
+"entity_id": "sensor.badezimmer_presence_nutzung_durchschnittsdauer",
+"state": "7",
+"attributes": {
+"friendly_name": "Bad nutzung durchschnittsdauer",
+"device_class": "duration",
+"unit_of_measurement": "min",
+"state_class": "measurement"
+},
+"context": {
+"id": "fixture"
+},
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00"
+},
+"sensor.badezimmer_presence_nutzung_anzahl": {
+"entity_id": "sensor.badezimmer_presence_nutzung_anzahl",
+"state": "1300",
+"attributes": {
+"friendly_name": "Bad nutzung anzahl",
+"state_class": "total_increasing"
+},
+"context": {
+"id": "fixture"
+},
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00"
+},
+"binary_sensor.badezimmer_presence_klodeckel_zu_lange_offen": {
+"entity_id": "binary_sensor.badezimmer_presence_klodeckel_zu_lange_offen",
+"state": "off",
+"attributes": {
+"friendly_name": "Bad Klodeckel zu lange offen",
+"device_class": "problem"
+},
+"context": {
+"id": "fixture"
+},
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00"
+},
+"switch.badezimmer_presence_belegt_manuell": {
+"entity_id": "switch.badezimmer_presence_belegt_manuell",
+"state": "off",
+"attributes": {
+"friendly_name": "Bad belegt (manuell)"
+},
+"context": {
+"id": "fixture"
+},
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00"
+},
+"button.badezimmer_presence_freigeben": {
+"entity_id": "button.badezimmer_presence_freigeben",
+"state": "unknown",
+"attributes": {
+"friendly_name": "Bad freigeben"
+},
+"context": {
+"id": "fixture"
+},
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00"
 }
 }
