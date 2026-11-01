@@ -4915,7 +4915,7 @@ class HomeAurora extends HTMLElement {
       }
       c = C[sid] = { t: Date.now(), cl, house };
     }
-    const T = [['Komfort', 'komforttemperatur', 'sofa'], ['Zuhause', 'zuhause_temperatur', 'home'], ['Aktivität', 'aktivitat_temperatur', 'bolt'], ['Eco', 'eco_temperatur', 'leaf'], ['Schlafen', 'schlafen_temperatur', 'bed'], ['Boost', 'boost_temperatur', 'flame'], ['Abwesend', null, 'door']];
+    const T = [['Komfort', 'komforttemperatur', 'sofa'], ['Zuhause', 'zuhause_temperatur', 'home'], ['Aktivität', 'aktivitat_temperatur', 'bolt'], ['Eco', 'eco_temperatur', 'leaf'], ['Schlafen', 'schlafen_temperatur', 'bed'], ['Boost', 'boost_temperatur', 'flame'], ['Abwesend', null, 'door'], ['Wohlfühlen', 'wohlfuhlen_temperatur', 'sun']];
     return {
       b, mode, cl: c.cl, house: c.house, dur: has(`select.${b}_betriebsart_dauer`), sched: has(`select.${b}_zeitplan`), lock: has(`switch.${b}_kindersicherung`),
       roff: has(`number.${b}_raum_versatz`), demand: has(`sensor.${b}_warmebedarf`), trend: has(`sensor.${b}_temperaturtrend`), out: has(`sensor.${b}_aussentemperatur`),
