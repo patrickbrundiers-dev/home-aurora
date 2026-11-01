@@ -243,6 +243,7 @@ const CSS2 = `
 .vbt{padding:8px 12px;border-radius:14px;background:rgba(var(--wh),.09);border:1px solid rgba(var(--wh),.12);font-size:12px;color:var(--tx);transition:.2s}.vbt:hover{background:rgba(var(--wh),.17)}
 .vbar{height:5px;border-radius:3px;background:rgba(var(--wh),.14);overflow:hidden;margin-top:10px}.vbar i{display:block;height:100%;border-radius:3px;background:rgb(var(--rc))}
 .vr{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:20px;background:rgba(var(--wh),.045);border:1px solid rgba(var(--wh),.07);margin-bottom:8px}
+.lsx .vr .ico,.vr .ico.lsi{color:var(--lsc);background:color-mix(in srgb,var(--lsc) 18%,transparent)}.lsx .chips{margin:2px 0 10px}.lsb{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 10px}.lsm{margin:0 0 10px}
 .vr.tap{cursor:pointer}.vr .ico{width:38px;height:38px;border-radius:13px;display:grid;place-items:center;background:rgba(var(--wh),.07);color:var(--tx2);flex:none}
 .vr .t{font-weight:600;font-size:14px}.vr .s{font-size:12px;color:var(--tx3);margin-top:2px}.vr .m{margin-left:auto;text-align:right;font-size:13px;color:var(--tx2);white-space:nowrap;padding-left:8px}.vr .m small{display:block;font-size:11px;color:var(--tx3);margin-top:2px}
 .okc{display:flex;flex-wrap:wrap;gap:8px}.okc span{padding:8px 13px;border-radius:999px;background:rgba(52,211,153,.12);color:#6ee7b7;font-size:13px;display:inline-flex;gap:6px;align-items:center}

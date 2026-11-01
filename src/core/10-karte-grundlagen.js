@@ -79,7 +79,7 @@ class HomeAurora extends HTMLElement {
     for (const k in h.states) if (k.startsWith('sensor.') && h.states[k].attributes?.thermostat_setpoints) dhs.push(h.states[k]);
     l.push(...this._heatScan(dhs));
     this._loadPlans();
-    for (const k in h.states) if (k.startsWith('light.') || (k.startsWith('sensor.') && k.includes('timer')) || this._isBat(k) || this._isContact(k) || k.includes(this._pid) || h.states[k].attributes?.putzplan_task || (k.startsWith('text.') && k.includes('_schedule_')) || (k.startsWith('sensor.') && k.includes('_choreops_'))) l.push(k);
+    for (const k in h.states) if (k.startsWith('light.') || (k.startsWith('sensor.') && k.includes('timer')) || this._isBat(k) || this._isContact(k) || k.includes(this._pid) || h.states[k].attributes?.putzplan_task || (k.startsWith('text.') && k.includes('_schedule_')) || (k.startsWith('sensor.') && k.includes('_choreops_')) || k.includes('.lichtsteuerung_') || k === 'input_select.hausmodus') l.push(k);
     this._xw = l; this._xwT = now;
     return l;
   }
