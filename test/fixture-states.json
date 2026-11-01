@@ -11738,5 +11738,617 @@
 "last_changed": "2026-01-01T12:00:00+00:00",
 "last_updated": "2026-01-01T12:00:00+00:00",
 "state": "Keine Vorschläge"
+},
+"sensor.leonie_choreops_aufgabenstatus_zimmer_aufraumen": {
+"attributes": {
+"approve_button_eid": "button.leonie_choreops_aufgabe_genehmigen_zimmer_aufraumen",
+"can_approve": true,
+"can_claim": true,
+"chore_name": "Zimmer aufräumen",
+"claim_button_eid": "button.leonie_choreops_aufgabe_beanspruchen_zimmer_aufraumen",
+"default_points": 5,
+"disapprove_button_eid": "button.leonie_choreops_aufgabe_ablehnen_zimmer_aufraumen",
+"due_date": "2026-11-01T17:00:00+00:00",
+"friendly_name": "Leonie (ChoreOps) Aufgabenstatus - Zimmer aufräumen",
+"icon": "mdi:broom",
+"purpose": "purpose_chore_status",
+"recurring_frequency": "weekly",
+"turn_user_name": null,
+"user_name": "Leonie"
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "sensor.leonie_choreops_aufgabenstatus_zimmer_aufraumen",
+"last_changed": "2026-11-01T08:00:00+00:00",
+"last_updated": "2026-11-01T08:00:00+00:00",
+"state": "pending"
+},
+"sensor.leonie_choreops_aufgabenstatus_tisch_decken": {
+"attributes": {
+"approve_button_eid": "button.leonie_choreops_aufgabe_genehmigen_tisch_decken",
+"can_approve": true,
+"can_claim": true,
+"chore_name": "Tisch decken",
+"claim_button_eid": "button.leonie_choreops_aufgabe_beanspruchen_tisch_decken",
+"default_points": 2,
+"disapprove_button_eid": "button.leonie_choreops_aufgabe_ablehnen_tisch_decken",
+"due_date": "2026-11-01T17:00:00+00:00",
+"friendly_name": "Leonie (ChoreOps) Aufgabenstatus - Tisch decken",
+"icon": "mdi:silverware-fork-knife",
+"purpose": "purpose_chore_status",
+"recurring_frequency": "daily",
+"turn_user_name": null,
+"user_name": "Leonie"
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "sensor.leonie_choreops_aufgabenstatus_tisch_decken",
+"last_changed": "2026-11-01T08:00:00+00:00",
+"last_updated": "2026-11-01T08:00:00+00:00",
+"state": "claimed"
+},
+"sensor.leonie_choreops_aufgabenstatus_zahne_putzen": {
+"attributes": {
+"approve_button_eid": "button.leonie_choreops_aufgabe_genehmigen_zahne_putzen",
+"can_approve": true,
+"can_claim": true,
+"chore_name": "Zähne putzen",
+"claim_button_eid": "button.leonie_choreops_aufgabe_beanspruchen_zahne_putzen",
+"default_points": 1,
+"disapprove_button_eid": "button.leonie_choreops_aufgabe_ablehnen_zahne_putzen",
+"due_date": "2026-11-01T17:00:00+00:00",
+"friendly_name": "Leonie (ChoreOps) Aufgabenstatus - Zähne putzen",
+"icon": "mdi:toothbrush",
+"purpose": "purpose_chore_status",
+"recurring_frequency": "daily",
+"turn_user_name": null,
+"user_name": "Leonie"
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "sensor.leonie_choreops_aufgabenstatus_zahne_putzen",
+"last_changed": "2026-11-01T08:00:00+00:00",
+"last_updated": "2026-11-01T08:00:00+00:00",
+"state": "approved"
+},
+"sensor.leonie_choreops_aufgabenstatus_mull_rausbringen": {
+"attributes": {
+"approve_button_eid": "button.leonie_choreops_aufgabe_genehmigen_mull_rausbringen",
+"can_approve": true,
+"can_claim": true,
+"chore_name": "Müll rausbringen",
+"claim_button_eid": "button.leonie_choreops_aufgabe_beanspruchen_mull_rausbringen",
+"default_points": 3,
+"disapprove_button_eid": "button.leonie_choreops_aufgabe_ablehnen_mull_rausbringen",
+"due_date": "2026-11-01T17:00:00+00:00",
+"friendly_name": "Leonie (ChoreOps) Aufgabenstatus - Müll rausbringen",
+"icon": "mdi:trash-can-outline",
+"purpose": "purpose_chore_status",
+"recurring_frequency": "weekly",
+"turn_user_name": "Nele",
+"user_name": "Leonie"
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "sensor.leonie_choreops_aufgabenstatus_mull_rausbringen",
+"last_changed": "2026-11-01T08:00:00+00:00",
+"last_updated": "2026-11-01T08:00:00+00:00",
+"state": "not_my_turn"
+},
+"sensor.leonie_choreops_aufgabenstatus_hausaufgaben_machen": {
+"attributes": {
+"approve_button_eid": "button.leonie_choreops_aufgabe_genehmigen_hausaufgaben_machen",
+"can_approve": true,
+"can_claim": true,
+"chore_name": "Hausaufgaben machen",
+"claim_button_eid": "button.leonie_choreops_aufgabe_beanspruchen_hausaufgaben_machen",
+"default_points": 3,
+"disapprove_button_eid": "button.leonie_choreops_aufgabe_ablehnen_hausaufgaben_machen",
+"due_date": "2026-11-01T17:00:00+00:00",
+"friendly_name": "Leonie (ChoreOps) Aufgabenstatus - Hausaufgaben machen",
+"icon": "mdi:book-open-variant",
+"purpose": "purpose_chore_status",
+"recurring_frequency": "daily",
+"turn_user_name": null,
+"user_name": "Leonie"
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "sensor.leonie_choreops_aufgabenstatus_hausaufgaben_machen",
+"last_changed": "2026-11-01T08:00:00+00:00",
+"last_updated": "2026-11-01T08:00:00+00:00",
+"state": "overdue"
+},
+"sensor.leonie_choreops_points": {
+"attributes": {
+"friendly_name": "Leonie (ChoreOps) Points",
+"unit_of_measurement": "Points"
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "sensor.leonie_choreops_points",
+"last_changed": "2026-11-01T08:00:00+00:00",
+"last_updated": "2026-11-01T08:00:00+00:00",
+"state": "5.0"
+},
+"sensor.leonie_choreops_ui_dashboard_helfer": {
+"attributes": {
+"chores": [
+{
+"eid": "sensor.leonie_choreops_aufgabenstatus_zimmer_aufraumen",
+"is_today_am": null,
+"labels": [],
+"name": "Zimmer aufräumen",
+"primary_group": "other",
+"state": "pending"
+},
+{
+"eid": "sensor.leonie_choreops_aufgabenstatus_tisch_decken",
+"is_today_am": null,
+"labels": [],
+"name": "Tisch decken",
+"primary_group": "today",
+"state": "claimed"
+},
+{
+"eid": "sensor.leonie_choreops_aufgabenstatus_zahne_putzen",
+"is_today_am": null,
+"labels": [],
+"name": "Zähne putzen",
+"primary_group": "today",
+"state": "approved"
+},
+{
+"eid": "sensor.leonie_choreops_aufgabenstatus_mull_rausbringen",
+"is_today_am": null,
+"labels": [],
+"name": "Müll rausbringen",
+"primary_group": "other",
+"state": "not_my_turn"
+},
+{
+"eid": "sensor.leonie_choreops_aufgabenstatus_hausaufgaben_machen",
+"is_today_am": null,
+"labels": [],
+"name": "Hausaufgaben machen",
+"primary_group": "today",
+"state": "overdue"
+}
+],
+"chores_paused": false,
+"core_sensors": {
+"points_eid": "sensor.leonie_choreops_points"
+},
+"friendly_name": "Leonie (ChoreOps) UI-Dashboard-Helfer",
+"penalties": [
+{
+"applied": 0,
+"eid": "button.leonie_choreops_strafe_anwenden_streiten_hauen",
+"name": "Streiten / Hauen",
+"points": -3
+},
+{
+"applied": 0,
+"eid": "button.leonie_choreops_strafe_anwenden_nicht_gehort",
+"name": "Nicht gehört",
+"points": -2
+}
+],
+"points_buttons": [
+{
+"eid": "button.leonie_choreops_points_um_1_0_verringern",
+"name": "Points -1.0"
+},
+{
+"eid": "button.leonie_choreops_points_um_1_0_erhohen",
+"name": "Points +1.0"
+},
+{
+"eid": "button.leonie_choreops_points_um_10_0_erhohen",
+"name": "Points +10.0"
+}
+],
+"purpose": "purpose_dashboard_helper",
+"user_name": "Leonie"
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "sensor.leonie_choreops_ui_dashboard_helfer",
+"last_changed": "2026-11-01T08:00:00+00:00",
+"last_updated": "2026-11-01T08:00:00+00:00",
+"state": "available"
+},
+"sensor.nele_choreops_aufgabenstatus_zimmer_aufraumen": {
+"attributes": {
+"approve_button_eid": "button.nele_choreops_aufgabe_genehmigen_zimmer_aufraumen",
+"can_approve": true,
+"can_claim": true,
+"chore_name": "Zimmer aufräumen",
+"claim_button_eid": "button.nele_choreops_aufgabe_beanspruchen_zimmer_aufraumen",
+"default_points": 5,
+"disapprove_button_eid": "button.nele_choreops_aufgabe_ablehnen_zimmer_aufraumen",
+"due_date": "2026-11-01T17:00:00+00:00",
+"friendly_name": "Nele (ChoreOps) Aufgabenstatus - Zimmer aufräumen",
+"icon": "mdi:broom",
+"purpose": "purpose_chore_status",
+"recurring_frequency": "weekly",
+"turn_user_name": null,
+"user_name": "Nele"
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "sensor.nele_choreops_aufgabenstatus_zimmer_aufraumen",
+"last_changed": "2026-11-01T08:00:00+00:00",
+"last_updated": "2026-11-01T08:00:00+00:00",
+"state": "pending"
+},
+"sensor.nele_choreops_aufgabenstatus_tisch_decken": {
+"attributes": {
+"approve_button_eid": "button.nele_choreops_aufgabe_genehmigen_tisch_decken",
+"can_approve": true,
+"can_claim": true,
+"chore_name": "Tisch decken",
+"claim_button_eid": "button.nele_choreops_aufgabe_beanspruchen_tisch_decken",
+"default_points": 2,
+"disapprove_button_eid": "button.nele_choreops_aufgabe_ablehnen_tisch_decken",
+"due_date": "2026-11-01T17:00:00+00:00",
+"friendly_name": "Nele (ChoreOps) Aufgabenstatus - Tisch decken",
+"icon": "mdi:silverware-fork-knife",
+"purpose": "purpose_chore_status",
+"recurring_frequency": "daily",
+"turn_user_name": null,
+"user_name": "Nele"
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "sensor.nele_choreops_aufgabenstatus_tisch_decken",
+"last_changed": "2026-11-01T08:00:00+00:00",
+"last_updated": "2026-11-01T08:00:00+00:00",
+"state": "pending"
+},
+"sensor.nele_choreops_aufgabenstatus_zahne_putzen": {
+"attributes": {
+"approve_button_eid": "button.nele_choreops_aufgabe_genehmigen_zahne_putzen",
+"can_approve": true,
+"can_claim": true,
+"chore_name": "Zähne putzen",
+"claim_button_eid": "button.nele_choreops_aufgabe_beanspruchen_zahne_putzen",
+"default_points": 1,
+"disapprove_button_eid": "button.nele_choreops_aufgabe_ablehnen_zahne_putzen",
+"due_date": "2026-11-01T17:00:00+00:00",
+"friendly_name": "Nele (ChoreOps) Aufgabenstatus - Zähne putzen",
+"icon": "mdi:toothbrush",
+"purpose": "purpose_chore_status",
+"recurring_frequency": "daily",
+"turn_user_name": null,
+"user_name": "Nele"
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "sensor.nele_choreops_aufgabenstatus_zahne_putzen",
+"last_changed": "2026-11-01T08:00:00+00:00",
+"last_updated": "2026-11-01T08:00:00+00:00",
+"state": "approved"
+},
+"sensor.nele_choreops_aufgabenstatus_mull_rausbringen": {
+"attributes": {
+"approve_button_eid": "button.nele_choreops_aufgabe_genehmigen_mull_rausbringen",
+"can_approve": true,
+"can_claim": true,
+"chore_name": "Müll rausbringen",
+"claim_button_eid": "button.nele_choreops_aufgabe_beanspruchen_mull_rausbringen",
+"default_points": 3,
+"disapprove_button_eid": "button.nele_choreops_aufgabe_ablehnen_mull_rausbringen",
+"due_date": "2026-11-01T17:00:00+00:00",
+"friendly_name": "Nele (ChoreOps) Aufgabenstatus - Müll rausbringen",
+"icon": "mdi:trash-can-outline",
+"purpose": "purpose_chore_status",
+"recurring_frequency": "weekly",
+"turn_user_name": "Nele",
+"user_name": "Nele"
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "sensor.nele_choreops_aufgabenstatus_mull_rausbringen",
+"last_changed": "2026-11-01T08:00:00+00:00",
+"last_updated": "2026-11-01T08:00:00+00:00",
+"state": "not_my_turn"
+},
+"sensor.nele_choreops_aufgabenstatus_hausaufgaben_machen": {
+"attributes": {
+"approve_button_eid": "button.nele_choreops_aufgabe_genehmigen_hausaufgaben_machen",
+"can_approve": true,
+"can_claim": true,
+"chore_name": "Hausaufgaben machen",
+"claim_button_eid": "button.nele_choreops_aufgabe_beanspruchen_hausaufgaben_machen",
+"default_points": 3,
+"disapprove_button_eid": "button.nele_choreops_aufgabe_ablehnen_hausaufgaben_machen",
+"due_date": "2026-11-01T17:00:00+00:00",
+"friendly_name": "Nele (ChoreOps) Aufgabenstatus - Hausaufgaben machen",
+"icon": "mdi:book-open-variant",
+"purpose": "purpose_chore_status",
+"recurring_frequency": "daily",
+"turn_user_name": null,
+"user_name": "Nele"
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "sensor.nele_choreops_aufgabenstatus_hausaufgaben_machen",
+"last_changed": "2026-11-01T08:00:00+00:00",
+"last_updated": "2026-11-01T08:00:00+00:00",
+"state": "overdue"
+},
+"sensor.nele_choreops_points": {
+"attributes": {
+"friendly_name": "Nele (ChoreOps) Points",
+"unit_of_measurement": "Points"
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "sensor.nele_choreops_points",
+"last_changed": "2026-11-01T08:00:00+00:00",
+"last_updated": "2026-11-01T08:00:00+00:00",
+"state": "6.0"
+},
+"sensor.nele_choreops_ui_dashboard_helfer": {
+"attributes": {
+"chores": [
+{
+"eid": "sensor.nele_choreops_aufgabenstatus_zimmer_aufraumen",
+"is_today_am": null,
+"labels": [],
+"name": "Zimmer aufräumen",
+"primary_group": "other",
+"state": "pending"
+},
+{
+"eid": "sensor.nele_choreops_aufgabenstatus_tisch_decken",
+"is_today_am": null,
+"labels": [],
+"name": "Tisch decken",
+"primary_group": "today",
+"state": "claimed"
+},
+{
+"eid": "sensor.nele_choreops_aufgabenstatus_zahne_putzen",
+"is_today_am": null,
+"labels": [],
+"name": "Zähne putzen",
+"primary_group": "today",
+"state": "approved"
+},
+{
+"eid": "sensor.nele_choreops_aufgabenstatus_mull_rausbringen",
+"is_today_am": null,
+"labels": [],
+"name": "Müll rausbringen",
+"primary_group": "other",
+"state": "not_my_turn"
+},
+{
+"eid": "sensor.nele_choreops_aufgabenstatus_hausaufgaben_machen",
+"is_today_am": null,
+"labels": [],
+"name": "Hausaufgaben machen",
+"primary_group": "today",
+"state": "overdue"
+}
+],
+"chores_paused": false,
+"core_sensors": {
+"points_eid": "sensor.nele_choreops_points"
+},
+"friendly_name": "Nele (ChoreOps) UI-Dashboard-Helfer",
+"penalties": [
+{
+"applied": 0,
+"eid": "button.nele_choreops_strafe_anwenden_streiten_hauen",
+"name": "Streiten / Hauen",
+"points": -3
+},
+{
+"applied": 0,
+"eid": "button.nele_choreops_strafe_anwenden_nicht_gehort",
+"name": "Nicht gehört",
+"points": -2
+}
+],
+"points_buttons": [
+{
+"eid": "button.nele_choreops_points_um_1_0_verringern",
+"name": "Points -1.0"
+},
+{
+"eid": "button.nele_choreops_points_um_1_0_erhohen",
+"name": "Points +1.0"
+},
+{
+"eid": "button.nele_choreops_points_um_10_0_erhohen",
+"name": "Points +10.0"
+}
+],
+"purpose": "purpose_dashboard_helper",
+"user_name": "Nele"
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "sensor.nele_choreops_ui_dashboard_helfer",
+"last_changed": "2026-11-01T08:00:00+00:00",
+"last_updated": "2026-11-01T08:00:00+00:00",
+"state": "available"
+},
+"sensor.lisa_choreops_aufgabenstatus_zimmer_aufraumen": {
+"attributes": {
+"approve_button_eid": "button.lisa_choreops_aufgabe_genehmigen_zimmer_aufraumen",
+"can_approve": true,
+"can_claim": true,
+"chore_name": "Zimmer aufräumen",
+"claim_button_eid": "button.lisa_choreops_aufgabe_beanspruchen_zimmer_aufraumen",
+"default_points": 5,
+"disapprove_button_eid": "button.lisa_choreops_aufgabe_ablehnen_zimmer_aufraumen",
+"due_date": "2026-11-01T17:00:00+00:00",
+"friendly_name": "Lisa (ChoreOps) Aufgabenstatus - Zimmer aufräumen",
+"icon": "mdi:broom",
+"purpose": "purpose_chore_status",
+"recurring_frequency": "weekly",
+"turn_user_name": null,
+"user_name": "Lisa"
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "sensor.lisa_choreops_aufgabenstatus_zimmer_aufraumen",
+"last_changed": "2026-11-01T08:00:00+00:00",
+"last_updated": "2026-11-01T08:00:00+00:00",
+"state": "pending"
+},
+"sensor.lisa_choreops_aufgabenstatus_tisch_decken": {
+"attributes": {
+"approve_button_eid": "button.lisa_choreops_aufgabe_genehmigen_tisch_decken",
+"can_approve": true,
+"can_claim": true,
+"chore_name": "Tisch decken",
+"claim_button_eid": "button.lisa_choreops_aufgabe_beanspruchen_tisch_decken",
+"default_points": 2,
+"disapprove_button_eid": "button.lisa_choreops_aufgabe_ablehnen_tisch_decken",
+"due_date": "2026-11-01T17:00:00+00:00",
+"friendly_name": "Lisa (ChoreOps) Aufgabenstatus - Tisch decken",
+"icon": "mdi:silverware-fork-knife",
+"purpose": "purpose_chore_status",
+"recurring_frequency": "daily",
+"turn_user_name": null,
+"user_name": "Lisa"
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "sensor.lisa_choreops_aufgabenstatus_tisch_decken",
+"last_changed": "2026-11-01T08:00:00+00:00",
+"last_updated": "2026-11-01T08:00:00+00:00",
+"state": "pending"
+},
+"sensor.lisa_choreops_aufgabenstatus_zahne_putzen": {
+"attributes": {
+"approve_button_eid": "button.lisa_choreops_aufgabe_genehmigen_zahne_putzen",
+"can_approve": true,
+"can_claim": true,
+"chore_name": "Zähne putzen",
+"claim_button_eid": "button.lisa_choreops_aufgabe_beanspruchen_zahne_putzen",
+"default_points": 1,
+"disapprove_button_eid": "button.lisa_choreops_aufgabe_ablehnen_zahne_putzen",
+"due_date": "2026-11-01T17:00:00+00:00",
+"friendly_name": "Lisa (ChoreOps) Aufgabenstatus - Zähne putzen",
+"icon": "mdi:toothbrush",
+"purpose": "purpose_chore_status",
+"recurring_frequency": "daily",
+"turn_user_name": null,
+"user_name": "Lisa"
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "sensor.lisa_choreops_aufgabenstatus_zahne_putzen",
+"last_changed": "2026-11-01T08:00:00+00:00",
+"last_updated": "2026-11-01T08:00:00+00:00",
+"state": "approved"
+},
+"sensor.lisa_choreops_points": {
+"attributes": {
+"friendly_name": "Lisa (ChoreOps) Points",
+"unit_of_measurement": "Points"
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "sensor.lisa_choreops_points",
+"last_changed": "2026-11-01T08:00:00+00:00",
+"last_updated": "2026-11-01T08:00:00+00:00",
+"state": "7.0"
+},
+"sensor.lisa_choreops_ui_dashboard_helfer": {
+"attributes": {
+"chores": [
+{
+"eid": "sensor.lisa_choreops_aufgabenstatus_zimmer_aufraumen",
+"is_today_am": null,
+"labels": [],
+"name": "Zimmer aufräumen",
+"primary_group": "other",
+"state": "pending"
+},
+{
+"eid": "sensor.lisa_choreops_aufgabenstatus_tisch_decken",
+"is_today_am": null,
+"labels": [],
+"name": "Tisch decken",
+"primary_group": "today",
+"state": "claimed"
+},
+{
+"eid": "sensor.lisa_choreops_aufgabenstatus_zahne_putzen",
+"is_today_am": null,
+"labels": [],
+"name": "Zähne putzen",
+"primary_group": "today",
+"state": "approved"
+}
+],
+"chores_paused": false,
+"core_sensors": {
+"points_eid": "sensor.lisa_choreops_points"
+},
+"friendly_name": "Lisa (ChoreOps) UI-Dashboard-Helfer",
+"penalties": [
+{
+"applied": 0,
+"eid": "button.lisa_choreops_strafe_anwenden_streiten_hauen",
+"name": "Streiten / Hauen",
+"points": -3
+},
+{
+"applied": 0,
+"eid": "button.lisa_choreops_strafe_anwenden_nicht_gehort",
+"name": "Nicht gehört",
+"points": -2
+}
+],
+"points_buttons": [
+{
+"eid": "button.lisa_choreops_points_um_1_0_verringern",
+"name": "Points -1.0"
+},
+{
+"eid": "button.lisa_choreops_points_um_1_0_erhohen",
+"name": "Points +1.0"
+},
+{
+"eid": "button.lisa_choreops_points_um_10_0_erhohen",
+"name": "Points +10.0"
+}
+],
+"purpose": "purpose_dashboard_helper",
+"user_name": "Lisa"
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "sensor.lisa_choreops_ui_dashboard_helfer",
+"last_changed": "2026-11-01T08:00:00+00:00",
+"last_updated": "2026-11-01T08:00:00+00:00",
+"state": "available"
 }
 }
