@@ -175,23 +175,23 @@ class HomeAuroraWide extends HomeAurora {
   setConfig(cfg) { super.setConfig({ ambient_night: { from: '23:00', to: '06:00', after: 1 }, ...(cfg || {}) }); }
 
   _vHome() {
-    const { c, L, open, V, VD, w, fc, sentence, mini, xr, sunChip, bathState, bathBusy } = this._homeBits();
+    const { c, L, open, V, VD, w, fc, sentence, mini, xr, sunChip, bathState, bathBusy, bathSub } = this._homeBits();
     const AL = this._alerts(), q = this._quick();
     const nv = VD.rooms.length ? VD.prio.length : V;
     const wxCard = `<div class="c wxh tap fix" style="--i:2;--wglow:${this._wxGlow(w.cond)}" data-act="nav" data-v="weather">
         <div class="wtop"><div><div class="wtemp big" data-count="${w.temp ?? 0}" data-d="1">${de(w.temp)}<small class="u">°C</small></div><div class="wcond">${COND[w.cond] || w.cond}</div></div>${wx(w.cond, 72)}</div>
         <div><div class="chips"><span class="chip">${ic('drop', 14)}<b>${de(w.hum, 0)}</b>%</span><span class="chip">${ic('wind', 14)}<b>${de(w.wind, 0)}</b> ${esc(w.windU)}</span>${w.rain ? `<span class="chip">${ic('rain', 14)}<b>${de(w.rain)}</b> ${esc(w.rainU)}</span>` : ''}${sunChip}</div>${mini ? `<div class="mini">${mini}</div>` : ''}</div></div>`;
-    const pz0 = this._pzCard(6, 1, 7), alltag = [...xr.filter(x => !/Heizmodus|data-act="music"/.test(x) && !(this._pzCard(6, 2) && /Tanken/.test(x))), this._plantRow(), this._sysRow()].filter(Boolean).slice(0, pz0 ? 3 : 5);
+    const pz0 = this._pzCard(6, 1, 7), alltag = [...xr.filter(x => !/Heizmodus|data-act="music"|data-act="cho"/.test(x) && !(this._pzCard(6, 2) && /Tanken/.test(x))), this._plantRow(), this._sysRow()].filter(Boolean).slice(0, pz0 ? 3 : 5);
     const cal = this._calCard(7, 1, 8), pow = this._powerCard(8);
     const vh = typeof innerHeight === 'number' ? innerHeight : 800;
     return `<div class="cock">
       <div class="ctop">${AL.length ? `<div class="alerts${AL.length > 2 ? ' many' : ''}">${AL.map(a => this._alertHtml(a)).join('')}</div>` : ''}${q || '<div class="gap"></div>'}
-        ${this._musicTb()}<button class="tb" data-act="ambient" aria-label="Wandtablet-Modus">${ic('expand', 15)}<span>Wandtablet</span></button></div>
+        ${this._choTb()}${this._musicTb()}<button class="tb" data-act="ambient" aria-label="Wandtablet-Modus">${ic('expand', 15)}<span>Wandtablet</span></button></div>
       <div class="stg">
         ${this._stat(1, 'bulb', 'Lichter an', L, L ? 'hot' : '', L ? esc(this._lightsOn().slice(0, 2).map(e => this._name(e)).join(', ')) + (L > 2 ? ' …' : '') : 'Alles aus', 'lights')}
         ${this._stat(2, 'window', 'Fenster offen', open.length, open.length ? 'bad' : 'cool', this._winSub(open), 'doors')}
         ${this._stat(3, 'wind', 'Räume zu lüften', nv, nv ? 'hot' : 'cool', nv ? (VD.prio.slice(0, 2).map(r => esc(r.name)).join(', ') + (VD.prio.length > 2 ? ' …' : '')) : (VD.paused.length ? VD.paused.length + ' später empfohlen' : 'Luft ist gut'), 'vent')}
-        ${this._stat(4, 'bath', 'Badezimmer', bathState, bathBusy ? 'bad' : 'cool', 'Status', 'nav', 'data-v="bath"')}
+        ${this._stat(4, 'bath', 'Badezimmer', bathState, bathBusy ? 'bad' : 'cool', bathSub, 'nav', 'data-v="bath"')}
       </div>
       <div class="cols">
         <div class="col c1">

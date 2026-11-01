@@ -31,6 +31,9 @@ const DEFAULTS = {
     indoor: [['sensor.hp2550a_pro_v1_9_3_indoor_temperature', 'sensor.hp2550a_pro_v1_9_3_indoor_humidity', 'sensor.hp2550a_pro_v1_9_3_indoor_dewpoint'], ['sensor.hp2550a_pro_v1_9_3_temperature_2', 'sensor.hp2550a_pro_v1_9_3_humidity_2', 'sensor.hp2550a_pro_v1_9_3_dewpoint_2']],
     batteryPct: ['sensor.hp2550a_pro_v1_9_3_wh57_battery'], batteryBin: ['binary_sensor.hp2550a_pro_v1_9_3_wh65_battery', 'binary_sensor.hp2550a_pro_v1_9_3_wh25_battery', 'binary_sensor.hp2550a_pro_v1_9_3_battery_2'],
   },
+  // pz45: Aufgaben & Punkte aus ChoreOps (Reihenfolge/Auswahl der Personen; leer = alle) und Morgen-Überblick im Bildschirmschoner
+  chores: { users: ['Leonie', 'Nele', 'Lisa'] },
+  morning: { from: '05:30', to: '09:30', shift: [{ name: 'Jenny', cal: 'calendar.dienstplan_jenny_dienstplan' }], extra: [{ name: 'Nele', schedule: 'schedule.nele_schultag', label: 'Schule' }, { name: 'Lisa', schedule: 'schedule.lisa_schultag', label: 'Kindergarten' }] },
   kidScript: 'script.kinderhandy_aktion',
   kidphones: [{ name: 'Leonie', title: 'Leonies Handy', lock: 'switch.redmi', b15: 'button.redmi_15min', b30: 'button.redmi_30min', b60: 'button.redmi_60min', reset: 'button.redmi_reset_bonus', ring: 'button.redmi_ring', used: 'sensor.redmi_daily_screen_time', bonus: 'sensor.redmi_active_bonus', next: 'sensor.redmi_next_restriction', limit: 'sensor.redmi_daily_limit', bed: 'binary_sensor.redmi_bedtime_active', school: 'binary_sensor.redmi_school_time_active', reached: 'binary_sensor.redmi_daily_limit_reached', schoolFree: 'input_boolean.leonie_schule_heute_frei', schoolWin: 'input_text.leonie_schulzeit_original_heute' }],
   unlock: { entity: 'input_boolean.tablet_entsperrt', pin: 'input_text.tablet_pin', code: '' },

@@ -10,6 +10,7 @@
     if (this._s(ex.fuel)) xr.push(`<button class="xr" data-act="fuel"><div class="ico">${ic('fuel', 19)}</div><div><div class="t">Tanken · günstigster Preis</div><div class="s">${esc(this._val(ex.fuel))} ${esc(this._unit(ex.fuel))}${this._s(ex.fuelName) && okv(this._val(ex.fuelName)) ? ' · ' + esc(this._val(ex.fuelName)) : ''}</div></div></button>`);
     const tvR = this._tvRows(); if (tvR.length) xr.push(...tvR); else if (this._s(ex.kids)) xr.push(`<button class="xr" data-act="toggle" data-e="${ex.kids}"><div class="ico">${ic('shield', 19)}</div><div><div class="t">Kindersicherung TV</div><div class="s">${this._val(ex.kids) === 'on' ? 'Aktiv' : 'Aus'}</div></div><span class="sw ${this._val(ex.kids) === 'on' ? 'on' : ''}"></span></button>`);
     { const sr = this._shopRow(); if (sr) xr.splice(Math.min(xr.length, 1), 0, sr); }
+    { const cr = this._choRow(); if (cr) xr.splice(Math.min(xr.length, 1), 0, cr); }
     xr.splice(Math.min(xr.length, 2), 0, ...this._cleanRows());
     xr.push(...this._kidRows());
     { const mr = this._musicRow(); if (mr) xr.push(mr); }
@@ -18,10 +19,11 @@
     const sunChip = sa ? `<span class="chip">${ic(sUp ? 'moon' : 'sun', 14)}<b>${hhmm(sUp ? sa.next_setting : sa.next_rising)}</b></span>` : '';
     const bathState = this._val(c.stats.bath) || '–';
     const bathBusy = bathState !== 'Frei' && bathState !== '–';
-    return { c, L, open, V, vr, VD, w, fc, sentence, mini, ex, xr, sunChip, bathState, bathBusy };
+    const bathSub = this._bathSub(bathBusy);
+    return { c, L, open, V, vr, VD, w, fc, sentence, mini, ex, xr, sunChip, bathState, bathBusy, bathSub };
   }
   _vHome() {
-    const { c, L, open, V, vr, VD, w, fc, sentence, mini, ex, xr, sunChip, bathState, bathBusy } = this._homeBits();
+    const { c, L, open, V, vr, VD, w, fc, sentence, mini, ex, xr, sunChip, bathState, bathBusy, bathSub } = this._homeBits();
     const AL = this._alerts();
     const BP = this._banPick(AL)[0], CH = AL.filter(a => a !== BP);
     return `${this._banner(AL)}${CH.length ? `<div class="alerts">${CH.map(a => this._alertHtml(a)).join('')}</div>` : ''}${this._quick()}<div class="bento">
@@ -34,7 +36,7 @@
       ${this._stat(2, 'bulb', 'Lichter an', L, L ? 'hot' : '', L ? esc(this._lightsOn().slice(0, 2).map(e => this._name(e)).join(', ')) + (L > 2 ? ' …' : '') : 'Alles aus', 'lights')}
       ${this._stat(3, 'window', 'Fenster offen', open.length, open.length ? 'bad' : 'cool', this._winSub(open), 'doors')}
       ${(() => { const nv = VD.rooms.length ? VD.prio.length : V; return this._stat(4, 'wind', 'Räume zu lüften', nv, nv ? 'hot' : 'cool', nv ? (VD.prio.slice(0, 2).map(r => esc(r.name)).join(', ') + (VD.prio.length > 2 ? ' …' : '')) : (VD.paused.length ? VD.paused.length + ' später empfohlen' : 'Luft ist gut'), 'vent'); })()}
-      ${this._stat(5, 'bath', 'Badezimmer', bathState, bathBusy ? 'bad' : 'cool', 'Status', 'nav', 'data-v="bath"')}
+      ${this._stat(5, 'bath', 'Badezimmer', bathState, bathBusy ? 'bad' : 'cool', bathSub, 'nav', 'data-v="bath"')}
       <div class="s8 col">${this._pzCard(5, 5)}<div><div class="h">${ic('grid', 14)}Räume<span class="r">${this._c.rooms.length} Räume</span></div><div class="rg">${c.rooms.map((r, i) => this._roomTile(r, false, 6 + i)).join('')}</div></div>
         <div class="c" style="--i:10"><div class="h">${ic('thermo', 14)}Temperaturen<span class="r">letzte 24 Stunden</span></div>${this._chart(this._tempSeries(false), { h: 190, dec: 1 })}</div>
         <div class="c" style="--i:11"><div class="h">${ic('star', 14)}Alltag</div><div class="ex two">${xr.join('')}${this._plantRow()}${this._sysRow()}${this._ambRow()}${this._setRow()}</div></div></div>
@@ -98,7 +100,7 @@
     const tiles = b.stats.filter(s => this._s(s[0])).map(s => `<div class="bs"><div class="v big">${de(this._num(s[0]), s[0].includes('durchschnitt') ? 1 : 0)}<small class="u">${s[2]}</small></div><div class="l">${s[1]}</div></div>`).join('');
     return `<div class="vh"><div><h1>Badezimmer</h1><p>${busy ? 'Gerade in Benutzung' : 'Frei'} · ${I.open ? 'Fenster offen' : 'Fenster zu'}</p></div></div>
       <div class="bento">
-        <div class="c bstatus s5" style="--i:0"><div class="h">${ic('bath', 14)}Status</div><div><div style="display:flex;align-items:center;gap:12px;margin-bottom:12px"><span class="pulse ${busy ? 'busy' : ''}"></span><span style="color:var(--tx2);font-size:13px">${busy ? 'Belegt' : 'Verfügbar'}</span></div><div class="v">${esc(st)}</div></div>
+        <div class="c bstatus s5" style="--i:0"><div class="h">${ic('bath', 14)}Status</div><div><div style="display:flex;align-items:center;gap:12px;margin-bottom:12px"><span class="pulse ${busy ? 'busy' : ''}"></span><span style="color:var(--tx2);font-size:13px">${busy ? 'Belegt' + (this._bathT() ? ` · <span class="bsn" data-t="${this._bathT()}">${this._sinceMin(this._bathT())}</span>` : '') : 'Verfügbar'}</span></div><div class="v">${esc(st)}</div></div>
           <div class="chips"><span class="chip">${ic('window', 14)}Fenster <b>${I.open ? 'offen' : 'zu'}</b></span>${I.lights.length ? `<span class="chip">${ic('bulb', 14)}Licht <b>${I.on.length ? 'an' : 'aus'}</b></span>` : ''}${I.act === 'heating' ? `<span class="chip">${ic('flame', 14)}<b>heizt</b></span>` : ''}</div></div>
         <div class="c s7" style="--i:1"><div class="h">${ic('drop', 14)}Raumklima</div><div class="twocol">
           <div class="gwrap"><svg viewBox="0 0 200 110" style="width:100%;overflow:visible"><path d="${arc(100, 100, 84, 180, 360)}" fill="none" stroke="rgba(${WH},.09)" stroke-width="14" stroke-linecap="round"/><path d="${arc(100, 100, 84, 180, Math.max(180.5, 180 + 180 * hf))}" fill="none" stroke="${hcol}" stroke-width="14" stroke-linecap="round" style="filter:drop-shadow(0 0 10px ${hcol})"/></svg><div class="gv"><div class="big" data-count="${hum ?? 0}" data-d="0">${de(hum, 0)}</div><div style="font-size:12px;color:var(--tx2)">Luftfeuchte %</div></div></div>

@@ -36,7 +36,7 @@ if (shots) mkdirSync(shots, { recursive: true });
 
 const VIEWS = ['home', 'rooms', 'climate', 'bath', 'weather', 'printer', 'radio', 'clean'];
 // room und heat brauchen einen Raum: es wird der erste Raum mit Thermostat genommen.
-const SHEETS = ['lights', 'persons', 'quick', 'vent', 'cal', 'bat', 'doors', 'sys', 'waste', 'power', 'set', 'fuel', 'plants', 'kid', 'clean', 'tv', 'music', 'radio', 'shop', 'pzstat', 'radar', 'room', 'heat'];
+const SHEETS = ['lights', 'persons', 'quick', 'vent', 'cal', 'bat', 'doors', 'sys', 'waste', 'power', 'set', 'fuel', 'plants', 'kid', 'clean', 'tv', 'music', 'radio', 'shop', 'cho', 'pzstat', 'radar', 'room', 'heat'];
 const TARGETS = [
   { file: 'dist/home-aurora.js', tag: 'home-aurora', vp: { width: 412, height: 915 } },
   { file: 'dist/home-aurora-wide.js', tag: 'home-aurora-wide', vp: { width: 1280, height: 800 } },
@@ -194,7 +194,7 @@ for (const [vn, states] of VARIANTS) for (const t of TARGETS.filter((x) => !only
   await check('fenster rezept', () => window.__el.shadowRoot.querySelector('.sheet').textContent.trim().length);
   await page.evaluate(() => { const el = window.__el; el._shopTab = 'list'; el._rcpSel = null; el._rcpServ = 0; });
   if (t.tag.endsWith('wide')) {
-    await check('bildschirmschoner', () => { const el = window.__el; el._closeSheet(); el._v = 'home'; el._render(); el._ambOn(); return el.shadowRoot.querySelector('.amb').textContent.trim().length; });
+    await check('bildschirmschoner', () => { const el = window.__el; el._closeSheet(); el._v = 'home'; el._render(); el._mornForce = true; el._ambOn(); return el.shadowRoot.querySelector('.amb').textContent.trim().length; });
     await page.evaluate(() => window.__el._ambOff(true));
   }
 

@@ -31,6 +31,9 @@ const DEFAULTS = {
     indoor: [['sensor.hp2550a_pro_v1_9_3_indoor_temperature', 'sensor.hp2550a_pro_v1_9_3_indoor_humidity', 'sensor.hp2550a_pro_v1_9_3_indoor_dewpoint'], ['sensor.hp2550a_pro_v1_9_3_temperature_2', 'sensor.hp2550a_pro_v1_9_3_humidity_2', 'sensor.hp2550a_pro_v1_9_3_dewpoint_2']],
     batteryPct: ['sensor.hp2550a_pro_v1_9_3_wh57_battery'], batteryBin: ['binary_sensor.hp2550a_pro_v1_9_3_wh65_battery', 'binary_sensor.hp2550a_pro_v1_9_3_wh25_battery', 'binary_sensor.hp2550a_pro_v1_9_3_battery_2'],
   },
+  // pz45: Aufgaben & Punkte aus ChoreOps (Reihenfolge/Auswahl der Personen; leer = alle) und Morgen-Überblick im Bildschirmschoner
+  chores: { users: ['Leonie', 'Nele', 'Lisa'] },
+  morning: { from: '05:30', to: '09:30', shift: [{ name: 'Jenny', cal: 'calendar.dienstplan_jenny_dienstplan' }], extra: [{ name: 'Nele', schedule: 'schedule.nele_schultag', label: 'Schule' }, { name: 'Lisa', schedule: 'schedule.lisa_schultag', label: 'Kindergarten' }] },
   kidScript: 'script.kinderhandy_aktion',
   kidphones: [{ name: 'Leonie', title: 'Leonies Handy', lock: 'switch.redmi', b15: 'button.redmi_15min', b30: 'button.redmi_30min', b60: 'button.redmi_60min', reset: 'button.redmi_reset_bonus', ring: 'button.redmi_ring', used: 'sensor.redmi_daily_screen_time', bonus: 'sensor.redmi_active_bonus', next: 'sensor.redmi_next_restriction', limit: 'sensor.redmi_daily_limit', bed: 'binary_sensor.redmi_bedtime_active', school: 'binary_sensor.redmi_school_time_active', reached: 'binary_sensor.redmi_daily_limit_reached', schoolFree: 'input_boolean.leonie_schule_heute_frei', schoolWin: 'input_text.leonie_schulzeit_original_heute' }],
   unlock: { entity: 'input_boolean.tablet_entsperrt', pin: 'input_text.tablet_pin', code: '' },
@@ -1576,6 +1579,34 @@ input.rx-bar[type=range]::-moz-range-thumb{width:24px;height:24px;border:0;borde
   .rx-now{padding:12px 14px;gap:12px}.rx-logo{width:64px;height:64px;font-size:16px;border-radius:16px}.rx-ctl{padding:12px 14px;gap:12px}.rx-knob{width:70px;height:70px}
   .rx-qv{gap:4px}.rx-qv button{font-size:12px}.rxp{padding:8px 11px;font-size:13px}.rxb{height:48px;font-size:15px}.rxs{padding:9px;gap:6px}.rxn{font-size:10.5px}}
 @media(prefers-reduced-motion:reduce){.rx-eq.on i{animation:none;height:24px}.rx-needle{transition:none}}
+.chu{display:flex;gap:8px;margin-bottom:14px;overflow-x:auto;scrollbar-width:none}
+.chu button{position:relative;flex:1 0 auto;min-width:92px;display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px 12px;border-radius:16px;background:rgba(var(--wh),.05);border:1px solid var(--line);color:var(--tx2)}
+.chu button b{font-size:14.5px;color:var(--tx)}.chu button span{font-size:12.5px}
+.chu button.on{background:rgba(var(--wh),.13);border-color:rgba(var(--wh),.26);color:var(--tx)}
+.chu button i{position:absolute;top:6px;right:8px;min-width:18px;height:18px;padding:0 5px;border-radius:9px;font-size:11px;font-style:normal;line-height:18px;background:rgba(var(--wh),.16);color:var(--tx)}
+.chu button i.w{background:#fbbf24;color:#1f1300}
+.chr{display:flex;align-items:center;gap:10px;padding:9px 10px 9px 12px;border-radius:16px;background:rgba(var(--wh),.045);margin-bottom:6px;min-height:52px}
+.chr .ico{width:34px;height:34px;border-radius:11px;display:grid;place-items:center;flex:none;background:rgba(var(--wh),.07);color:var(--tx2)}
+.chr .tx{flex:1;min-width:0}.chr .t{font-size:14.5px;overflow-wrap:anywhere}.chr .s{font-size:12px;color:var(--tx3);margin-top:1px}
+.chr.late .s{color:#fb7185}.chr.wait{background:rgba(251,191,36,.09)}.chr.wait .s{color:#fcd34d}
+.chr.dn .t{color:var(--tx3);text-decoration:line-through}.chr.off{opacity:.55}
+.chp{flex:none;font-size:12.5px;color:#fcd34d;font-variant-numeric:tabular-nums}
+.chb{flex:none;display:inline-flex;align-items:center;gap:5px;min-height:38px;padding:0 12px;border-radius:12px;font-size:13px;background:rgba(var(--wh),.08);border:1px solid var(--line);color:var(--tx)}
+.chb.go{background:rgba(52,211,153,.14);border-color:rgba(52,211,153,.35);color:#6ee7b7}
+.chb.ok{background:rgba(52,211,153,.22);border-color:rgba(52,211,153,.5);color:#a7f3d0}
+.chb.no{padding:0 10px;color:#fda4af}.chb:disabled{opacity:.5}
+.chd{flex:none;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:rgba(52,211,153,.2);color:#6ee7b7}
+.chbar{margin:0 0 10px}
+.chpen{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:6px}
+.chpen button{display:flex;align-items:center;gap:8px;min-height:44px;padding:6px 10px;border-radius:14px;background:rgba(251,113,133,.08);border:1px solid rgba(251,113,133,.22);color:var(--tx);text-align:left;font-size:13px}
+.chpen button b{flex:none;color:#fb7185;font-size:14px}.chpen button.arm{background:rgba(251,113,133,.28);border-color:#fb7185}
+.chpts{display:flex;align-items:center;gap:6px;flex-wrap:wrap}.chpts button{min-width:46px;min-height:40px;border-radius:12px;background:rgba(var(--wh),.06);border:1px solid var(--line);color:var(--tx);font-size:14px}
+.chpts span{flex:1;text-align:center;font-size:15px;color:#fcd34d;min-width:60px}
+.ambm{display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px 18px;border-radius:22px;background:rgba(255,255,255,.05);max-width:min(92vw,860px)}
+.ambmh{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--tx2);letter-spacing:.02em}
+.ambmg{display:flex;flex-wrap:wrap;justify-content:center;gap:8px 18px}
+.ambmc{display:flex;align-items:center;gap:10px;text-align:left;color:var(--tx2)}.ambmc b{display:block;font-size:clamp(14px,1.9vw,17px);color:var(--tx);font-weight:500}.ambmc span{font-size:clamp(13px,1.7vw,15px)}
+.ambmc.on .ico,.ambmc.on>svg{color:#7dd3fc}
 
 `;
 class HomeAurora extends HTMLElement {
@@ -1592,7 +1623,7 @@ class HomeAurora extends HTMLElement {
     const c = cfg || {};
     this._c = Object.assign({}, DEFAULTS, c, { outdoor: { ...DEFAULTS.outdoor, ...(c.outdoor || {}) }, stats: { ...DEFAULTS.stats, ...(c.stats || {}) }, extras: { ...DEFAULTS.extras, ...(c.extras || {}) }, bath: { ...DEFAULTS.bath, ...(c.bath || {}) }, station: { ...DEFAULTS.station, ...(c.station || {}) }, alerts: { ...DEFAULTS.alerts, ...(c.alerts || {}) }, plant: { ...DEFAULTS.plant, ...(c.plant || {}) }, printer: { ...DEFAULTS.printer, ...(c.printer || {}) }, power: { ...DEFAULTS.power, ...(c.power || {}) }, wasteNames: { ...DEFAULTS.wasteNames, ...(c.wasteNames || {}) }, shopping: { ...DEFAULTS.shopping, ...(c.shopping || {}) } });
     this._c.rooms = (this._c.rooms || []).map(r => ({ ...r })); // eigene Kopie: die Heizungserkennung ergänzt Räume
-    try { this._themePref = localStorage.getItem('home-aurora-theme'); this._ambPref = localStorage.getItem('home-aurora-amb'); this._nightPref = localStorage.getItem('home-aurora-ambnight'); this._fuPref = localStorage.getItem('home-aurora-fully'); this._pzvPref = localStorage.getItem('home-aurora-pzview'); this._pzsPref = localStorage.getItem('home-aurora-pzshow'); this._shsPref = localStorage.getItem('home-aurora-shopshow'); } catch (e) { /* kein Speicher */ }
+    try { this._themePref = localStorage.getItem('home-aurora-theme'); this._ambPref = localStorage.getItem('home-aurora-amb'); this._nightPref = localStorage.getItem('home-aurora-ambnight'); this._fuPref = localStorage.getItem('home-aurora-fully'); this._pzvPref = localStorage.getItem('home-aurora-pzview'); this._pzsPref = localStorage.getItem('home-aurora-pzshow'); this._shsPref = localStorage.getItem('home-aurora-shopshow'); this._chsPref = localStorage.getItem('home-aurora-choshow'); } catch (e) { /* kein Speicher */ }
     const w = new Set();
     const walk = o => { if (typeof o === 'string') { if (/^[a-z_]+\.[a-z0-9_]+$/.test(o)) w.add(o); } else if (Array.isArray(o)) o.forEach(walk); else if (o && typeof o === 'object') Object.values(o).forEach(walk); };
     walk(this._c);
@@ -1659,7 +1690,7 @@ class HomeAurora extends HTMLElement {
     for (const k in h.states) if (k.startsWith('sensor.') && h.states[k].attributes?.thermostat_setpoints) dhs.push(h.states[k]);
     l.push(...this._heatScan(dhs));
     this._loadPlans();
-    for (const k in h.states) if (k.startsWith('light.') || (k.startsWith('sensor.') && k.includes('timer')) || this._isBat(k) || this._isContact(k) || k.includes(this._pid) || h.states[k].attributes?.putzplan_task || (k.startsWith('text.') && k.includes('_schedule_'))) l.push(k);
+    for (const k in h.states) if (k.startsWith('light.') || (k.startsWith('sensor.') && k.includes('timer')) || this._isBat(k) || this._isContact(k) || k.includes(this._pid) || h.states[k].attributes?.putzplan_task || (k.startsWith('text.') && k.includes('_schedule_')) || (k.startsWith('sensor.') && k.includes('_choreops_'))) l.push(k);
     this._xw = l; this._xwT = now;
     return l;
   }
@@ -1921,6 +1952,7 @@ class HomeAurora extends HTMLElement {
     if (this._s(ex.fuel)) xr.push(`<button class="xr" data-act="fuel"><div class="ico">${ic('fuel', 19)}</div><div><div class="t">Tanken · günstigster Preis</div><div class="s">${esc(this._val(ex.fuel))} ${esc(this._unit(ex.fuel))}${this._s(ex.fuelName) && okv(this._val(ex.fuelName)) ? ' · ' + esc(this._val(ex.fuelName)) : ''}</div></div></button>`);
     const tvR = this._tvRows(); if (tvR.length) xr.push(...tvR); else if (this._s(ex.kids)) xr.push(`<button class="xr" data-act="toggle" data-e="${ex.kids}"><div class="ico">${ic('shield', 19)}</div><div><div class="t">Kindersicherung TV</div><div class="s">${this._val(ex.kids) === 'on' ? 'Aktiv' : 'Aus'}</div></div><span class="sw ${this._val(ex.kids) === 'on' ? 'on' : ''}"></span></button>`);
     { const sr = this._shopRow(); if (sr) xr.splice(Math.min(xr.length, 1), 0, sr); }
+    { const cr = this._choRow(); if (cr) xr.splice(Math.min(xr.length, 1), 0, cr); }
     xr.splice(Math.min(xr.length, 2), 0, ...this._cleanRows());
     xr.push(...this._kidRows());
     { const mr = this._musicRow(); if (mr) xr.push(mr); }
@@ -1929,10 +1961,11 @@ class HomeAurora extends HTMLElement {
     const sunChip = sa ? `<span class="chip">${ic(sUp ? 'moon' : 'sun', 14)}<b>${hhmm(sUp ? sa.next_setting : sa.next_rising)}</b></span>` : '';
     const bathState = this._val(c.stats.bath) || '–';
     const bathBusy = bathState !== 'Frei' && bathState !== '–';
-    return { c, L, open, V, vr, VD, w, fc, sentence, mini, ex, xr, sunChip, bathState, bathBusy };
+    const bathSub = this._bathSub(bathBusy);
+    return { c, L, open, V, vr, VD, w, fc, sentence, mini, ex, xr, sunChip, bathState, bathBusy, bathSub };
   }
   _vHome() {
-    const { c, L, open, V, vr, VD, w, fc, sentence, mini, ex, xr, sunChip, bathState, bathBusy } = this._homeBits();
+    const { c, L, open, V, vr, VD, w, fc, sentence, mini, ex, xr, sunChip, bathState, bathBusy, bathSub } = this._homeBits();
     const AL = this._alerts();
     const BP = this._banPick(AL)[0], CH = AL.filter(a => a !== BP);
     return `${this._banner(AL)}${CH.length ? `<div class="alerts">${CH.map(a => this._alertHtml(a)).join('')}</div>` : ''}${this._quick()}<div class="bento">
@@ -1945,7 +1978,7 @@ class HomeAurora extends HTMLElement {
       ${this._stat(2, 'bulb', 'Lichter an', L, L ? 'hot' : '', L ? esc(this._lightsOn().slice(0, 2).map(e => this._name(e)).join(', ')) + (L > 2 ? ' …' : '') : 'Alles aus', 'lights')}
       ${this._stat(3, 'window', 'Fenster offen', open.length, open.length ? 'bad' : 'cool', this._winSub(open), 'doors')}
       ${(() => { const nv = VD.rooms.length ? VD.prio.length : V; return this._stat(4, 'wind', 'Räume zu lüften', nv, nv ? 'hot' : 'cool', nv ? (VD.prio.slice(0, 2).map(r => esc(r.name)).join(', ') + (VD.prio.length > 2 ? ' …' : '')) : (VD.paused.length ? VD.paused.length + ' später empfohlen' : 'Luft ist gut'), 'vent'); })()}
-      ${this._stat(5, 'bath', 'Badezimmer', bathState, bathBusy ? 'bad' : 'cool', 'Status', 'nav', 'data-v="bath"')}
+      ${this._stat(5, 'bath', 'Badezimmer', bathState, bathBusy ? 'bad' : 'cool', bathSub, 'nav', 'data-v="bath"')}
       <div class="s8 col">${this._pzCard(5, 5)}<div><div class="h">${ic('grid', 14)}Räume<span class="r">${this._c.rooms.length} Räume</span></div><div class="rg">${c.rooms.map((r, i) => this._roomTile(r, false, 6 + i)).join('')}</div></div>
         <div class="c" style="--i:10"><div class="h">${ic('thermo', 14)}Temperaturen<span class="r">letzte 24 Stunden</span></div>${this._chart(this._tempSeries(false), { h: 190, dec: 1 })}</div>
         <div class="c" style="--i:11"><div class="h">${ic('star', 14)}Alltag</div><div class="ex two">${xr.join('')}${this._plantRow()}${this._sysRow()}${this._ambRow()}${this._setRow()}</div></div></div>
@@ -2009,7 +2042,7 @@ class HomeAurora extends HTMLElement {
     const tiles = b.stats.filter(s => this._s(s[0])).map(s => `<div class="bs"><div class="v big">${de(this._num(s[0]), s[0].includes('durchschnitt') ? 1 : 0)}<small class="u">${s[2]}</small></div><div class="l">${s[1]}</div></div>`).join('');
     return `<div class="vh"><div><h1>Badezimmer</h1><p>${busy ? 'Gerade in Benutzung' : 'Frei'} · ${I.open ? 'Fenster offen' : 'Fenster zu'}</p></div></div>
       <div class="bento">
-        <div class="c bstatus s5" style="--i:0"><div class="h">${ic('bath', 14)}Status</div><div><div style="display:flex;align-items:center;gap:12px;margin-bottom:12px"><span class="pulse ${busy ? 'busy' : ''}"></span><span style="color:var(--tx2);font-size:13px">${busy ? 'Belegt' : 'Verfügbar'}</span></div><div class="v">${esc(st)}</div></div>
+        <div class="c bstatus s5" style="--i:0"><div class="h">${ic('bath', 14)}Status</div><div><div style="display:flex;align-items:center;gap:12px;margin-bottom:12px"><span class="pulse ${busy ? 'busy' : ''}"></span><span style="color:var(--tx2);font-size:13px">${busy ? 'Belegt' + (this._bathT() ? ` · <span class="bsn" data-t="${this._bathT()}">${this._sinceMin(this._bathT())}</span>` : '') : 'Verfügbar'}</span></div><div class="v">${esc(st)}</div></div>
           <div class="chips"><span class="chip">${ic('window', 14)}Fenster <b>${I.open ? 'offen' : 'zu'}</b></span>${I.lights.length ? `<span class="chip">${ic('bulb', 14)}Licht <b>${I.on.length ? 'an' : 'aus'}</b></span>` : ''}${I.act === 'heating' ? `<span class="chip">${ic('flame', 14)}<b>heizt</b></span>` : ''}</div></div>
         <div class="c s7" style="--i:1"><div class="h">${ic('drop', 14)}Raumklima</div><div class="twocol">
           <div class="gwrap"><svg viewBox="0 0 200 110" style="width:100%;overflow:visible"><path d="${arc(100, 100, 84, 180, 360)}" fill="none" stroke="rgba(${WH},.09)" stroke-width="14" stroke-linecap="round"/><path d="${arc(100, 100, 84, 180, Math.max(180.5, 180 + 180 * hf))}" fill="none" stroke="${hcol}" stroke-width="14" stroke-linecap="round" style="filter:drop-shadow(0 0 10px ${hcol})"/></svg><div class="gv"><div class="big" data-count="${hum ?? 0}" data-d="0">${de(hum, 0)}</div><div style="font-size:12px;color:var(--tx2)">Luftfeuchte %</div></div></div>
@@ -2879,7 +2912,7 @@ class HomeAurora extends HTMLElement {
   _sSet() {
     const th = this._themePref || this._c.theme || 'dark', am = String(this._ambMin());
     const seg = (act, cur, items) => `<div class="seg wide">${items.map(x => `<button class="${cur === x[0] ? 'on' : ''}" data-act="${act}" data-m="${x[0]}">${x[1]}</button>`).join('')}</div>`;
-    return `<div class="grab"></div><div class="sh"><div class="ico">${ic('cog', 24)}</div><div><h2>Darstellung &amp; Modi</h2><p>Home Aurora v5.2 · Build pz43</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
+    return `<div class="grab"></div><div class="sh"><div class="ico">${ic('cog', 24)}</div><div><h2>Darstellung &amp; Modi</h2><p>Home Aurora v5.2 · Build pz45</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
       <div class="lab2">DESIGN</div>${seg('theme', th, [['dark', 'Dunkel'], ['light', 'Hell'], ['auto', 'Automatisch']])}
       <div class="card-note">„Automatisch“ folgt dem Dunkel-/Hellmodus deines Home-Assistant-Profils. Die Auswahl gilt nur für dieses Gerät.</div>
       ${WALL_UI ? `      <div class="lab2">WANDTABLET-MODUS</div>
@@ -2894,6 +2927,8 @@ class HomeAurora extends HTMLElement {
       <div class="card-note">Eigene Seite mit „Zurück“ oder Fenster über der Startseite. Gilt nur für dieses Gerät.</div>` : ''}` : ''}
       ${this._shopOk() || this._rcpOk() ? `<div class="lab2">EINKAUFSLISTE &amp; REZEPTE</div>${seg('shopshow', this._shopOn() ? '1' : '0', [['1', 'Sichtbar'], ['0', 'Ausgeblendet']])}
       <div class="card-note">Ausgeblendet verschwindet der Eintrag „Einkaufsliste“ im Alltag. Die Listen in Home Assistant bleiben unverändert. Gilt nur für dieses Gerät.</div>` : ''}
+      ${this._choOk() ? `<div class="lab2">AUFGABEN &amp; PUNKTE</div>${seg('choshow', this._choOn() ? '1' : '0', [['1', 'Sichtbar'], ['0', 'Ausgeblendet']])}
+      <div class="card-note">Ausgeblendet verschwinden der Eintrag „Aufgaben &amp; Punkte“${WALL_UI ? ', der Knopf oben' : ''} und der Hinweis im Bildschirmschoner. ChoreOps in Home Assistant bleibt unverändert. Gilt nur für dieses Gerät.</div>` : ''}
       <div class="lab2">SCHNELLAKTIONEN</div>
       <button class="xr" style="width:100%" data-act="qedit"><div class="ico">${ic('sparkle', 19)}</div><div><div class="t">Schnellaktionen bearbeiten</div><div class="s">Szenen &amp; Skripte hinzufügen, sortieren, neue Szene speichern</div></div></button>
       <div class="lab2">SCHNELLZUGRIFF</div>
@@ -2954,6 +2989,47 @@ class HomeAurora extends HTMLElement {
     if (d1 && ok(d1.temperature)) strip += `<i class="ambfd"></i>` + cell('Morgen', d1.condition || 'cloudy', `${ok(d1.templow) ? de(d1.templow, 0) + '° / ' : ''}${de(d1.temperature, 0)}°`, rain(d1));
     return line + (strip ? `<div class="ambfx">${strip}</div>` : '');
   }
+  /* pz45: Bad besetzt – Zustand aus stats.bath (Frei / WC / Dusche …), Beginn = letzte Änderung dieses Sensors */
+  _bathNow() { const e = this._c.stats.bath, s = e && this._s(e); if (!s || !okv(s.state) || s.state === 'Frei') return null; const t = Date.parse(s.last_changed); return { st: s.state, t: isNaN(t) ? null : t }; }
+  _bathT() { return this._bathNow()?.t || 0; }
+  _sinceMin(t) { if (!t) return ''; const m = Math.max(0, Math.floor((Date.now() - t) / 6e4)); return m < 1 ? 'gerade eben' : m < 60 ? `seit ${m} Min.` : `seit ${Math.floor(m / 60)} Std. ${m % 60} Min.`; }
+  _bathSub(busy) { const t = busy && this._bathT(); return t ? `<span class="bsn" data-t="${t}">${this._sinceMin(t)}</span>` : 'Status'; }
+  /* pz45: Morgen-Überblick im Bildschirmschoner (Vorgabe 05:30–09:30, YAML morning: { from, to, shift, extra } oder morning: false):
+     Dienst laut Dienstplan-Kalender, Schule je Kinderhandy (Family Link), weitere Kinder über einen Zeitplan (schedule.*), offene Aufgaben */
+  _mornC() { const m = this._c.morning; if (m === false) return null; return { from: '05:30', to: '09:30', ...(DEFAULTS.morning || {}), ...(m || {}) }; }
+  _ambMorning() {
+    const M = this._mornC(); if (!M) return '';
+    const hm = s => { const [h, m] = String(s).split(':').map(Number); return (h || 0) * 60 + (m || 0); }, d = new Date(), t = d.getHours() * 60 + d.getMinutes();
+    if (!(t >= hm(M.from) && t < hm(M.to)) && !this._mornForce) return '';
+    const C = [], cell = (icon, name, txt, tone) => C.push(`<div class="ambmc${tone ? ' ' + tone : ''}">${ic(icon, 20)}<div><b>${esc(name)}</b><span>${txt}</span></div></div>`);
+    const today = new Date(); today.setHours(0, 0, 0, 0); const tom = +today + 864e5;
+    for (const sh of [].concat(M.shift || [])) {
+      if (!sh || !sh.cal || !this._s(sh.cal)) continue;
+      const a = this._s(sh.cal).attributes || {};
+      const ev = (this._cal?.evs || []).filter(x => x.cal === sh.cal && +x.s < tom && +x.e > +today).sort((x, y) => x.s - y.s)[0];
+      let tx = '';
+      if (ev) tx = esc(ev.title) + (ev.allDay ? '' : ` · ${hhmm(ev.s)}–${hhmm(ev.e)}`);
+      else if (a.today_shift_name || a.today_shift) tx = esc(a.today_shift_name || a.today_shift);
+      else if (this._cal) tx = 'Heute frei';
+      if (tx) cell('cal', sh.name || 'Dienst', tx, ev || a.today_shift ? 'on' : '');
+    }
+    for (const k of this._kids()) {
+      const S = this._kidSchool(k); if (!S.has && S.st === 'none') continue;
+      cell(S.st === 'soon' || S.st === 'run' ? 'backpack' : 'sun', k.name, esc(S.st === 'soon' || S.st === 'run' ? S.title + (S.sub ? ' · ' + S.sub : '') : S.st === 'none' ? 'Heute keine Schule' : S.title), S.st === 'soon' ? 'on' : '');
+    }
+    /* Zeitplan = Zeiten zuhause (Heizung): morgens an bis zum Losgehen, dann aus bis zur Rückkehr. next_event zeigt den nächsten Wechsel. */
+    for (const x of [].concat(M.extra || [])) {
+      const s = x && x.schedule && this._s(x.schedule); if (!s) continue;
+      const ne = Date.parse(s.attributes?.next_event || ''), lab = x.label || 'Schule', at = x.at || (/garten/i.test(lab) ? 'Im Kindergarten' : 'In der Schule');
+      const isT = !isNaN(ne) && ne < tom, on = s.state === 'on', noon = new Date(); noon.setHours(11, 0, 0, 0);
+      if (on && isT && ne < +noon) cell('backpack', x.name || this._name(x.schedule), `${esc(lab)} · los um ${hhmm(ne)} Uhr`, 'on');
+      else if (!on && isT && ne <= +noon) cell('backpack', x.name || this._name(x.schedule), `Heute ${esc(lab)}`, '');
+      else if (!on && isT) cell('backpack', x.name || this._name(x.schedule), `${esc(at)} · zurück ${hhmm(ne)} Uhr`, '');
+      else cell('sun', x.name || this._name(x.schedule), `Heute kein${/e$/.test(lab) ? 'e' : ''} ${esc(lab)}`, '');
+    }
+    if (this._choOn() && this._choOk()) { const U = this._choSum().U.filter(u => u.T.length); if (U.length) cell('star', 'Aufgaben heute', U.map(u => `${esc(u.name)} ${u.open || '✓'}`).join(' · ')); }
+    return C.length ? `<div class="ambm"><div class="ambmh">${ic('sun', 15)} Guten Morgen · heute</div><div class="ambmg">${C.join('')}</div></div>` : '';
+  }
   /* Bildschirmschoner: Hinweise als ruhige Chips; Warnungen zuerst und in Gelb */
   _ambChips() {
     const C = [], chip = (icon, txt, warn) => C.push(`<div class="ambn${warn ? ' warn' : ''}">${ic(icon, 18)}<span>${txt}</span></div>`);
@@ -2965,6 +3041,8 @@ class HomeAurora extends HTMLElement {
     if (WL && WL[0] && WL[0].days <= 1) { const nx = WL.filter(x => x.days === WL[0].days); chip('trash', `${this._dayTxt(WL[0])} · ${esc(nx.map(x => x.name).join(' + '))}`); }
     if (this._pzOn()) { const T = this._pzSum().T, due = T.filter(t => !t.today && (t.st === 'overdue' || (t.st === 'due_soon' && t.until === 0))).length; if (due) chip('broom', `Heute putzen · ${due} ${due === 1 ? 'Aufgabe' : 'Aufgaben'}`); }
     if (this._shopOn() && this._shopOk()) { const n = parseInt(this._val(this._shopC().list), 10) || 0; if (n) chip('cart', `Einkaufsliste · ${n} ${n === 1 ? 'Sache' : 'Sachen'}`); }
+    { const b = this._bathNow(); if (b) chip('bath', `Bad besetzt · ${esc(b.st)} ${esc(this._sinceMin(b.t))}`); }
+    if (this._choOn() && this._choOk()) { const S = this._choSum(); if (S.wait) chip('star', `${S.wait} ${S.wait === 1 ? 'Aufgabe wartet' : 'Aufgaben warten'} auf OK`); else if (S.open) chip('star', `Kinder-Aufgaben · ${S.open} offen`); }
     const lights = this._lightsOn().length; if (lights) chip('bulb', `${lights} ${lights === 1 ? 'Licht' : 'Lichter'} an`);
     return C.join('');
   }
@@ -2979,7 +3057,7 @@ class HomeAurora extends HTMLElement {
       <div class="ambd">${new Date().toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long' })}</div>
       <div class="ambr"><div class="ambw">${wx(w.cond, 64)}<div><div class="ambt big">${de(w.temp)}<small>°C</small></div><div class="ambs">${COND[w.cond] || w.cond}</div></div></div>
       ${avg != null ? `<div class="ambw"><div class="ico">${ic('home', 34)}</div><div><div class="ambt big">${de(avg)}<small>°C</small></div><div class="ambs">innen Ø</div></div></div>` : ''}</div>
-      ${this._ambWx(w)}<div class="ambl">${this._ambChips()}</div>
+      ${this._ambWx(w)}${this._ambMorning()}<div class="ambl">${this._ambChips()}</div>
       <div class="pp ambp">${pe}</div><div class="ambh">Tippen zum Beenden</div></div>`);
   }
   /* ───────────── v5.2: Lüften – Raumkarte ───────────── */
@@ -5120,6 +5198,131 @@ class HomeAurora extends HTMLElement {
       }
     }
   }
+  /* ───────────── pz45: Aufgaben & Punkte (Integration ChoreOps) ───────────── */
+  /* ChoreOps legt pro Person einen Sensor „… UI-Dashboard-Helfer“ an (Attribut purpose = purpose_dashboard_helper) mit
+     Aufgaben, Strafen und Punkte-Knöpfen. Pro Aufgabe gibt es einen Status-Sensor mit den Knöpfen zum Erledigen (claim),
+     Genehmigen und Ablehnen. Das Dashboard drückt nur diese Knöpfe; Punkte rechnet ChoreOps selbst.
+     YAML: chores: { users: ['Leonie', 'Nele', 'Lisa'] } legt Reihenfolge und Auswahl fest (leer = alle). aufgaben: false blendet aus. */
+  _choC() { return this._c.chores || {}; }
+  _choKeys() {
+    const h = this._h, now = Date.now();
+    if (this._choK && now - this._choKT < 6e4 && this._choK.every(k => k in h.states)) return this._choK;
+    const l = [];
+    for (const k in h.states) if (k.startsWith('sensor.') && k.includes('choreops') && h.states[k].attributes?.purpose === 'purpose_dashboard_helper') l.push(k);
+    this._choK = l; this._choKT = now;
+    return l;
+  }
+  _choUsers() {
+    return this._memo('cho', () => {
+      const want = (this._choC().users || []).map(n => String(n).toLowerCase());
+      const U = [];
+      for (const k of this._choKeys()) {
+        const a = this._s(k)?.attributes || {}, name = a.user_name; if (!name) continue;
+        if (want.length && !want.includes(String(name).toLowerCase())) continue;
+        const pe = a.core_sensors?.points_eid, pts = this._num(pe);
+        const ch = (a.chores || []).map(c => {
+          const s = this._s(c.eid); if (!s) return null;
+          const x = s.attributes || {};
+          return { eid: c.eid, name: c.name || x.chore_name || '', st: s.state, grp: c.primary_group || '', pts: parseFloat(x.default_points) || 0, due: x.due_date || '', icon: x.icon || '', turn: x.turn_user_name || '', freq: x.recurring_frequency || '', desc: x.description || '', claim: x.claim_button_eid, ok: x.approve_button_eid, no: x.disapprove_button_eid, canClaim: x.can_claim !== false, canOk: x.can_approve !== false, at: x.last_approved || '' };
+        }).filter(Boolean);
+        U.push({ name, key: k, pts, ch, pen: (a.penalties || []).filter(p => p && p.eid), pb: (a.points_buttons || []).filter(p => p && p.eid), paused: !!a.chores_paused });
+      }
+      if (want.length) U.sort((a, b) => want.indexOf(a.name.toLowerCase()) - want.indexOf(b.name.toLowerCase()));
+      return U;
+    });
+  }
+  _choOk() { return this._choUsers().length > 0; }
+  _choOn() { return this._chsPref != null ? this._chsPref === '1' : this._c?.aufgaben !== false; }
+  /* Was heute dran ist: fällig/überfällig/wartend oder von ChoreOps unter „heute“ einsortiert; erledigt zählt mit */
+  _choToday(c) {
+    if (['overdue', 'due', 'claimed'].includes(c.st)) return true;
+    if (c.st === 'not_my_turn' || c.st === 'completed_by_other') return false;
+    if (c.grp === 'today') return true;
+    const d = Date.parse(c.due); if (!isNaN(d)) { const e = new Date(); e.setHours(23, 59, 59, 999); if (d <= +e) return true; }
+    return false;
+  }
+  _choDone(c) { return c.st === 'approved' || c.st === 'completed'; }
+  _choSum() {
+    return this._memo('chosum', () => {
+      const U = this._choUsers().map(u => { const T = u.ch.filter(c => this._choToday(c)); return { ...u, T, open: T.filter(c => !this._choDone(c) && c.st !== 'claimed').length, wait: u.ch.filter(c => c.st === 'claimed').length, late: T.filter(c => c.st === 'overdue').length }; });
+      return { U, open: U.reduce((a, u) => a + u.open, 0), wait: U.reduce((a, u) => a + u.wait, 0) };
+    });
+  }
+  _choLab(c) {
+    const t = Date.parse(c.due), when = !isNaN(t) ? (new Date(t).toDateString() === new Date().toDateString() ? 'bis ' + hhmm(c.due) + ' Uhr' : new Date(t).toLocaleDateString('de-DE', { weekday: 'short', day: 'numeric', month: 'numeric' }) + ', ' + hhmm(c.due)) : '';
+    return { pending: when ? 'Offen · ' + when : 'Offen', due: 'Jetzt fällig' + (when ? ' · ' + when : ''), overdue: 'Überfällig', claimed: 'Wartet auf OK', approved: 'Erledigt', completed: 'Erledigt', not_my_turn: c.turn ? c.turn + ' ist dran' : 'Nicht dran', completed_by_other: 'Schon erledigt', missed: 'Verpasst' }[c.st] || c.st;
+  }
+  /* mdi-Icon der Aufgabe auf die eigenen Strich-Icons abbilden */
+  _choIco(c) {
+    const s = (c.icon + ' ' + c.name).toLowerCase();
+    const M = [[/bed|bett/, 'bed'], [/dish|spül/, 'dishwasher'], [/silverware|tisch decken|fork/, 'cook'], [/table|tisch/, 'table'], [/trash|müll/, 'trash'], [/water|gieß|pflanz/, 'flower'], [/tooth|zähne/, 'sparkle'], [/basket|wäsche/, 'washer'], [/toy|brick|spielzeug/, 'brick'], [/bag|ranzen|schule/, 'backpack'], [/book|hausaufgab/, 'list'], [/broom|aufräum|zimmer/, 'broom'], [/dog|gassi|hund/, 'shoe'], [/vacuum|saug/, 'vacuum']];
+    return (M.find(m => m[0].test(s)) || [0, 'check'])[1];
+  }
+  _choRow() {
+    if (!this._choOn() || !this._choOk()) return '';
+    const S = this._choSum();
+    const sub = S.wait ? `${S.wait} ${S.wait === 1 ? 'wartet' : 'warten'} auf OK` : S.open ? `${S.open} heute offen` : 'Heute alles erledigt';
+    const pts = S.U.filter(u => u.pts != null).slice(0, 4).map(u => `${esc(u.name)} ${de(u.pts, 0)}`).join(' · ');
+    return `<button class="xr" data-act="cho"><div class="ico" ${S.wait ? 'style="background:rgba(251,191,36,.18);color:#fcd34d"' : ''}>${ic('star', 19)}</div><div><div class="t">Aufgaben &amp; Punkte</div><div class="s">${sub}${pts ? ' · ⭐ ' + pts : ''}</div></div>${S.wait ? '<span class="kdot lk" style="background:#fbbf24;box-shadow:0 0 10px rgba(251,191,36,.6)"></span>' : ''}</button>`;
+  }
+  _choTb() {
+    if (!this._choOn() || !this._choOk()) return '';
+    const S = this._choSum();
+    return `<button class="tb${S.wait ? ' on' : ''}" data-act="cho" aria-label="Aufgaben und Punkte">${ic('star', 15)}<span>${S.wait ? S.wait + ' warten auf OK' : S.open ? 'Aufgaben · ' + S.open + ' offen' : 'Aufgaben'}</span></button>`;
+  }
+  _sCho() {
+    const head = p => `<div class="grab"></div><div class="sh"><div class="ico">${ic('star', 24)}</div><div><h2>Aufgaben &amp; Punkte</h2><p>${p}</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>`;
+    const S = this._choSum();
+    if (!S.U.length) return head('Nicht verfügbar') + '<div class="empty">Keine Personen in ChoreOps gefunden. Ist die Integration geladen?</div>';
+    const u = S.U.find(x => x.name === this._choSel) || S.U.find(x => x.wait) || S.U[0];
+    const tabs = `<div class="chu">${S.U.map(x => `<button class="${x === u ? 'on' : ''}" data-act="chou" data-u="${esc(x.name)}"><b>${esc(x.name)}</b><span>⭐ ${x.pts != null ? de(x.pts, 0) : '–'}</span>${x.wait ? `<i class="w">${x.wait}</i>` : x.open ? `<i>${x.open}</i>` : ''}</button>`).join('')}</div>`;
+    const busy = this._choBusy || '';
+    const row = c => {
+      const done = this._choDone(c), cl = c.st === 'claimed', late = c.st === 'overdue', off = c.st === 'not_my_turn' || c.st === 'completed_by_other';
+      let act = '';
+      if (cl) act = `<button class="chb no" data-act="chono" data-e="${esc(c.no || '')}" aria-label="${esc(c.name)} ablehnen" ${busy ? 'disabled' : ''}>${ic('close', 16)}</button><button class="chb ok" data-act="chook" data-e="${esc(c.ok || '')}" ${busy ? 'disabled' : ''}>${ic('check', 16)} OK</button>`;
+      else if (!done && !off && c.claim && c.canClaim) act = `<button class="chb go" data-act="choclaim" data-e="${esc(c.claim)}" ${busy ? 'disabled' : ''}>${ic('check', 16)} Erledigt</button>`;
+      else if (done) act = `<span class="chd">${ic('check', 16)}</span>`;
+      return `<div class="chr${done ? ' dn' : ''}${late ? ' late' : ''}${cl ? ' wait' : ''}${off ? ' off' : ''}"><div class="ico">${ic(this._choIco(c), 18)}</div><div class="tx"><div class="t">${esc(c.name)}</div><div class="s">${esc(this._choLab(c))}</div></div><span class="chp">+${de(c.pts, 0)}</span>${act}</div>`;
+    };
+    const T = u.ch.filter(c => this._choToday(c)), L = u.ch.filter(c => !T.includes(c) && c.st !== 'not_my_turn' && c.st !== 'completed_by_other'), O = u.ch.filter(c => c.st === 'not_my_turn' || c.st === 'completed_by_other');
+    const ord = c => ({ claimed: 0, overdue: 1, due: 2, pending: 3 }[c.st] ?? 5);
+    T.sort((a, b) => ord(a) - ord(b) || String(a.due).localeCompare(String(b.due)));
+    L.sort((a, b) => String(a.due).localeCompare(String(b.due)));
+    const doneT = T.filter(c => this._choDone(c)).length;
+    const pen = u.pen.slice().sort((a, b) => (a.points || 0) - (b.points || 0) || String(a.name).localeCompare(String(b.name), 'de'));
+    const plus = u.pb.filter(p => /\+/.test(p.name || '')), minus = u.pb.filter(p => /-/.test(p.name || ''));
+    const pbt = p => { const v = String(p.name || '').replace(/^\D*/, '').replace(/\.0$/, ''); return `<button data-act="chopt" data-e="${esc(p.eid)}" ${busy ? 'disabled' : ''}>${/-/.test(p.name || '') ? '−' : '+'}${esc(v.replace(/^[-+]/, ''))}</button>`; };
+    return head(`${esc(u.name)} · ⭐ ${u.pts != null ? de(u.pts, 0) + ' Punkte' : '–'}${u.paused ? ' · pausiert' : ''}`) + tabs
+      + `<div class="lab2">HEUTE · ${doneT} VON ${T.length} ERLEDIGT</div>`
+      + (T.length ? `<div class="pzbar chbar"><i style="width:${T.length ? Math.round(100 * doneT / T.length) : 0}%"></i></div>${T.map(row).join('')}` : '<div class="empty sm">Heute nichts zu tun 🎉</div>')
+      + (L.length ? `<div class="lab2">DEMNÄCHST · ${L.length}</div>${L.map(row).join('')}` : '')
+      + (O.length ? `<div class="lab2">ANDERE SIND DRAN · ${O.length}</div>${O.map(row).join('')}` : '')
+      + (pen.length ? `<div class="lab2">STRAFE GEBEN · zweimal tippen</div><div class="chpen">${pen.map(p => `<button class="${this._choArm === p.eid ? 'arm' : ''}" data-act="chopen" data-e="${esc(p.eid)}" data-n="${esc(p.name)}" ${busy ? 'disabled' : ''}><b>${de(p.points, 0)}</b><span>${this._choArm === p.eid ? 'Wirklich?' : esc(p.name)}</span></button>`).join('')}</div>` : '')
+      + (plus.length || minus.length ? `<div class="lab2">PUNKTE VON HAND</div><div class="chpts">${minus.map(pbt).join('')}<span>⭐ ${u.pts != null ? de(u.pts, 0) : '–'}</span>${plus.map(pbt).join('')}</div>` : '')
+      + `<div class="card-note">„Erledigt“ meldet die Aufgabe, mit „OK“ gibt es die Punkte. Aufgaben, Strafen und Belohnungen werden in Home Assistant unter ChoreOps verwaltet.</div>`;
+  }
+  async _choPress(e, msg) {
+    if (!e || this._choBusy) return;
+    this._choBusy = e; this._renderSheet();
+    try { await this._h.callService('button', 'press', { entity_id: e }); if (msg) this._toast(msg); }
+    catch (er) { this._toast('Ging nicht: ' + (er?.message || 'Fehler'), 4200); }
+    this._choBusy = ''; this._renderSheet();
+  }
+  _choAct(a, el) {
+    const e = el.dataset.e;
+    switch (a) {
+      case 'cho': this._sheet = { t: 'cho' }; this._choArm = ''; if (el.dataset.u) this._choSel = el.dataset.u; this._renderSheet(); break;
+      case 'chou': this._choSel = el.dataset.u; this._choArm = ''; this._renderSheet(); this._sh.scrollTop = 0; break;
+      case 'choclaim': this._choPress(e, 'Gemeldet · wartet auf OK'); break;
+      case 'chook': this._choPress(e, 'Punkte gutgeschrieben ⭐'); break;
+      case 'chono': this._choPress(e, 'Abgelehnt'); break;
+      case 'chopt': this._choPress(e); break;
+      case 'chopen':
+        if (this._choArm !== e) { this._choArm = e; this._renderSheet(); clearTimeout(this._choAt); this._choAt = setTimeout(() => { this._choArm = ''; if (this._sheet?.t === 'cho') this._renderSheet(); }, 3000); break; }
+        this._choArm = ''; clearTimeout(this._choAt); this._choPress(e, `Strafe: ${el.dataset.n}`); break;
+    }
+  }
   /* ───────────── Rendern ───────────── */
   _navHtml() {
     return `<div class="logo"></div>${(WALL_UI && this._pzOn() && this._pzView() ? [...TABS, ['clean', 'Putzplan', 'broom']] : TABS).map(t => `<button class="nb ${this._v === t[0] ? 'on' : ''}" data-act="nav" data-v="${t[0]}">${ic(t[2], 24)}<span class="lab">${t[1]}</span></button>`).join('')}
@@ -5186,7 +5389,7 @@ class HomeAurora extends HTMLElement {
     const st = this._sh.scrollTop;
     if (this._sheet.t === 'sched' && this._schedEl && this._sh.contains(this._schedEl)) { this._schedEl.hass = this._h; this._ov.classList.add('show'); return; }
     const r = this._sheet.t === 'room' ? this._c.rooms.find(x => x.id === this._sheet.id) : null;
-    const T = { vroom: () => this._sVRoom(this._sheet.e), persons: () => this._sPersons(), quick: () => this._sQuick(), vent: () => this._sVent(), cal: () => this._sCal(), bat: () => this._sBat(), doors: () => this._sDoors(), sys: () => this._sSys(), waste: () => this._sWaste(), power: () => this._sPower(), sched: () => this._sSched(), set: () => this._sSet(), warn: () => this._sWarn(), radar: () => this._sRadar(), pin: () => this._sPin(), fuel: () => this._sFuel(), plants: () => this._sPlants(), heat: () => this._sHeat(), kid: () => this._sKid(), clean: () => this._sClean(), tv: () => this._sTv(), pzstat: () => this._sPzStat(), music: () => this._sMusic(), radio: () => this._sRadio(), hsf: () => this._sHsf(), shop: () => this._sShop() };
+    const T = { vroom: () => this._sVRoom(this._sheet.e), persons: () => this._sPersons(), quick: () => this._sQuick(), vent: () => this._sVent(), cal: () => this._sCal(), bat: () => this._sBat(), doors: () => this._sDoors(), sys: () => this._sSys(), waste: () => this._sWaste(), power: () => this._sPower(), sched: () => this._sSched(), set: () => this._sSet(), warn: () => this._sWarn(), radar: () => this._sRadar(), pin: () => this._sPin(), fuel: () => this._sFuel(), plants: () => this._sPlants(), heat: () => this._sHeat(), kid: () => this._sKid(), clean: () => this._sClean(), tv: () => this._sTv(), pzstat: () => this._sPzStat(), music: () => this._sMusic(), radio: () => this._sRadio(), hsf: () => this._sHsf(), shop: () => this._sShop(), cho: () => this._sCho() };
     const qn = this.shadowRoot.getElementById('qname'), qv = qn ? qn.value : null, qf = qn && this.shadowRoot.activeElement === qn;
     const an = this.shadowRoot.getElementById('annq'), av = an ? an.value : null, af = an && this.shadowRoot.activeElement === an;
     const sq = this.shadowRoot.getElementById('shopq'), sv = sq ? sq.value : null, sf = sq && this.shadowRoot.activeElement === sq;
@@ -5222,7 +5425,7 @@ class HomeAurora extends HTMLElement {
     const el = this.shadowRoot?.getElementById('clk');
     if (!el) return;
     const s = this._clockStr();
-    if (el._last !== s) { el._last = s; el.innerHTML = s; }
+    if (el._last !== s) { el._last = s; el.innerHTML = s; this.shadowRoot.querySelectorAll('.bsn').forEach(b => { b.textContent = this._sinceMin(+b.dataset.t); }); }
   }
   _countUp() {
     if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
@@ -5380,6 +5583,7 @@ class HomeAurora extends HTMLElement {
       case 'dzplay': case 'dzsearch': case 'dztype': this._dzAct(a, el); break;
       case 'music': this._sheet = { t: 'music' }; this._renderSheet(); break;
       case 'shop': case 'shoptab': case 'shopadd': case 'shopq': case 'shopdone': case 'shopundo': case 'shopall': case 'shopclr': case 'rcpsel': case 'rcpserv': case 'rcpone': case 'rcpall': this._shopAct(a, el); break;
+      case 'cho': case 'chou': case 'choclaim': case 'chook': case 'chono': case 'chopt': case 'chopen': this._choAct(a, el); break;
       case 'annt': this._annT = el.dataset.i; this._renderSheet(); break;
       case 'annph': { const p = (this._c.music?.phrases || [])[+el.dataset.i], inp = this.shadowRoot.getElementById('annq'); if (p && inp) { inp.value = p; inp.focus(); } break; }
       case 'annsend': this._annSend(); break;
@@ -5388,6 +5592,7 @@ class HomeAurora extends HTMLElement {
       case 'theme': this._themePref = el.dataset.m; try { localStorage.setItem('home-aurora-theme', el.dataset.m); } catch (er) { /* ok */ } this._render(); break;
       case 'pzshow': this._pzsPref = el.dataset.m; try { localStorage.setItem('home-aurora-pzshow', el.dataset.m); } catch (er) { /* ok */ } if (el.dataset.m === '0' && this._v === 'clean') this._v = 'home'; this._sig = ''; this._render(); this._renderSheet(); break;
       case 'shopshow': this._shsPref = el.dataset.m; try { localStorage.setItem('home-aurora-shopshow', el.dataset.m); } catch (er) { /* ok */ } this._sig = ''; this._render(); this._renderSheet(); break;
+      case 'choshow': this._chsPref = el.dataset.m; try { localStorage.setItem('home-aurora-choshow', el.dataset.m); } catch (er) { /* ok */ } this._sig = ''; this._render(); this._renderSheet(); break;
       case 'pzview': this._pzvPref = el.dataset.m; try { localStorage.setItem('home-aurora-pzview', el.dataset.m); } catch (er) { /* ok */ } if (el.dataset.m === '0' && this._v === 'clean') this._v = 'home'; this._sig = ''; this._render(); this._renderSheet(); break;
       case 'ambnight': this._nightPref = el.dataset.m; try { localStorage.setItem('home-aurora-ambnight', el.dataset.m); } catch (er) { /* ok */ } this._renderSheet(); break;
       case 'ambafter': this._ambPref = el.dataset.m; try { localStorage.setItem('home-aurora-amb', el.dataset.m); } catch (er) { /* ok */ } this._lastAct = Date.now(); this._renderSheet(); break;

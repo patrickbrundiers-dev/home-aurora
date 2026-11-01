@@ -4,7 +4,7 @@
   _sSet() {
     const th = this._themePref || this._c.theme || 'dark', am = String(this._ambMin());
     const seg = (act, cur, items) => `<div class="seg wide">${items.map(x => `<button class="${cur === x[0] ? 'on' : ''}" data-act="${act}" data-m="${x[0]}">${x[1]}</button>`).join('')}</div>`;
-    return `<div class="grab"></div><div class="sh"><div class="ico">${ic('cog', 24)}</div><div><h2>Darstellung &amp; Modi</h2><p>Home Aurora v5.2 · Build pz43</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
+    return `<div class="grab"></div><div class="sh"><div class="ico">${ic('cog', 24)}</div><div><h2>Darstellung &amp; Modi</h2><p>Home Aurora v5.2 · Build pz45</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
       <div class="lab2">DESIGN</div>${seg('theme', th, [['dark', 'Dunkel'], ['light', 'Hell'], ['auto', 'Automatisch']])}
       <div class="card-note">„Automatisch“ folgt dem Dunkel-/Hellmodus deines Home-Assistant-Profils. Die Auswahl gilt nur für dieses Gerät.</div>
       ${WALL_UI ? `      <div class="lab2">WANDTABLET-MODUS</div>
@@ -19,6 +19,8 @@
       <div class="card-note">Eigene Seite mit „Zurück“ oder Fenster über der Startseite. Gilt nur für dieses Gerät.</div>` : ''}` : ''}
       ${this._shopOk() || this._rcpOk() ? `<div class="lab2">EINKAUFSLISTE &amp; REZEPTE</div>${seg('shopshow', this._shopOn() ? '1' : '0', [['1', 'Sichtbar'], ['0', 'Ausgeblendet']])}
       <div class="card-note">Ausgeblendet verschwindet der Eintrag „Einkaufsliste“ im Alltag. Die Listen in Home Assistant bleiben unverändert. Gilt nur für dieses Gerät.</div>` : ''}
+      ${this._choOk() ? `<div class="lab2">AUFGABEN &amp; PUNKTE</div>${seg('choshow', this._choOn() ? '1' : '0', [['1', 'Sichtbar'], ['0', 'Ausgeblendet']])}
+      <div class="card-note">Ausgeblendet verschwinden der Eintrag „Aufgaben &amp; Punkte“${WALL_UI ? ', der Knopf oben' : ''} und der Hinweis im Bildschirmschoner. ChoreOps in Home Assistant bleibt unverändert. Gilt nur für dieses Gerät.</div>` : ''}
       <div class="lab2">SCHNELLAKTIONEN</div>
       <button class="xr" style="width:100%" data-act="qedit"><div class="ico">${ic('sparkle', 19)}</div><div><div class="t">Schnellaktionen bearbeiten</div><div class="s">Szenen &amp; Skripte hinzufügen, sortieren, neue Szene speichern</div></div></button>
       <div class="lab2">SCHNELLZUGRIFF</div>
@@ -79,6 +81,47 @@
     if (d1 && ok(d1.temperature)) strip += `<i class="ambfd"></i>` + cell('Morgen', d1.condition || 'cloudy', `${ok(d1.templow) ? de(d1.templow, 0) + '° / ' : ''}${de(d1.temperature, 0)}°`, rain(d1));
     return line + (strip ? `<div class="ambfx">${strip}</div>` : '');
   }
+  /* pz45: Bad besetzt – Zustand aus stats.bath (Frei / WC / Dusche …), Beginn = letzte Änderung dieses Sensors */
+  _bathNow() { const e = this._c.stats.bath, s = e && this._s(e); if (!s || !okv(s.state) || s.state === 'Frei') return null; const t = Date.parse(s.last_changed); return { st: s.state, t: isNaN(t) ? null : t }; }
+  _bathT() { return this._bathNow()?.t || 0; }
+  _sinceMin(t) { if (!t) return ''; const m = Math.max(0, Math.floor((Date.now() - t) / 6e4)); return m < 1 ? 'gerade eben' : m < 60 ? `seit ${m} Min.` : `seit ${Math.floor(m / 60)} Std. ${m % 60} Min.`; }
+  _bathSub(busy) { const t = busy && this._bathT(); return t ? `<span class="bsn" data-t="${t}">${this._sinceMin(t)}</span>` : 'Status'; }
+  /* pz45: Morgen-Überblick im Bildschirmschoner (Vorgabe 05:30–09:30, YAML morning: { from, to, shift, extra } oder morning: false):
+     Dienst laut Dienstplan-Kalender, Schule je Kinderhandy (Family Link), weitere Kinder über einen Zeitplan (schedule.*), offene Aufgaben */
+  _mornC() { const m = this._c.morning; if (m === false) return null; return { from: '05:30', to: '09:30', ...(DEFAULTS.morning || {}), ...(m || {}) }; }
+  _ambMorning() {
+    const M = this._mornC(); if (!M) return '';
+    const hm = s => { const [h, m] = String(s).split(':').map(Number); return (h || 0) * 60 + (m || 0); }, d = new Date(), t = d.getHours() * 60 + d.getMinutes();
+    if (!(t >= hm(M.from) && t < hm(M.to)) && !this._mornForce) return '';
+    const C = [], cell = (icon, name, txt, tone) => C.push(`<div class="ambmc${tone ? ' ' + tone : ''}">${ic(icon, 20)}<div><b>${esc(name)}</b><span>${txt}</span></div></div>`);
+    const today = new Date(); today.setHours(0, 0, 0, 0); const tom = +today + 864e5;
+    for (const sh of [].concat(M.shift || [])) {
+      if (!sh || !sh.cal || !this._s(sh.cal)) continue;
+      const a = this._s(sh.cal).attributes || {};
+      const ev = (this._cal?.evs || []).filter(x => x.cal === sh.cal && +x.s < tom && +x.e > +today).sort((x, y) => x.s - y.s)[0];
+      let tx = '';
+      if (ev) tx = esc(ev.title) + (ev.allDay ? '' : ` · ${hhmm(ev.s)}–${hhmm(ev.e)}`);
+      else if (a.today_shift_name || a.today_shift) tx = esc(a.today_shift_name || a.today_shift);
+      else if (this._cal) tx = 'Heute frei';
+      if (tx) cell('cal', sh.name || 'Dienst', tx, ev || a.today_shift ? 'on' : '');
+    }
+    for (const k of this._kids()) {
+      const S = this._kidSchool(k); if (!S.has && S.st === 'none') continue;
+      cell(S.st === 'soon' || S.st === 'run' ? 'backpack' : 'sun', k.name, esc(S.st === 'soon' || S.st === 'run' ? S.title + (S.sub ? ' · ' + S.sub : '') : S.st === 'none' ? 'Heute keine Schule' : S.title), S.st === 'soon' ? 'on' : '');
+    }
+    /* Zeitplan = Zeiten zuhause (Heizung): morgens an bis zum Losgehen, dann aus bis zur Rückkehr. next_event zeigt den nächsten Wechsel. */
+    for (const x of [].concat(M.extra || [])) {
+      const s = x && x.schedule && this._s(x.schedule); if (!s) continue;
+      const ne = Date.parse(s.attributes?.next_event || ''), lab = x.label || 'Schule', at = x.at || (/garten/i.test(lab) ? 'Im Kindergarten' : 'In der Schule');
+      const isT = !isNaN(ne) && ne < tom, on = s.state === 'on', noon = new Date(); noon.setHours(11, 0, 0, 0);
+      if (on && isT && ne < +noon) cell('backpack', x.name || this._name(x.schedule), `${esc(lab)} · los um ${hhmm(ne)} Uhr`, 'on');
+      else if (!on && isT && ne <= +noon) cell('backpack', x.name || this._name(x.schedule), `Heute ${esc(lab)}`, '');
+      else if (!on && isT) cell('backpack', x.name || this._name(x.schedule), `${esc(at)} · zurück ${hhmm(ne)} Uhr`, '');
+      else cell('sun', x.name || this._name(x.schedule), `Heute kein${/e$/.test(lab) ? 'e' : ''} ${esc(lab)}`, '');
+    }
+    if (this._choOn() && this._choOk()) { const U = this._choSum().U.filter(u => u.T.length); if (U.length) cell('star', 'Aufgaben heute', U.map(u => `${esc(u.name)} ${u.open || '✓'}`).join(' · ')); }
+    return C.length ? `<div class="ambm"><div class="ambmh">${ic('sun', 15)} Guten Morgen · heute</div><div class="ambmg">${C.join('')}</div></div>` : '';
+  }
   /* Bildschirmschoner: Hinweise als ruhige Chips; Warnungen zuerst und in Gelb */
   _ambChips() {
     const C = [], chip = (icon, txt, warn) => C.push(`<div class="ambn${warn ? ' warn' : ''}">${ic(icon, 18)}<span>${txt}</span></div>`);
@@ -90,6 +133,8 @@
     if (WL && WL[0] && WL[0].days <= 1) { const nx = WL.filter(x => x.days === WL[0].days); chip('trash', `${this._dayTxt(WL[0])} · ${esc(nx.map(x => x.name).join(' + '))}`); }
     if (this._pzOn()) { const T = this._pzSum().T, due = T.filter(t => !t.today && (t.st === 'overdue' || (t.st === 'due_soon' && t.until === 0))).length; if (due) chip('broom', `Heute putzen · ${due} ${due === 1 ? 'Aufgabe' : 'Aufgaben'}`); }
     if (this._shopOn() && this._shopOk()) { const n = parseInt(this._val(this._shopC().list), 10) || 0; if (n) chip('cart', `Einkaufsliste · ${n} ${n === 1 ? 'Sache' : 'Sachen'}`); }
+    { const b = this._bathNow(); if (b) chip('bath', `Bad besetzt · ${esc(b.st)} ${esc(this._sinceMin(b.t))}`); }
+    if (this._choOn() && this._choOk()) { const S = this._choSum(); if (S.wait) chip('star', `${S.wait} ${S.wait === 1 ? 'Aufgabe wartet' : 'Aufgaben warten'} auf OK`); else if (S.open) chip('star', `Kinder-Aufgaben · ${S.open} offen`); }
     const lights = this._lightsOn().length; if (lights) chip('bulb', `${lights} ${lights === 1 ? 'Licht' : 'Lichter'} an`);
     return C.join('');
   }
@@ -104,6 +149,6 @@
       <div class="ambd">${new Date().toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long' })}</div>
       <div class="ambr"><div class="ambw">${wx(w.cond, 64)}<div><div class="ambt big">${de(w.temp)}<small>°C</small></div><div class="ambs">${COND[w.cond] || w.cond}</div></div></div>
       ${avg != null ? `<div class="ambw"><div class="ico">${ic('home', 34)}</div><div><div class="ambt big">${de(avg)}<small>°C</small></div><div class="ambs">innen Ø</div></div></div>` : ''}</div>
-      ${this._ambWx(w)}<div class="ambl">${this._ambChips()}</div>
+      ${this._ambWx(w)}${this._ambMorning()}<div class="ambl">${this._ambChips()}</div>
       <div class="pp ambp">${pe}</div><div class="ambh">Tippen zum Beenden</div></div>`);
   }
