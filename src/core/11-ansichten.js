@@ -17,8 +17,9 @@
     if (this._s(ex.winter)) xr.push(`<button class="xr" data-act="more" data-e="${ex.winter}"><div class="ico">${ic(this._val(ex.winter) === 'on' ? 'thermo' : 'sun', 19)}</div><div><div class="t">Heizmodus</div><div class="s">${this._val(ex.winter) === 'on' ? 'Wintermodus aktiv' : 'Sommerbetrieb'}</div></div></button>`);
     const sa = this._s(c.sun)?.attributes, sUp = this._val(c.sun) === 'above_horizon';
     const sunChip = sa ? `<span class="chip">${ic(sUp ? 'moon' : 'sun', 14)}<b>${hhmm(sUp ? sa.next_setting : sa.next_rising)}</b></span>` : '';
-    const bathState = this._val(c.stats.bath) || '–';
-    const bathBusy = bathState !== 'Frei' && bathState !== '–';
+    const bathB = this._bathState();
+    const bathState = bathB ? bathB.txt : '–';
+    const bathBusy = !!bathB && !bathB.free;
     const bathSub = this._bathSub(bathBusy);
     return { c, L, open, V, vr, VD, w, fc, sentence, mini, ex, xr, sunChip, bathState, bathBusy, bathSub };
   }
@@ -95,7 +96,7 @@
   /* ───────────── Ansicht: Bad ───────────── */
   _vBath() {
     const c = this._c, b = c.bath, room = c.rooms.find(r => r.id === b.room) || c.rooms[0], I = this._room(room);
-    const st = this._val(c.stats.bath) || '–', busy = st !== 'Frei' && st !== '–';
+    const bB = this._bathState(), st = bB ? bB.txt : '–', busy = !!bB && !bB.free;
     const hum = I.hum, hf = clamp((hum ?? 0) / 100, 0, 1), hcol = hum > 65 ? '#fb7185' : hum > 55 ? '#fbbf24' : '#38bdf8';
     const tiles = b.stats.filter(s => this._s(s[0])).map(s => `<div class="bs"><div class="v big">${de(this._num(s[0]), s[0].includes('durchschnitt') ? 1 : 0)}<small class="u">${s[2]}</small></div><div class="l">${s[1]}</div></div>`).join('');
     return `<div class="vh"><div><h1>Badezimmer</h1><p>${busy ? 'Gerade in Benutzung' : 'Frei'} · ${I.open ? 'Fenster offen' : 'Fenster zu'}</p></div></div>

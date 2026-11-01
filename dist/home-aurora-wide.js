@@ -14,7 +14,7 @@ const DEFAULTS = {
   outdoor: { temp: 'sensor.hp2550a_pro_v1_9_3_outdoor_temperature', hum: 'sensor.hp2550a_pro_v1_9_3_humidity', wind: 'sensor.hp2550a_pro_v1_9_3_wind_speed', rain: 'sensor.hp2550a_pro_v1_9_3_rain_rate' },
   sun: 'sun.sun',
   radar: 'camera.precipitation',
-  stats: { open: 'sensor.offene_turen_fenster_zahler', vent: 'sensor.luften_ubersicht_raume_mit_luftungsbedarf', ventRoom: 'sensor.luften_ubersicht_dringendster_raum', bath: 'sensor.badezimmer' },
+  stats: { open: 'sensor.offene_turen_fenster_zahler', vent: 'sensor.luften_ubersicht_raume_mit_luftungsbedarf', ventRoom: 'sensor.luften_ubersicht_dringendster_raum', bath: 'sensor.badezimmer_presence_status' },
   extras: { waste: 'sensor.abfallkalender', fuel: 'sensor.tankstelle_gunstigster_preis', fuelName: 'sensor.tankstelle_gunstigste', kids: 'input_boolean.kindersicherung_tv', winter: 'binary_sensor.wintermodus' },
   stationWeather: 'weather.kachelmannwetter',
   station: {
@@ -132,10 +132,10 @@ const DEFAULTS = {
   bath: {
     room: 'bad',
     stats: [
-      ['sensor.bad_duschen_heute', 'Duschen heute', ''], ['sensor.bad_duschminuten_heute', 'Minuten heute', 'min'],
-      ['sensor.bad_duschen_woche', 'Diese Woche', ''], ['sensor.bad_duschminuten_woche', 'Minuten Woche', 'min'],
-      ['sensor.bad_duschen_monat', 'Dieser Monat', ''], ['sensor.bad_duschminuten_monat', 'Minuten Monat', 'min'],
-      ['sensor.bad_dusche_durchschnitt_heute', 'Ø Dauer heute', 'min'], ['sensor.bad_duschen_gesamt', 'Gesamt', ''],
+      ['sensor.badezimmer_presence_dusche_anzahl_heute', 'Duschen heute', ''], ['sensor.badezimmer_presence_dusche_minuten_heute', 'Minuten heute', 'min'],
+      ['sensor.badezimmer_presence_dusche_anzahl_woche', 'Diese Woche', ''], ['sensor.badezimmer_presence_dusche_minuten_woche', 'Minuten Woche', 'min'],
+      ['sensor.badezimmer_presence_dusche_anzahl_monat', 'Dieser Monat', ''], ['sensor.badezimmer_presence_dusche_minuten_monat', 'Minuten Monat', 'min'],
+      ['sensor.badezimmer_presence_dusche_durchschnitt_heute', 'Ø Dauer heute', 'min'], ['sensor.badezimmer_presence_dusche_anzahl', 'Gesamt', ''],
     ],
   },
   // Wandtablet (Fully Kiosk über die Home-Assistant-Integration): Helligkeit und die Automation „Helligkeit nach Tageszeit“
@@ -1967,8 +1967,9 @@ class HomeAurora extends HTMLElement {
     if (this._s(ex.winter)) xr.push(`<button class="xr" data-act="more" data-e="${ex.winter}"><div class="ico">${ic(this._val(ex.winter) === 'on' ? 'thermo' : 'sun', 19)}</div><div><div class="t">Heizmodus</div><div class="s">${this._val(ex.winter) === 'on' ? 'Wintermodus aktiv' : 'Sommerbetrieb'}</div></div></button>`);
     const sa = this._s(c.sun)?.attributes, sUp = this._val(c.sun) === 'above_horizon';
     const sunChip = sa ? `<span class="chip">${ic(sUp ? 'moon' : 'sun', 14)}<b>${hhmm(sUp ? sa.next_setting : sa.next_rising)}</b></span>` : '';
-    const bathState = this._val(c.stats.bath) || '–';
-    const bathBusy = bathState !== 'Frei' && bathState !== '–';
+    const bathB = this._bathState();
+    const bathState = bathB ? bathB.txt : '–';
+    const bathBusy = !!bathB && !bathB.free;
     const bathSub = this._bathSub(bathBusy);
     return { c, L, open, V, vr, VD, w, fc, sentence, mini, ex, xr, sunChip, bathState, bathBusy, bathSub };
   }
@@ -2045,7 +2046,7 @@ class HomeAurora extends HTMLElement {
   /* ───────────── Ansicht: Bad ───────────── */
   _vBath() {
     const c = this._c, b = c.bath, room = c.rooms.find(r => r.id === b.room) || c.rooms[0], I = this._room(room);
-    const st = this._val(c.stats.bath) || '–', busy = st !== 'Frei' && st !== '–';
+    const bB = this._bathState(), st = bB ? bB.txt : '–', busy = !!bB && !bB.free;
     const hum = I.hum, hf = clamp((hum ?? 0) / 100, 0, 1), hcol = hum > 65 ? '#fb7185' : hum > 55 ? '#fbbf24' : '#38bdf8';
     const tiles = b.stats.filter(s => this._s(s[0])).map(s => `<div class="bs"><div class="v big">${de(this._num(s[0]), s[0].includes('durchschnitt') ? 1 : 0)}<small class="u">${s[2]}</small></div><div class="l">${s[1]}</div></div>`).join('');
     return `<div class="vh"><div><h1>Badezimmer</h1><p>${busy ? 'Gerade in Benutzung' : 'Frei'} · ${I.open ? 'Fenster offen' : 'Fenster zu'}</p></div></div>
@@ -2997,8 +2998,11 @@ class HomeAurora extends HTMLElement {
     if (d1 && ok(d1.temperature)) strip += `<i class="ambfd"></i>` + cell('Morgen', d1.condition || 'cloudy', `${ok(d1.templow) ? de(d1.templow, 0) + '° / ' : ''}${de(d1.temperature, 0)}°`, rain(d1));
     return line + (strip ? `<div class="ambfx">${strip}</div>` : '');
   }
-  /* pz45: Bad besetzt – Zustand aus stats.bath (Frei / WC / Dusche …), Beginn = letzte Änderung dieses Sensors */
-  _bathNow() { const e = this._c.stats.bath, s = e && this._s(e); if (!s || !okv(s.state) || s.state === 'Frei') return null; const t = Date.parse(s.last_changed); return { st: s.state, t: isNaN(t) ? null : t }; }
+  /* pz45: Bad besetzt – Zustand aus stats.bath, Beginn = letzte Änderung dieses Sensors.
+     Status-Sensor der Integration Badezimmer Presence liefert Schlüssel (free, toilet, shower …), angezeigt wird die
+     übersetzte Form; der alte Template-Sensor mit deutschem Text („Frei“) funktioniert weiter. */
+  _bathState() { const e = this._c.stats.bath, s = e && this._s(e); if (!s || !okv(s.state)) return null; let txt = s.state; try { if (this._h && this._h.formatEntityState) txt = this._h.formatEntityState(s) || s.state; } catch (_) {} const t = Date.parse(s.last_changed); return { txt, free: s.state === 'free' || s.state === 'Frei', t: isNaN(t) ? null : t }; }
+  _bathNow() { const b = this._bathState(); return b && !b.free ? { st: b.txt, t: b.t } : null; }
   _bathT() { return this._bathNow()?.t || 0; }
   _sinceMin(t) { if (!t) return ''; const m = Math.max(0, Math.floor((Date.now() - t) / 6e4)); return m < 1 ? 'gerade eben' : m < 60 ? `seit ${m} Min.` : `seit ${Math.floor(m / 60)} Std. ${m % 60} Min.`; }
   _bathSub(busy) { const t = busy && this._bathT(); return t ? `<span class="bsn" data-t="${t}">${this._sinceMin(t)}</span>` : 'Status'; }
