@@ -14,7 +14,7 @@ const DEFAULTS = {
   outdoor: { temp: 'sensor.hp2550a_pro_v1_9_3_outdoor_temperature', hum: 'sensor.hp2550a_pro_v1_9_3_humidity', wind: 'sensor.hp2550a_pro_v1_9_3_wind_speed', rain: 'sensor.hp2550a_pro_v1_9_3_rain_rate' },
   sun: 'sun.sun',
   radar: 'camera.precipitation',
-  stats: { open: 'sensor.offene_turen_fenster_zahler', vent: 'sensor.luften_ubersicht_raume_mit_luftungsbedarf', ventRoom: 'sensor.luften_ubersicht_dringendster_raum', bath: 'sensor.badezimmer' },
+  stats: { open: 'sensor.offene_turen_fenster_zahler', vent: 'sensor.luften_ubersicht_raume_mit_luftungsbedarf', ventRoom: 'sensor.luften_ubersicht_dringendster_raum', bath: 'sensor.badezimmer_presence_status' },
   extras: { waste: 'sensor.abfallkalender', fuel: 'sensor.tankstelle_gunstigster_preis', fuelName: 'sensor.tankstelle_gunstigste', kids: 'input_boolean.kindersicherung_tv', winter: 'binary_sensor.wintermodus' },
   stationWeather: 'weather.kachelmannwetter',
   station: {
@@ -132,10 +132,10 @@ const DEFAULTS = {
   bath: {
     room: 'bad',
     stats: [
-      ['sensor.bad_duschen_heute', 'Duschen heute', ''], ['sensor.bad_duschminuten_heute', 'Minuten heute', 'min'],
-      ['sensor.bad_duschen_woche', 'Diese Woche', ''], ['sensor.bad_duschminuten_woche', 'Minuten Woche', 'min'],
-      ['sensor.bad_duschen_monat', 'Dieser Monat', ''], ['sensor.bad_duschminuten_monat', 'Minuten Monat', 'min'],
-      ['sensor.bad_dusche_durchschnitt_heute', 'Ø Dauer heute', 'min'], ['sensor.bad_duschen_gesamt', 'Gesamt', ''],
+      ['sensor.badezimmer_presence_dusche_anzahl_heute', 'Duschen heute', ''], ['sensor.badezimmer_presence_dusche_minuten_heute', 'Minuten heute', 'min'],
+      ['sensor.badezimmer_presence_dusche_anzahl_woche', 'Diese Woche', ''], ['sensor.badezimmer_presence_dusche_minuten_woche', 'Minuten Woche', 'min'],
+      ['sensor.badezimmer_presence_dusche_anzahl_monat', 'Dieser Monat', ''], ['sensor.badezimmer_presence_dusche_minuten_monat', 'Minuten Monat', 'min'],
+      ['sensor.badezimmer_presence_dusche_durchschnitt_heute', 'Ø Dauer heute', 'min'], ['sensor.badezimmer_presence_dusche_anzahl', 'Gesamt', ''],
     ],
   },
   // Wandtablet (Fully Kiosk über die Home-Assistant-Integration): Helligkeit und die Automation „Helligkeit nach Tageszeit“

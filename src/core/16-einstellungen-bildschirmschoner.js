@@ -81,8 +81,11 @@
     if (d1 && ok(d1.temperature)) strip += `<i class="ambfd"></i>` + cell('Morgen', d1.condition || 'cloudy', `${ok(d1.templow) ? de(d1.templow, 0) + '° / ' : ''}${de(d1.temperature, 0)}°`, rain(d1));
     return line + (strip ? `<div class="ambfx">${strip}</div>` : '');
   }
-  /* pz45: Bad besetzt – Zustand aus stats.bath (Frei / WC / Dusche …), Beginn = letzte Änderung dieses Sensors */
-  _bathNow() { const e = this._c.stats.bath, s = e && this._s(e); if (!s || !okv(s.state) || s.state === 'Frei') return null; const t = Date.parse(s.last_changed); return { st: s.state, t: isNaN(t) ? null : t }; }
+  /* pz45: Bad besetzt – Zustand aus stats.bath, Beginn = letzte Änderung dieses Sensors.
+     Status-Sensor der Integration Badezimmer Presence liefert Schlüssel (free, toilet, shower …), angezeigt wird die
+     übersetzte Form; der alte Template-Sensor mit deutschem Text („Frei“) funktioniert weiter. */
+  _bathState() { const e = this._c.stats.bath, s = e && this._s(e); if (!s || !okv(s.state)) return null; let txt = s.state; try { if (this._h && this._h.formatEntityState) txt = this._h.formatEntityState(s) || s.state; } catch (_) {} const t = Date.parse(s.last_changed); return { txt, free: s.state === 'free' || s.state === 'Frei', t: isNaN(t) ? null : t }; }
+  _bathNow() { const b = this._bathState(); return b && !b.free ? { st: b.txt, t: b.t } : null; }
   _bathT() { return this._bathNow()?.t || 0; }
   _sinceMin(t) { if (!t) return ''; const m = Math.max(0, Math.floor((Date.now() - t) / 6e4)); return m < 1 ? 'gerade eben' : m < 60 ? `seit ${m} Min.` : `seit ${Math.floor(m / 60)} Std. ${m % 60} Min.`; }
   _bathSub(busy) { const t = busy && this._bathT(); return t ? `<span class="bsn" data-t="${t}">${this._sinceMin(t)}</span>` : 'Status'; }

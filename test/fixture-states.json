@@ -2967,7 +2967,7 @@
 "last_updated": "2026-01-01T12:00:00+00:00",
 "state": "Biotonne"
 },
-"sensor.bad_dusche_durchschnitt_heute": {
+"sensor.badezimmer_presence_dusche_durchschnitt_heute": {
 "attributes": {
 "device_class": "duration",
 "friendly_name": "Bad Dusche Durchschnitt Heute",
@@ -2977,12 +2977,12 @@
 "context": {
 "id": "fixture"
 },
-"entity_id": "sensor.bad_dusche_durchschnitt_heute",
+"entity_id": "sensor.badezimmer_presence_dusche_durchschnitt_heute",
 "last_changed": "2026-01-01T12:00:00+00:00",
 "last_updated": "2026-01-01T12:00:00+00:00",
 "state": "0"
 },
-"sensor.bad_duschen_gesamt": {
+"sensor.badezimmer_presence_dusche_anzahl": {
 "attributes": {
 "friendly_name": "Bad Duschen Gesamt",
 "icon": "mdi:shower",
@@ -2991,12 +2991,12 @@
 "context": {
 "id": "fixture"
 },
-"entity_id": "sensor.bad_duschen_gesamt",
+"entity_id": "sensor.badezimmer_presence_dusche_anzahl",
 "last_changed": "2026-01-01T12:00:00+00:00",
 "last_updated": "2026-01-01T12:00:00+00:00",
 "state": "87"
 },
-"sensor.bad_duschen_heute": {
+"sensor.badezimmer_presence_dusche_anzahl_heute": {
 "attributes": {
 "friendly_name": "bad_duschen_heute",
 "last_period": "2",
@@ -3009,12 +3009,12 @@
 "context": {
 "id": "fixture"
 },
-"entity_id": "sensor.bad_duschen_heute",
+"entity_id": "sensor.badezimmer_presence_dusche_anzahl_heute",
 "last_changed": "2026-01-01T12:00:00+00:00",
 "last_updated": "2026-01-01T12:00:00+00:00",
 "state": "0"
 },
-"sensor.bad_duschen_monat": {
+"sensor.badezimmer_presence_dusche_anzahl_monat": {
 "attributes": {
 "friendly_name": "bad_duschen_monat",
 "last_period": "72",
@@ -3027,12 +3027,12 @@
 "context": {
 "id": "fixture"
 },
-"entity_id": "sensor.bad_duschen_monat",
+"entity_id": "sensor.badezimmer_presence_dusche_anzahl_monat",
 "last_changed": "2026-01-01T12:00:00+00:00",
 "last_updated": "2026-01-01T12:00:00+00:00",
 "state": "15"
 },
-"sensor.bad_duschen_woche": {
+"sensor.badezimmer_presence_dusche_anzahl_woche": {
 "attributes": {
 "friendly_name": "bad_duschen_woche",
 "last_period": "11",
@@ -3045,12 +3045,12 @@
 "context": {
 "id": "fixture"
 },
-"entity_id": "sensor.bad_duschen_woche",
+"entity_id": "sensor.badezimmer_presence_dusche_anzahl_woche",
 "last_changed": "2026-01-01T12:00:00+00:00",
 "last_updated": "2026-01-01T12:00:00+00:00",
 "state": "8"
 },
-"sensor.bad_duschminuten_heute": {
+"sensor.badezimmer_presence_dusche_minuten_heute": {
 "attributes": {
 "device_class": "duration",
 "friendly_name": "bad_duschminuten_heute",
@@ -3065,12 +3065,12 @@
 "context": {
 "id": "fixture"
 },
-"entity_id": "sensor.bad_duschminuten_heute",
+"entity_id": "sensor.badezimmer_presence_dusche_minuten_heute",
 "last_changed": "2026-01-01T12:00:00+00:00",
 "last_updated": "2026-01-01T12:00:00+00:00",
 "state": "0"
 },
-"sensor.bad_duschminuten_monat": {
+"sensor.badezimmer_presence_dusche_minuten_monat": {
 "attributes": {
 "device_class": "duration",
 "friendly_name": "bad_duschminuten_monat",
@@ -3085,12 +3085,12 @@
 "context": {
 "id": "fixture"
 },
-"entity_id": "sensor.bad_duschminuten_monat",
+"entity_id": "sensor.badezimmer_presence_dusche_minuten_monat",
 "last_changed": "2026-01-01T12:00:00+00:00",
 "last_updated": "2026-01-01T12:00:00+00:00",
 "state": "189.8"
 },
-"sensor.bad_duschminuten_woche": {
+"sensor.badezimmer_presence_dusche_minuten_woche": {
 "attributes": {
 "device_class": "duration",
 "friendly_name": "bad_duschminuten_woche",
@@ -3105,7 +3105,7 @@
 "context": {
 "id": "fixture"
 },
-"entity_id": "sensor.bad_duschminuten_woche",
+"entity_id": "sensor.badezimmer_presence_dusche_minuten_woche",
 "last_changed": "2026-01-01T12:00:00+00:00",
 "last_updated": "2026-01-01T12:00:00+00:00",
 "state": "92.1"
@@ -3155,17 +3155,17 @@
 "last_updated": "2026-01-01T12:00:00+00:00",
 "state": "100"
 },
-"sensor.badezimmer": {
+"sensor.badezimmer_presence_status": {
 "attributes": {
 "friendly_name": "Badezimmer"
 },
 "context": {
 "id": "fixture"
 },
-"entity_id": "sensor.badezimmer",
+"entity_id": "sensor.badezimmer_presence_status",
 "last_changed": "2026-01-01T12:00:00+00:00",
 "last_updated": "2026-01-01T12:00:00+00:00",
-"state": "Frei"
+"state": "shower"
 },
 "sensor.badezimmer_dusche_battery": {
 "attributes": {
