@@ -1607,6 +1607,14 @@ input.rx-bar[type=range]::-moz-range-thumb{width:24px;height:24px;border:0;borde
 .ambmg{display:flex;flex-wrap:wrap;justify-content:center;gap:8px 18px}
 .ambmc{display:flex;align-items:center;gap:10px;text-align:left;color:var(--tx2)}.ambmc b{display:block;font-size:clamp(14px,1.9vw,17px);color:var(--tx);font-weight:500}.ambmc span{font-size:clamp(13px,1.7vw,15px)}
 .ambmc.on .ico,.ambmc.on>svg{color:#7dd3fc}
+.rwdg{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px}
+.rwd{display:flex;flex-direction:column;gap:8px;padding:10px;border-radius:16px;background:rgba(var(--wh),.045);border:1px solid transparent}
+.rwd.ok{border-color:rgba(251,191,36,.35);background:rgba(251,191,36,.07)}.rwd.wait{border-color:rgba(251,191,36,.6);background:rgba(251,191,36,.12)}
+.rwdt{display:flex;align-items:center;gap:9px;min-width:0}.rwdt .ico{width:32px;height:32px;border-radius:10px;display:grid;place-items:center;flex:none;background:rgba(var(--wh),.07);color:#fcd34d}
+.rwdt .tx{min-width:0}.rwdt .t{font-size:13.5px;line-height:1.25;overflow-wrap:anywhere}.rwdt .s{font-size:12px;color:var(--tx3)}.rwd.wait .s{color:#fcd34d}
+.rwdb{height:5px;border-radius:3px;background:rgba(var(--wh),.08);overflow:hidden}.rwdb i{display:block;height:100%;border-radius:3px;background:linear-gradient(90deg,#f59e0b,#fcd34d)}
+.rwd .chb{justify-content:center;width:100%}.rwd .chb.arm{background:rgba(251,191,36,.3);border-color:#fbbf24;color:#fde68a}
+.rwda{display:flex;gap:6px;min-width:0}.rwda .chb{width:auto;min-width:0}.rwda .chb.ok{flex:1}.rwdn{font-size:12.5px;color:var(--tx3);text-align:center;min-height:38px;display:grid;place-items:center}
 
 `;
 class HomeAurora extends HTMLElement {
@@ -2912,7 +2920,7 @@ class HomeAurora extends HTMLElement {
   _sSet() {
     const th = this._themePref || this._c.theme || 'dark', am = String(this._ambMin());
     const seg = (act, cur, items) => `<div class="seg wide">${items.map(x => `<button class="${cur === x[0] ? 'on' : ''}" data-act="${act}" data-m="${x[0]}">${x[1]}</button>`).join('')}</div>`;
-    return `<div class="grab"></div><div class="sh"><div class="ico">${ic('cog', 24)}</div><div><h2>Darstellung &amp; Modi</h2><p>Home Aurora v5.2 · Build pz45</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
+    return `<div class="grab"></div><div class="sh"><div class="ico">${ic('cog', 24)}</div><div><h2>Darstellung &amp; Modi</h2><p>Home Aurora v5.2 · Build pz46</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
       <div class="lab2">DESIGN</div>${seg('theme', th, [['dark', 'Dunkel'], ['light', 'Hell'], ['auto', 'Automatisch']])}
       <div class="card-note">„Automatisch“ folgt dem Dunkel-/Hellmodus deines Home-Assistant-Profils. Die Auswahl gilt nur für dieses Gerät.</div>
       ${WALL_UI ? `      <div class="lab2">WANDTABLET-MODUS</div>
@@ -3042,7 +3050,7 @@ class HomeAurora extends HTMLElement {
     if (this._pzOn()) { const T = this._pzSum().T, due = T.filter(t => !t.today && (t.st === 'overdue' || (t.st === 'due_soon' && t.until === 0))).length; if (due) chip('broom', `Heute putzen · ${due} ${due === 1 ? 'Aufgabe' : 'Aufgaben'}`); }
     if (this._shopOn() && this._shopOk()) { const n = parseInt(this._val(this._shopC().list), 10) || 0; if (n) chip('cart', `Einkaufsliste · ${n} ${n === 1 ? 'Sache' : 'Sachen'}`); }
     { const b = this._bathNow(); if (b) chip('bath', `Bad besetzt · ${esc(b.st)} ${esc(this._sinceMin(b.t))}`); }
-    if (this._choOn() && this._choOk()) { const S = this._choSum(); if (S.wait) chip('star', `${S.wait} ${S.wait === 1 ? 'Aufgabe wartet' : 'Aufgaben warten'} auf OK`); else if (S.open) chip('star', `Kinder-Aufgaben · ${S.open} offen`); }
+    if (this._choOn() && this._choOk()) { const S = this._choSum(); if (S.wait) chip('star', `${S.wait} ${S.wait === 1 ? 'wartet' : 'warten'} auf OK`); else if (S.open) chip('star', `Kinder-Aufgaben · ${S.open} offen`); }
     const lights = this._lightsOn().length; if (lights) chip('bulb', `${lights} ${lights === 1 ? 'Licht' : 'Lichter'} an`);
     return C.join('');
   }
@@ -5225,7 +5233,11 @@ class HomeAurora extends HTMLElement {
           const x = s.attributes || {};
           return { eid: c.eid, name: c.name || x.chore_name || '', st: s.state, grp: c.primary_group || '', pts: parseFloat(x.default_points) || 0, due: x.due_date || '', icon: x.icon || '', turn: x.turn_user_name || '', freq: x.recurring_frequency || '', desc: x.description || '', claim: x.claim_button_eid, ok: x.approve_button_eid, no: x.disapprove_button_eid, canClaim: x.can_claim !== false, canOk: x.can_approve !== false, at: x.last_approved || '' };
         }).filter(Boolean);
-        U.push({ name, key: k, pts, ch, pen: (a.penalties || []).filter(p => p && p.eid), pb: (a.points_buttons || []).filter(p => p && p.eid), paused: !!a.chores_paused });
+        const rw = (a.rewards || []).map(r => {
+          const x = this._s(r.eid)?.attributes || {}, st = this._val(r.eid) || r.status || '';
+          return { eid: r.eid, name: r.name || x.reward_name || '', cost: parseFloat(r.cost ?? x.cost) || 0, st, icon: x.icon || '', desc: x.description || '', claim: x.claim_button_eid, ok: x.approve_button_eid, no: x.disapprove_button_eid, wait: (parseInt(x.pending_claims, 10) || 0) > 0 || /^(claimed|pending)$/.test(st) };
+        }).filter(r => r.eid && r.name).sort((p, q) => p.cost - q.cost || p.name.localeCompare(q.name, 'de'));
+        U.push({ name, key: k, pts, ch, rw, pen: (a.penalties || []).filter(p => p && p.eid), pb: (a.points_buttons || []).filter(p => p && p.eid), paused: !!a.chores_paused });
       }
       if (want.length) U.sort((a, b) => want.indexOf(a.name.toLowerCase()) - want.indexOf(b.name.toLowerCase()));
       return U;
@@ -5244,7 +5256,7 @@ class HomeAurora extends HTMLElement {
   _choDone(c) { return c.st === 'approved' || c.st === 'completed'; }
   _choSum() {
     return this._memo('chosum', () => {
-      const U = this._choUsers().map(u => { const T = u.ch.filter(c => this._choToday(c)); return { ...u, T, open: T.filter(c => !this._choDone(c) && c.st !== 'claimed').length, wait: u.ch.filter(c => c.st === 'claimed').length, late: T.filter(c => c.st === 'overdue').length }; });
+      const U = this._choUsers().map(u => { const T = u.ch.filter(c => this._choToday(c)); return { ...u, T, open: T.filter(c => !this._choDone(c) && c.st !== 'claimed').length, wait: u.ch.filter(c => c.st === 'claimed').length + u.rw.filter(r => r.wait).length, late: T.filter(c => c.st === 'overdue').length }; });
       return { U, open: U.reduce((a, u) => a + u.open, 0), wait: U.reduce((a, u) => a + u.wait, 0) };
     });
   }
@@ -5257,6 +5269,23 @@ class HomeAurora extends HTMLElement {
     const s = (c.icon + ' ' + c.name).toLowerCase();
     const M = [[/bed|bett/, 'bed'], [/dish|spül/, 'dishwasher'], [/silverware|tisch decken|fork/, 'cook'], [/table|tisch/, 'table'], [/trash|müll/, 'trash'], [/water|gieß|pflanz/, 'flower'], [/tooth|zähne/, 'sparkle'], [/basket|wäsche/, 'washer'], [/toy|brick|spielzeug/, 'brick'], [/bag|ranzen|schule/, 'backpack'], [/book|hausaufgab/, 'list'], [/broom|aufräum|zimmer/, 'broom'], [/dog|gassi|hund/, 'shoe'], [/vacuum|saug/, 'vacuum']];
     return (M.find(m => m[0].test(s)) || [0, 'check'])[1];
+  }
+  _rwIco(r) {
+    const s = (r.icon + ' ' + r.name).toLowerCase();
+    const M = [[/cellphone|tablet|handy|bildschirm/, 'phone'], [/ice|eis|süß|candy/, 'heart'], [/food|essen/, 'cook'], [/movie|film/, 'tv'], [/night|bett/, 'moon'], [/piggy|geld|€/, 'cart'], [/ticket|ausflug|kino/, 'star']];
+    return (M.find(m => m[0].test(s)) || [0, 'sparkle'])[1];
+  }
+  _rwHtml(u, busy) {
+    if (!u.rw.length) return '';
+    const card = r => {
+      const have = u.pts ?? 0, ok = have >= r.cost, pct = r.cost ? Math.min(100, Math.round(100 * have / r.cost)) : 100;
+      let act;
+      if (r.wait) act = `<div class="rwda"><button class="chb no" data-act="chono" data-e="${esc(r.no || '')}" aria-label="${esc(r.name)} ablehnen" ${busy ? 'disabled' : ''}>${ic('close', 16)}</button><button class="chb ok" data-act="rwok" data-e="${esc(r.ok || '')}" ${busy ? 'disabled' : ''}>${ic('check', 16)} OK</button></div>`;
+      else if (ok && r.claim) act = `<button class="chb go${this._choArm === r.claim ? ' arm' : ''}" data-act="rwclaim" data-e="${esc(r.claim)}" data-n="${esc(r.name)}" ${busy ? 'disabled' : ''}>${this._choArm === r.claim ? 'Wirklich einlösen?' : ic('star', 15) + ' Einlösen'}</button>`;
+      else act = `<span class="rwdn">noch ${de(r.cost - have, 0)} ⭐</span>`;
+      return `<div class="rwd${r.wait ? ' wait' : ok ? ' ok' : ''}"><div class="rwdt"><div class="ico">${ic(this._rwIco(r), 18)}</div><div class="tx"><div class="t">${esc(r.name)}</div><div class="s">${r.wait ? 'Wartet auf OK' : '⭐ ' + de(r.cost, 0)}</div></div></div><div class="rwdb"><i style="width:${pct}%"></i></div>${act}</div>`;
+    };
+    return `<div class="lab2">BELOHNUNGEN · ⭐ ${u.pts != null ? de(u.pts, 0) : '–'} GESAMMELT</div><div class="rwdg">${u.rw.map(card).join('')}</div>`;
   }
   _choRow() {
     if (!this._choOn() || !this._choOk()) return '';
@@ -5298,9 +5327,10 @@ class HomeAurora extends HTMLElement {
       + (T.length ? `<div class="pzbar chbar"><i style="width:${T.length ? Math.round(100 * doneT / T.length) : 0}%"></i></div>${T.map(row).join('')}` : '<div class="empty sm">Heute nichts zu tun 🎉</div>')
       + (L.length ? `<div class="lab2">DEMNÄCHST · ${L.length}</div>${L.map(row).join('')}` : '')
       + (O.length ? `<div class="lab2">ANDERE SIND DRAN · ${O.length}</div>${O.map(row).join('')}` : '')
+      + this._rwHtml(u, busy)
       + (pen.length ? `<div class="lab2">STRAFE GEBEN · zweimal tippen</div><div class="chpen">${pen.map(p => `<button class="${this._choArm === p.eid ? 'arm' : ''}" data-act="chopen" data-e="${esc(p.eid)}" data-n="${esc(p.name)}" ${busy ? 'disabled' : ''}><b>${de(p.points, 0)}</b><span>${this._choArm === p.eid ? 'Wirklich?' : esc(p.name)}</span></button>`).join('')}</div>` : '')
       + (plus.length || minus.length ? `<div class="lab2">PUNKTE VON HAND</div><div class="chpts">${minus.map(pbt).join('')}<span>⭐ ${u.pts != null ? de(u.pts, 0) : '–'}</span>${plus.map(pbt).join('')}</div>` : '')
-      + `<div class="card-note">„Erledigt“ meldet die Aufgabe, mit „OK“ gibt es die Punkte. Aufgaben, Strafen und Belohnungen werden in Home Assistant unter ChoreOps verwaltet.</div>`;
+      + `<div class="card-note">„Erledigt“ meldet die Aufgabe, mit „OK“ gibt es die Punkte. Eingelöste Belohnungen ziehen die Punkte erst nach „OK“ ab. Aufgaben, Strafen und Belohnungen werden in Home Assistant unter ChoreOps verwaltet.</div>`;
   }
   async _choPress(e, msg) {
     if (!e || this._choBusy) return;
@@ -5318,6 +5348,10 @@ class HomeAurora extends HTMLElement {
       case 'chook': this._choPress(e, 'Punkte gutgeschrieben ⭐'); break;
       case 'chono': this._choPress(e, 'Abgelehnt'); break;
       case 'chopt': this._choPress(e); break;
+      case 'rwok': this._choPress(e, 'Belohnung genehmigt 🎁'); break;
+      case 'rwclaim':
+        if (this._choArm !== e) { this._choArm = e; this._renderSheet(); clearTimeout(this._choAt); this._choAt = setTimeout(() => { this._choArm = ''; if (this._sheet?.t === 'cho') this._renderSheet(); }, 3000); break; }
+        this._choArm = ''; clearTimeout(this._choAt); this._choPress(e, `${el.dataset.n} eingelöst · wartet auf OK`); break;
       case 'chopen':
         if (this._choArm !== e) { this._choArm = e; this._renderSheet(); clearTimeout(this._choAt); this._choAt = setTimeout(() => { this._choArm = ''; if (this._sheet?.t === 'cho') this._renderSheet(); }, 3000); break; }
         this._choArm = ''; clearTimeout(this._choAt); this._choPress(e, `Strafe: ${el.dataset.n}`); break;
@@ -5583,7 +5617,7 @@ class HomeAurora extends HTMLElement {
       case 'dzplay': case 'dzsearch': case 'dztype': this._dzAct(a, el); break;
       case 'music': this._sheet = { t: 'music' }; this._renderSheet(); break;
       case 'shop': case 'shoptab': case 'shopadd': case 'shopq': case 'shopdone': case 'shopundo': case 'shopall': case 'shopclr': case 'rcpsel': case 'rcpserv': case 'rcpone': case 'rcpall': this._shopAct(a, el); break;
-      case 'cho': case 'chou': case 'choclaim': case 'chook': case 'chono': case 'chopt': case 'chopen': this._choAct(a, el); break;
+      case 'cho': case 'chou': case 'choclaim': case 'chook': case 'chono': case 'chopt': case 'chopen': case 'rwok': case 'rwclaim': this._choAct(a, el); break;
       case 'annt': this._annT = el.dataset.i; this._renderSheet(); break;
       case 'annph': { const p = (this._c.music?.phrases || [])[+el.dataset.i], inp = this.shadowRoot.getElementById('annq'); if (p && inp) { inp.value = p; inp.focus(); } break; }
       case 'annsend': this._annSend(); break;
