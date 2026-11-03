@@ -186,6 +186,17 @@ for (const [vn, states] of VARIANTS) for (const t of TARGETS.filter((x) => !only
   await check('ansicht radio deezer', () => window.__el.shadowRoot.querySelector('main').textContent.trim().length);
   await page.evaluate(() => window.__el._dzSearch('chill'));
   await check('deezer suche', () => { const n = window.__el.shadowRoot.querySelectorAll('.rxh[data-act="dzplay"]').length; if (n !== 4) throw new Error('Deezer zeigt ' + n + ' statt 4 Kacheln'); return window.__el.shadowRoot.querySelector('main').textContent.trim().length; });
+  // Tippen auf eine Playlist: Alexa-Media-Suche (play_media DEEZER) oder Sprachbefehl; ein Album startet Titel für Titel über das Hörspiel-Skript
+  await check('deezer playlist abspielen', async () => { const el = window.__el; el._h.calls.length = 0; el._dzPlay('playlist:7'); await new Promise(r => setTimeout(r, 50));
+    const c = el._h.calls.find(i => (i[0] === 'media_player' && i[1] === 'play_media') || (i[0] === 'alexa_devices'));
+    if (!c && el._rdPlayer()) throw new Error('kein Abspielbefehl: ' + JSON.stringify(el._h.calls)); if (c?.[1] === 'play_media' && (c[2].media.media_content_type !== 'DEEZER' || c[2].media.media_content_id !== 'die Playlist Chillout Lounge')) throw new Error('falscher Suchsatz: ' + JSON.stringify(c[2])); return el.shadowRoot.querySelector('main').textContent.trim().length; });
+  await check('deezer album titelweise', async () => { const el = window.__el; el._dzT = 'album';
+    el._dzJsonp = async (path) => path.startsWith('search/album') ? { data: [{ id: 42, title: 'Folge 1: Der Wunschzettel', artist: { name: 'Weihnachtsmann & Co. KG' } }] }
+      : path.startsWith('album/42/tracks') ? { data: [{ title: 'Folge 1: Der Wunschzettel - Teil 1' }, { title: 'Folge 1: Der Wunschzettel - Teil 2' }] } : { data: [] };
+    await el._dzSearch('weihnachtsmann'); el._h.calls.length = 0; el._dzPlay('album:42'); await new Promise(r => setTimeout(r, 100));
+    const sc = el._rdC().hsp?.script || 'script.aurora_hoerspiel', s = el._h.calls.find(i => i[0] === 'script');
+    if (sc && el._h.states[sc] && el._rdPlayer()) { if (!s || s[2].variables.tracks.length !== 2 || !/den Titel Folge 1 Der Wunschzettel Teil 1 von Weihnachtsmann und Co KG/.test(s[2].variables.tracks[0].c)) throw new Error('Album nicht titelweise: ' + JSON.stringify(el._h.calls)); }
+    else if (el._rdPlayer() && !el._h.calls.length) throw new Error('Album ohne Abspielbefehl'); return el.shadowRoot.querySelector('main').textContent.trim().length; });
   await page.evaluate(() => { const el = window.__el; el._dzT = 'artist'; return el._dzSearch('niemand'); });
   await check('deezer nichts gefunden', () => window.__el.shadowRoot.querySelector('main').textContent.trim().length);
   await page.evaluate(() => { const el = window.__el; el._dzJsonp = async () => { throw new Error('nicht erreichbar'); }; return el._dzSearch('chill'); });
