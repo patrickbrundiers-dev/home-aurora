@@ -197,6 +197,8 @@ for (const [vn, states] of VARIANTS) for (const t of TARGETS.filter((x) => !only
     const sc = el._rdC().hsp?.script || 'script.aurora_hoerspiel', s = el._h.calls.find(i => i[0] === 'script');
     if (sc && el._h.states[sc] && el._rdPlayer()) { if (!s || s[2].variables.tracks.length !== 2 || !/den Titel Folge 1 Der Wunschzettel Teil 1 von Weihnachtsmann und Co KG/.test(s[2].variables.tracks[0].c)) throw new Error('Album nicht titelweise: ' + JSON.stringify(el._h.calls)); }
     else if (el._rdPlayer() && !el._h.calls.length) throw new Error('Album ohne Abspielbefehl'); return el.shadowRoot.querySelector('main').textContent.trim().length; });
+  await check('hoerspiel folgenname', () => { const el = window.__el, a = el._hsAlt('Folge 01: Die magische Perle (Das Original-Hörspiel zur TV-Serie)', 'Weihnachtsmann & Co. KG');
+    if (a !== 'Die magische Perle von Weihnachtsmann und Co KG') throw new Error('Folgenname: ' + a); return el.shadowRoot.querySelector('main').textContent.trim().length; });
   await page.evaluate(() => { const el = window.__el; el._dzT = 'artist'; return el._dzSearch('niemand'); });
   await check('deezer nichts gefunden', () => window.__el.shadowRoot.querySelector('main').textContent.trim().length);
   await page.evaluate(() => { const el = window.__el; el._dzJsonp = async () => { throw new Error('nicht erreichbar'); }; return el._dzSearch('chill'); });

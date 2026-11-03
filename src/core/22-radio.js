@@ -150,6 +150,14 @@
     const s = this._h.states[P.e];
     if (!s) return;
     if (!this._rdMiss(P) && (s.state === 'playing' || s.attributes?.media_title !== before)) return;
+    const reg = this._h.entities || {}, am = (P.ents || []).find(e => reg[e]?.platform === 'alexa_media') || (!reg[P.e] ? P.e : null);
+    if (st.alt && am) {   // erst nur der Folgenname über die Deezer-Suche von Alexa Media, danach Spotify
+      this._toast(`Album nicht gefunden, suche „${st.alt}“`, 3600);
+      const b2 = this._h.states[am]?.attributes?.media_title;
+      Promise.resolve(this._h.callService('media_player', 'play_media', { entity_id: am, media: { media_content_type: 'DEEZER', media_content_id: st.alt } }))
+        .then(() => setTimeout(() => this._rdFallback(P, { ...st, alt: '' }, b2), 12000), () => this._rdFallback(P, { ...st, alt: '' }, b2));
+      return;
+    }
     const c = this._rdCall(P, { ...st, cmd: st.spot });
     if (!c) return;
     this._toast(`Auf Deezer nicht gefunden, versuche Spotify`, 3600);
@@ -316,6 +324,14 @@
       .replace(/[:–—|/]+|\s-\s/g, ' ').replace(/[?!.,;"„“”'’«»…]+/g, ' ').replace(/^0*(\d+)\s+(?=\D)/, 'Folge $1 ').replace(/\s+/g, ' ').trim();
     return s || String(t || '').trim();
   }
+  /* pz50: Suchsatz nur mit dem Folgennamen: „Folge 01: Die magische Perle (Das Original-Hörspiel …)“ → „Die magische Perle von
+     Weihnachtsmann und Co KG“. Das Album fand Alexa nicht, den Folgennamen schon (läuft dann am Stück, oft ab Kapitel 2) */
+  _hsAlt(t, art) {
+    const n = String(t || '').replace(/\s*[([][^)\]]*[)\]]/g, '').replace(/^\s*(folge|episode|teil|band)?\s*\d+\s*[:.\-–—]?\s*/i, '').trim();
+    const c = x => String(x || '').replace(/&/g, ' und ').replace(/[^\p{L}\p{N}\s'-]+/gu, ' ').replace(/\s+/g, ' ').trim();
+    const s = c(n), a = c(art);
+    return s && s.length > 2 ? s + this._hsVon(s, a) : '';
+  }
   _hsVon(t, art) { return art && !t.toLowerCase().includes(art.toLowerCase()) ? ' von ' + art : ''; }
   _hsCmd(a, art, dienst = 'Deezer') { const t = this._hsSay(a.t); return `spiele das Album ${t}${this._hsVon(t, art)} auf ${dienst}`; }
   /* Alexa hat geantwortet, dass sie es nicht findet („Ich kann … nicht finden“) */
@@ -331,7 +347,7 @@
     const x = this._hsX(), c = x && this._hsC(x), a = c?.list?.find(i => i.id === aid); if (!a) return;
     this._hsRecent(this._hsKey(x), a.id);
     this._closeSheet();
-    const label = a.t.replace(/\s*\([^)]*\)/g, ''), alb = { cmd: this._hsCmd(a, c.art), spot: this._hsCmd(a, c.art, 'Spotify'), label };
+    const label = a.t.replace(/\s*\([^)]*\)/g, ''), alb = { cmd: this._hsCmd(a, c.art), spot: this._hsCmd(a, c.art, 'Spotify'), alt: this._hsAlt(a.t, c.art), label };
     const sc = { ...DEFAULTS.radio.hsp, ...(this._rdC().hsp || {}) }.script, P = this._rdPlayer();
     if (sc && this._h.states[sc] && P && /^\d+$/.test(a.id)) {
       let T = [];
