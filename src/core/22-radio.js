@@ -340,7 +340,7 @@
     }
     this._rdPlay(x.id, alb);
   }
-  _hsChain(P, x, sc, T, art, alb) {
+  _hsChain(P, x, sc, T, art, alb, fb = () => this._rdPlay(x.id, alb)) {
     const reg = this._h.entities || {}, ents = P.ents || [];
     const dv = ents.map(e => reg[e]).find(r => r?.platform === 'alexa_devices' && r.device_id)?.device_id || '';
     const watch = ents.find(e => reg[e]?.platform === 'alexa_media') || (!reg[P.e] ? P.e : '');
@@ -350,8 +350,8 @@
     Promise.resolve(this._h.callService('script', 'turn_on', { entity_id: sc, variables: { watch, device_id: dv, tracks } })).then(() => {
       this._toast(`${alb.label} ab Kapitel 1 auf ${P.name}`);
       // läuft Kapitel 1 nach 15 s nicht, startet Alexa die Folge wie bisher als Album
-      setTimeout(() => { if (this._hsNorm(this._h.states[watch]?.attributes?.media_title) !== this._hsNorm(T[0])) this._rdPlay(x.id, alb); }, 15000);
-    }, () => this._rdPlay(x.id, alb));
+      setTimeout(() => { if (this._hsNorm(this._h.states[watch]?.attributes?.media_title) !== this._hsNorm(T[0])) fb(); }, 15000);
+    }, fb);
     this._sig = ''; this._render();
     return true;
   }

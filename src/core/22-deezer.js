@@ -1,7 +1,8 @@
 /* ───────────── pz44: Reiter Deezer auf der Radioseite · Deezer-Katalog durchsuchen, Alexa spielt den Treffer ───────────── */
-  /* Gesucht wird im öffentlichen Deezer-Katalog über _dzJsonp (abgeschottetes iframe, ohne Anmeldung). Abgespielt wird wie bei
-     Sendern und Hörspielen per Sprachbefehl über _rdCall („spiele die Playlist … auf Deezer“); Deezer muss dafür in der Alexa-App
-     verknüpft sein. Favoriten stehen in radio.dz.favorites (name, cmd, genre, emoji). */
+  /* Gesucht wird im öffentlichen Deezer-Katalog über _dzJsonp (abgeschottetes iframe, ohne Anmeldung). pz49: Abgespielt wird über
+     die Deezer-Suche von Alexa Media (play_media DEEZER, „das Album … von …“); den Sprachbefehl als Text („spiele … auf Deezer“)
+     verstand Alexa oft nicht und blieb stumm. Echos ohne Alexa Media, oder wenn nach 15 s nichts Neues läuft, bekommen den
+     Sprachbefehl über _rdCall. Deezer muss in der Alexa-App verknüpft sein. Favoriten: radio.dz.favorites (name, cmd, genre, emoji). */
   _dzTypes() { return [['playlist', 'Playlists'], ['artist', 'Künstler'], ['album', 'Alben'], ['track', 'Titel']]; }
   _dzType() {
     if (this._dzT == null) { try { this._dzT = localStorage.getItem('home-aurora-dztype') || 'playlist'; } catch (e) { this._dzT = 'playlist'; } }
@@ -9,19 +10,23 @@
   }
   _dzFavs() {
     const D = { ...DEFAULTS.radio.dz, ...(this._rdC().dz || {}) };
-    return (D.favorites || []).filter(f => f && f.name).map((f, i) => ({ id: 'f' + i, name: String(f.name), sub: String(f.genre || 'Favorit'), emoji: String(f.emoji || ''), img: '', cmd: String(f.cmd || `spiele ${f.name} auf Deezer`) }));
+    return (D.favorites || []).filter(f => f && f.name).map((f, i) => { const cmd = String(f.cmd || `spiele ${f.name} auf Deezer`); return { id: 'f' + i, name: String(f.name), sub: String(f.genre || 'Favorit'), emoji: String(f.emoji || ''), img: '', cmd, q: String(f.q || this._dzQOf(cmd)) }; });
   }
+  /* Suchsatz für Alexa Media aus einem Sprachbefehl: „spiele meinen Flow auf Deezer“ → „meinen Flow“ */
+  _dzQOf(cmd) { return String(cmd).replace(/^\s*spiel[e]?\s+/i, '').replace(/\s+(auf|von|bei)\s+deezer\s*$/i, '').trim(); }
+  /* wie _hsSay, dazu Emojis und Sonderzeichen weg („Weihnachtssongs 2026 🎄“ → „Weihnachtssongs 2026“) */
+  _dzSay(t) { return this._hsSay(String(t || '').replace(/&/g, ' und ')).replace(/[^\p{L}\p{N}\s'-]+/gu, ' ').replace(/\s+/g, ' ').trim() || this._hsSay(t); }
   _dzImg(u) { u = String(u || ''); return /^https:\/\/[\w.-]+\.dzcdn\.net\//.test(u) ? u : ''; }
   /* ein Treffer als Kachel, mit dem Satz, den Alexa versteht (Titel wie bei Hörspielen ohne Klammern und Satzzeichen) */
   _dzItem(type, a) {
     const t = String((type === 'artist' ? a?.name : a?.title) || '').trim(); if (!t) return null;
-    const s = this._hsSay(t), art = String(a.artist?.name || '').trim();
-    const cmd = type === 'playlist' ? `spiele die Playlist ${s} auf Deezer` : type === 'artist' ? `spiele ${s} auf Deezer`
-      : `spiele ${type === 'album' ? 'das Album' : 'den Titel'} ${s}${this._hsVon(s, art)} auf Deezer`;
+    const s = this._dzSay(t), art = this._dzSay(a.artist?.name || '');
+    const q = type === 'playlist' ? `die Playlist ${s}` : type === 'artist' ? s : `${type === 'album' ? 'das Album' : 'den Titel'} ${s}${this._hsVon(s, art)}`;
+    const cmd = `spiele ${q} auf Deezer`;
     const fans = parseInt(a.nb_fan, 10), tr = parseInt(a.nb_tracks, 10);
     const sub = type === 'playlist' ? [a.user?.name ? 'von ' + a.user.name : '', tr > 0 ? tr + ' Titel' : '']
       : type === 'artist' ? [fans > 0 ? fans.toLocaleString('de-DE') + ' Fans' : 'Künstler'] : [art];
-    return { id: type + ':' + String(a.id || t), name: t.slice(0, 120), sub: sub.filter(Boolean).join(' · ').slice(0, 80), emoji: '', img: this._dzImg(a.picture_medium || a.cover_medium || a.album?.cover_medium), cmd };
+    return { id: type + ':' + String(a.id || t), name: t.slice(0, 120), sub: sub.filter(Boolean).join(' · ').slice(0, 80), emoji: '', img: this._dzImg(a.picture_medium || a.cover_medium || a.album?.cover_medium), cmd, q, type, aid: /^\d+$/.test(String(a.id)) ? String(a.id) : '', art: String(a.artist?.name || '') };
   }
   async _dzSearch(q0) {
     const inp = this.shadowRoot.getElementById('dzq'), q = String(q0 ?? inp?.value ?? this._dzQ ?? '').trim().slice(0, 100);
@@ -39,15 +44,38 @@
     if (n !== this._dzN) return;
     this._dzR = R; this._sig = ''; this._render();
   }
-  _dzPlay(id) {
-    const x = [...this._dzFavs(), ...(this._dzR?.list || [])].find(i => i.id === id), P = this._rdPlayer();
-    if (!x) return;
+  _dzPlay(id, plain) {
+    const x0 = [...this._dzFavs(), ...(this._dzR?.list || [])].find(i => i.id === id), P = this._rdPlayer();
+    if (!x0) return;
+    const x = plain ? { ...x0, chained: true } : x0;
     if (!P) { this._toast('Kein Lautsprecher erreichbar'); return; }
+    const reg = this._h.entities || {}, am = (P.ents || []).find(e => reg[e]?.platform === 'alexa_media') || (!reg[P.e] ? P.e : null);
     const c = this._rdCall(P, { name: x.name, cmd: x.cmd });
-    if (!c) { this._toast(`${P.name} kann Deezer nicht abspielen`, 3600); return; }
+    if (!am && !c) { this._toast(`${P.name} kann Deezer nicht abspielen`, 3600); return; }
     this._dzLast = x.id;
-    Promise.resolve(this._h.callService(...c)).then(() => this._toast(`${x.name} auf ${P.name}`), () => this._toast('Deezer konnte nicht gestartet werden', 3600));
+    if (x.type === 'album' && x.aid && !x.chained) { this._dzAlbum(P, x); return; }
+    const fail = () => this._toast('Deezer konnte nicht gestartet werden', 3600);
+    if (am && x.q) {
+      const before = this._attr(am, 'media_title') || '';
+      Promise.resolve(this._h.callService('media_player', 'play_media', { entity_id: am, media: { media_content_type: 'DEEZER', media_content_id: x.q } })).then(() => {
+        this._toast(`${x.name} auf ${P.name}`);
+        // läuft nach 15 s nichts Neues, versucht es Alexa noch einmal per Sprachbefehl
+        setTimeout(() => { const s = this._h.states[am]; if (c && s && !(s.state === 'playing' && (s.attributes?.media_title || '') !== before)) Promise.resolve(this._h.callService(...c)).catch(() => { /* ok */ }); }, 15000);
+      }, () => (c ? Promise.resolve(this._h.callService(...c)).then(() => this._toast(`${x.name} auf ${P.name}`), fail) : fail()));
+    } else Promise.resolve(this._h.callService(...c)).then(() => this._toast(`${x.name} auf ${P.name}`), fail);
     this._sig = ''; this._render();
+  }
+  /* pz49: Hörspiel-Alben („Weihnachtsmann & Co. KG Folge 1“) findet Alexa unter dem Albumnamen oft nicht, einzelne Titel aber schon.
+     Deshalb wie bei den Hörspielen: Titel des Albums von Deezer holen und über radio.hsp.script ab Titel 1 nacheinander spielen.
+     Ohne Skript, ohne Titel oder wenn Titel 1 nicht anläuft: Album über die Alexa-Media-Suche wie bisher. */
+  async _dzAlbum(P, x) {
+    const sc = { ...DEFAULTS.radio.hsp, ...(this._rdC().hsp || {}) }.script, again = () => this._dzPlay(x.id, true);
+    let T = [];
+    if (sc && this._h.states[sc]) {
+      try { const r = await this._dzJsonp(`album/${x.aid}/tracks?limit=100`); T = (r?.data || []).map(i => String(i.title || '').trim()).filter(Boolean).slice(0, 80); } catch (e) { T = []; }
+    }
+    if (T.length && this._hsChain(P, { name: x.name }, sc, T, x.art, { label: x.name }, again)) return;
+    again();
   }
   _dzAct(a, el) {
     switch (a) {
