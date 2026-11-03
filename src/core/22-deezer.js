@@ -26,7 +26,7 @@
     const fans = parseInt(a.nb_fan, 10), tr = parseInt(a.nb_tracks, 10);
     const sub = type === 'playlist' ? [a.user?.name ? 'von ' + a.user.name : '', tr > 0 ? tr + ' Titel' : '']
       : type === 'artist' ? [fans > 0 ? fans.toLocaleString('de-DE') + ' Fans' : 'Künstler'] : [art];
-    return { id: type + ':' + String(a.id || t), name: t.slice(0, 120), sub: sub.filter(Boolean).join(' · ').slice(0, 80), emoji: '', img: this._dzImg(a.picture_medium || a.cover_medium || a.album?.cover_medium), cmd, q, type, aid: /^\d+$/.test(String(a.id)) ? String(a.id) : '', art: String(a.artist?.name || '') };
+    return { id: type + ':' + String(a.id || t), name: t.slice(0, 120), sub: sub.filter(Boolean).join(' · ').slice(0, 80), emoji: '', img: this._dzImg(a.picture_medium || a.cover_medium || a.album?.cover_medium), cmd, q, alt: type === 'album' ? this._hsAlt(t, a.artist?.name || '') : '', type, aid: /^\d+$/.test(String(a.id)) ? String(a.id) : '', art: String(a.artist?.name || '') };
   }
   async _dzSearch(q0) {
     const inp = this.shadowRoot.getElementById('dzq'), q = String(q0 ?? inp?.value ?? this._dzQ ?? '').trim().slice(0, 100);
@@ -47,7 +47,7 @@
   _dzPlay(id, plain) {
     const x0 = [...this._dzFavs(), ...(this._dzR?.list || [])].find(i => i.id === id), P = this._rdPlayer();
     if (!x0) return;
-    const x = plain ? { ...x0, chained: true } : x0;
+    const x = plain ? { ...x0, chained: true, q: x0.alt || x0.q } : x0;   // nach dem Titel-für-Titel-Versuch gleich den Folgennamen
     if (!P) { this._toast('Kein Lautsprecher erreichbar'); return; }
     const reg = this._h.entities || {}, am = (P.ents || []).find(e => reg[e]?.platform === 'alexa_media') || (!reg[P.e] ? P.e : null);
     const c = this._rdCall(P, { name: x.name, cmd: x.cmd });
@@ -60,7 +60,12 @@
       Promise.resolve(this._h.callService('media_player', 'play_media', { entity_id: am, media: { media_content_type: 'DEEZER', media_content_id: x.q } })).then(() => {
         this._toast(`${x.name} auf ${P.name}`);
         // läuft nach 15 s nichts Neues, versucht es Alexa noch einmal per Sprachbefehl
-        setTimeout(() => { const s = this._h.states[am]; if (c && s && !(s.state === 'playing' && (s.attributes?.media_title || '') !== before)) Promise.resolve(this._h.callService(...c)).catch(() => { /* ok */ }); }, 15000);
+        // Album nicht gefunden: nur der Folgenname (pz50); läuft nach 15 s sonst nichts Neues, Sprachbefehl
+        setTimeout(() => {
+          const s = this._h.states[am]; if (!s || (!this._rdMiss(P) && s.state === 'playing' && (s.attributes?.media_title || '') !== before)) return;
+          if (x.alt && x.alt !== x.q) { this._toast(`Album nicht gefunden, suche „${x.alt}“`, 3600); Promise.resolve(this._h.callService('media_player', 'play_media', { entity_id: am, media: { media_content_type: 'DEEZER', media_content_id: x.alt } })).catch(() => { /* ok */ }); }
+          else if (c) Promise.resolve(this._h.callService(...c)).catch(() => { /* ok */ });
+        }, 15000);
       }, () => (c ? Promise.resolve(this._h.callService(...c)).then(() => this._toast(`${x.name} auf ${P.name}`), fail) : fail()));
     } else Promise.resolve(this._h.callService(...c)).then(() => this._toast(`${x.name} auf ${P.name}`), fail);
     this._sig = ''; this._render();
