@@ -102,6 +102,7 @@
       case 'settemp': h.callService('climate', 'set_temperature', { entity_id: e, temperature: parseFloat(el.dataset.v) }); break;
       case 'cpreset': h.callService('climate', 'set_preset_mode', { entity_id: e, preset_mode: el.dataset.m }); break;
       case 'chvac': h.callService('climate', 'set_hvac_mode', { entity_id: e, hvac_mode: el.dataset.m }); break;
+      case 'dhp': case 'dhpre': case 'dhpf': case 'dhpmore': this._dhPAct(a, el); break;
       case 'dhmode': this._dhSet(this._c.rooms.find(r => r.id === el.dataset.room), el.dataset.m); break;
       case 'selopt': h.callService('select', 'select_option', { entity_id: e, option: el.dataset.v }); if (el.dataset.t) this._toast(el.dataset.t); break;
       case 'numstep': {

@@ -10351,6 +10351,17 @@
 },
 "sensor.wohnzimmer_heizung_status": {
 "attributes": {
+"heating_limit_lifted": "heat_today",
+"cold_snap": false,
+"frost_night": -6,
+"facade": "sw",
+"sun_on_facade": true,
+"contact_problems": {
+"Fenster Wintergarten": "meldet sich seit 3 Stunden nicht"
+},
+"valve_own_state": {
+"climate.wohnzimmer_hinter_sofa": "Auto"
+},
 "current_setpoint": 21,
 "decision_status": "Komfortbetrieb nach Zeitplan",
 "enabled": true,
@@ -13141,5 +13152,43 @@
 },
 "last_changed": "2026-01-01T12:00:00+00:00",
 "last_updated": "2026-01-01T12:00:00+00:00"
+},
+"switch.dynamische_heizung_haus_heute_heizen": {
+"attributes": {
+"friendly_name": "Dynamische Heizung Haus Heute heizen",
+"until": "2099-01-01T06:40:00+01:00"
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "switch.dynamische_heizung_haus_heute_heizen",
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00",
+"state": "on"
+},
+"switch.dynamische_heizung_haus_gute_nacht_automatisch": {
+"attributes": {
+"friendly_name": "Dynamische Heizung Haus Gute Nacht automatisch"
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "switch.dynamische_heizung_haus_gute_nacht_automatisch",
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00",
+"state": "off"
+},
+"sensor.dynamische_heizung_haus_ubliche_schlafenszeit": {
+"attributes": {
+"friendly_name": "Dynamische Heizung Haus Übliche Schlafenszeit",
+"nights_seen": 9
+},
+"context": {
+"id": "fixture"
+},
+"entity_id": "sensor.dynamische_heizung_haus_ubliche_schlafenszeit",
+"last_changed": "2026-01-01T12:00:00+00:00",
+"last_updated": "2026-01-01T12:00:00+00:00",
+"state": "22:45"
 }
 }

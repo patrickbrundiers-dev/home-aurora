@@ -1192,6 +1192,11 @@ const CSS4 = `
 .rb .hw{color:#fbbf24}.rb .hw2{color:#fb7185}.rb .stl,.stl{color:#fbbf24;display:inline-flex;align-items:center;gap:4px}.rm.stale .rw,.rm.stale .rv{opacity:.45}.rm.stale .rb .stl{opacity:1}
 .hwarn{display:flex;align-items:center;gap:12px;width:100%;text-align:left;padding:12px 14px;margin:0 0 14px;border-radius:18px;border:1px solid rgba(251,191,36,.45);background:rgba(251,191,36,.12);color:#fde68a;cursor:pointer}.hwarn.l2{border-color:rgba(251,113,133,.5);background:rgba(251,113,133,.13);color:#fecdd3}.hwarn svg{flex:none}.hwarn div{display:flex;flex-direction:column;gap:2px;min-width:0}.hwarn b{font-size:14px;font-weight:600}.hwarn span{font-size:12.5px;opacity:.85}
 .card-note.stn{display:flex;align-items:center;gap:6px;color:#fbbf24}.chip.stc{color:#fbbf24;border-color:rgba(251,191,36,.45)}
+.hwhy{display:flex;align-items:flex-start;gap:8px;margin-top:12px;padding:10px 12px;border-radius:14px;background:rgba(var(--wh),.05);border:1px solid var(--line);font-size:13px;color:var(--tx2);line-height:1.35}.hwhy svg{flex:none;margin-top:1px}.hwhy.heat{color:#fb923c;border-color:rgba(251,146,60,.35)}.hwhy.bad{color:#fbbf24;border-color:rgba(251,191,36,.35)}
+.hwbt{margin-top:10px}.hwp{margin-top:10px;padding:10px 12px;border-radius:16px;background:rgba(var(--wh),.04);border:1px solid var(--line)}.hwl{display:flex;flex-direction:column}
+.hwc{display:grid;grid-template-columns:22px minmax(0,auto) minmax(0,1fr);gap:4px 10px;align-items:baseline;padding:7px 0;border-bottom:1px solid var(--line);font-size:13px}.hwc:last-child{border-bottom:0}.hwc b{font-weight:600;white-space:nowrap}.hwc span{color:var(--tx2);min-width:0;overflow-wrap:anywhere}.hwc i{font-style:normal;display:flex;justify-content:center;align-self:center}.hwc i.ok{color:#4ade80}.hwc i.no{color:#fb7185}.hwc i.in{color:var(--tx3);font-weight:700}.hwc.no b{color:#fb7185}
+.hwf{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;scrollbar-width:none}.hwf .chip{flex:none;cursor:pointer;font:inherit;font-size:12px}.chip.on{background:rgba(251,146,60,.2);border-color:rgba(251,146,60,.6);color:#fb923c}
+.hwd{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--tx3);margin:10px 0 2px}.hwe{display:grid;grid-template-columns:44px minmax(0,1fr);gap:8px;padding:6px 0;border-bottom:1px solid var(--line);font-size:13px}.hwe:last-child{border-bottom:0}.hwe em{font-style:normal;color:var(--tx3);font-variant-numeric:tabular-nums}.hwe small{display:block;color:var(--tx3);font-size:11.5px;margin-top:2px}
 .camstale:empty{display:none}.camstale{position:absolute;left:12px;bottom:12px;display:inline-flex;align-items:center;gap:5px;padding:5px 10px;border-radius:12px;font-size:12px;font-weight:600;background:rgba(0,0,0,.6);color:#fbbf24}
 .al{position:relative;overflow:hidden}.alb{position:absolute;left:0;right:0;bottom:0;height:3px;background:rgba(var(--wh),.12)}.alb u{display:block;height:100%;background:currentColor;opacity:.75;text-decoration:none;border-radius:0 3px 3px 0;transition:width .6s}
 .fr .pr b .ft{display:inline-flex;align-items:center;font-style:normal;font-size:11.5px;font-weight:600;margin-right:8px;vertical-align:2px}.fr .pr b .ft svg{width:12px;height:12px}.fr .ft.up{color:#fb7185}.fr .ft.dn{color:#34d399}.fr.go{cursor:pointer}.fr .mp{flex:none;color:var(--tx3);display:grid;place-items:center}
@@ -3527,7 +3532,7 @@ class HomeAurora extends HTMLElement {
     // Status-Kacheln: was die Regelung gerade weiß
     const P = this._plan(r), ht = this._heatTime(r), pm = parseFloat(a.preheat_minutes), dm = X.demand ? this._num(X.demand) : parseFloat(a.heat_demand), tr = X.trend && this._num(X.trend), ou = X.out && this._num(X.out), hr = parseFloat(a.heating_rate);
     const kw = X.kwh && parseFloat(this._s(X.kwh)?.attributes?.today_kwh), rad = X.rad && this._val(X.rad), bd = X.bat ? this._num(X.bat) : null;
-    const tiles = `<div class="dg">${this._tile(win ? 'Offen' : 'Zu', 'Fenster', 'window')}${ht != null ? this._tile(this._durTxt(ht), 'Heute geheizt', 'flame') : ''}${kw != null && !isNaN(kw) ? this._tile(de(kw, 1) + '<small class="u">kWh</small>', 'Wärme heute', 'bolt') : ''}${okv(rad) ? this._tile(esc(rad), 'Heizkörper', 'radiator') : ''}${bd != null && bd <= 60 ? this._tile(bd <= 0 ? 'jetzt' : 'in ' + de(bd, 0) + ' T.', 'Batterie fällig', 'battery') : ''}${dm != null && !isNaN(dm) ? this._tile(de(dm, 0) + ' %', 'Wärmebedarf', 'gauge') : ''}${P?.next ? this._tile(this._whenTxt(P.next), 'Nächster Planwechsel', 'clock') : ''}${!isNaN(pm) && pm > 0 ? this._tile(de(pm, 0) + ' Min.', 'Vorheizen', 'flame') : ''}${a.present != null ? this._tile(a.present ? 'Ja' : 'Nein', 'Jemand da', 'home') : ''}${ou != null ? this._tile(de(ou, 1) + '°', 'Außen', 'thermo') : ''}${tr != null ? this._tile((tr > 0 ? '+' : '') + de(tr, 1) + ' °/h', 'Trend', 'arrowup') : ''}${!isNaN(hr) && hr > 0 ? this._tile(de(hr, 1) + ' °/h', 'Heizt auf mit', 'chevron') : ''}</div>`;
+    const tiles = `<div class="dg">${this._tile(win ? 'Offen' : 'Zu', 'Fenster', 'window')}${ht != null ? this._tile(this._durTxt(ht), 'Heute geheizt', 'flame') : ''}${kw != null && !isNaN(kw) ? this._tile(de(kw, 1) + '<small class="u">kWh</small>', 'Wärme heute', 'bolt') : ''}${okv(rad) ? this._tile(esc(rad), 'Heizkörper', 'radiator') : ''}${bd != null && bd <= 60 ? this._tile(bd <= 0 ? 'jetzt' : 'in ' + de(bd, 0) + ' T.', 'Batterie fällig', 'battery') : ''}${dm != null && !isNaN(dm) ? this._tile(de(dm, 0) + ' %', 'Wärmebedarf', 'gauge') : ''}${P?.next ? this._tile(this._whenTxt(P.next), 'Nächster Planwechsel', 'clock') : ''}${!isNaN(pm) && pm > 0 ? this._tile(de(pm, 0) + ' Min.', 'Vorheizen', 'flame') : ''}${a.present != null ? this._tile(a.present ? 'Ja' : 'Nein', 'Jemand da', 'home') : ''}${ou != null ? this._tile(de(ou, 1) + '°', 'Außen', 'thermo') : ''}${tr != null ? this._tile((tr > 0 ? '+' : '') + de(tr, 1) + ' °/h', 'Trend', 'arrowup') : ''}${this._facadeTxt(a.facade) && typeof a.sun_on_facade === 'boolean' ? this._tile(a.sun_on_facade ? 'Ja' : 'Nein', 'Sonne auf ' + this._facadeTxt(a.facade) + 'wand', 'sun') : ''}${!isNaN(hr) && hr > 0 ? this._tile(de(hr, 1) + ' °/h', 'Heizt auf mit', 'chevron') : ''}</div>`;
     // Hinweise: Probleme zuerst (rot), dann Entscheidung und Lernstand der Regelung
     const red = s => `<div class="card-note" style="color:#fb7185">${esc(s)}</div>`;
     const tw = a.thermostat_warnings && typeof a.thermostat_warnings === 'object' ? Object.entries(a.thermostat_warnings) : [];
@@ -3535,6 +3540,7 @@ class HomeAurora extends HTMLElement {
     const notes = X.prob.filter(e => this._val(e) === 'on').map(e => red(this._name(e).replace(/^Heizung\s*/i, '') + ' gemeldet')).join('')
       + tw.map(([k, v]) => red(`${this._name(k)}: ${typeof v === 'string' ? v : JSON.stringify(v)}`)).join('')
       + (ua.length ? red('Nicht erreichbar: ' + ua.map(e => this._name(e)).join(', ')) : '')
+      + this._dhNew(a)
       + (okv(a.decision_status) && a.decision_status !== D.label ? `<div class="card-note">${esc(String(a.decision_status))}</div>` : '')
       + (okv(a.learning_status) ? `<div class="card-note">Lernt: ${esc(String(a.learning_status))}</div>` : '') + (r.temp ? this._staleNote(r.temp) : '')
       + (X.air && !['not_needed', 'unknown', 'unavailable', undefined].includes(this._s(X.air)?.attributes?.state) && okv(this._val(X.air)) ? `<div class="card-note" style="color:#38bdf8">Lüften: ${esc(this._val(X.air))}</div>` : '')
@@ -3551,11 +3557,15 @@ class HomeAurora extends HTMLElement {
     const hs = X.house && this._s(X.house), hv = hs?.state;
     // Temperaturstufen am Haus (Zeitplanblöcke mit „stufe: abend“): eine Änderung gilt in allen Zeitplänen
     const lv = X.lv.length ? `<div class="hlv">${X.lv.map(l => `<div class="hlvc"><span>Stufe ${esc(l.n)}</span>${this._hStep(l.e, 1, '°')}</div>`).join('')}</div>` : '';
-    const house = hs ? `<div class="lab2">HAUS · ALLE RÄUME</div><div class="seg hseg">${(hs.attributes.options || []).map(o => `<button class="${hv === o ? 'on' : ''}" data-act="selopt" data-e="${X.house}" data-v="${esc(o)}" data-t="Haus: ${esc(o)}">${esc(o)}</button>`).join('')}</div>${lv}` : '';
+    // pz50: „Heute heizen“ (24 h ohne Heizgrenze) und „Gute Nacht automatisch“ zur gelernten Schlafenszeit
+    const tgl = (e, i, t, sub) => { const on = this._val(e) === 'on'; return `<button class="xr" data-act="toggle" data-e="${e}"><div class="ico">${ic(i, 19)}</div><div class="grow"><div class="t">${t}</div><div class="s">${esc(sub(on))}</div></div><span class="sw ${on ? 'on' : ''}"></span></button>`; };
+    const tu = X.today && this._s(X.today)?.attributes?.until ? new Date(this._s(X.today).attributes.until) : null, bt = X.bed && this._val(X.bed);
+    const hsw = X.today || X.gn ? `<div class="mcol" style="margin-top:8px">${X.today ? tgl(X.today, 'radiator', 'Heute heizen', on => on ? 'Heizgrenze aufgehoben' + (tu && !isNaN(tu) ? ' bis ' + this._whenTxt(tu) : '') : 'heizt 24 Stunden auch über der Heizgrenze') : ''}${X.gn ? tgl(X.gn, 'moon', 'Gute Nacht automatisch', on => (okv(bt) && bt ? 'übliche Schlafenszeit ' + bt : 'lernt die Schlafenszeit noch') + (on ? '' : ' · aus')) : ''}</div>` : '';
+    const house = hs ? `<div class="lab2">HAUS · ALLE RÄUME</div><div class="seg hseg">${(hs.attributes.options || []).map(o => `<button class="${hv === o ? 'on' : ''}" data-act="selopt" data-e="${X.house}" data-v="${esc(o)}" data-t="Haus: ${esc(o)}">${esc(o)}</button>`).join('')}</div>${lv}${hsw}` : '';
     [r.temp, r.hum].forEach(x => { if (x && !this._hist[x]) this._need.add(x); });
     return `<div class="grab"></div><div class="sh"><div class="ico">${ic(r.icon, 24)}</div><div><h2>Heizung · ${esc(r.name)}</h2><p>${esc(status)}</p></div><button class="x" data-act="close">${ic('close', 20)}</button></div>
       <div class="hhero ${heat ? 'heat' : ''}">${dial}<div class="hside">${side}${seg}</div></div>
-      ${hint}${notes}${day}${pre ? `<div class="lab2">BETRIEBSART</div><div class="hpre hmodes">${pre}</div>` : ''}${apRow ? `<div class="mcol" style="margin-top:8px">${apRow}</div>` : ''}${dur}${zp}
+      ${this._dhVerdict(r.heat.status)}${hint}${notes}${this._dhPanel(r.heat.status)}${day}${pre ? `<div class="lab2">BETRIEBSART</div><div class="hpre hmodes">${pre}</div>` : ''}${apRow ? `<div class="mcol" style="margin-top:8px">${apRow}</div>` : ''}${dur}${zp}
       <div class="lab2">STATUS</div>${tiles}${trv}${fine}${house}
       ${this._trend(r, col)}
       <div class="hbtns"><button class="qb" data-act="sched">${ic('clock', 14)}Heizungsplan</button><button class="qb" data-act="room" data-room="${r.id}">${ic(r.icon, 14)}Zurück zum Raum</button></div>`;
@@ -4953,13 +4963,17 @@ class HomeAurora extends HTMLElement {
       // pz43 (Integration 0.13–0.15): Tagesplan, Lüften, Wärmemenge, Batterie, Heizkörper, Zeitplan-Vorschlag, „kurz wärmer“, Temperaturstufen am Haus
       day: has(`sensor.${b}_tagesplan`), air: has(`sensor.${b}_luften`), kwh: has(`sensor.${b}_warmemenge`), bat: has(`sensor.${b}_batterie_fallig_in`),
       rad: has(`sensor.${b}_heizkorper`), tip: has(`sensor.${b}_zeitplan_vorschlag`), warm: has(`button.${b}_kurz_warmer`),
+      // pz50 (Integration 0.21): Haus-Schalter „Heute heizen“ und „Gute Nacht automatisch“, gelernte Schlafenszeit
+      today: c.house ? has(c.house.replace(/^select\./, 'switch.').replace(/_hausmodus$/, '_heute_heizen')) : null,
+      gn: c.house ? has(c.house.replace(/^select\./, 'switch.').replace(/_hausmodus$/, '_gute_nacht_automatisch')) : null,
+      bed: c.house ? has(c.house.replace(/^select\./, 'sensor.').replace(/_hausmodus$/, '_ubliche_schlafenszeit')) : null,
       lv: c.house ? [['morgen', 'Morgen'], ['tag', 'Tag'], ['abend', 'Abend'], ['nacht', 'Nacht']].map(([k, n]) => ({ n, e: has(c.house.replace(/^select\./, 'number.').replace(/_hausmodus$/, '_stufe_' + k)) })).filter(x => x.e) : [],
     };
   }
   _dhXIds(sid) {
     const X = this._dhX(sid); if (!X) return [];
     const S = this._h.states, trv = Object.keys(S[sid]?.attributes?.thermostat_setpoints || {});
-    return [X.mode, X.cl, X.house, X.dur, X.sched, X.lock, X.roff, X.demand, X.trend, X.out, X.day, X.air, X.kwh, X.bat, X.rad, X.tip, X.warm, ...X.lv.map(l => l.e), ...X.prob, ...X.presets.map(p => p.num), ...trv.map(X.off)].filter(Boolean);
+    return [X.mode, X.cl, X.house, X.dur, X.sched, X.lock, X.roff, X.demand, X.trend, X.out, X.day, X.air, X.kwh, X.bat, X.rad, X.tip, X.warm, X.today, X.gn, X.bed, ...X.lv.map(l => l.e), ...X.prob, ...X.presets.map(p => p.num), ...trv.map(X.off)].filter(Boolean);
   }
   /* Automations-Konfigurationen lesen (alle 30 Min.) und Räume mit Advanced-Heating-Control-Plänen verbinden.
      Über die REST-Schnittstelle kommt die gespeicherte Konfiguration mit use_blueprint (klein, braucht Admin-Rechte);
@@ -5485,6 +5499,99 @@ class HomeAurora extends HTMLElement {
     if (!A) return;
     h.callService('lichtsteuerung', A[0], A[1]); this._toast(A[2]); if (this._sheet) this._renderSheet();
   }
+  /* ───────────── pz50: „Warum?“ und „Protokoll“ (Dynamische Heizungssteuerung ab 0.21) ─────────────
+     Die Integration beantwortet zwei Dienste mit return_response:
+       dynamic_heating.why       → { heating, verdict, checks: [{ name, ok: true/false/null, detail }] }
+       dynamic_heating.decisions → { room, count, decisions: [{ at, area, mode, text, target, room, outdoor, source }] }
+     Das Urteil („Heizt nicht: Fenster – offen“) steht immer im Heizungsfenster; „Warum?“ klappt die Prüfliste auf,
+     „Protokoll“ die Entscheidungen der letzten 24 h / 3 / 7 Tage mit Filter nach Bereich. Antworten bleiben eine Minute. */
+  _dhPHas() { const S = this._h?.services; return !S || !!S.dynamic_heating?.why; }
+  _dhPKey(sid, kind) { const L = this._dhLog || {}; return kind === 'why' ? `why|${sid}` : `log|${sid}|${L.days || 1}|${L.area || ''}`; }
+  async _dhPLoad(sid, kind, force) {
+    const C = this._dhPc || (this._dhPc = {}), k = this._dhPKey(sid, kind), c = C[k];
+    if (c?.busy || (!force && c && Date.now() - c.t < (c.ok ? 6e4 : 3e5))) return;
+    C[k] = { ...(c || {}), busy: true, t: c?.t || 0 };
+    const L = this._dhLog || {}, data = { entity_id: sid };
+    if (kind === 'log') { data.days = L.days || 1; if (L.area) data.area = L.area; }
+    let d = null, ok = false;
+    try {
+      const r = await this._h.callWS({ type: 'call_service', domain: 'dynamic_heating', service: kind === 'why' ? 'why' : 'decisions', service_data: data, return_response: true });
+      d = r?.response || {}; ok = true;
+    } catch (e) { d = { err: String(e?.message || e?.code || 'unbekannter Fehler') }; }
+    C[k] = { t: Date.now(), busy: false, ok, d };
+    if (this._sheet?.t === 'heat') this._renderSheet();
+  }
+  _dhP(sid, kind) { this._dhPLoad(sid, kind); return this._dhPc?.[this._dhPKey(sid, kind)] || null; }
+  _dhPAct(a, el) {
+    const sh = this._sheet; if (!sh || sh.t !== 'heat') return;
+    const r = this._c.rooms.find(x => x.id === sh.id), sid = r?.heat?.status; if (!sid) return;
+    if (a === 'dhp') { const m = el.dataset.m; sh.p = sh.p === m ? null : m; if (sh.p) this._dhPLoad(sid, sh.p, true); }
+    else if (a === 'dhpre') this._dhPLoad(sid, sh.p || 'why', true);
+    else if (a === 'dhpf') {
+      const L = this._dhLog || (this._dhLog = {});
+      if (el.dataset.k === 'days') L.days = parseFloat(el.dataset.v) || 1; else L.area = el.dataset.v || '';
+      this._dhLogN = 40; this._dhPLoad(sid, 'log');
+    } else if (a === 'dhpmore') this._dhLogN = (this._dhLogN || 40) + 60;
+    this._renderSheet();
+  }
+  /* kurzes Urteil oben im Heizungsfenster */
+  _dhVerdict(sid) {
+    if (!this._dhPHas()) return '';
+    const w = this._dhP(sid, 'why'), v = w?.ok ? w.d?.verdict : '';
+    if (!okv(v) || !v) return '';
+    const bad = w.d.heating === false && (w.d.checks || []).some(c => c.ok === false);
+    return `<div class="hwhy ${w.d.heating ? 'heat' : bad ? 'bad' : ''}">${ic(w.d.heating ? 'flame' : bad ? 'alert' : 'check', 15)}<span>${esc(String(v))}</span></div>`;
+  }
+  _dhPanel(sid) {
+    if (!this._dhPHas()) return '';
+    const p = this._sheet?.p || null;
+    const btn = (m, i, l) => `<button class="qb ${p === m ? 'on' : ''}" data-act="dhp" data-m="${m}">${ic(i, 14)}${l}</button>`;
+    let body = '';
+    if (p) {
+      const c = this._dhP(sid, p);
+      if (!c || (!c.ok && c.busy)) body = '<div class="sk" style="height:120px"></div>';
+      else if (!c.ok) body = `<div class="card-note" style="color:#fb7185">Ging nicht: ${esc(c.d?.err || '')}</div>`;
+      else body = p === 'why' ? this._dhWhyHtml(c.d) : this._dhLogHtml(c.d);
+      body += `<div class="hbtns"><button class="qb" data-act="dhpre">${ic('refresh', 14)}${p === 'why' ? 'Neu prüfen' : 'Neu laden'}</button></div>`;
+    }
+    return `<div class="hbtns hwbt">${btn('why', 'search', 'Warum?')}${btn('log', 'list', 'Protokoll')}</div>${p ? `<div class="hwp">${body}</div>` : ''}`;
+  }
+  _dhWhyHtml(d) {
+    const L = Array.isArray(d?.checks) ? d.checks : [];
+    if (!L.length) return '<div class="empty">Noch keine Prüfung – die Regelung rechnet gleich.</div>';
+    const mk = ok => ok === true ? `<i class="ok">${ic('check', 14)}</i>` : ok === false ? `<i class="no">${ic('close', 14)}</i>` : '<i class="in">·</i>';
+    return `<div class="hwl">${L.map(c => `<div class="hwc ${c.ok === false ? 'no' : ''}">${mk(c.ok)}<b>${esc(String(c.name ?? ''))}</b><span>${esc(okv(c.detail) ? String(c.detail) : '')}</span></div>`).join('')}</div>`;
+  }
+  _dhLogHtml(d) {
+    const L = this._dhLog || {}, days = L.days || 1, area = L.area || '';
+    const AR = ['Zeitplan', 'Anwesenheit', 'Fenster', 'Wetter', 'Therme', 'Ventile', 'Bedienung', 'Hinweis', 'Störung'];
+    const chip = (k, v, l, on) => `<button class="chip ${on ? 'on' : ''}" data-act="dhpf" data-k="${k}" data-v="${esc(String(v))}">${esc(l)}</button>`;
+    const f = `<div class="hwf">${[[1, '24 h'], [3, '3 Tage'], [7, '7 Tage']].map(([v, l]) => chip('days', v, l, days === v)).join('')}</div><div class="hwf">${chip('area', '', 'Alle', !area)}${AR.map(a => chip('area', a, a, area === a)).join('')}</div>`;
+    const it = Array.isArray(d?.decisions) ? d.decisions : [], n = this._dhLogN || 40;
+    if (!it.length) return f + '<div class="empty">Keine Einträge in dieser Zeit.</div>';
+    const n1 = (v, s) => { const x = parseFloat(v); return isNaN(x) ? null : s + ' ' + de(x, 1) + ' °C'; };
+    let last = '';
+    const rows = it.slice(0, n).map(x => {
+      const t = new Date(x.at), ok = !isNaN(t), day = ok ? t.toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit' }) : '';
+      const head = day && day !== last ? `<div class="hwd">${esc(day)}</div>` : ''; if (day) last = day;
+      const meta = [okv(x.area) ? x.area : '', n1(x.target, 'Soll'), n1(x.room, 'Raum'), n1(x.outdoor, 'außen'), okv(x.source) ? 'durch ' + x.source : ''].filter(Boolean).map(s => esc(String(s))).join(' · ');
+      return `${head}<div class="hwe"><em>${ok ? hhmm(t) : ''}</em><div><div>${esc(okv(x.text) ? String(x.text) : '')}</div>${meta ? `<small>${meta}</small>` : ''}</div></div>`;
+    }).join('');
+    return f + `<div class="hwl">${rows}</div>` + (it.length > n ? `<div class="hbtns"><button class="qb" data-act="dhpmore">${ic('chevron', 14)}Weitere ${it.length - n}</button></div>` : '');
+  }
+  /* Hinweise aus den neuen Attributen des Status-Sensors (wenn die Integration sie liefert) */
+  _dhNew(a) {
+    const out = [], note = (c, s) => `<div class="card-note" style="color:${c}">${esc(s)}</div>`;
+    if (a.heating_limit_lifted === 'heat_today') out.push(note('#fbbf24', 'Heizgrenze aufgehoben: „Heute heizen“ ist an'));
+    else if (a.heating_limit_lifted === 'cold_snap') out.push(note('#38bdf8', 'Kälteeinbruch – die Heizgrenze gilt gerade nicht'));
+    const fr = parseFloat(a.frost_night);
+    if (!isNaN(fr)) out.push(note('#38bdf8', `Frostnacht erwartet (${de(fr, 0)} °C) – nachts nur halb abgesenkt`));
+    const obj = v => (v && typeof v === 'object' && !Array.isArray(v) ? Object.entries(v) : []);
+    for (const [k, v] of obj(a.contact_problems)) out.push(note('#fb7185', `Fensterkontakt ${k}: ${v}`));
+    for (const [k, v] of obj(a.valve_own_state)) out.push(note('#fb7185', `${this._name(k)} stellt sich selbst: ${v}`));
+    return out.join('');
+  }
+  _facadeTxt(f) { return { n: 'Nord', no: 'Nordost', o: 'Ost', so: 'Südost', s: 'Süd', sw: 'Südwest', w: 'West', nw: 'Nordwest' }[String(f || '').toLowerCase()] || ''; }
   /* ───────────── Rendern ───────────── */
   _navHtml() {
     return `<div class="logo"></div>${(WALL_UI && this._pzOn() && this._pzView() ? [...TABS, ['clean', 'Putzplan', 'broom']] : TABS).map(t => `<button class="nb ${this._v === t[0] ? 'on' : ''}" data-act="nav" data-v="${t[0]}">${ic(t[2], 24)}<span class="lab">${t[1]}</span></button>`).join('')}
@@ -5720,6 +5827,7 @@ class HomeAurora extends HTMLElement {
       case 'settemp': h.callService('climate', 'set_temperature', { entity_id: e, temperature: parseFloat(el.dataset.v) }); break;
       case 'cpreset': h.callService('climate', 'set_preset_mode', { entity_id: e, preset_mode: el.dataset.m }); break;
       case 'chvac': h.callService('climate', 'set_hvac_mode', { entity_id: e, hvac_mode: el.dataset.m }); break;
+      case 'dhp': case 'dhpre': case 'dhpf': case 'dhpmore': this._dhPAct(a, el); break;
       case 'dhmode': this._dhSet(this._c.rooms.find(r => r.id === el.dataset.room), el.dataset.m); break;
       case 'selopt': h.callService('select', 'select_option', { entity_id: e, option: el.dataset.v }); if (el.dataset.t) this._toast(el.dataset.t); break;
       case 'numstep': {

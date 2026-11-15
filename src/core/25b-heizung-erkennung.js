@@ -56,13 +56,17 @@
       // pz43 (Integration 0.13–0.15): Tagesplan, Lüften, Wärmemenge, Batterie, Heizkörper, Zeitplan-Vorschlag, „kurz wärmer“, Temperaturstufen am Haus
       day: has(`sensor.${b}_tagesplan`), air: has(`sensor.${b}_luften`), kwh: has(`sensor.${b}_warmemenge`), bat: has(`sensor.${b}_batterie_fallig_in`),
       rad: has(`sensor.${b}_heizkorper`), tip: has(`sensor.${b}_zeitplan_vorschlag`), warm: has(`button.${b}_kurz_warmer`),
+      // pz50 (Integration 0.21): Haus-Schalter „Heute heizen“ und „Gute Nacht automatisch“, gelernte Schlafenszeit
+      today: c.house ? has(c.house.replace(/^select\./, 'switch.').replace(/_hausmodus$/, '_heute_heizen')) : null,
+      gn: c.house ? has(c.house.replace(/^select\./, 'switch.').replace(/_hausmodus$/, '_gute_nacht_automatisch')) : null,
+      bed: c.house ? has(c.house.replace(/^select\./, 'sensor.').replace(/_hausmodus$/, '_ubliche_schlafenszeit')) : null,
       lv: c.house ? [['morgen', 'Morgen'], ['tag', 'Tag'], ['abend', 'Abend'], ['nacht', 'Nacht']].map(([k, n]) => ({ n, e: has(c.house.replace(/^select\./, 'number.').replace(/_hausmodus$/, '_stufe_' + k)) })).filter(x => x.e) : [],
     };
   }
   _dhXIds(sid) {
     const X = this._dhX(sid); if (!X) return [];
     const S = this._h.states, trv = Object.keys(S[sid]?.attributes?.thermostat_setpoints || {});
-    return [X.mode, X.cl, X.house, X.dur, X.sched, X.lock, X.roff, X.demand, X.trend, X.out, X.day, X.air, X.kwh, X.bat, X.rad, X.tip, X.warm, ...X.lv.map(l => l.e), ...X.prob, ...X.presets.map(p => p.num), ...trv.map(X.off)].filter(Boolean);
+    return [X.mode, X.cl, X.house, X.dur, X.sched, X.lock, X.roff, X.demand, X.trend, X.out, X.day, X.air, X.kwh, X.bat, X.rad, X.tip, X.warm, X.today, X.gn, X.bed, ...X.lv.map(l => l.e), ...X.prob, ...X.presets.map(p => p.num), ...trv.map(X.off)].filter(Boolean);
   }
   /* Automations-Konfigurationen lesen (alle 30 Min.) und Räume mit Advanced-Heating-Control-Plänen verbinden.
      Über die REST-Schnittstelle kommt die gespeicherte Konfiguration mit use_blueprint (klein, braucht Admin-Rechte);
