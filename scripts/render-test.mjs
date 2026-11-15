@@ -63,6 +63,9 @@ function setup({ tag, states, hist, autos }) {
       }
       const m = /^config\/automation\/config\/(.+)$/.exec(path); if (!m) return []; const e = Object.keys(states).find((k) => k.startsWith('automation.') && states[k].attributes?.id === decodeURIComponent(m[1])); if (e && autos[e]) return autos[e]; throw new Error('not found'); },
     callWS: async (m) => {
+      // Dynamische Heizungssteuerung 0.21: „Warum?“ und „Protokoll“ (erfundene Antworten)
+      if (m.type === 'call_service' && m.domain === 'dynamic_heating' && m.service === 'why') return { response: { heating: false, verdict: 'Heizt nicht: Fenster – offen – Heizung pausiert', checks: [{ name: 'Regelung', ok: true, detail: 'eingeschaltet' }, { name: 'Fenster', ok: false, detail: 'offen – Heizung pausiert' }, { name: 'Zeitplan', ok: null, detail: 'Absenkzeit 18,0 °C, Komfort ab 17:00 Uhr' }, { name: 'Heizgrenze', ok: true, detail: 'aufgehoben – „Heute heizen“ ist an' }] } };
+      if (m.type === 'call_service' && m.domain === 'dynamic_heating' && m.service === 'decisions') { const now = Date.now(), A = ['Zeitplan', 'Fenster', 'Wetter', 'Bedienung']; const list = Array.from({ length: 70 }, (_, i) => ({ at: new Date(now - i * 47 * 6e4).toISOString(), area: A[i % 4], mode: 'eco', text: i % 4 === 1 ? 'Fenster offen – pausiert' : 'Absenkzeit, Soll 18 °C', target: i % 3 ? 18 : null, room: 20.4, outdoor: i % 2 ? 6.5 : null, source: i % 4 === 3 ? 'Dashboard' : null })).filter((x) => !m.service_data.area || x.area === m.service_data.area); return { response: { room: 'Wohnzimmer', count: list.length, decisions: list } }; }
       if (m.type === 'call_service' && m.service === 'get_forecasts') { const e = m.target.entity_id; return { response: { [e]: { forecast: fc(m.service_data.type) } } }; }
       // Verlauf: 24 h gleichmäßig verteilte Werte um den aktuellen Zustand (nur im Normaldurchlauf; die Chaos-Läufe testen „kein Verlauf“)
       if (m.type === 'history/history_during_period') {
@@ -150,6 +153,13 @@ for (const [vn, states] of VARIANTS) for (const t of TARGETS.filter((x) => !only
   for (const id of await page.evaluate(() => window.__el._c.rooms.filter((r) => r.climate).map((r) => r.id))) {
     await page.evaluate((id) => { const el = window.__el; el._v = 'home'; el._sheet = { t: 'heat', id }; el._render(); }, id);
     await check(`fenster heizung ${id}`, () => window.__el.shadowRoot.querySelector('.sheet').textContent.trim().length);
+  }
+  // pz50: „Warum?“ und „Protokoll“ im Heizungsfenster (nur Räume der Dynamischen Heizungssteuerung)
+  const dhId = await page.evaluate(() => window.__el._c.rooms.find((r) => r.heat?.status)?.id);
+  if (dhId) for (const p of ['why', 'log']) {
+    await page.evaluate(([id, p]) => { const el = window.__el; el._v = 'home'; el._sheet = { t: 'heat', id, p }; el._render(); }, [dhId, p]);
+    await page.waitForTimeout(150);
+    await check(`fenster heizung ${p}`, ([p, vn]) => { const sh = window.__el.shadowRoot.querySelector('.sheet'); if (!vn && !sh.querySelector(p === 'why' ? '.hwc' : '.hwe')) throw new Error('Panel leer: ' + p); return sh.textContent.trim().length; }, [p, vn]);
   }
   // Aufgaben & Punkte: zweites Kind, nach unten zu den Belohnungen gerollt
   await page.evaluate(() => { const el = window.__el; el._v = 'home'; el._choSel = 'Nele'; el._sheet = { t: 'cho' }; el._render(); const r = el.shadowRoot.querySelector('.rwdg'); if (r) el._sh.scrollTop = r.offsetTop - 120; });
